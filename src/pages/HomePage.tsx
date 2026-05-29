@@ -56,6 +56,15 @@ function IconBox({ children }: { children: ReactNode }) {
   return <button className="h-11 w-11 rounded-lg bg-[#ececec] text-[18px] text-[#2b2a34]">{children}</button>;
 }
 
+function LocationPin({ className = "h-4 w-4" }: { className?: string }) {
+  return (
+    <svg viewBox="0 0 24 24" fill="none" className={className} aria-hidden="true">
+      <path d="M12 21s7-6.2 7-11a7 7 0 1 0-14 0c0 4.8 7 11 7 11Z" stroke="currentColor" strokeWidth="1.8" />
+      <circle cx="12" cy="10" r="2.2" stroke="currentColor" strokeWidth="1.8" />
+    </svg>
+  );
+}
+
 export default function HomePage() {
   const navigate = useNavigate();
   return (
@@ -73,7 +82,10 @@ export default function HomePage() {
             <span className="text-lg text-[#f5932b]">⌕</span>
             <span>I am looking for ...</span>
           </div>
-          <div className="text-[16px] text-[#9c98a5]">◉ Nig.</div>
+          <div className="flex items-center gap-1 text-[16px] text-[#9c98a5]">
+            <LocationPin className="h-4 w-4" />
+            <span>Nig.</span>
+          </div>
         </div>
 
         <div className="flex items-center gap-2.5">
@@ -102,7 +114,7 @@ export default function HomePage() {
       </section>
 
       <main className="mx-auto w-full max-w-[1728px] px-12 pb-24 pt-14">
-        <h2 className="mb-5 text-[42px] font-medium">Top Ads</h2>
+        <h2 className="mb-5 text-[32px] font-medium">Top Ads</h2>
         <div className="grid grid-cols-1 gap-4 md:grid-cols-2 xl:grid-cols-4">
           {products.map((item, idx) => (
             <article
@@ -118,7 +130,10 @@ export default function HomePage() {
                 </div>
                 <h4 className="mb-1.5 mt-4 text-[18px] font-medium leading-[1.25]">{item.title}</h4>
                 <p className="mb-3 text-[15px] leading-[1.4] text-muted">{item.description}</p>
-                <small className="text-[15px] text-[#4b4a54]">◉ {item.location}</small>
+                <small className="flex items-center gap-1 text-[15px] text-[#4b4a54]">
+                  <LocationPin className="h-4 w-4" />
+                  <span>{item.location}</span>
+                </small>
               </div>
             </article>
           ))}
