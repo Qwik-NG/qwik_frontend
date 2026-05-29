@@ -10,6 +10,7 @@ import CreatePasswordPage from "./pages/CreatePasswordPage";
 import PromoteAdPage from "./pages/PromoteAdPage";
 import NotificationPage from "./pages/NotificationPage";
 import ProductDetailsPage from "./pages/ProductDetailsPage";
+import MakeOfferPage from "./pages/MakeOfferPage";
 
 export default function App() {
   return (
@@ -26,6 +27,7 @@ export default function App() {
       <Route path="/promote-ad" element={<PromoteAdPage />} />
       <Route path="/notifications" element={<NotificationPage />} />
       <Route path="/product-details" element={<ProductDetailsPage />} />
+      <Route path="/make-offer" element={<MakeOfferPage />} />
       <Route path="*" element={<Navigate to="/" replace />} />
     </Routes>
   );
