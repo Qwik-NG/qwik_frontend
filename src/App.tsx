@@ -11,6 +11,9 @@ import PromoteAdPage from "./pages/PromoteAdPage";
 import NotificationPage from "./pages/NotificationPage";
 import ProductDetailsPage from "./pages/ProductDetailsPage";
 import MakeOfferPage from "./pages/MakeOfferPage";
+import SearchResultsPage from "./pages/SearchResultsPage";
+import SearchResultsListPage from "./pages/SearchResultsListPage";
+import ProfileSettingsPage from "./pages/ProfileSettingsPage";
 
 export default function App() {
   return (
@@ -28,6 +31,9 @@ export default function App() {
       <Route path="/notifications" element={<NotificationPage />} />
       <Route path="/product-details" element={<ProductDetailsPage />} />
       <Route path="/make-offer" element={<MakeOfferPage />} />
+      <Route path="/search-results" element={<SearchResultsPage />} />
+      <Route path="/search-results-list" element={<SearchResultsListPage />} />
+      <Route path="/profile-settings" element={<ProfileSettingsPage />} />
       <Route path="*" element={<Navigate to="/" replace />} />
     </Routes>
   );
