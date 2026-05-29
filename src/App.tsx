@@ -14,6 +14,12 @@ import MakeOfferPage from "./pages/MakeOfferPage";
 import SearchResultsPage from "./pages/SearchResultsPage";
 import SearchResultsListPage from "./pages/SearchResultsListPage";
 import ProfileSettingsPage from "./pages/ProfileSettingsPage";
+import ChatSettingsPage from "./pages/ChatSettingsPage";
+import AdsDashboardPage from "./pages/AdsDashboardPage";
+import NotificationSettingsPage from "./pages/NotificationSettingsPage";
+import EmailNotificationSettingsPage from "./pages/EmailNotificationSettingsPage";
+import MessagesPage from "./pages/MessagesPage";
+import NotificationEmptyPage from "./pages/NotificationEmptyPage";
 
 export default function App() {
   return (
@@ -34,6 +40,12 @@ export default function App() {
       <Route path="/search-results" element={<SearchResultsPage />} />
       <Route path="/search-results-list" element={<SearchResultsListPage />} />
       <Route path="/profile-settings" element={<ProfileSettingsPage />} />
+      <Route path="/chat-settings" element={<ChatSettingsPage />} />
+      <Route path="/ads-dashboard" element={<AdsDashboardPage />} />
+      <Route path="/notification-settings" element={<NotificationSettingsPage />} />
+      <Route path="/notification-settings-email" element={<EmailNotificationSettingsPage />} />
+      <Route path="/messages" element={<MessagesPage />} />
+      <Route path="/notification-empty" element={<NotificationEmptyPage />} />
       <Route path="*" element={<Navigate to="/" replace />} />
     </Routes>
   );

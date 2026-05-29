@@ -91,6 +91,7 @@ export default function HomePage() {
           <IconBox><svg viewBox="0 0 24 24" className="h-5 w-5" fill="none" stroke="currentColor" strokeWidth="1.9" aria-hidden="true"><path d="M15 17H9a2 2 0 0 1-2-2v-3a5 5 0 1 1 10 0v3a2 2 0 0 1-2 2Z"/><path d="M10 19a2 2 0 0 0 4 0"/></svg></IconBox>
           <IconBox><svg viewBox="0 0 24 24" className="h-5 w-5" fill="none" stroke="currentColor" strokeWidth="1.9" aria-hidden="true"><path d="M8 4h8a1 1 0 0 1 1 1v14l-5-3-5 3V5a1 1 0 0 1 1-1Z"/><path d="M10 8h4"/></svg></IconBox>
           <IconBox><svg viewBox="0 0 24 24" className="h-5 w-5" fill="none" stroke="currentColor" strokeWidth="1.9" aria-hidden="true"><rect x="4" y="6.5" width="16" height="11" rx="2.5"/><path d="m5.5 8 6.5 5 6.5-5"/></svg></IconBox>
+          <img className="h-11 w-11 rounded-full object-cover" src="https://images.unsplash.com/photo-1521572267360-ee0c2909d518?w=80" alt="avatar" />
           <button
             className="h-14 rounded-[11px] bg-gradient-to-r from-amber to-orange px-5 text-[16px] text-white shadow-glow"
             onClick={() => navigate("/signup")}

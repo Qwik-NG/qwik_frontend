@@ -9,13 +9,24 @@ function MenuItem({ label, active = false }: { label: string; active?: boolean }
         active ? "bg-[#efefef] text-[#1f1d27]" : "text-[#94919d]"
       }`}
     >
-      <span className="text-[20px]">◌</span>
+      <span className="text-[20px]">○</span>
       <span>{label}</span>
     </button>
   );
 }
 
-export default function ProfileSettingsPage() {
+function ToggleRow({ label }: { label: string }) {
+  return (
+    <div className="mb-6 flex items-center justify-between">
+      <p className="text-[35px] text-[#9794a1]">{label}</p>
+      <button type="button" className="relative h-10 w-[66px] rounded-full bg-[#f6d8b0]">
+        <span className="absolute right-1 top-1 h-8 w-8 rounded-full bg-gradient-to-r from-amber to-orange" />
+      </button>
+    </div>
+  );
+}
+
+export default function ChatSettingsPage() {
   const navigate = useNavigate();
 
   return (
@@ -41,12 +52,18 @@ export default function ProfileSettingsPage() {
               <div className="flex flex-wrap items-center justify-between gap-6">
                 <div className="flex items-center gap-4">
                   <div className="relative">
-                    <img className="h-[84px] w-[84px] rounded-full object-cover" src="https://images.unsplash.com/photo-1521572267360-ee0c2909d518?w=120" alt="profile" />
-                    <button className="absolute -bottom-1 -right-1 h-7 w-7 rounded-full bg-[#f2f2f5] text-[14px]" type="button">✎</button>
+                    <img
+                      className="h-[84px] w-[84px] rounded-full object-cover"
+                      src="https://images.unsplash.com/photo-1544005313-94ddf0286df2?w=120"
+                      alt="profile"
+                    />
+                    <button className="absolute -bottom-1 -right-1 h-7 w-7 rounded-full bg-[#f2f2f5] text-[14px]" type="button">
+                      ✎
+                    </button>
                   </div>
                   <div>
-                    <h1 className="text-[42px] font-medium leading-tight">Sherry James</h1>
-                    <p className="text-[20px] text-[#8c8996]">Imshuvo97@gmail.com</p>
+                    <h1 className="text-[50px] font-medium leading-tight">Sherry James</h1>
+                    <p className="text-[36px] text-[#8c8996]">Imshuvo97@gmail.com</p>
                   </div>
                 </div>
                 <div className="flex gap-10 text-center">
@@ -66,20 +83,17 @@ export default function ProfileSettingsPage() {
               </div>
             </div>
 
-            <div className="mt-6 max-w-[520px]">
-              <div className="mb-6 flex flex-nowrap gap-3 text-[20px] sm:text-[24px]">
-                <button className="whitespace-nowrap text-[#9794a1]" type="button">Edit Profile</button>
-                <button className="whitespace-nowrap font-medium" type="button">Company details</button>
-                <button className="whitespace-nowrap text-[#9794a1]" type="button">Chat settings</button>
+            <div className="mt-6 max-w-[760px]">
+              <div className="mb-10 flex flex-nowrap gap-5 text-[26px] sm:text-[34px]">
+                <button className="whitespace-nowrap text-[#9794a1]" onClick={() => navigate("/profile-settings")} type="button">Edit Profile</button>
+                <button className="whitespace-nowrap text-[#9794a1]" onClick={() => navigate("/profile-settings")} type="button">Company details</button>
+                <button className="whitespace-nowrap font-medium" type="button">Chat settings</button>
               </div>
 
-              <label className="mb-2 block text-[16px] text-[#94919d]">Business Name</label>
-              <input className="mb-5 h-12 w-full rounded-[10px] border border-[#dedde4] bg-transparent px-3 text-[17px] outline-none" placeholder="Enter your full name" />
+              <ToggleRow label="Receive messages" />
+              <ToggleRow label="Receive messages" />
 
-              <label className="mb-2 block text-[16px] text-[#94919d]">Description</label>
-              <textarea className="mb-5 h-[120px] w-full rounded-[10px] border border-[#dedde4] bg-transparent px-3 py-3 text-[17px] outline-none" placeholder="What does your company do?" />
-
-              <button className="h-[50px] w-full rounded-[10px] bg-gradient-to-r from-amber to-orange text-[18px] text-white shadow-glow" type="button">
+              <button className="mt-2 h-[70px] w-[420px] rounded-[14px] bg-gradient-to-r from-amber to-orange text-[36px] text-white shadow-glow" type="button">
                 Save
               </button>
             </div>
@@ -91,7 +105,3 @@ export default function ProfileSettingsPage() {
     </div>
   );
 }
-
-
-
-

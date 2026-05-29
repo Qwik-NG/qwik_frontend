@@ -1,4 +1,5 @@
 import { useNavigate } from "react-router-dom";
+import { SiteFooter, SiteHeader } from "../components/SiteChrome";
 
 type Listing = {
   price: string;
@@ -65,26 +66,7 @@ export default function SearchResultsPage() {
 
   return (
     <div className="min-h-screen bg-page text-ink">
-      <header className="mx-auto flex w-full max-w-[1728px] items-center gap-5 px-10 pt-6">
-        <button className="text-[24px]" type="button">≡</button>
-        <button className="text-[44px] text-[#ff8f0a]" onClick={() => navigate("/")} type="button">qwik</button>
-        <div className="flex flex-1 items-center gap-2">
-          <div className="flex h-12 w-[300px] items-center gap-2 rounded-[10px] border-2 border-orange px-3 text-[14px] text-[#b6b3bd]">
-            <span className="text-[#f5932b]">⌕</span>
-            <span>I am looking for ...</span>
-          </div>
-          <div className="text-[14px] text-[#9c98a5]">◉ Nig.</div>
-        </div>
-        <div className="flex items-center gap-2">
-          <button className="h-10 w-10 rounded-lg bg-[#ececec]" type="button">◠</button>
-          <button className="h-10 w-10 rounded-lg bg-[#ececec]" type="button">⌖</button>
-          <button className="h-10 w-10 rounded-lg bg-[#ececec]" type="button">✉</button>
-          <img className="h-10 w-10 rounded-full object-cover" src="https://images.unsplash.com/photo-1521572267360-ee0c2909d518?w=80" alt="avatar" />
-          <button className="h-12 rounded-[10px] bg-gradient-to-r from-amber to-orange px-4 text-[14px] text-white shadow-glow" onClick={() => navigate("/promote-ad")} type="button">
-            Post a free ad
-          </button>
-        </div>
-      </header>
+      <SiteHeader navigate={navigate} />
 
       <main className="mx-auto w-full max-w-[1728px] px-10 pb-20 pt-8">
         <div className="grid grid-cols-1 gap-6 xl:grid-cols-[260px_1fr]">
@@ -139,40 +121,10 @@ export default function SearchResultsPage() {
         </div>
       </main>
 
-      <footer className="grid grid-cols-1 gap-6 bg-deep px-[70px] py-[84px] text-[#b0afbc] md:grid-cols-2 xl:grid-cols-[1fr_1fr_1fr_1fr_1fr_1.8fr]">
-        <div className="mt-2 text-[58px] leading-none text-[#ff9412]">qwik</div>
-        <div>
-          <h5 className="mb-3.5 text-[24px] font-medium text-[#efeff5]">About</h5>
-          <button className="mb-2.5 block text-[16px] text-[#5f6071]" onClick={() => navigate("/signup")} type="button">About Qwik</button>
-          <a className="mb-2.5 block text-[16px] text-[#5f6071]">Career</a>
-          <a className="mb-2.5 block text-[16px] text-[#5f6071]">Terms</a>
-        </div>
-        <div>
-          <h5 className="mb-3.5 text-[24px] font-medium text-[#efeff5]">Resources</h5>
-          <a className="mb-2.5 block text-[16px] text-[#5f6071]">Blog</a>
-          <a className="mb-2.5 block text-[16px] text-[#5f6071]">Instagram</a>
-          <a className="mb-2.5 block text-[16px] text-[#5f6071]">Youtube</a>
-          <a className="mb-2.5 block text-[16px] text-[#5f6071]">Twitter</a>
-        </div>
-        <div>
-          <h5 className="mb-3.5 text-[24px] font-medium text-[#efeff5]">Support</h5>
-          <a className="mb-2.5 block text-[16px] text-[#5f6071]">help@qwik.ng</a>
-          <a className="mb-2.5 block text-[16px] text-[#5f6071]">FAQs</a>
-        </div>
-        <div>
-          <h5 className="mb-3.5 text-[24px] font-medium text-[#efeff5]">Download</h5>
-          <button className="mb-2.5 h-14 w-full rounded-[10px] bg-[#1a1b33] text-[16px] text-[#76798d]" type="button">App Store</button>
-          <button className="h-14 w-full rounded-[10px] bg-[#1a1b33] text-[16px] text-[#76798d]" type="button">Play Store</button>
-        </div>
-        <div>
-          <h5 className="mb-3.5 text-[24px] font-medium text-[#efeff5]">Stay up to date</h5>
-          <p className="mb-2.5 text-[16px] leading-[1.38] text-[#5f6071]">Get news, offers, promotions & the best deals sent to your inbox.</p>
-          <div className="mt-2 flex">
-            <input className="h-[54px] flex-1 rounded-l-[10px] border border-r-0 border-[#ff9b00] bg-transparent px-3 text-[15px] text-[#b5b5c3] outline-none" placeholder="@email" />
-            <button className="h-[54px] rounded-r-[10px] bg-gradient-to-r from-amber to-orange px-[18px] text-[15px] text-white shadow-glow" type="button">Subscribe</button>
-          </div>
-        </div>
-      </footer>
+      <SiteFooter navigate={navigate} />
     </div>
   );
 }
+
+
+
