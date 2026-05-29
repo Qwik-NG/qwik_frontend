@@ -54,7 +54,7 @@ export default function LoginPage() {
 
           <button
             disabled={!canContinue}
-            onClick={() => navigate("/welcome")}
+            onClick={() => navigate("/login-password")}
             className={`h-[48px] w-full rounded-[10px] text-[14px] ${
               canContinue ? "bg-[#3f5db2] text-white" : "bg-[#d8d8dc] text-[#b5b4be]"
             }`}

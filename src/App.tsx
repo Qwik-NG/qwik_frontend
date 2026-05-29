@@ -4,6 +4,9 @@ import HomePage from "./pages/HomePage";
 import SignUpPage from "./pages/SignUpPage";
 import WelcomePage from "./pages/WelcomePage";
 import LoginPage from "./pages/LoginPage";
+import LoginPasswordPage from "./pages/LoginPasswordPage";
+import RecoverPasswordPage from "./pages/RecoverPasswordPage";
+import CreatePasswordPage from "./pages/CreatePasswordPage";
 
 export default function App() {
   return (
@@ -13,6 +16,9 @@ export default function App() {
       <Route path="/signin" element={<SignInPage />} />
       <Route path="/signup" element={<SignUpPage />} />
       <Route path="/login" element={<LoginPage />} />
+      <Route path="/login-password" element={<LoginPasswordPage />} />
+      <Route path="/recover-password" element={<RecoverPasswordPage />} />
+      <Route path="/create-password" element={<CreatePasswordPage />} />
       <Route path="/welcome" element={<WelcomePage />} />
       <Route path="*" element={<Navigate to="/" replace />} />
     </Routes>
