@@ -1,27 +1,14 @@
-import { useEffect, useState } from "react";
-import AuthPage from "./pages/AuthPage";
+import { Navigate, Route, Routes } from "react-router-dom";
+import SignInPage from "./pages/SignInPage";
 import HomePage from "./pages/HomePage";
 
 export default function App() {
-  const getPage = (): "auth" | "home" => {
-    const page = new URLSearchParams(window.location.search).get("page");
-    return page === "home" ? "home" : "auth";
-  };
-
-  const [page, setPage] = useState<"auth" | "home">(getPage);
-
-  useEffect(() => {
-    const handlePopState = () => setPage(getPage());
-    window.addEventListener("popstate", handlePopState);
-    return () => window.removeEventListener("popstate", handlePopState);
-  }, []);
-
-  const goTo = (nextPage: "auth" | "home") => {
-    const url = new URL(window.location.href);
-    url.searchParams.set("page", nextPage);
-    window.history.pushState({}, "", url);
-    setPage(nextPage);
-  };
-
-  return page === "home" ? <HomePage onNavigate={goTo} /> : <AuthPage onNavigate={goTo} />;
+  return (
+    <Routes>
+      <Route path="/" element={<HomePage />} />
+      <Route path="/singin" element={<SignInPage />} />
+      <Route path="/signin" element={<SignInPage />} />
+      <Route path="*" element={<Navigate to="/" replace />} />
+    </Routes>
+  );
 }

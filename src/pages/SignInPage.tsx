@@ -1,10 +1,8 @@
 import { useState } from "react";
+import { useNavigate } from "react-router-dom";
 
-type AuthPageProps = {
-  onNavigate: (page: "auth" | "home") => void;
-};
-
-export default function AuthPage({ onNavigate }: AuthPageProps) {
+export default function SignInPage() {
+  const navigate = useNavigate();
   const [email, setEmail] = useState("");
   const [acceptedTerms, setAcceptedTerms] = useState(false);
   const isEmailValid = /\S+@\S+\.\S+/.test(email);
@@ -16,7 +14,7 @@ export default function AuthPage({ onNavigate }: AuthPageProps) {
         <h1 className="text-[50px] font-normal leading-none text-[#ff8300]">qwik</h1>
         <p className="text-[15px] text-[#9a99a6]">
           New here?{" "}
-          <button className="text-[#ff8f00]" onClick={() => onNavigate("auth")}>
+          <button className="text-[#ff8f00]" onClick={() => navigate("/singin")}>
             Create an account
           </button>
         </p>
@@ -25,7 +23,7 @@ export default function AuthPage({ onNavigate }: AuthPageProps) {
       <main className="mx-auto flex h-[calc(100vh-124px)] w-full max-w-[1728px] items-center justify-center px-4 pb-8">
         <section className="mx-auto w-[455px] rounded-[22px] bg-[#f0f0f1] px-[22px] pb-[22px] pt-[16px]">
           <h2 className="mb-[12px] text-center text-[30px] font-normal leading-[1.05] text-[#22222b]">
-            Create a fresh account
+            Sign in to your account
           </h2>
 
           <button
@@ -68,7 +66,7 @@ export default function AuthPage({ onNavigate }: AuthPageProps) {
 
           <button
             disabled={!canContinue}
-            onClick={() => onNavigate("home")}
+            onClick={() => navigate("/")}
             className={`h-[48px] w-full rounded-[10px] text-[14px] ${
               canContinue ? "bg-[#3f5db2] text-white" : "bg-[#d8d8dc] text-[#b5b4be]"
             }`}

@@ -1,4 +1,5 @@
 import type { ReactNode } from "react";
+import { useNavigate } from "react-router-dom";
 
 type Category = { name: string; image: string; tone: string };
 type Product = { price: string; title: string; description: string; location: string; image: string };
@@ -55,15 +56,12 @@ function IconBox({ children }: { children: ReactNode }) {
   return <button className="h-11 w-11 rounded-lg bg-[#ececec] text-[18px] text-[#2b2a34]">{children}</button>;
 }
 
-type HomePageProps = {
-  onNavigate: (page: "auth" | "home") => void;
-};
-
-export default function HomePage({ onNavigate }: HomePageProps) {
+export default function HomePage() {
+  const navigate = useNavigate();
   return (
     <div className="min-h-screen bg-page text-ink">
       <header className="mx-auto flex w-full max-w-[1728px] items-center gap-6 px-12 pt-8">
-        <button className="relative h-[86px] w-[96px] shrink-0 rounded-3xl bg-[#ececec]" onClick={() => onNavigate("home")}>
+        <button className="relative h-[86px] w-[96px] shrink-0 rounded-3xl bg-[#ececec]" onClick={() => navigate("/")}>
           <div className="absolute left-9 top-1.5 h-4 w-10 rounded-t-full border-x-[5px] border-t-[5px] border-[#f6b100]" />
           <div className="absolute left-2.5 top-7 grid h-10 w-14 place-items-center rounded-[10px] bg-orange text-sm font-semibold text-white">Qwik</div>
           <div className="absolute right-2 top-9 grid h-8 w-10 place-items-center rounded-lg bg-[#0b6a48] text-xs text-white">ng</div>
@@ -86,7 +84,7 @@ export default function HomePage({ onNavigate }: HomePageProps) {
           <img className="h-11 w-11 rounded-full object-cover" src="https://images.unsplash.com/photo-1521572267360-ee0c2909d518?w=80" alt="avatar" />
           <button
             className="h-14 rounded-[11px] bg-gradient-to-r from-amber to-orange px-5 text-[16px] text-white shadow-glow"
-            onClick={() => onNavigate("auth")}
+            onClick={() => navigate("/singin")}
           >
             Post a free ad
           </button>
@@ -132,7 +130,7 @@ export default function HomePage({ onNavigate }: HomePageProps) {
         <div className="mt-2 text-[58px] leading-none text-[#ff9412]">qwik</div>
         <div>
           <h5 className="mb-3.5 text-[24px] font-medium text-[#efeff5]">About</h5>
-          <button className="mb-2.5 block text-[16px] text-[#5f6071]" onClick={() => onNavigate("auth")}>About Qwik</button>
+          <button className="mb-2.5 block text-[16px] text-[#5f6071]" onClick={() => navigate("/singin")}>About Qwik</button>
           <a className="mb-2.5 block text-[16px] text-[#5f6071]">Career</a>
           <a className="mb-2.5 block text-[16px] text-[#5f6071]">Terms</a>
         </div>
