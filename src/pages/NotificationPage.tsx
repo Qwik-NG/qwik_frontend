@@ -59,7 +59,7 @@ export default function NotificationPage() {
           <span className="text-[#1f1d27]">
             <BellIcon small />
           </span>
-          <h1 className="text-[42px] font-medium">Notification</h1>
+          <h1 className="text-[28px] font-medium">Notification</h1>
         </div>
 
         <article className="flex items-start justify-between gap-4 rounded-[14px] p-2">
