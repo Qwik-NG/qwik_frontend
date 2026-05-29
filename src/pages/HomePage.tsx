@@ -84,7 +84,7 @@ export default function HomePage() {
           <img className="h-11 w-11 rounded-full object-cover" src="https://images.unsplash.com/photo-1521572267360-ee0c2909d518?w=80" alt="avatar" />
           <button
             className="h-14 rounded-[11px] bg-gradient-to-r from-amber to-orange px-5 text-[16px] text-white shadow-glow"
-            onClick={() => navigate("/singin")}
+            onClick={() => navigate("/signup")}
           >
             Post a free ad
           </button>
@@ -130,7 +130,7 @@ export default function HomePage() {
         <div className="mt-2 text-[58px] leading-none text-[#ff9412]">qwik</div>
         <div>
           <h5 className="mb-3.5 text-[24px] font-medium text-[#efeff5]">About</h5>
-          <button className="mb-2.5 block text-[16px] text-[#5f6071]" onClick={() => navigate("/singin")}>About Qwik</button>
+          <button className="mb-2.5 block text-[16px] text-[#5f6071]" onClick={() => navigate("/signup")}>About Qwik</button>
           <a className="mb-2.5 block text-[16px] text-[#5f6071]">Career</a>
           <a className="mb-2.5 block text-[16px] text-[#5f6071]">Terms</a>
         </div>
