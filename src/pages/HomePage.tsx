@@ -61,12 +61,11 @@ export default function HomePage() {
   return (
     <div className="min-h-screen bg-page text-ink">
       <header className="mx-auto flex w-full max-w-[1728px] items-center gap-6 px-12 pt-8">
-        <button className="relative h-[86px] w-[96px] shrink-0 rounded-3xl bg-[#ececec]" onClick={() => navigate("/")}>
-          <div className="absolute left-9 top-1.5 h-4 w-10 rounded-t-full border-x-[5px] border-t-[5px] border-[#f6b100]" />
-          <div className="absolute left-2.5 top-7 grid h-10 w-14 place-items-center rounded-[10px] bg-orange text-sm font-semibold text-white">Qwik</div>
-          <div className="absolute right-2 top-9 grid h-8 w-10 place-items-center rounded-lg bg-[#0b6a48] text-xs text-white">ng</div>
-          <span className="absolute bottom-2 left-3.5 h-2 w-2 rounded-full bg-[#ff6430]" />
-          <span className="absolute bottom-2 left-11 h-2 w-2 rounded-full bg-[#ff6430]" />
+        <button
+          className="relative h-[96px] w-[96px] shrink-0 overflow-hidden rounded-full bg-white"
+          onClick={() => navigate("/")}
+        >
+          <img src="/images/logo-header.png" alt="Qwik logo" className="h-full w-full object-cover" />
         </button>
 
         <div className="flex flex-1 items-center gap-2.5">
@@ -108,17 +107,17 @@ export default function HomePage() {
           {products.map((item, idx) => (
             <article
               key={`${item.title}-${idx}`}
-              className="cursor-pointer rounded-[22px] bg-white p-3 transition hover:scale-[1.01]"
+              className="cursor-pointer rounded-[26px] bg-white p-4 transition hover:scale-[1.01]"
               onClick={() => window.alert(`Clicked: ${item.title}`)}
             >
-              <img src={item.image} alt={item.title} className="aspect-square w-full rounded-[14px] object-cover" />
-              <div className="px-0 pb-1 pt-2.5">
+              <img src={item.image} alt={item.title} className="h-[260px] w-full rounded-[18px] object-cover" />
+              <div className="px-0 pb-1 pt-4">
                 <div className="flex items-center justify-between gap-2">
-                  <h3 className="m-0 text-[39px] font-semibold leading-tight">{item.price}</h3>
-                  <span className="rounded-[9px] bg-[#f5ebdc] px-2.5 py-1.5 text-[14px] text-[#ff9715]">New</span>
+                  <h3 className="m-0 whitespace-nowrap text-[20px] font-semibold leading-none">{item.price}</h3>
+                  <span className="rounded-[12px] bg-[#f5ebdc] px-3 py-1.5 text-[15px] text-[#ff9715]">New</span>
                 </div>
-                <h4 className="mb-1 mt-2 text-[19px] font-medium leading-[1.25]">{item.title}</h4>
-                <p className="mb-2 text-[16px] leading-[1.35] text-muted">{item.description}</p>
+                <h4 className="mb-1.5 mt-4 text-[18px] font-medium leading-[1.25]">{item.title}</h4>
+                <p className="mb-3 text-[15px] leading-[1.4] text-muted">{item.description}</p>
                 <small className="text-[15px] text-[#4b4a54]">◉ {item.location}</small>
               </div>
             </article>

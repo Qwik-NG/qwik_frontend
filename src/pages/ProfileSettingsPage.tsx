@@ -88,10 +88,10 @@ export default function ProfileSettingsPage() {
             </div>
 
             <div className="mt-6 max-w-[520px]">
-              <div className="mb-6 flex gap-8 text-[41px]">
-                <button className="text-[#9794a1]" type="button">Edit Profile</button>
-                <button className="font-medium" type="button">Company details</button>
-                <button className="text-[#9794a1]" type="button">Chat settings</button>
+              <div className="mb-6 flex flex-nowrap gap-3 text-[20px] sm:text-[24px]">
+                <button className="whitespace-nowrap text-[#9794a1]" type="button">Edit Profile</button>
+                <button className="whitespace-nowrap font-medium" type="button">Company details</button>
+                <button className="whitespace-nowrap text-[#9794a1]" type="button">Chat settings</button>
               </div>
 
               <label className="mb-2 block text-[16px] text-[#94919d]">Business Name</label>
