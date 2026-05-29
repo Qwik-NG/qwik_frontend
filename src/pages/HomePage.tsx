@@ -108,7 +108,7 @@ export default function HomePage() {
           {products.map((item, idx) => (
             <article
               key={`${item.title}-${idx}`}
-              className="cursor-pointer rounded-[22px] bg-card p-3 transition hover:scale-[1.01]"
+              className="cursor-pointer rounded-[22px] bg-white p-3 transition hover:scale-[1.01]"
               onClick={() => window.alert(`Clicked: ${item.title}`)}
             >
               <img src={item.image} alt={item.title} className="aspect-square w-full rounded-[14px] object-cover" />
@@ -163,3 +163,4 @@ export default function HomePage() {
     </div>
   );
 }
+

@@ -7,6 +7,7 @@ import LoginPage from "./pages/LoginPage";
 import LoginPasswordPage from "./pages/LoginPasswordPage";
 import RecoverPasswordPage from "./pages/RecoverPasswordPage";
 import CreatePasswordPage from "./pages/CreatePasswordPage";
+import PromoteAdPage from "./pages/PromoteAdPage";
 
 export default function App() {
   return (
@@ -20,6 +21,7 @@ export default function App() {
       <Route path="/recover-password" element={<RecoverPasswordPage />} />
       <Route path="/create-password" element={<CreatePasswordPage />} />
       <Route path="/welcome" element={<WelcomePage />} />
+      <Route path="/promote-ad" element={<PromoteAdPage />} />
       <Route path="*" element={<Navigate to="/" replace />} />
     </Routes>
   );
