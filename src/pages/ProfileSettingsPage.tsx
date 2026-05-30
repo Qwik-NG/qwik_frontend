@@ -1,5 +1,5 @@
 import { useNavigate } from "react-router-dom";
-import { SiteFooter, SiteHeader } from "../components/SiteChrome";
+import { SiteFooter, SiteHeader } from "../components/AppShell";
 
 function MenuItem({ label, active = false, onClick }: { label: string; active?: boolean; onClick: () => void }) {
   return (

@@ -7,3 +7,59 @@
     @apply m-0 bg-page text-ink font-outfit;
   }
 }
+
+@media (max-width: 640px) {
+  [class*="max-w-[1728px]"] {
+    width: 100%;
+  }
+
+  [class*="px-12"],
+  [class*="px-10"] {
+    padding-left: 1rem !important;
+    padding-right: 1rem !important;
+  }
+
+  [class*="pt-8"] {
+    padding-top: 1.25rem !important;
+  }
+
+  [class*="pb-20"],
+  [class*="pb-24"] {
+    padding-bottom: 3rem !important;
+  }
+
+  [class*="w-[420px]"],
+  [class*="w-[435px]"],
+  [class*="w-[360px]"] {
+    width: 100% !important;
+    max-width: 100% !important;
+  }
+
+  [class*="h-[70px]"] {
+    height: 3rem !important;
+  }
+
+  [class*="text-[58px]"] { font-size: 2.25rem !important; }
+  [class*="text-[56px]"] { font-size: 2rem !important; }
+  [class*="text-[54px]"] { font-size: 1.875rem !important; }
+  [class*="text-[50px]"] { font-size: 1.75rem !important; }
+  [class*="text-[49px]"] { font-size: 1.75rem !important; }
+  [class*="text-[48px]"] { font-size: 1.625rem !important; }
+  [class*="text-[44px]"] { font-size: 1.5rem !important; }
+  [class*="text-[42px]"] { font-size: 1.5rem !important; }
+  [class*="text-[40px]"] { font-size: 1.375rem !important; }
+  [class*="text-[39px]"] { font-size: 1.25rem !important; }
+  [class*="text-[38px]"] { font-size: 1.25rem !important; }
+  [class*="text-[36px]"] { font-size: 1.125rem !important; }
+  [class*="text-[35px]"] { font-size: 1.0625rem !important; }
+  [class*="text-[34px]"] { font-size: 1.0625rem !important; }
+  [class*="text-[33px]"] { font-size: 1rem !important; }
+  [class*="text-[32px]"] { font-size: 1.5rem !important; }
+  [class*="text-[31px]"] { font-size: 1rem !important; }
+  [class*="text-[30px]"] { font-size: 1rem !important; }
+
+  [class*="min-h-[680px]"],
+  [class*="min-h-[620px]"] {
+    min-height: 50vh !important;
+  }
+}

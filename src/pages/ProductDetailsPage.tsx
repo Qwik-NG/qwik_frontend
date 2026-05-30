@@ -1,6 +1,6 @@
 import { useMemo, useState } from "react";
 import { useNavigate } from "react-router-dom";
-import { SiteFooter, SiteHeader } from "../components/SiteChrome";
+import { SiteFooter, SiteHeader } from "../components/AppShell";
 
 type SimilarAd = {
   title: string;
@@ -65,9 +65,21 @@ function ProductCard({ item, onClick }: { item: SimilarAd; onClick: () => void }
         </div>
         <h5 className="mb-2 text-[16px] font-medium leading-tight">{item.title}</h5>
         <p className="mb-2 text-[14px] leading-[1.35] text-[#6d6a74]">{item.description}</p>
-        <small className="text-[14px] text-[#4b4a54]">◉ {item.location}</small>
+        <small className="flex items-center gap-1 text-[14px] text-[#4b4a54]">
+          <LocationPin className="h-4 w-4" />
+          <span>{item.location}</span>
+        </small>
       </div>
     </article>
+  );
+}
+
+function LocationPin({ className = "h-4 w-4" }: { className?: string }) {
+  return (
+    <svg viewBox="0 0 24 24" fill="none" className={className} aria-hidden="true">
+      <path d="M12 21s7-6.2 7-11a7 7 0 1 0-14 0c0 4.8 7 11 7 11Z" stroke="currentColor" strokeWidth="1.8" />
+      <circle cx="12" cy="10" r="2.2" stroke="currentColor" strokeWidth="1.8" />
+    </svg>
   );
 }
 
@@ -101,7 +113,10 @@ export default function ProductDetailsPage() {
             <div className="pt-10">
               <p className="mb-2 text-[18px] text-[#57b77a]">◌ Verified Seller</p>
               <h1 className="text-[42px] leading-tight">Mercedes-Benz GLA 250 2015 Blue</h1>
-              <p className="mb-6 mt-1 text-[18px] text-[#6d6a74]">◉ Abuja, Apo</p>
+              <p className="mb-6 mt-1 flex items-center gap-1 text-[18px] text-[#6d6a74]">
+                <LocationPin className="h-5 w-5" />
+                <span>Abuja, Apo</span>
+              </p>
               <div className="mb-2 flex items-center gap-3">
                 <h2 className="text-[54px] font-semibold">₦ 16,000,000</h2>
                 <span className="rounded-[8px] bg-[#f5ebdc] px-2.5 py-1 text-[16px] text-[#ff9715]">New</span>
@@ -198,7 +213,7 @@ export default function ProductDetailsPage() {
 
         <section className="mt-10">
           <h3 className="mb-4 text-[40px] font-medium">Similar Ads</h3>
-          <div className="grid grid-cols-1 gap-4 md:grid-cols-2 xl:grid-cols-4">
+          <div className="grid grid-cols-2 gap-4 xl:grid-cols-4">
             {similarAds.map((item) => (
               <ProductCard key={item.title} item={item} onClick={() => navigate("/product-details")} />
             ))}

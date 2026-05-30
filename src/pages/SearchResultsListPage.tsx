@@ -1,5 +1,5 @@
 import { useNavigate } from "react-router-dom";
-import { SiteFooter, SiteHeader } from "../components/SiteChrome";
+import { SiteFooter, SiteHeader } from "../components/AppShell";
 
 type Listing = {
   price: string;
@@ -35,6 +35,16 @@ const listings: Listing[] = [
 
 const repeated = [...listings, ...listings];
 
+
+function LocationPin({ className = "h-4 w-4" }: { className?: string }) {
+  return (
+    <svg viewBox="0 0 24 24" fill="none" className={className} aria-hidden="true">
+      <path d="M12 21s7-6.2 7-11a7 7 0 1 0-14 0c0 4.8 7 11 7 11Z" stroke="currentColor" strokeWidth="1.8" />
+      <circle cx="12" cy="10" r="2.2" stroke="currentColor" strokeWidth="1.8" />
+    </svg>
+  );
+}
+
 function FilterCard({ title, children }: { title: string; children: React.ReactNode }) {
   return (
     <div className="rounded-[16px] bg-[#efefef] p-4">
@@ -56,7 +66,10 @@ function ListCard({ item, onClick }: { item: Listing; onClick: () => void }) {
           </div>
           <h5 className="mb-2 text-[18px] font-medium leading-tight">{item.title}</h5>
           <p className="mb-2 text-[16px] leading-[1.35] text-[#6d6a74]">{item.description}</p>
-          <small className="text-[15px] text-[#4b4a54]">◉ {item.location}</small>
+          <small className="flex items-center gap-1 text-[15px] text-[#4b4a54]">
+            <LocationPin className="h-4 w-4" />
+            <span>{item.location}</span>
+          </small>
         </div>
       </div>
     </article>
@@ -127,6 +140,7 @@ export default function SearchResultsListPage() {
     </div>
   );
 }
+
 
 
 

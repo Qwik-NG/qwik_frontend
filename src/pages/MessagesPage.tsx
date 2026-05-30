@@ -1,5 +1,5 @@
 import { useNavigate } from "react-router-dom";
-import { SiteFooter, SiteHeader } from "../components/SiteChrome";
+import { SiteFooter, SiteHeader } from "../components/AppShell";
 
 function EnvelopeIcon({ className = "h-7 w-7" }: { className?: string }) {
   return (

@@ -1,5 +1,5 @@
 import { useNavigate } from "react-router-dom";
-import { SiteFooter, SiteHeader } from "../components/SiteChrome";
+import { SiteFooter, SiteHeader } from "../components/AppShell";
 
 type Listing = {
   price: string;
@@ -35,6 +35,16 @@ const listings: Listing[] = [
 
 const repeated = [...listings, ...listings, ...listings];
 
+
+function LocationPin({ className = "h-4 w-4" }: { className?: string }) {
+  return (
+    <svg viewBox="0 0 24 24" fill="none" className={className} aria-hidden="true">
+      <path d="M12 21s7-6.2 7-11a7 7 0 1 0-14 0c0 4.8 7 11 7 11Z" stroke="currentColor" strokeWidth="1.8" />
+      <circle cx="12" cy="10" r="2.2" stroke="currentColor" strokeWidth="1.8" />
+    </svg>
+  );
+}
+
 function FilterCard({ title, children }: { title: string; children: React.ReactNode }) {
   return (
     <div className="rounded-[16px] bg-[#efefef] p-4">
@@ -46,16 +56,19 @@ function FilterCard({ title, children }: { title: string; children: React.ReactN
 
 function ListingCard({ item, onClick }: { item: Listing; onClick: () => void }) {
   return (
-    <article className="cursor-pointer rounded-[18px] bg-white p-3" onClick={onClick}>
-      <img src={item.image} alt={item.title} className="h-[250px] w-full rounded-[12px] object-cover" />
-      <div className="pt-3">
-        <div className="mb-2 flex items-center justify-between">
-          <h4 className="text-[38px] font-semibold leading-none">{item.price}</h4>
-          <span className="rounded-[9px] bg-[#f5ebdc] px-2.5 py-1 text-[14px] text-[#ff9715]">New</span>
+    <article className="cursor-pointer rounded-[22px] bg-white p-2.5 transition hover:scale-[1.01] sm:rounded-[26px] sm:p-4" onClick={onClick}>
+      <img src={item.image} alt={item.title} className="h-[170px] w-full rounded-[14px] object-cover sm:h-[260px] sm:rounded-[18px]" />
+      <div className="px-0 pb-1 pt-3 sm:pt-4">
+        <div className="flex items-center justify-between gap-2">
+          <h4 className="m-0 whitespace-nowrap text-[16px] font-semibold leading-none sm:text-[20px]">{item.price}</h4>
+          <span className="rounded-[10px] bg-[#f5ebdc] px-2 py-1 text-[12px] text-[#ff9715] sm:rounded-[12px] sm:px-3 sm:py-1.5 sm:text-[15px]">New</span>
         </div>
-        <h5 className="mb-2 text-[20px] font-medium leading-tight">{item.title}</h5>
-        <p className="mb-2 text-[16px] leading-[1.35] text-[#6d6a74]">{item.description}</p>
-        <small className="text-[15px] text-[#4b4a54]">◉ {item.location}</small>
+        <h5 className="mb-1.5 mt-3 text-[15px] font-medium leading-[1.25] sm:mt-4 sm:text-[18px]" style={{ display: "-webkit-box", WebkitLineClamp: 2, WebkitBoxOrient: "vertical", overflow: "hidden" }}>{item.title}</h5>
+        <p className="mb-2 text-[13px] leading-[1.35] text-[#6d6a74] sm:mb-3 sm:text-[15px] sm:leading-[1.4]" style={{ display: "-webkit-box", WebkitLineClamp: 2, WebkitBoxOrient: "vertical", overflow: "hidden" }}>{item.description}</p>
+        <small className="flex items-center gap-1 text-[13px] text-[#4b4a54] sm:text-[15px]">
+          <LocationPin className="h-4 w-4" />
+          <span style={{ display: "-webkit-box", WebkitLineClamp: 1, WebkitBoxOrient: "vertical", overflow: "hidden" }}>{item.location}</span>
+        </small>
       </div>
     </article>
   );
@@ -112,7 +125,7 @@ export default function SearchResultsPage() {
               </h1>
               <div className="text-[24px] text-[#1f1c26]">◫ ☰</div>
             </div>
-            <div className="grid grid-cols-1 gap-4 md:grid-cols-2 xl:grid-cols-3">
+            <div className="grid grid-cols-2 gap-4 xl:grid-cols-4">
               {repeated.map((item, idx) => (
                 <ListingCard key={`${item.title}-${idx}`} item={item} onClick={() => navigate("/product-details")} />
               ))}
@@ -125,6 +138,7 @@ export default function SearchResultsPage() {
     </div>
   );
 }
+
 
 
 

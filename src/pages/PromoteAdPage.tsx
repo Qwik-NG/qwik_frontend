@@ -1,6 +1,6 @@
 import type { ReactNode } from "react";
 import { useNavigate } from "react-router-dom";
-import { SiteFooter, SiteHeader } from "../components/SiteChrome";
+import { SiteFooter, SiteHeader } from "../components/AppShell";
 
 function IconBox({ children }: { children: ReactNode }) {
   return <button className="h-11 w-11 rounded-lg bg-[#ececec] text-[18px] text-[#2b2a34]">{children}</button>;

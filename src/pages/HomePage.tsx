@@ -1,5 +1,5 @@
-import type { ReactNode } from "react";
 import { useNavigate } from "react-router-dom";
+import { SiteFooter, SiteHeader } from "../components/AppShell";
 
 type Category = { name: string; image: string; tone: string };
 type Product = { price: string; title: string; description: string; location: string; image: string };
@@ -52,13 +52,6 @@ const seed: Product[] = [
 
 const products = [...seed, ...seed, ...seed];
 
-function IconBox({ children, onClick }: { children: ReactNode; onClick: () => void }) {
-  return (
-    <button onClick={onClick} type="button" className="grid h-11 w-11 place-items-center rounded-lg bg-[#ececec] text-[#1f1d27]">
-      {children}
-    </button>
-  );
-}
 function LocationPin({ className = "h-4 w-4" }: { className?: string }) {
   return (
     <svg viewBox="0 0 24 24" fill="none" className={className} aria-hidden="true">
@@ -72,42 +65,9 @@ export default function HomePage() {
   const navigate = useNavigate();
   return (
     <div className="min-h-screen bg-page text-ink">
-      <header className="relative z-20 mx-auto flex w-full max-w-[1728px] items-center gap-6 px-12 pt-8">
-        <button
-          className="relative h-[96px] w-[96px] shrink-0 overflow-hidden rounded-full bg-white"
-          onClick={() => navigate("/")}
-        >
-          <img src="/images/logo-header.png" alt="Qwik logo" className="h-full w-full object-cover" />
-        </button>
+      <SiteHeader navigate={navigate} />
 
-        <div className="flex flex-1 items-center gap-2.5">
-          <div className="flex h-14 w-[360px] items-center gap-2 rounded-[10px] border-2 border-orange px-3.5 text-[16px] text-[#b6b3bd]">
-            <span className="text-lg text-[#f5932b]">⌕</span>
-            <span>I am looking for ...</span>
-          </div>
-          <div className="flex items-center gap-1 text-[16px] text-[#9c98a5]">
-            <LocationPin className="h-4 w-4" />
-            <span>Nig.</span>
-          </div>
-        </div>
-
-        <div className="relative z-30 flex items-center gap-2.5 pointer-events-auto">
-          <IconBox onClick={() => navigate("/notification-empty")}><svg viewBox="0 0 24 24" className="h-5 w-5" fill="none" stroke="currentColor" strokeWidth="1.9" aria-hidden="true"><path d="M15 17H9a2 2 0 0 1-2-2v-3a5 5 0 1 1 10 0v3a2 2 0 0 1-2 2Z"/><path d="M10 19a2 2 0 0 0 4 0"/></svg></IconBox>
-          <IconBox onClick={() => navigate("/ads-dashboard")}><svg viewBox="0 0 24 24" className="h-5 w-5" fill="none" stroke="currentColor" strokeWidth="1.9" aria-hidden="true"><path d="M8 4h8a1 1 0 0 1 1 1v14l-5-3-5 3V5a1 1 0 0 1 1-1Z"/><path d="M10 8h4"/></svg></IconBox>
-          <IconBox onClick={() => navigate("/messages")}><svg viewBox="0 0 24 24" className="h-5 w-5" fill="none" stroke="currentColor" strokeWidth="1.9" aria-hidden="true"><rect x="4" y="6.5" width="16" height="11" rx="2.5"/><path d="m5.5 8 6.5 5 6.5-5"/></svg></IconBox>
-          <button onClick={() => navigate("/profile-settings")} className="cursor-pointer rounded-full" type="button">
-            <img className="h-11 w-11 rounded-full object-cover" src="https://images.unsplash.com/photo-1521572267360-ee0c2909d518?w=80" alt="avatar" />
-          </button>
-          <button
-            className="h-14 cursor-pointer rounded-[11px] bg-gradient-to-r from-amber to-orange px-5 text-[16px] text-white shadow-glow"
-            onClick={() => navigate("/promote-ad")}
-          >
-            Post a free ad
-          </button>
-        </div>
-      </header>
-
-      <section className="mx-auto grid w-full max-w-[1728px] grid-cols-4 gap-3 px-12 pb-1 pt-[70px] md:grid-cols-6 xl:grid-cols-12">
+      <section className="mx-auto grid w-full max-w-[1728px] grid-cols-4 gap-3 px-4 pb-1 pt-8 sm:px-6 sm:pt-[50px] md:grid-cols-6 lg:px-12 xl:grid-cols-12 xl:pt-[70px]">
         {categories.map((item) => (
           <button
             key={item.name}
@@ -123,26 +83,26 @@ export default function HomePage() {
         ))}
       </section>
 
-      <main className="mx-auto w-full max-w-[1728px] px-12 pb-24 pt-14">
-        <h2 className="mb-5 text-[32px] font-medium">Top Ads</h2>
-        <div className="grid grid-cols-1 gap-4 md:grid-cols-2 xl:grid-cols-4">
+      <main className="mx-auto w-full max-w-[1728px] px-4 pb-16 pt-8 sm:px-6 lg:px-12 lg:pb-24 lg:pt-14">
+        <h2 className="mb-5 text-[26px] font-medium sm:text-[32px]">Top Ads</h2>
+        <div className="grid grid-cols-2 gap-4 xl:grid-cols-4">
           {products.map((item, idx) => (
             <article
               key={`${item.title}-${idx}`}
-              className="cursor-pointer rounded-[26px] bg-white p-4 transition hover:scale-[1.01]"
+              className="cursor-pointer rounded-[22px] bg-white p-2.5 transition hover:scale-[1.01] sm:rounded-[26px] sm:p-4"
               onClick={() => navigate("/product-details")}
             >
-              <img src={item.image} alt={item.title} className="h-[260px] w-full rounded-[18px] object-cover" />
-              <div className="px-0 pb-1 pt-4">
+              <img src={item.image} alt={item.title} className="h-[170px] w-full rounded-[14px] object-cover sm:h-[260px] sm:rounded-[18px]" />
+              <div className="px-0 pb-1 pt-3 sm:pt-4">
                 <div className="flex items-center justify-between gap-2">
-                  <h3 className="m-0 whitespace-nowrap text-[20px] font-semibold leading-none">{item.price}</h3>
-                  <span className="rounded-[12px] bg-[#f5ebdc] px-3 py-1.5 text-[15px] text-[#ff9715]">New</span>
+                  <h3 className="m-0 whitespace-nowrap text-[16px] font-semibold leading-none sm:text-[20px]">{item.price}</h3>
+                  <span className="rounded-[10px] bg-[#f5ebdc] px-2 py-1 text-[12px] text-[#ff9715] sm:rounded-[12px] sm:px-3 sm:py-1.5 sm:text-[15px]">New</span>
                 </div>
-                <h4 className="mb-1.5 mt-4 text-[18px] font-medium leading-[1.25]">{item.title}</h4>
-                <p className="mb-3 text-[15px] leading-[1.4] text-muted">{item.description}</p>
-                <small className="flex items-center gap-1 text-[15px] text-[#4b4a54]">
+                <h4 className="mb-1.5 mt-3 text-[15px] font-medium leading-[1.25] sm:mt-4 sm:text-[18px]" style={{ display: "-webkit-box", WebkitLineClamp: 2, WebkitBoxOrient: "vertical", overflow: "hidden" }}>{item.title}</h4>
+                <p className="mb-2 text-[13px] leading-[1.35] text-muted sm:mb-3 sm:text-[15px] sm:leading-[1.4]" style={{ display: "-webkit-box", WebkitLineClamp: 2, WebkitBoxOrient: "vertical", overflow: "hidden" }}>{item.description}</p>
+                <small className="flex items-center gap-1 text-[13px] text-[#4b4a54] sm:text-[15px]">
                   <LocationPin className="h-4 w-4" />
-                  <span>{item.location}</span>
+                  <span style={{ display: "-webkit-box", WebkitLineClamp: 1, WebkitBoxOrient: "vertical", overflow: "hidden" }}>{item.location}</span>
                 </small>
               </div>
             </article>
@@ -150,54 +110,7 @@ export default function HomePage() {
         </div>
       </main>
 
-      <footer className="grid grid-cols-1 gap-6 bg-[#040316] px-[70px] py-[76px] text-[#b0afbc] md:grid-cols-2 xl:grid-cols-[1fr_1fr_1fr_1fr_1fr_1.8fr]">
-        <div className="mt-2 text-[58px] leading-none text-[#ff9412]">qwik</div>
-        <div>
-          <h5 className="mb-3.5 text-[18px] font-medium text-[#efeff5]">About</h5>
-          <button className="mb-2.5 block text-[14px] text-[#5f6071]" onClick={() => navigate("/signup")}>About Qwik</button>
-          <a className="mb-2.5 block text-[14px] text-[#5f6071]">Career</a>
-          <a className="mb-2.5 block text-[14px] text-[#5f6071]">Terms</a>
-        </div>
-        <div>
-          <h5 className="mb-3.5 text-[18px] font-medium text-[#efeff5]">Resources</h5>
-          <a className="mb-2.5 block text-[14px] text-[#5f6071]">Blog</a>
-          <a className="mb-2.5 block text-[14px] text-[#5f6071]">Instagram</a>
-          <a className="mb-2.5 block text-[14px] text-[#5f6071]">Youtube</a>
-          <a className="mb-2.5 block text-[14px] text-[#5f6071]">Twitter</a>
-        </div>
-        <div>
-          <h5 className="mb-3.5 text-[18px] font-medium text-[#efeff5]">Support</h5>
-          <a className="mb-2.5 block text-[14px] text-[#5f6071]">help@qwik.ng</a>
-          <a className="mb-2.5 block text-[14px] text-[#5f6071]">FAQs</a>
-        </div>
-        <div>
-          <h5 className="mb-3.5 text-[18px] font-medium text-[#efeff5]">Download</h5>
-          <button className="mb-2.5 flex h-12 w-[160px] items-center gap-3 rounded-[10px] bg-[#1b1a2f] px-4 text-[14px] text-[#76798d]">
-            <svg viewBox="0 0 24 24" className="h-5 w-5 fill-current text-[#666877]" aria-hidden="true">
-              <path d="M16.7 12.6c0-2.1 1.7-3.1 1.8-3.2-1-1.5-2.5-1.7-3.1-1.8-1.3-.1-2.5.8-3.1.8-.6 0-1.6-.8-2.6-.8-1.4 0-2.7.8-3.4 2-.8 1.4-.2 3.5.6 4.7.4.6.9 1.4 1.7 1.3.7 0 1-.4 1.9-.4.9 0 1.2.4 1.9.4.8 0 1.3-.7 1.7-1.3.5-.8.8-1.6.8-1.7-.1 0-2.2-.8-2.2-3Zm-2.1-6.3c.3-.4.6-1.1.5-1.7-.5 0-1.2.3-1.6.7-.4.4-.7 1-.6 1.6.6 0 1.2-.3 1.7-.6Z" />
-            </svg>
-            <span>App Store</span>
-          </button>
-          <button className="flex h-12 w-[160px] items-center gap-3 rounded-[10px] bg-[#1b1a2f] px-4 text-[14px] text-[#76798d]">
-            <svg viewBox="0 0 24 24" className="h-5 w-5 fill-current text-[#666877]" aria-hidden="true">
-              <path d="M3 3.5v17l10.7-8.5L3 3.5Zm11.7 9.2 2.6 2.1 3.8-2-4.5-2.6-1.9 2.5Zm-9.8 8.8 11.8-7.5 2.4 1.4L4.9 21.5Zm0-19L19 8.6 16.7 10 4.9 2.5Z" />
-            </svg>
-            <span>Play Store</span>
-          </button>
-        </div>
-        <div>
-          <h5 className="mb-3.5 text-[18px] font-medium text-[#efeff5]">Stay up to date</h5>
-          <p className="mb-2.5 text-[14px] leading-[1.38] text-[#5f6071]">Get news, offers, promotions & the best deals sent to your inbox.</p>
-          <div className="mt-2 flex gap-2">
-            <input className="h-[54px] flex-1 rounded-[10px] border border-[#ff9b00] bg-transparent px-3 text-[15px] text-[#b5b5c3] outline-none" placeholder="@email" />
-            <button className="h-[54px] rounded-[10px] bg-gradient-to-r from-amber to-orange px-[18px] text-[15px] text-white shadow-glow">Subscribe</button>
-          </div>
-        </div>
-      </footer>
+      <SiteFooter navigate={navigate} />
     </div>
   );
 }
-
-
-
-
