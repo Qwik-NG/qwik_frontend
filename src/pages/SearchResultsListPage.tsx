@@ -44,9 +44,9 @@ function FilterCard({ title, children }: { title: string; children: React.ReactN
   );
 }
 
-function ListCard({ item }: { item: Listing }) {
+function ListCard({ item, onClick }: { item: Listing; onClick: () => void }) {
   return (
-    <article className="rounded-[18px] bg-white p-3">
+    <article className="cursor-pointer rounded-[18px] bg-white p-3" onClick={onClick}>
       <div className="grid grid-cols-1 items-center gap-3 md:grid-cols-[220px_1fr]">
         <img src={item.image} alt={item.title} className="h-[220px] w-full rounded-[12px] object-cover" />
         <div>
@@ -116,7 +116,7 @@ export default function SearchResultsListPage() {
             </div>
             <div className="space-y-3">
               {repeated.map((item, idx) => (
-                <ListCard key={`${item.title}-${idx}`} item={item} />
+                <ListCard key={`${item.title}-${idx}`} item={item} onClick={() => navigate("/product-details")} />
               ))}
             </div>
           </section>
@@ -127,6 +127,7 @@ export default function SearchResultsListPage() {
     </div>
   );
 }
+
 
 
 

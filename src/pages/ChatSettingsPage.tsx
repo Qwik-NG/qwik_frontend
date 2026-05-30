@@ -1,9 +1,10 @@
 import { useNavigate } from "react-router-dom";
 import { SiteFooter, SiteHeader } from "../components/SiteChrome";
 
-function MenuItem({ label, active = false }: { label: string; active?: boolean }) {
+function MenuItem({ label, active = false, onClick }: { label: string; active?: boolean; onClick: () => void }) {
   return (
     <button
+      onClick={onClick}
       type="button"
       className={`flex h-[58px] w-full items-center gap-3 rounded-[12px] px-4 text-left text-[16px] ${
         active ? "bg-[#efefef] text-[#1f1d27]" : "text-[#94919d]"
@@ -37,13 +38,13 @@ export default function ChatSettingsPage() {
         <div className="grid grid-cols-1 gap-6 xl:grid-cols-[310px_1fr]">
           <aside className="rounded-[20px] bg-white p-4">
             <div className="space-y-2">
-              <MenuItem label="Profile" active />
-              <MenuItem label="Ads" />
-              <MenuItem label="Make money" />
-              <MenuItem label="Notification" />
-              <MenuItem label="Help" />
-              <MenuItem label="About" />
-              <MenuItem label="Log out" />
+              <MenuItem label="Profile" active onClick={() => navigate("/profile-settings")} />
+              <MenuItem label="Ads" onClick={() => navigate("/ads-dashboard")} />
+              <MenuItem label="Make money" onClick={() => navigate("/promote-ad")} />
+              <MenuItem label="Notification" onClick={() => navigate("/notification-settings")} />
+              <MenuItem label="Help" onClick={() => navigate("/messages")} />
+              <MenuItem label="About" onClick={() => navigate("/")} />
+              <MenuItem label="Log out" onClick={() => navigate("/signin")} />
             </div>
           </aside>
 

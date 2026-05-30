@@ -54,9 +54,9 @@ const similarAds: SimilarAd[] = [
   }
 ];
 
-function ProductCard({ item }: { item: SimilarAd }) {
+function ProductCard({ item, onClick }: { item: SimilarAd; onClick: () => void }) {
   return (
-    <article className="rounded-[18px] bg-white p-3">
+    <article className="cursor-pointer rounded-[18px] bg-white p-3" onClick={onClick}>
       <img src={item.image} alt={item.title} className="h-[180px] w-full rounded-[12px] object-cover" />
       <div className="pt-3">
         <div className="mb-2 flex items-center justify-between">
@@ -108,7 +108,7 @@ export default function ProductDetailsPage() {
               </div>
               <p className="mb-6 text-[18px] text-[#57b77a]">↗ Check market price</p>
               <div className="flex items-center gap-3">
-                <button className="h-[44px] rounded-[8px] bg-gradient-to-r from-amber to-orange px-4 text-[16px] text-white shadow-glow" type="button">
+                <button className="h-[44px] rounded-[8px] bg-gradient-to-r from-amber to-orange px-4 text-[16px] text-white shadow-glow" onClick={() => navigate("/make-offer")} type="button">
                   Chat Seller
                 </button>
                 <button className="h-[44px] w-[44px] rounded-[8px] bg-white text-[22px]" type="button">⌖</button>
@@ -177,7 +177,7 @@ export default function ProductDetailsPage() {
               </div>
             </div>
             <div className="mt-4 flex gap-2">
-              <button className="h-10 rounded-[8px] bg-gradient-to-r from-amber to-orange px-4 text-white shadow-glow" type="button">◍ Mak an offer</button>
+              <button className="h-10 rounded-[8px] bg-gradient-to-r from-amber to-orange px-4 text-white shadow-glow" onClick={() => navigate("/make-offer")} type="button">◍ Mak an offer</button>
               <button className="h-10 rounded-[8px] bg-[#f5ebdc] px-4 text-[#ff9715]" type="button">◡ Call</button>
             </div>
           </div>
@@ -200,7 +200,7 @@ export default function ProductDetailsPage() {
           <h3 className="mb-4 text-[40px] font-medium">Similar Ads</h3>
           <div className="grid grid-cols-1 gap-4 md:grid-cols-2 xl:grid-cols-4">
             {similarAds.map((item) => (
-              <ProductCard key={item.title} item={item} />
+              <ProductCard key={item.title} item={item} onClick={() => navigate("/product-details")} />
             ))}
           </div>
         </section>

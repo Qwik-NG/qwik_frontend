@@ -29,7 +29,7 @@ export default function NotificationEmptyPage() {
 
   return (
     <div className="min-h-screen bg-page text-ink">
-      <SiteHeader navigate={navigate} />
+      <SiteHeader navigate={navigate} activeIcon="bell" />
 
       <main className="mx-auto w-full max-w-[1728px] px-12 pb-20 pt-8">
         <div className="mb-10 flex items-center gap-3">
@@ -44,6 +44,13 @@ export default function NotificationEmptyPage() {
             </div>
             <h2 className="text-[50px] font-medium leading-none">Nothing to see here</h2>
             <p className="mt-3 text-[39px] text-[#9a98a4]">You don&apos;t have any notification yet</p>
+            <button
+              className="mt-6 rounded-[10px] bg-gradient-to-r from-amber to-orange px-6 py-3 text-[18px] text-white shadow-glow"
+              onClick={() => navigate("/notifications")}
+              type="button"
+            >
+              View notifications
+            </button>
           </div>
         </div>
       </main>
@@ -52,4 +59,3 @@ export default function NotificationEmptyPage() {
     </div>
   );
 }
-

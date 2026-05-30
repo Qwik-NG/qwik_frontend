@@ -1,9 +1,10 @@
 import { useNavigate } from "react-router-dom";
 import { SiteFooter, SiteHeader } from "../components/SiteChrome";
 
-function MenuItem({ label, active = false }: { label: string; active?: boolean }) {
+function MenuItem({ label, active = false, onClick }: { label: string; active?: boolean; onClick: () => void }) {
   return (
     <button
+      onClick={onClick}
       type="button"
       className={`flex h-[58px] w-full items-center gap-3 rounded-[12px] px-4 text-left text-[16px] ${
         active ? "bg-[#efefef] text-[#1f1d27]" : "text-[#94919d]"
@@ -15,9 +16,9 @@ function MenuItem({ label, active = false }: { label: string; active?: boolean }
   );
 }
 
-function Tab({ label, active = false }: { label: string; active?: boolean }) {
+function Tab({ label, active = false, onClick }: { label: string; active?: boolean; onClick: () => void }) {
   return (
-    <button className={`text-[42px] ${active ? "text-[#1f1d27]" : "text-[#9794a1]"}`} type="button">
+    <button onClick={onClick} className={`text-[42px] ${active ? "text-[#1f1d27]" : "text-[#9794a1]"}`} type="button">
       {label}
     </button>
   );
@@ -42,20 +43,20 @@ export default function NotificationSettingsPage() {
         <div className="grid grid-cols-1 gap-6 xl:grid-cols-[310px_1fr]">
           <aside className="rounded-[20px] bg-white p-4">
             <div className="space-y-2">
-              <MenuItem label="Profile" />
-              <MenuItem label="Ads" />
-              <MenuItem label="Make money" />
-              <MenuItem label="Notification" active />
-              <MenuItem label="Help" />
-              <MenuItem label="About" />
-              <MenuItem label="Log out" />
+              <MenuItem label="Profile" onClick={() => navigate("/profile-settings")} />
+              <MenuItem label="Ads" onClick={() => navigate("/ads-dashboard")} />
+              <MenuItem label="Make money" onClick={() => navigate("/promote-ad")} />
+              <MenuItem label="Notification" active onClick={() => navigate("/notification-settings")} />
+              <MenuItem label="Help" onClick={() => navigate("/messages")} />
+              <MenuItem label="About" onClick={() => navigate("/")} />
+              <MenuItem label="Log out" onClick={() => navigate("/signin")} />
             </div>
           </aside>
 
           <section className="max-w-[760px]">
             <div className="mb-8 flex gap-10">
-              <Tab label="Push" active />
-              <Tab label="Email" />
+              <Tab label="Push" active onClick={() => navigate("/notification-settings")} />
+              <Tab label="Email" onClick={() => navigate("/notification-settings-email")} />
             </div>
 
             <div className="space-y-6">
@@ -88,4 +89,3 @@ export default function NotificationSettingsPage() {
     </div>
   );
 }
-

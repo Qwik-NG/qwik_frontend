@@ -29,7 +29,7 @@ export default function MessagesPage() {
 
   return (
     <div className="min-h-screen bg-page text-ink">
-      <SiteHeader navigate={navigate} />
+      <SiteHeader navigate={navigate} activeIcon="mail" />
 
       <main className="mx-auto w-full max-w-[1728px] px-12 pb-20 pt-8">
         <div className="mb-10 flex items-center gap-3">
@@ -52,4 +52,3 @@ export default function MessagesPage() {
     </div>
   );
 }
-

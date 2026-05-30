@@ -52,8 +52,12 @@ const seed: Product[] = [
 
 const products = [...seed, ...seed, ...seed];
 
-function IconBox({ children }: { children: ReactNode }) {
-  return <button className="grid h-11 w-11 place-items-center rounded-lg bg-[#ececec] text-[#1f1d27]">{children}</button>;
+function IconBox({ children, onClick }: { children: ReactNode; onClick: () => void }) {
+  return (
+    <button onClick={onClick} type="button" className="grid h-11 w-11 place-items-center rounded-lg bg-[#ececec] text-[#1f1d27]">
+      {children}
+    </button>
+  );
 }
 function LocationPin({ className = "h-4 w-4" }: { className?: string }) {
   return (
@@ -68,7 +72,7 @@ export default function HomePage() {
   const navigate = useNavigate();
   return (
     <div className="min-h-screen bg-page text-ink">
-      <header className="mx-auto flex w-full max-w-[1728px] items-center gap-6 px-12 pt-8">
+      <header className="relative z-20 mx-auto flex w-full max-w-[1728px] items-center gap-6 px-12 pt-8">
         <button
           className="relative h-[96px] w-[96px] shrink-0 overflow-hidden rounded-full bg-white"
           onClick={() => navigate("/")}
@@ -87,14 +91,16 @@ export default function HomePage() {
           </div>
         </div>
 
-        <div className="flex items-center gap-2.5">
-          <IconBox><svg viewBox="0 0 24 24" className="h-5 w-5" fill="none" stroke="currentColor" strokeWidth="1.9" aria-hidden="true"><path d="M15 17H9a2 2 0 0 1-2-2v-3a5 5 0 1 1 10 0v3a2 2 0 0 1-2 2Z"/><path d="M10 19a2 2 0 0 0 4 0"/></svg></IconBox>
-          <IconBox><svg viewBox="0 0 24 24" className="h-5 w-5" fill="none" stroke="currentColor" strokeWidth="1.9" aria-hidden="true"><path d="M8 4h8a1 1 0 0 1 1 1v14l-5-3-5 3V5a1 1 0 0 1 1-1Z"/><path d="M10 8h4"/></svg></IconBox>
-          <IconBox><svg viewBox="0 0 24 24" className="h-5 w-5" fill="none" stroke="currentColor" strokeWidth="1.9" aria-hidden="true"><rect x="4" y="6.5" width="16" height="11" rx="2.5"/><path d="m5.5 8 6.5 5 6.5-5"/></svg></IconBox>
-          <img className="h-11 w-11 rounded-full object-cover" src="https://images.unsplash.com/photo-1521572267360-ee0c2909d518?w=80" alt="avatar" />
+        <div className="relative z-30 flex items-center gap-2.5 pointer-events-auto">
+          <IconBox onClick={() => navigate("/notification-empty")}><svg viewBox="0 0 24 24" className="h-5 w-5" fill="none" stroke="currentColor" strokeWidth="1.9" aria-hidden="true"><path d="M15 17H9a2 2 0 0 1-2-2v-3a5 5 0 1 1 10 0v3a2 2 0 0 1-2 2Z"/><path d="M10 19a2 2 0 0 0 4 0"/></svg></IconBox>
+          <IconBox onClick={() => navigate("/ads-dashboard")}><svg viewBox="0 0 24 24" className="h-5 w-5" fill="none" stroke="currentColor" strokeWidth="1.9" aria-hidden="true"><path d="M8 4h8a1 1 0 0 1 1 1v14l-5-3-5 3V5a1 1 0 0 1 1-1Z"/><path d="M10 8h4"/></svg></IconBox>
+          <IconBox onClick={() => navigate("/messages")}><svg viewBox="0 0 24 24" className="h-5 w-5" fill="none" stroke="currentColor" strokeWidth="1.9" aria-hidden="true"><rect x="4" y="6.5" width="16" height="11" rx="2.5"/><path d="m5.5 8 6.5 5 6.5-5"/></svg></IconBox>
+          <button onClick={() => navigate("/profile-settings")} className="cursor-pointer rounded-full" type="button">
+            <img className="h-11 w-11 rounded-full object-cover" src="https://images.unsplash.com/photo-1521572267360-ee0c2909d518?w=80" alt="avatar" />
+          </button>
           <button
-            className="h-14 rounded-[11px] bg-gradient-to-r from-amber to-orange px-5 text-[16px] text-white shadow-glow"
-            onClick={() => navigate("/signup")}
+            className="h-14 cursor-pointer rounded-[11px] bg-gradient-to-r from-amber to-orange px-5 text-[16px] text-white shadow-glow"
+            onClick={() => navigate("/promote-ad")}
           >
             Post a free ad
           </button>
@@ -103,12 +109,17 @@ export default function HomePage() {
 
       <section className="mx-auto grid w-full max-w-[1728px] grid-cols-4 gap-3 px-12 pb-1 pt-[70px] md:grid-cols-6 xl:grid-cols-12">
         {categories.map((item) => (
-          <div key={item.name} className="text-center">
+          <button
+            key={item.name}
+            className="text-center"
+            onClick={() => navigate(item.name === "More" ? "/search-results-list" : "/search-results")}
+            type="button"
+          >
             <div className="mx-auto mb-2.5 grid h-[86px] w-[86px] place-items-center overflow-hidden rounded-full" style={{ background: item.tone }}>
               {item.image ? (<img src={item.image} alt={item.name} className="h-[62px] w-[62px] object-contain" />) : (<span className="flex items-center gap-1"><span className="h-2.5 w-2.5 rounded-full bg-black" /><span className="h-2.5 w-2.5 rounded-full bg-black" /></span>)}
             </div>
             <p className="m-0 text-[16px]">{item.name}</p>
-          </div>
+          </button>
         ))}
       </section>
 
@@ -119,7 +130,7 @@ export default function HomePage() {
             <article
               key={`${item.title}-${idx}`}
               className="cursor-pointer rounded-[26px] bg-white p-4 transition hover:scale-[1.01]"
-              onClick={() => window.alert(`Clicked: ${item.title}`)}
+              onClick={() => navigate("/product-details")}
             >
               <img src={item.image} alt={item.title} className="h-[260px] w-full rounded-[18px] object-cover" />
               <div className="px-0 pb-1 pt-4">
