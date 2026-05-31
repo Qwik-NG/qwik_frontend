@@ -111,7 +111,7 @@ export default function ProductDetailsPage() {
               </div>
             </div>
             <div className="pt-10">
-              <p className="mb-2 text-[18px] text-[#57b77a]">◌ Verified Seller</p>
+              <p className="mb-2 text-[18px] text-[#57b77a]">Verified Seller</p>
               <h1 className="text-[42px] leading-tight">Mercedes-Benz GLA 250 2015 Blue</h1>
               <p className="mb-6 mt-1 flex items-center gap-1 text-[18px] text-[#6d6a74]">
                 <LocationPin className="h-5 w-5" />
@@ -121,12 +121,12 @@ export default function ProductDetailsPage() {
                 <h2 className="text-[54px] font-semibold">₦ 16,000,000</h2>
                 <span className="rounded-[8px] bg-[#f5ebdc] px-2.5 py-1 text-[16px] text-[#ff9715]">New</span>
               </div>
-              <p className="mb-6 text-[18px] text-[#57b77a]">↗ Check market price</p>
+              <p className="mb-6 text-[18px] text-[#57b77a]">Check market price</p>
               <div className="flex items-center gap-3">
                 <button className="h-[44px] rounded-[8px] bg-gradient-to-r from-amber to-orange px-4 text-[16px] text-white shadow-glow" onClick={() => navigate("/make-offer")} type="button">
                   Chat Seller
                 </button>
-                <button className="h-[44px] w-[44px] rounded-[8px] bg-white text-[22px]" type="button">⌖</button>
+                <button className="h-[44px] w-[44px] rounded-[8px] bg-white text-[22px]" type="button">Save</button>
               </div>
             </div>
           </div>
@@ -159,8 +159,8 @@ export default function ProductDetailsPage() {
               <div className="flex-1 rounded-[12px] border border-[#d9d7df] bg-white p-3">
                 <input className="w-full border-none bg-transparent text-[14px] outline-none" placeholder="I noticed that..." />
                 <div className="mt-3 flex items-center justify-between">
-                  <span className="text-[18px] text-[#ff9a00]">★★☆☆☆</span>
-                  <button className="h-7 w-7 rounded-full bg-[#ff9a00] text-white" type="button">➤</button>
+                  <span className="text-[18px] text-[#ff9a00]">★★★★★</span>
+                  <button className="h-7 w-7 rounded-full bg-[#ff9a00] text-white" type="button">Post</button>
                 </div>
               </div>
             </div>
@@ -192,8 +192,8 @@ export default function ProductDetailsPage() {
               </div>
             </div>
             <div className="mt-4 flex gap-2">
-              <button className="h-10 rounded-[8px] bg-gradient-to-r from-amber to-orange px-4 text-white shadow-glow" onClick={() => navigate("/make-offer")} type="button">◍ Mak an offer</button>
-              <button className="h-10 rounded-[8px] bg-[#f5ebdc] px-4 text-[#ff9715]" type="button">◡ Call</button>
+              <button className="h-10 rounded-[8px] bg-gradient-to-r from-amber to-orange px-4 text-white shadow-glow" onClick={() => navigate("/make-offer")} type="button">Make an offer</button>
+              <button className="h-10 rounded-[8px] bg-[#f5ebdc] px-4 text-[#ff9715]" type="button">Call</button>
             </div>
           </div>
           <div className="rounded-[18px] bg-[#efefef] p-6">
@@ -225,7 +225,3 @@ export default function ProductDetailsPage() {
     </div>
   );
 }
-
-
-
-

@@ -1,9 +1,12 @@
 import { useState } from "react";
 import { useNavigate } from "react-router-dom";
+import { api } from "../services/api";
+import { setResetToken } from "../services/auth";
 
 export default function RecoverPasswordPage() {
   const navigate = useNavigate();
   const [email, setEmail] = useState("");
+  const [isSubmitting, setIsSubmitting] = useState(false);
   const canSend = /\S+@\S+\.\S+/.test(email);
 
   return (
@@ -36,13 +39,26 @@ export default function RecoverPasswordPage() {
           />
 
           <button
-            disabled={!canSend}
-            onClick={() => navigate("/create-password")}
+            disabled={!canSend || isSubmitting}
+            onClick={async () => {
+              try {
+                setIsSubmitting(true);
+                const res = await api.forgotPassword({ email: email.trim().toLowerCase() });
+                if (res.data?.resetToken) {
+                  setResetToken(res.data.resetToken);
+                }
+                navigate("/create-password");
+              } catch (error) {
+                window.alert(error instanceof Error ? error.message : "Unable to send reset request");
+              } finally {
+                setIsSubmitting(false);
+              }
+            }}
             className={`h-[48px] w-full rounded-[10px] text-[14px] ${
-              canSend ? "bg-[#3f5db2] text-white" : "bg-[#d8d8dc] text-[#b5b4be]"
+              canSend && !isSubmitting ? "bg-[#3f5db2] text-white" : "bg-[#d8d8dc] text-[#b5b4be]"
             }`}
           >
-            Send
+            {isSubmitting ? "Sending..." : "Send"}
           </button>
         </section>
       </main>

@@ -194,7 +194,7 @@ export default function PostPage() {
               <span className="mb-[10px] block text-[16px] leading-none text-[#9c98a5]">Description</span>
               <textarea
                 className="h-[92px] w-full resize-none rounded-[9px] border-2 border-card bg-white px-[16px] py-[14px] text-[17px] leading-[1.45] text-ink outline-none placeholder:text-[#a4a0aa] focus:border-orange"
-                placeholder="A brief description of what it is that you’re selling..."
+                placeholder="A brief description of what it is that you're selling..."
               />
             </label>
           </div>

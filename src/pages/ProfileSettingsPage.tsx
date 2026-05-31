@@ -1,6 +1,9 @@
 import type { ReactNode } from "react";
+import { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { SiteFooter, SiteHeader } from "../components/AppShell";
+import { api } from "../services/api";
+import { clearToken } from "../services/auth";
 
 function UserIcon() {
   return (
@@ -75,6 +78,20 @@ function MenuItem({ label, icon, active = false, onClick }: { label: string; ico
 
 export default function ProfileSettingsPage() {
   const navigate = useNavigate();
+  const [fullName, setFullName] = useState("");
+  const [email, setEmail] = useState("");
+  const [bio, setBio] = useState("");
+  const [loading, setLoading] = useState(false);
+
+  useEffect(() => {
+    void api.me()
+      .then((res) => {
+        setFullName(res.data.fullName ?? "");
+        setEmail(res.data.email ?? "");
+        setBio(res.data.profile?.bio ?? "");
+      })
+      .catch((error) => console.error(error));
+  }, []);
 
   return (
     <div className="min-h-screen bg-page text-ink">
@@ -90,7 +107,7 @@ export default function ProfileSettingsPage() {
               <MenuItem label="Notification" icon={<BellIcon />} onClick={() => navigate("/notification-settings")} />
               <MenuItem label="Help" icon={<PhoneIcon />} onClick={() => navigate("/messages")} />
               <MenuItem label="About" icon={<InfoIcon />} onClick={() => navigate("/")} />
-              <MenuItem label="Log out" icon={<LogoutIcon />} onClick={() => navigate("/signin")} />
+              <MenuItem label="Log out" icon={<LogoutIcon />} onClick={() => { clearToken(); navigate("/signin"); }} />
             </div>
           </aside>
 
@@ -102,8 +119,8 @@ export default function ProfileSettingsPage() {
                     <img className="h-[84px] w-[84px] rounded-full object-cover" src="https://images.unsplash.com/photo-1521572267360-ee0c2909d518?w=120" alt="profile" />
                   </div>
                   <div>
-                    <h1 className="text-[42px] font-medium leading-tight">Sherry James</h1>
-                    <p className="text-[20px] text-[#8c8996]">Imshuvo97@gmail.com</p>
+                    <h1 className="text-[42px] font-medium leading-tight">{fullName || "Profile"}</h1>
+                    <p className="text-[20px] text-[#8c8996]">{email || "-"}</p>
                   </div>
                 </div>
                 <div className="flex gap-10 text-center">
@@ -137,13 +154,23 @@ export default function ProfileSettingsPage() {
               </div>
 
               <label className="mb-2 block text-[16px] text-[#94919d]">Business Name</label>
-              <input className="mb-5 h-12 w-full rounded-[10px] border border-[#dedde4] bg-transparent px-3 text-[17px] outline-none" placeholder="Enter your full name" />
+              <input value={fullName} onChange={(e) => setFullName(e.target.value)} className="mb-5 h-12 w-full rounded-[10px] border border-[#dedde4] bg-transparent px-3 text-[17px] outline-none" placeholder="Enter your full name" />
 
               <label className="mb-2 block text-[16px] text-[#94919d]">Description</label>
-              <textarea className="mb-5 h-[120px] w-full rounded-[10px] border border-[#dedde4] bg-transparent px-3 py-3 text-[17px] outline-none" placeholder="What does your company do?" />
+              <textarea value={bio} onChange={(e) => setBio(e.target.value)} className="mb-5 h-[120px] w-full rounded-[10px] border border-[#dedde4] bg-transparent px-3 py-3 text-[17px] outline-none" placeholder="What does your company do?" />
 
-              <button className="h-[50px] w-full rounded-[10px] bg-gradient-to-r from-amber to-orange text-[18px] text-white shadow-glow" type="button">
-                Save
+              <button className="h-[50px] w-full rounded-[10px] bg-gradient-to-r from-amber to-orange text-[18px] text-white shadow-glow" type="button" onClick={async () => {
+                try {
+                  setLoading(true);
+                  await api.updateMe({ fullName, bio });
+                  window.alert("Profile updated");
+                } catch (error) {
+                  window.alert(error instanceof Error ? error.message : "Failed to update profile");
+                } finally {
+                  setLoading(false);
+                }
+              }}>
+                {loading ? "Saving..." : "Save"}
               </button>
             </div>
           </section>

@@ -1,10 +1,13 @@
 import { useState } from "react";
 import { useNavigate } from "react-router-dom";
+import { api } from "../services/api";
+import { getLoginEmail, setToken } from "../services/auth";
 
 export default function LoginPasswordPage() {
   const navigate = useNavigate();
   const [password, setPassword] = useState("");
   const [rememberMe, setRememberMe] = useState(true);
+  const [isSubmitting, setIsSubmitting] = useState(false);
   const canLogin = password.length >= 6;
 
   return (
@@ -44,13 +47,30 @@ export default function LoginPasswordPage() {
           </div>
 
           <button
-            disabled={!canLogin}
-            onClick={() => navigate("/welcome")}
+            disabled={!canLogin || isSubmitting}
+            onClick={async () => {
+              try {
+                setIsSubmitting(true);
+                const email = getLoginEmail();
+                if (!email) {
+                  window.alert("Please enter your email first.");
+                  navigate("/login");
+                  return;
+                }
+                const res = await api.login({ email, password });
+                setToken(res.data.token);
+                navigate("/welcome");
+              } catch (error) {
+                window.alert(error instanceof Error ? error.message : "Login failed");
+              } finally {
+                setIsSubmitting(false);
+              }
+            }}
             className={`h-[48px] w-full rounded-[10px] text-[14px] ${
-              canLogin ? "bg-[#3f5db2] text-white" : "bg-[#d8d8dc] text-[#b5b4be]"
+              canLogin && !isSubmitting ? "bg-[#3f5db2] text-white" : "bg-[#d8d8dc] text-[#b5b4be]"
             }`}
           >
-            Login
+            {isSubmitting ? "Logging in..." : "Login"}
           </button>
         </section>
       </main>

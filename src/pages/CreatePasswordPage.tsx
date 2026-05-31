@@ -1,10 +1,13 @@
 import { useMemo, useState } from "react";
 import { useNavigate } from "react-router-dom";
+import { api } from "../services/api";
+import { getResetToken } from "../services/auth";
 
 export default function CreatePasswordPage() {
   const navigate = useNavigate();
   const [newPassword, setNewPassword] = useState("");
   const [confirmPassword, setConfirmPassword] = useState("");
+  const [isSubmitting, setIsSubmitting] = useState(false);
 
   const canSend = useMemo(() => {
     return newPassword.length >= 6 && confirmPassword.length >= 6 && newPassword === confirmPassword;
@@ -45,13 +48,29 @@ export default function CreatePasswordPage() {
           />
 
           <button
-            disabled={!canSend}
-            onClick={() => navigate("/singin")}
+            disabled={!canSend || isSubmitting}
+            onClick={async () => {
+              try {
+                setIsSubmitting(true);
+                const token = getResetToken();
+                if (!token) {
+                  window.alert("Reset session not found. Please request password reset again.");
+                  navigate("/recover-password");
+                  return;
+                }
+                await api.resetPassword({ token, password: newPassword });
+                navigate("/signin");
+              } catch (error) {
+                window.alert(error instanceof Error ? error.message : "Failed to reset password");
+              } finally {
+                setIsSubmitting(false);
+              }
+            }}
             className={`h-[48px] w-full rounded-[10px] text-[14px] ${
-              canSend ? "bg-[#3f5db2] text-white" : "bg-[#d8d8dc] text-[#b5b4be]"
+              canSend && !isSubmitting ? "bg-[#3f5db2] text-white" : "bg-[#d8d8dc] text-[#b5b4be]"
             }`}
           >
-            Send
+            {isSubmitting ? "Submitting..." : "Send"}
           </button>
         </section>
       </main>

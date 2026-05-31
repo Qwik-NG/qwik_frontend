@@ -1,5 +1,6 @@
 import { useState } from "react";
 import { useNavigate } from "react-router-dom";
+import { setLoginEmail } from "../services/auth";
 
 function GoogleIcon() {
   return (
@@ -75,7 +76,10 @@ export default function LoginPage() {
 
           <button
             disabled={!canContinue}
-            onClick={() => navigate("/login-password")}
+            onClick={() => {
+              setLoginEmail(email.trim().toLowerCase());
+              navigate("/login-password");
+            }}
             className={`h-[48px] w-full rounded-[10px] text-[14px] ${
               canContinue ? "bg-[#3f5db2] text-white" : "bg-[#d8d8dc] text-[#b5b4be]"
             }`}

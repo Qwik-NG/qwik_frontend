@@ -1,14 +1,18 @@
 import { useMemo, useState } from "react";
 import { useNavigate } from "react-router-dom";
+import { api } from "../services/api";
+import { setToken } from "../services/auth";
 
 export default function SignUpPage() {
   const navigate = useNavigate();
   const [fullName, setFullName] = useState("");
+  const [email, setEmail] = useState("");
   const [phone, setPhone] = useState("");
   const [password, setPassword] = useState("");
+  const [isSubmitting, setIsSubmitting] = useState(false);
 
   const isPhoneValid = useMemo(() => /^\+?\d{10,15}$/.test(phone.replace(/\s/g, "")), [phone]);
-  const canCreate = fullName.trim().length >= 2 && isPhoneValid && password.length >= 6;
+  const canCreate = fullName.trim().length >= 2 && /\S+@\S+\.\S+/.test(email) && isPhoneValid && password.length >= 6;
 
   return (
     <div className="min-h-screen overflow-hidden bg-[#f3f3f5] font-outfit text-[#1f1f29]">
@@ -29,6 +33,14 @@ export default function SignUpPage() {
           <h2 className="mb-[14px] text-center text-[24px] font-normal leading-[1.1] text-[#22222b] whitespace-nowrap">
             Create a fresh account
           </h2>
+
+          <input
+            type="email"
+            placeholder="Email"
+            value={email}
+            onChange={(e) => setEmail(e.target.value)}
+            className="mb-[12px] h-[54px] w-full rounded-[10px] border border-[#dedee1] bg-[#ececee] px-3 text-[11px] text-[#20212a] placeholder:text-[#a3a2ad] focus:outline-none"
+          />
 
           <input
             type="text"
@@ -55,13 +67,24 @@ export default function SignUpPage() {
           />
 
           <button
-            disabled={!canCreate}
-            onClick={() => navigate("/singin")}
+            disabled={!canCreate || isSubmitting}
+            onClick={async () => {
+              try {
+                setIsSubmitting(true);
+                const res = await api.register({ email: email.trim().toLowerCase(), password, fullName: fullName.trim(), phone: phone.trim() });
+                setToken(res.data.token);
+                navigate("/welcome");
+              } catch (error) {
+                window.alert(error instanceof Error ? error.message : "Sign up failed");
+              } finally {
+                setIsSubmitting(false);
+              }
+            }}
             className={`h-[54px] w-full rounded-[10px] text-[11px] ${
-              canCreate ? "bg-[#3f5db2] text-white" : "bg-[#d8d8dc] text-[#b5b4be]"
+              canCreate && !isSubmitting ? "bg-[#3f5db2] text-white" : "bg-[#d8d8dc] text-[#b5b4be]"
             }`}
           >
-            Create Account
+            {isSubmitting ? "Creating..." : "Create Account"}
           </button>
         </section>
       </main>
