@@ -1,3 +1,4 @@
+import type { ReactNode } from "react";
 import { useNavigate } from "react-router-dom";
 import { SiteFooter, SiteHeader } from "../components/AppShell";
 
@@ -15,26 +16,25 @@ const listings: Listing[] = [
     title: "4bdrm Duplex in Lekki",
     description: "A Well Built and Spacious 4bedroom Semi Detached",
     location: "Lagos, Lekki",
-    image: "https://images.unsplash.com/photo-1600607687939-ce8a6c25118c?w=1200"
+    image: "https://images.unsplash.com/photo-1600607687939-ce8a6c25118c?w=1200",
   },
   {
     price: "₦ 90,800,000",
     title: "Furnished 5bdrm Duplex in Port-Harcourt for Sale",
     description: "Superb design 5 bedroom duplex in a gated community with good road network in a serene environment",
     location: "Rivers, Port-Harcourt",
-    image: "https://images.unsplash.com/photo-1564013799919-ab600027ffc6?w=1200"
+    image: "https://images.unsplash.com/photo-1564013799919-ab600027ffc6?w=1200",
   },
   {
     price: "₦ 85,500,000",
     title: "4bdrm Duplex in Lekki",
     description: "A Well Built and Spacious 4bedroom Semi Detached",
     location: "Lagos, Lekki",
-    image: "https://images.unsplash.com/photo-1505693416388-ac5ce068fe85?w=1200"
-  }
+    image: "https://images.unsplash.com/photo-1505693416388-ac5ce068fe85?w=1200",
+  },
 ];
 
 const repeated = [...listings, ...listings, ...listings];
-
 
 function LocationPin({ className = "h-4 w-4" }: { className?: string }) {
   return (
@@ -45,7 +45,7 @@ function LocationPin({ className = "h-4 w-4" }: { className?: string }) {
   );
 }
 
-function FilterCard({ title, children }: { title: string; children: React.ReactNode }) {
+function FilterCard({ title, children }: { title: string; children: ReactNode }) {
   return (
     <div className="rounded-[16px] bg-[#efefef] p-4">
       <p className="mb-3 text-[14px] font-medium">{title}</p>
@@ -119,11 +119,30 @@ export default function SearchResultsPage() {
           </aside>
 
           <section>
-            <div className="mb-4 flex items-center justify-between">
+            <div className="mb-4 flex items-center justify-between gap-4">
               <h1 className="text-[44px] font-medium">
                 Found <span className="text-[#ff9715]">23,029</span> results for “Home”
               </h1>
-              <div className="text-[24px] text-[#1f1c26]">◫ ☰</div>
+              <div className="flex items-center gap-2">
+                <button
+                  type="button"
+                  onClick={() => navigate("/search-results")}
+                  className="rounded-[8px] bg-[#ececec] px-2 py-1 text-[28px] text-[#1f1c26]"
+                  aria-label="Grid view"
+                  title="Grid view"
+                >
+                  ▦
+                </button>
+                <button
+                  type="button"
+                  onClick={() => navigate("/search-results-list")}
+                  className="rounded-[8px] px-2 py-1 text-[28px] text-[#1f1c26] hover:bg-[#ececec]"
+                  aria-label="List view"
+                  title="List view"
+                >
+                  ☰
+                </button>
+              </div>
             </div>
             <div className="grid grid-cols-2 gap-4 xl:grid-cols-4">
               {repeated.map((item, idx) => (
@@ -138,8 +157,3 @@ export default function SearchResultsPage() {
     </div>
   );
 }
-
-
-
-
-

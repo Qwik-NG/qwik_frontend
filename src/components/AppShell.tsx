@@ -77,12 +77,16 @@ export function SiteHeader({
       </button>
 
       <div className="order-3 mt-2.5 flex w-full items-center gap-2.5 lg:order-2 lg:mt-0 lg:flex-1">
-        <div className="flex h-11 w-full items-center gap-2 rounded-[10px] border-2 border-orange px-3 text-[14px] text-[#b6b3bd] lg:h-[42px] lg:w-[250px] lg:rounded-[8px] lg:px-[13px] lg:text-[16px]">
+        <button
+          type="button"
+          onClick={() => navigate("/search-results")}
+          className="flex h-11 w-full items-center gap-2 rounded-[10px] border-2 border-orange px-3 text-left text-[14px] text-[#b6b3bd] lg:h-[42px] lg:w-[250px] lg:rounded-[8px] lg:px-[13px] lg:text-[16px]"
+        >
           <span className="text-[#f5932b]">
             <SearchIcon />
           </span>
           <span>I am looking for ...</span>
-        </div>
+        </button>
         <div className="flex shrink-0 items-center gap-1 text-[15px] text-[#9c98a5] sm:text-[16px]">
           <LocationPin className="h-4 w-4" />
           <span>Nig.</span>
@@ -168,7 +172,12 @@ export function SiteHeader({
 export function SiteFooter({ navigate }: { navigate: NavigateTo }) {
   return (
     <footer className="grid grid-cols-3 gap-4 bg-[#040316] px-4 py-10 text-[#b0afbc] sm:gap-6 sm:px-6 lg:px-10 xl:grid-cols-[1fr_1fr_1fr_1fr_1fr_1.8fr] xl:px-[70px] xl:py-[76px]">
-      <div className="col-span-3 mt-2 text-[40px] leading-none text-[#ff9412] sm:col-span-1 sm:text-[58px]">qwik</div>
+      <button
+        onClick={() => navigate("/")}
+        className="col-span-3 mt-2 text-left text-[40px] leading-none text-[#ff9412] sm:col-span-1 sm:text-[58px]"
+      >
+        qwik
+      </button>
       <div className="col-span-1">
         <h5 className="mb-3.5 text-[18px] font-medium text-[#efeff5]">About</h5>
         <button
@@ -177,24 +186,24 @@ export function SiteFooter({ navigate }: { navigate: NavigateTo }) {
         >
           About Qwik
         </button>
-        <a className="mb-2.5 block text-[14px] text-[#5f6071]">Career</a>
-        <a className="mb-2.5 block text-[14px] text-[#5f6071]">Terms</a>
+        <button onClick={() => navigate("/messages")} className="mb-2.5 block text-[14px] text-[#5f6071]">Career</button>
+        <button onClick={() => navigate("/signin")} className="mb-2.5 block text-[14px] text-[#5f6071]">Terms</button>
       </div>
       <div className="col-span-1">
         <h5 className="mb-3.5 text-[18px] font-medium text-[#efeff5]">
           Resources
         </h5>
-        <a className="mb-2.5 block text-[14px] text-[#5f6071]">Blog</a>
-        <a className="mb-2.5 block text-[14px] text-[#5f6071]">Instagram</a>
-        <a className="mb-2.5 block text-[14px] text-[#5f6071]">Youtube</a>
-        <a className="mb-2.5 block text-[14px] text-[#5f6071]">Twitter</a>
+        <button onClick={() => navigate("/search-results")} className="mb-2.5 block text-[14px] text-[#5f6071]">Blog</button>
+        <button onClick={() => navigate("/profile-settings")} className="mb-2.5 block text-[14px] text-[#5f6071]">Instagram</button>
+        <button onClick={() => navigate("/messages")} className="mb-2.5 block text-[14px] text-[#5f6071]">Youtube</button>
+        <button onClick={() => navigate("/notifications")} className="mb-2.5 block text-[14px] text-[#5f6071]">Twitter</button>
       </div>
       <div className="col-span-1">
         <h5 className="mb-3.5 text-[18px] font-medium text-[#efeff5]">
           Support
         </h5>
-        <a className="mb-2.5 block text-[14px] text-[#5f6071]">help@qwik.ng</a>
-        <a className="mb-2.5 block text-[14px] text-[#5f6071]">FAQs</a>
+        <button onClick={() => navigate("/messages")} className="mb-2.5 block text-[14px] text-[#5f6071]">help@qwik.ng</button>
+        <button onClick={() => navigate("/notifications")} className="mb-2.5 block text-[14px] text-[#5f6071]">FAQs</button>
       </div>
       <div className="col-span-2 sm:col-span-1">
         <h5 className="mb-3.5 text-[18px] font-medium text-[#efeff5]">

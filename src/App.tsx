@@ -25,6 +25,8 @@ import PostPage from "./pages/PostPage";
 import PostDetailsPage from "./pages/PostDetailsPage";
 import SavedPage from "./pages/SavedPage";
 import NewAdvertDetailsPage from "./pages/NewAdvertDetailsPage";
+import PlanPaymentPage from "./pages/PlanPaymentPage";
+import PremiumPlanPaymentPage from "./pages/PremiumPlanPaymentPage";
 
 export default function App() {
   return (
@@ -54,6 +56,8 @@ export default function App() {
       <Route path="/post" element={<PostPage />} />
       <Route path="/post-details" element={<PostDetailsPage />} />
       <Route path="/new-advert-details" element={<NewAdvertDetailsPage />} />
+      <Route path="/plan-payment" element={<PlanPaymentPage />} />
+      <Route path="/premium-plan-payment" element={<PremiumPlanPaymentPage />} />
       <Route path="/saved" element={<SavedPage />} />
       <Route path="*" element={<Navigate to="/" replace />} />
     </Routes>

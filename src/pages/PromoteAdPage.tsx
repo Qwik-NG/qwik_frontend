@@ -1,10 +1,5 @@
-import type { ReactNode } from "react";
 import { useNavigate } from "react-router-dom";
 import { SiteFooter, SiteHeader } from "../components/AppShell";
-
-function IconBox({ children }: { children: ReactNode }) {
-  return <button className="h-11 w-11 rounded-lg bg-[#ececec] text-[18px] text-[#2b2a34]">{children}</button>;
-}
 
 function DayPill({ label, active = false }: { label: string; active?: boolean }) {
   return (
@@ -29,7 +24,10 @@ export default function PromoteAdPage() {
       <main className="mx-auto w-full max-w-[1728px] px-12 pb-24 pt-8">
         <div className="mx-auto w-full max-w-[430px]">
           <div className="mb-4 flex h-[44px] items-center rounded-[20px] bg-white px-6">
-            <button onClick={() => (window.history.length > 1 ? navigate(-1) : navigate("/"))} className="mr-6 text-[30px] text-[#9d99a6]">
+            <button
+              onClick={() => (window.history.length > 1 ? navigate(-1) : navigate("/"))}
+              className="mr-6 text-[30px] text-[#9d99a6]"
+            >
               ‹ Back
             </button>
             <h1 className="text-[39px] font-medium">Promote Ad</h1>
@@ -45,7 +43,11 @@ export default function PromoteAdPage() {
               <span className="text-[#d7d7de]">Free</span>
             </button>
 
-            <div className="mb-5 rounded-[10px] border border-[#d8d8de] p-3">
+            <button
+              type="button"
+              onClick={() => navigate("/plan-payment")}
+              className="mb-5 w-full rounded-[10px] border border-[#d8d8de] p-3 text-left"
+            >
               <p className="mb-3 text-[16px] text-[#8f8c98]">TOP</p>
               <div className="flex items-center justify-between">
                 <div className="flex gap-2">
@@ -54,9 +56,13 @@ export default function PromoteAdPage() {
                 </div>
                 <span className="text-[20px] text-[#9b97a4]">₦1,500</span>
               </div>
-            </div>
+            </button>
 
-            <div className="mb-6 rounded-[10px] border border-[#d8d8de] p-3">
+            <button
+              type="button"
+              onClick={() => navigate("/premium-plan-payment")}
+              className="mb-6 w-full rounded-[10px] border border-[#d8d8de] p-3 text-left"
+            >
               <p className="mb-3 text-[16px] text-[#8f8c98]">Premium</p>
               <div className="flex items-center justify-between">
                 <div className="flex gap-2">
@@ -65,9 +71,12 @@ export default function PromoteAdPage() {
                 </div>
                 <span className="text-[20px] text-[#9b97a4]">₦4,000</span>
               </div>
-            </div>
+            </button>
 
-            <button className="h-[50px] w-full rounded-[11px] bg-gradient-to-r from-amber to-orange text-[18px] text-white shadow-glow">
+            <button
+              onClick={() => navigate("/post")}
+              className="h-[50px] w-full rounded-[11px] bg-gradient-to-r from-amber to-orange text-[18px] text-white shadow-glow"
+            >
               Post Ad
             </button>
           </section>
@@ -78,7 +87,3 @@ export default function PromoteAdPage() {
     </div>
   );
 }
-
-
-
-
