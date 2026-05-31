@@ -1,5 +1,6 @@
 import type { ReactNode } from "react";
 import { useNavigate } from "react-router-dom";
+import { SiteFooter, SiteHeader } from "../components/AppShell";
 
 type Conversation = {
   name: string;
@@ -17,32 +18,32 @@ type ChatMessage = {
 const conversations: Conversation[] = [
   {
     name: "Olivia Rhye",
-    date: "Today",
+    date: "Jun 14,2022",
     preview: "Sure, I can come check it...",
     avatar: "https://images.unsplash.com/photo-1494790108377-be9c29b29330?w=120&auto=format&fit=crop",
     active: true
   },
   {
     name: "Phoenix Baker",
-    date: "Mon",
+    date: "Jun 14,2022",
     preview: "Is the MacBook still available?",
     avatar: "https://images.unsplash.com/photo-1500648767791-00dcc994a43e?w=120&auto=format&fit=crop"
   },
   {
     name: "Lana Steiner",
-    date: "Sun",
+    date: "Jun 14,2022",
     preview: "Please send the location.",
     avatar: "https://images.unsplash.com/photo-1517841905240-472988babdf9?w=120&auto=format&fit=crop"
   },
   {
     name: "Demi Wilkinson",
-    date: "24 May",
+    date: "Jun 14,2022",
     preview: "The price works for me.",
     avatar: "https://images.unsplash.com/photo-1534528741775-53994a69daeb?w=120&auto=format&fit=crop"
   },
   {
     name: "Candice Wu",
-    date: "22 May",
+    date: "Jun 14,2022",
     preview: "Can you deliver tomorrow?",
     avatar: "https://images.unsplash.com/photo-1524504388940-b1c1722653e1?w=120&auto=format&fit=crop"
   }
@@ -185,11 +186,8 @@ function ConversationItem({ item }: { item: Conversation }) {
     >
       <img src={item.avatar} alt={item.name} className="h-[52px] w-[52px] shrink-0 rounded-full object-cover" />
       <span className="min-w-0 flex-1">
-        <span className="flex items-center justify-between gap-3">
-          <span className="truncate text-[16px] font-semibold text-ink">{item.name}</span>
-          <span className="shrink-0 text-[13px] text-muted">{item.date}</span>
-        </span>
-        <span className="mt-1 block truncate text-[14px] text-muted">{item.preview}</span>
+        <span className="block truncate text-[16px] font-semibold text-ink">{item.name}</span>
+        <span className="mt-1 block text-[13px] text-muted">{item.date}</span>
       </span>
     </button>
   );
@@ -213,44 +211,8 @@ export default function MessagesPage() {
   const navigate = useNavigate();
 
   return (
-    <div className="min-h-screen overflow-x-hidden bg-page font-outfit text-ink">
-      <header className="mx-auto flex w-full max-w-[1512px] flex-wrap items-center gap-4 px-[24px] pt-[16px] sm:px-[40px] lg:flex-nowrap lg:px-[50px]">
-        <div onClick={() => navigate("/")}>
-          <QwikLogo />
-        </div>
-
-        <div className="order-3 flex w-full items-center gap-[12px] lg:order-none lg:w-auto">
-          <div className="flex h-[50px] w-full items-center gap-[10px] rounded-[8px] border border-orange bg-page px-[13px] text-[16px] text-muted sm:w-[250px]">
-            <span className="text-orange">
-              <SearchIcon />
-            </span>
-            <span className="text-[#c8c5cc]">I am looking for ...</span>
-          </div>
-          <div className="flex items-center gap-1 whitespace-nowrap text-[16px] text-muted">
-            <PinIcon />
-            Nig.
-          </div>
-        </div>
-
-        <div className="ml-auto flex items-center gap-[10px]">
-          <IconButton>
-            <BellIcon />
-          </IconButton>
-          <IconButton>
-            <BookmarkIcon className="h-[22px] w-[22px]" />
-          </IconButton>
-          <IconButton active>
-            <MessageIcon />
-          </IconButton>
-          <img className="h-[50px] w-[50px] rounded-full object-cover" src="https://images.unsplash.com/photo-1580489944761-15a19d654956?w=100&auto=format&fit=crop" alt="avatar" />
-          <button
-            className="hidden h-[50px] rounded-[8px] bg-gradient-to-r from-amber to-orange px-[18px] text-[16px] font-normal text-white shadow-glow sm:block"
-            onClick={() => navigate("/signup")}
-          >
-            Post a free ad
-          </button>
-        </div>
-      </header>
+    <div className="min-h-screen bg-page font-outfit text-ink">
+      <SiteHeader navigate={navigate} activeIcon="mail" />
 
       <main className="mx-auto w-full max-w-[1512px] px-[24px] pb-[120px] pt-[37px] sm:px-[60px]">
         <div className="mb-[34px] flex items-center gap-[10px]">
@@ -307,59 +269,7 @@ export default function MessagesPage() {
         </section>
       </main>
 
-      <footer className="w-full overflow-hidden bg-deep px-[24px] py-[48px] text-[#5f5d6c] sm:px-[48px] lg:px-[70px] lg:pb-[116px] lg:pt-[112px]">
-        <div className="mx-auto grid w-full max-w-[1320px] grid-cols-1 gap-[34px] xl:grid-cols-[minmax(80px,0.7fr)_minmax(390px,3.2fr)_minmax(140px,1fr)_minmax(300px,1.8fr)] xl:gap-[32px] 2xl:gap-[76px]">
-          <div className="min-w-0 text-[38px] font-normal leading-none text-orange xl:pt-[4px]">qwik</div>
-
-          <div className="grid min-w-0 grid-cols-3 gap-x-[14px] gap-y-7">
-            <div className="min-w-0">
-              <h5 className="mb-[16px] text-[14px] font-semibold text-white sm:text-[15px] xl:mb-[28px] xl:text-[17px]">About</h5>
-              <a className="mb-[13px] block text-[13px] leading-snug text-[#5f5d6c] sm:text-[14px] xl:mb-[27px] xl:text-[17px]">About Qwik</a>
-              <a className="mb-[13px] block text-[13px] leading-snug text-[#5f5d6c] sm:text-[14px] xl:mb-[27px] xl:text-[17px]">Career</a>
-              <a className="block text-[13px] leading-snug text-[#5f5d6c] sm:text-[14px] xl:text-[17px]">Terms</a>
-            </div>
-
-            <div className="min-w-0">
-              <h5 className="mb-[16px] text-[14px] font-semibold text-white sm:text-[15px] xl:mb-[28px] xl:text-[17px]">Resources</h5>
-              <a className="mb-[13px] block text-[13px] leading-snug text-[#5f5d6c] sm:text-[14px] xl:mb-[27px] xl:text-[17px]">Blog</a>
-              <a className="mb-[13px] block text-[13px] leading-snug text-[#5f5d6c] sm:text-[14px] xl:mb-[27px] xl:text-[17px]">Instagram</a>
-              <a className="mb-[13px] block text-[13px] leading-snug text-[#5f5d6c] sm:text-[14px] xl:mb-[27px] xl:text-[17px]">Youtube</a>
-              <a className="block text-[13px] leading-snug text-[#5f5d6c] sm:text-[14px] xl:text-[17px]">Twitter</a>
-            </div>
-
-            <div className="min-w-0">
-              <h5 className="mb-[16px] text-[14px] font-semibold text-white sm:text-[15px] xl:mb-[28px] xl:text-[17px]">Support</h5>
-              <a className="mb-[13px] block break-words text-[13px] leading-snug text-[#5f5d6c] sm:text-[14px] xl:mb-[27px] xl:text-[17px]">help@qwik.ng</a>
-              <a className="block text-[13px] leading-snug text-[#5f5d6c] sm:text-[14px] xl:text-[17px]">FAQs</a>
-            </div>
-          </div>
-
-          <div className="min-w-0">
-            <h5 className="mb-[16px] text-[15px] font-semibold text-white xl:mb-[24px] xl:text-[17px]">Download</h5>
-            <div className="flex w-full min-w-0 flex-row gap-[10px] xl:flex-col xl:gap-0">
-              <button className="flex h-[52px] min-w-0 flex-1 items-center justify-center gap-2 rounded-[8px] bg-card/10 text-[14px] text-[#5f5d6c] sm:text-[15px] xl:mb-[24px] xl:h-[58px] xl:w-[142px] xl:flex-none xl:text-[17px]">
-                <AppleIcon />
-                App Store
-              </button>
-              <button className="flex h-[52px] min-w-0 flex-1 items-center justify-center gap-2 rounded-[8px] bg-card/10 text-[14px] text-[#5f5d6c] sm:text-[15px] xl:h-[58px] xl:w-[142px] xl:flex-none xl:text-[17px]">
-                <PlayIcon />
-                Play Store
-              </button>
-            </div>
-          </div>
-
-          <div className="min-w-0 max-w-full">
-            <h5 className="mb-[10px] text-[15px] font-semibold text-white xl:mb-[11px] xl:text-[17px]">Stay up to date</h5>
-            <p className="mb-[16px] text-[14px] leading-[1.45] text-[#5f5d6c] sm:text-[15px] xl:mb-[18px] xl:text-[17px] xl:leading-[1.35]">Get news, offers, promotions & the best deals sent to your inbox.</p>
-            <div className="flex w-full min-w-0 flex-col gap-[10px] xl:flex-row xl:flex-nowrap xl:gap-[8px]">
-              <input className="h-[54px] min-w-0 flex-1 rounded-[8px] border border-orange bg-transparent px-[14px] text-[16px] text-muted outline-none xl:h-[48px] xl:px-[12px]" placeholder="@email" />
-              <button className="h-[52px] w-full shrink-0 rounded-[8px] bg-gradient-to-r from-amber to-orange px-[18px] text-[16px] text-white shadow-glow xl:h-[48px] xl:w-auto">
-                Subscribe
-              </button>
-            </div>
-          </div>
-        </div>
-      </footer>
+      <SiteFooter navigate={navigate} />
     </div>
   );
 }

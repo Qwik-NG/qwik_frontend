@@ -1,9 +1,10 @@
 import type { ReactNode } from "react";
 import { useState } from "react";
 import { useNavigate } from "react-router-dom";
+import { SiteFooter, SiteHeader } from "../components/AppShell";
 
 type TabKey = "profile" | "company" | "chat";
-type MenuItem = { label: string; icon: ReactNode; active?: boolean };
+type MenuItem = { label: string; icon: ReactNode; active?: boolean; to?: string };
 
 const avatarUrl = "https://images.unsplash.com/photo-1580489944761-15a19d654956?w=180&auto=format&fit=crop";
 
@@ -374,64 +375,29 @@ export default function AccountPage() {
   const [activeTab, setActiveTab] = useState<TabKey>("profile");
 
   const menuItems: MenuItem[] = [
-    { label: "Profile", icon: <UserIcon />, active: true },
-    { label: "Ads", icon: <BoxIcon /> },
-    { label: "Make money", icon: <TicketIcon /> },
-    { label: "Notification", icon: <BellIcon /> },
-    { label: "Help", icon: <PhoneIcon /> },
-    { label: "About", icon: <InfoIcon /> },
-    { label: "Log out", icon: <LogoutIcon /> }
+    { label: "Profile", icon: <UserIcon />, active: true, to: "/profile-settings" },
+    { label: "Ads", icon: <BoxIcon />, to: "/ads-dashboard" },
+    { label: "Make money", icon: <TicketIcon />, to: "/promote-ad" },
+    { label: "Notification", icon: <BellIcon />, to: "/notification-settings" },
+    { label: "Help", icon: <PhoneIcon />, to: "/messages" },
+    { label: "About", icon: <InfoIcon />, to: "/" },
+    { label: "Log out", icon: <LogoutIcon />, to: "/signin" }
   ];
 
   return (
-    <div className="min-h-screen overflow-x-hidden bg-page font-outfit text-ink">
-      <header className="mx-auto flex w-full max-w-[1512px] flex-wrap items-center gap-4 px-[24px] pt-[16px] sm:px-[40px] lg:flex-nowrap lg:px-[50px]">
-        <div onClick={() => navigate("/")}>
-          <QwikLogo />
-        </div>
-
-        <div className="order-3 flex w-full items-center gap-[12px] lg:order-none lg:w-auto">
-          <div className="flex h-[50px] w-full items-center gap-[10px] rounded-[8px] border border-orange bg-page px-[13px] text-[16px] text-muted sm:w-[250px]">
-            <span className="text-orange">
-              <SearchIcon />
-            </span>
-            <span className="text-[#c8c5cc]">I am looking for ...</span>
-          </div>
-          <div className="flex items-center gap-1 whitespace-nowrap text-[16px] text-muted">
-            <PinIcon />
-            Nig.
-          </div>
-        </div>
-
-        <div className="ml-auto flex items-center gap-[10px]">
-          <IconButton>
-            <BellIcon />
-          </IconButton>
-          <IconButton>
-            <BookmarkIcon className="h-[22px] w-[22px]" />
-          </IconButton>
-          <IconButton>
-            <MessageIcon />
-          </IconButton>
-          <img className="h-[50px] w-[50px] rounded-full border-[3px] border-deep object-cover" src={avatarUrl} alt="avatar" />
-          <button
-            className="hidden h-[50px] rounded-[8px] bg-gradient-to-r from-amber to-orange px-[18px] text-[16px] font-normal text-white shadow-glow sm:block"
-            onClick={() => navigate("/signup")}
-          >
-            Post a free ad
-          </button>
-        </div>
-      </header>
+    <div className="min-h-screen bg-page font-outfit text-ink">
+      <SiteHeader navigate={navigate} />
 
       <main className="mx-auto grid w-full max-w-[1512px] grid-cols-1 gap-[32px] px-[24px] pb-[60px] pt-[48px] sm:px-[60px] lg:grid-cols-[310px_1fr] lg:gap-[32px] lg:pb-[58px]">
-        <aside className="min-w-0 rounded-[18px] bg-white p-[16px] lg:h-[544px]">
-          <nav className="flex gap-3 overflow-x-auto lg:flex-col lg:gap-[22px] lg:overflow-visible">
+        <aside className="min-w-0 self-start rounded-[18px] bg-white p-[16px]">
+          <nav className="grid grid-cols-1 gap-3 sm:grid-cols-2 lg:flex lg:flex-col lg:gap-[22px]">
             {menuItems.map((item) => (
               <button
                 key={item.label}
-                className={`flex h-[72px] shrink-0 items-center gap-[18px] rounded-[14px] px-[18px] text-[16px] ${
+                onClick={() => (item.to ? navigate(item.to) : undefined)}
+                className={`flex h-[72px] items-center gap-[18px] rounded-[14px] px-[18px] text-[16px] ${
                   item.active ? "bg-page text-ink" : "text-[#9c98a5]"
-                } lg:w-full`}
+                } w-full`}
               >
                 {item.icon}
                 <span className="whitespace-nowrap">{item.label}</span>
@@ -451,7 +417,7 @@ export default function AccountPage() {
         </section>
       </main>
 
-      <Footer />
+      <SiteFooter navigate={navigate} />
     </div>
   );
 }

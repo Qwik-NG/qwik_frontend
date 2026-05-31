@@ -15,7 +15,7 @@ function IconBox({
   return (
     <button
       onClick={onClick}
-      className={`grid h-10 w-10 place-items-center rounded-lg sm:h-11 sm:w-11 ${active ? "bg-[#0a0820] text-white" : "bg-[#ececec] text-[#1f1d27]"}`}
+      className={`grid h-10 w-10 place-items-center rounded-lg lg:h-[42px] lg:w-[42px] ${active ? "bg-[#0a0820] text-white" : "bg-[#ececec] text-[#1f1d27]"}`}
     >
       {children}
     </button>
@@ -64,9 +64,9 @@ export function SiteHeader({
   activeIcon?: HeaderIcon;
 }) {
   return (
-    <header className="relative z-20 mx-auto flex w-full max-w-[1728px] flex-wrap items-center gap-3 px-4 pt-5 sm:px-6 lg:gap-6 lg:px-12 lg:pt-8">
+    <header className="sticky top-0 z-[100] mx-auto flex w-full max-w-[1728px] flex-wrap items-center gap-2 bg-page/95 px-4 py-0.5 backdrop-blur-sm sm:px-6 lg:gap-4 lg:px-12 lg:py-1">
       <button
-        className="relative h-[78px] w-[78px] shrink-0 overflow-hidden rounded-full bg-white sm:h-[96px] sm:w-[96px]"
+        className="relative h-[54px] w-[54px] shrink-0 overflow-hidden rounded-full bg-white lg:h-[58px] lg:w-[58px]"
         onClick={() => navigate("/")}
       >
         <img
@@ -76,8 +76,8 @@ export function SiteHeader({
         />
       </button>
 
-      <div className="order-3 flex w-full items-center gap-2.5 lg:order-2 lg:flex-1">
-        <div className="flex h-12 w-full items-center gap-2 rounded-[10px] border-2 border-orange px-3 text-[14px] text-[#b6b3bd] sm:h-14 sm:w-[360px] sm:px-3.5 sm:text-[16px]">
+      <div className="order-3 mt-2.5 flex w-full items-center gap-2.5 lg:order-2 lg:mt-0 lg:flex-1">
+        <div className="flex h-11 w-full items-center gap-2 rounded-[10px] border-2 border-orange px-3 text-[14px] text-[#b6b3bd] lg:h-[42px] lg:w-[250px] lg:rounded-[8px] lg:px-[13px] lg:text-[16px]">
           <span className="text-[#f5932b]">
             <SearchIcon />
           </span>
@@ -89,7 +89,7 @@ export function SiteHeader({
         </div>
       </div>
 
-      <div className="relative z-30 ml-auto flex flex-nowrap items-center justify-end gap-1.5 pointer-events-auto lg:order-3 lg:w-auto lg:gap-2.5">
+      <div className="relative z-30 ml-auto flex flex-nowrap items-center justify-end gap-1.5 pointer-events-auto lg:order-3 lg:w-auto lg:gap-2">
         <IconBox
           onClick={() => navigate("/notification-empty")}
           active={activeIcon === "bell"}
@@ -99,15 +99,17 @@ export function SiteHeader({
             className="h-5 w-5"
             fill="none"
             stroke="currentColor"
-            strokeWidth="1.9"
+            strokeLinecap="round"
+            strokeLinejoin="round"
+            strokeWidth="2"
             aria-hidden="true"
           >
-            <path d="M15 17H9a2 2 0 0 1-2-2v-3a5 5 0 1 1 10 0v3a2 2 0 0 1-2 2Z" />
-            <path d="M10 19a2 2 0 0 0 4 0" />
+            <path d="M18 9.5a6 6 0 0 0-12 0c0 7-2.6 7.5-2.6 7.5h17.2S18 16.5 18 9.5" />
+            <path d="M14.2 20a2.4 2.4 0 0 1-4.4 0" />
           </svg>
         </IconBox>
         <IconBox
-          onClick={() => navigate("/ads-dashboard")}
+          onClick={() => navigate("/saved")}
           active={activeIcon === "bookmark"}
         >
           <svg
@@ -115,11 +117,12 @@ export function SiteHeader({
             className="h-5 w-5"
             fill="none"
             stroke="currentColor"
-            strokeWidth="1.9"
+            strokeLinecap="round"
+            strokeLinejoin="round"
+            strokeWidth="2"
             aria-hidden="true"
           >
-            <path d="M8 4h8a1 1 0 0 1 1 1v14l-5-3-5 3V5a1 1 0 0 1 1-1Z" />
-            <path d="M10 8h4" />
+            <path d="M6.5 4.8c0-1 .8-1.8 1.8-1.8h7.4c1 0 1.8.8 1.8 1.8v16.1L12 17.5l-5.5 3.4V4.8Z" />
           </svg>
         </IconBox>
         <IconBox
@@ -131,11 +134,13 @@ export function SiteHeader({
             className="h-5 w-5"
             fill="none"
             stroke="currentColor"
-            strokeWidth="1.9"
+            strokeLinecap="round"
+            strokeLinejoin="round"
+            strokeWidth="2"
             aria-hidden="true"
           >
-            <rect x="4" y="6.5" width="16" height="11" rx="2.5" />
-            <path d="m5.5 8 6.5 5 6.5-5" />
+            <rect x="4" y="6" width="16" height="12" rx="3" />
+            <path d="m7.5 9.5 4.5 3.3 4.5-3.3" />
           </svg>
         </IconBox>
         <button
@@ -144,13 +149,13 @@ export function SiteHeader({
           type="button"
         >
           <img
-            className="h-10 w-10 rounded-full object-cover sm:h-11 sm:w-11"
+            className="h-10 w-10 rounded-full object-cover lg:h-[42px] lg:w-[42px]"
             src="https://images.unsplash.com/photo-1521572267360-ee0c2909d518?w=80"
             alt="avatar"
           />
         </button>
         <button
-          className="h-10 cursor-pointer rounded-[11px] bg-gradient-to-r from-amber to-orange px-3 text-[13px] text-white shadow-glow sm:h-14 sm:px-5 sm:text-[16px]"
+          className="h-10 cursor-pointer rounded-[11px] bg-gradient-to-r from-amber to-orange px-3 text-[13px] text-white shadow-glow lg:h-[42px] lg:rounded-[8px] lg:px-[16px] lg:text-[16px]"
           onClick={() => navigate("/promote-ad")}
         >
           Post a free ad
@@ -191,30 +196,32 @@ export function SiteFooter({ navigate }: { navigate: NavigateTo }) {
         <a className="mb-2.5 block text-[14px] text-[#5f6071]">help@qwik.ng</a>
         <a className="mb-2.5 block text-[14px] text-[#5f6071]">FAQs</a>
       </div>
-      <div className="col-span-1">
+      <div className="col-span-2 sm:col-span-1">
         <h5 className="mb-3.5 text-[18px] font-medium text-[#efeff5]">
           Download
         </h5>
-        <button className="mb-2.5 flex h-12 w-full items-center gap-3 rounded-[10px] bg-[#1b1a2f] px-3 text-[13px] text-[#76798d] sm:w-[160px] sm:px-4 sm:text-[14px]">
-          <svg
-            viewBox="0 0 24 24"
-            className="h-5 w-5 fill-current text-[#666877]"
-            aria-hidden="true"
-          >
-            <path d="M16.7 12.6c0-2.1 1.7-3.1 1.8-3.2-1-1.5-2.5-1.7-3.1-1.8-1.3-.1-2.5.8-3.1.8-.6 0-1.6-.8-2.6-.8-1.4 0-2.7.8-3.4 2-.8 1.4-.2 3.5.6 4.7.4.6.9 1.4 1.7 1.3.7 0 1-.4 1.9-.4.9 0 1.2.4 1.9.4.8 0 1.3-.7 1.7-1.3.5-.8.8-1.6.8-1.7-.1 0-2.2-.8-2.2-3Zm-2.1-6.3c.3-.4.6-1.1.5-1.7-.5 0-1.2.3-1.6.7-.4.4-.7 1-.6 1.6.6 0 1.2-.3 1.7-.6Z" />
-          </svg>
-          <span>App Store</span>
-        </button>
-        <button className="flex h-12 w-full items-center gap-3 rounded-[10px] bg-[#1b1a2f] px-3 text-[13px] text-[#76798d] sm:w-[160px] sm:px-4 sm:text-[14px]">
-          <svg
-            viewBox="0 0 24 24"
-            className="h-5 w-5 fill-current text-[#666877]"
-            aria-hidden="true"
-          >
-            <path d="M3 3.5v17l10.7-8.5L3 3.5Zm11.7 9.2 2.6 2.1 3.8-2-4.5-2.6-1.9 2.5Zm-9.8 8.8 11.8-7.5 2.4 1.4L4.9 21.5Zm0-19L19 8.6 16.7 10 4.9 2.5Z" />
-          </svg>
-          <span>Play Store</span>
-        </button>
+        <div className="flex gap-2.5 sm:flex-col sm:gap-2.5">
+          <button className="flex h-12 flex-1 items-center justify-center gap-2 rounded-[10px] bg-[#1b1a2f] px-2 text-[13px] text-[#76798d] sm:w-[160px] sm:flex-none sm:justify-start sm:px-4 sm:text-[14px]">
+            <svg
+              viewBox="0 0 24 24"
+              className="h-5 w-5 fill-current text-[#666877]"
+              aria-hidden="true"
+            >
+              <path d="M16.5 12.8c0-2 1.7-3 1.8-3.1-1-.1-2-.6-2.6-1.3-1.1-1.1-2.7-1-3.4-.7-.7.3-1.3.7-2 .7-.8 0-1.5-.4-2.3-.7-1-.4-2.3-.1-3.2.8-1.7 1.8-1.4 5.2.3 7.9.8 1.3 1.8 2.7 3.1 2.7 1.2 0 1.7-.8 3.2-.8s1.9.8 3.2.8 2.2-1.2 3-2.5c.5-.7.8-1.5 1-2.1-.1-.1-2.1-.8-2.1-3.7ZM14.9 6.5c.7-.8 1.1-1.8 1-2.8-1 .1-2 .6-2.7 1.4-.6.7-1.1 1.8-1 2.8 1.1.1 2.1-.5 2.7-1.4Z" />
+            </svg>
+            <span>App Store</span>
+          </button>
+          <button className="flex h-12 flex-1 items-center justify-center gap-2 rounded-[10px] bg-[#1b1a2f] px-2 text-[13px] text-[#76798d] sm:w-[160px] sm:flex-none sm:justify-start sm:px-4 sm:text-[14px]">
+            <svg
+              viewBox="0 0 24 24"
+              className="h-5 w-5 fill-current text-[#666877]"
+              aria-hidden="true"
+            >
+              <path d="M5.5 3.6v16.8L14 12 5.5 3.6Zm1.4-.9 9.8 5.6-2 2L6.9 2.7Zm0 18.6 7.8-7.6 2 2-9.8 5.6Zm10.8-12.4 2.4 1.4c1.2.7 1.2 2.1 0 2.8l-2.4 1.4-2.2-2.8 2.2-2.8Z" />
+            </svg>
+            <span>Play Store</span>
+          </button>
+        </div>
       </div>
       <div className="col-span-3 sm:col-span-3 xl:col-span-1">
         <h5 className="mb-3.5 text-[18px] font-medium text-[#efeff5]">

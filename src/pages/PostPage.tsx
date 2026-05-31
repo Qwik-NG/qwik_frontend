@@ -1,5 +1,6 @@
 import type { ReactNode } from "react";
 import { useNavigate } from "react-router-dom";
+import { SiteFooter, SiteHeader } from "../components/AppShell";
 
 function QwikLogo() {
   return (
@@ -167,41 +168,8 @@ export default function PostPage() {
   const navigate = useNavigate();
 
   return (
-    <div className="min-h-screen overflow-x-hidden bg-page font-outfit text-ink">
-      <header className="mx-auto flex w-full max-w-[1512px] flex-wrap items-center gap-4 px-[24px] pt-[16px] sm:px-[40px] lg:flex-nowrap lg:px-[50px]">
-        <div onClick={() => navigate("/")}>
-          <QwikLogo />
-        </div>
-
-        <div className="order-3 flex w-full items-center gap-[12px] lg:order-none lg:w-auto">
-          <div className="flex h-[50px] w-full items-center gap-[10px] rounded-[8px] border border-orange bg-page px-[13px] text-[16px] text-muted sm:w-[250px]">
-            <span className="text-orange">
-              <SearchIcon />
-            </span>
-            <span className="text-[#c8c5cc]">I am looking for ...</span>
-          </div>
-          <div className="flex items-center gap-1 whitespace-nowrap text-[16px] text-muted">
-            <PinIcon />
-            Nig.
-          </div>
-        </div>
-
-        <div className="ml-auto flex items-center gap-[10px]">
-          <IconButton>
-            <BellIcon />
-          </IconButton>
-          <IconButton>
-            <BookmarkIcon className="h-[22px] w-[22px]" />
-          </IconButton>
-          <IconButton>
-            <MessageIcon />
-          </IconButton>
-          <img className="h-[50px] w-[50px] rounded-full object-cover" src="https://images.unsplash.com/photo-1580489944761-15a19d654956?w=100&auto=format&fit=crop" alt="avatar" />
-          <button className="hidden h-[50px] rounded-[8px] bg-gradient-to-r from-amber to-orange px-[18px] text-[16px] font-normal text-white shadow-glow sm:block">
-            Post a free ad
-          </button>
-        </div>
-      </header>
+    <div className="min-h-screen bg-page font-outfit text-ink">
+      <SiteHeader navigate={navigate} />
 
       <main className="mx-auto flex w-full max-w-[1512px] flex-col items-center px-[20px] pb-[80px] pt-[36px] sm:px-[40px] lg:pb-[100px]">
         <div className="mb-[18px] grid h-[54px] w-full max-w-[420px] place-items-center rounded-[28px] bg-white px-6">
@@ -237,7 +205,7 @@ export default function PostPage() {
         </section>
       </main>
 
-      <Footer />
+      <SiteFooter navigate={navigate} />
     </div>
   );
 }

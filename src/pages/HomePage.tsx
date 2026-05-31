@@ -75,10 +75,10 @@ export default function HomePage() {
             onClick={() => navigate(item.name === "More" ? "/search-results-list" : "/search-results")}
             type="button"
           >
-            <div className="mx-auto mb-2.5 grid h-[86px] w-[86px] place-items-center overflow-hidden rounded-full" style={{ background: item.tone }}>
-              {item.image ? (<img src={item.image} alt={item.name} className="h-[62px] w-[62px] object-contain" />) : (<span className="flex items-center gap-1"><span className="h-2.5 w-2.5 rounded-full bg-black" /><span className="h-2.5 w-2.5 rounded-full bg-black" /></span>)}
+            <div className="mx-auto mb-1.5 grid h-[68px] w-[68px] place-items-center overflow-hidden rounded-full" style={{ background: item.tone }}>
+              {item.image ? (<img src={item.image} alt={item.name} className="h-[46px] w-[46px] object-contain" />) : (<span className="flex items-center gap-1"><span className="h-1.5 w-1.5 rounded-full bg-black" /><span className="h-1.5 w-1.5 rounded-full bg-black" /></span>)}
             </div>
-            <p className="m-0 text-[16px]">{item.name}</p>
+            <p className="m-0 text-[13px]">{item.name}</p>
           </button>
         ))}
       </section>
