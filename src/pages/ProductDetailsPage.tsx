@@ -1,6 +1,7 @@
 import { useMemo, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { SiteFooter, SiteHeader } from "../components/AppShell";
+import ProductCard from "../components/listings/ProductCard";
 
 type SimilarAd = {
   title: string;
@@ -53,26 +54,6 @@ const similarAds: SimilarAd[] = [
     image: "https://images.unsplash.com/photo-1564013799919-ab600027ffc6?w=1200"
   }
 ];
-
-function ProductCard({ item, onClick }: { item: SimilarAd; onClick: () => void }) {
-  return (
-    <article className="cursor-pointer rounded-[18px] bg-white p-3" onClick={onClick}>
-      <img src={item.image} alt={item.title} className="h-[180px] w-full rounded-[12px] object-cover" />
-      <div className="pt-3">
-        <div className="mb-2 flex items-center justify-between">
-          <h4 className="text-[20px] font-semibold">{item.price}</h4>
-          <span className="rounded-[8px] bg-[#f5ebdc] px-2.5 py-1 text-[14px] text-[#ff9715]">New</span>
-        </div>
-        <h5 className="mb-2 text-[16px] font-medium leading-tight">{item.title}</h5>
-        <p className="mb-2 text-[14px] leading-[1.35] text-[#6d6a74]">{item.description}</p>
-        <small className="flex items-center gap-1 text-[14px] text-[#4b4a54]">
-          <LocationPin className="h-4 w-4" />
-          <span>{item.location}</span>
-        </small>
-      </div>
-    </article>
-  );
-}
 
 function LocationPin({ className = "h-4 w-4" }: { className?: string }) {
   return (

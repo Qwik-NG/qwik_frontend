@@ -1,8 +1,9 @@
 import { useNavigate } from "react-router-dom";
 import { SiteFooter, SiteHeader } from "../components/AppShell";
+import ListingCard, { type ListingCardItem } from "../components/listings/ListingCard";
 
 type Category = { name: string; image: string; tone: string };
-type Product = { price: string; title: string; description: string; location: string; image: string };
+type Product = ListingCardItem;
 
 const categories: Category[] = [
   { name: "Cars", image: "https://cdnjs.cloudflare.com/ajax/libs/twemoji/14.0.2/72x72/1f697.png", tone: "#f5e8e2" },
@@ -52,15 +53,6 @@ const seed: Product[] = [
 
 const products = [...seed, ...seed, ...seed];
 
-function LocationPin({ className = "h-4 w-4" }: { className?: string }) {
-  return (
-    <svg viewBox="0 0 24 24" fill="none" className={className} aria-hidden="true">
-      <path d="M12 21s7-6.2 7-11a7 7 0 1 0-14 0c0 4.8 7 11 7 11Z" stroke="currentColor" strokeWidth="1.8" />
-      <circle cx="12" cy="10" r="2.2" stroke="currentColor" strokeWidth="1.8" />
-    </svg>
-  );
-}
-
 export default function HomePage() {
   const navigate = useNavigate();
   return (
@@ -87,25 +79,16 @@ export default function HomePage() {
         <h2 className="mb-5 text-[26px] font-medium sm:text-[32px]">Top Ads</h2>
         <div className="grid grid-cols-2 gap-4 xl:grid-cols-4">
           {products.map((item, idx) => (
-            <article
+            <ListingCard
               key={`${item.title}-${idx}`}
-              className="cursor-pointer rounded-[22px] bg-white p-2.5 transition hover:scale-[1.01] sm:rounded-[26px] sm:p-4"
+              item={item}
+              interactive
+              descriptionClassName="text-muted"
+              clampTitleLines={2}
+              clampDescriptionLines={2}
+              clampLocationLines={1}
               onClick={() => navigate("/product-details")}
-            >
-              <img src={item.image} alt={item.title} className="h-[170px] w-full rounded-[14px] object-cover sm:h-[260px] sm:rounded-[18px]" />
-              <div className="px-0 pb-1 pt-3 sm:pt-4">
-                <div className="flex items-center justify-between gap-2">
-                  <h3 className="m-0 whitespace-nowrap text-[16px] font-semibold leading-none sm:text-[20px]">{item.price}</h3>
-                  <span className="rounded-[10px] bg-[#f5ebdc] px-2 py-1 text-[12px] text-[#ff9715] sm:rounded-[12px] sm:px-3 sm:py-1.5 sm:text-[15px]">New</span>
-                </div>
-                <h4 className="mb-1.5 mt-3 text-[15px] font-medium leading-[1.25] sm:mt-4 sm:text-[18px]" style={{ display: "-webkit-box", WebkitLineClamp: 2, WebkitBoxOrient: "vertical", overflow: "hidden" }}>{item.title}</h4>
-                <p className="mb-2 text-[13px] leading-[1.35] text-muted sm:mb-3 sm:text-[15px] sm:leading-[1.4]" style={{ display: "-webkit-box", WebkitLineClamp: 2, WebkitBoxOrient: "vertical", overflow: "hidden" }}>{item.description}</p>
-                <small className="flex items-center gap-1 text-[13px] text-[#4b4a54] sm:text-[15px]">
-                  <LocationPin className="h-4 w-4" />
-                  <span style={{ display: "-webkit-box", WebkitLineClamp: 1, WebkitBoxOrient: "vertical", overflow: "hidden" }}>{item.location}</span>
-                </small>
-              </div>
-            </article>
+            />
           ))}
         </div>
       </main>
