@@ -26,11 +26,11 @@ export default function PromoteAdPage() {
           <div className="mb-4 flex h-[44px] items-center rounded-[20px] bg-white px-6">
             <button
               onClick={() => (window.history.length > 1 ? navigate(-1) : navigate("/"))}
-              className="mr-6 text-[30px] text-[#9d99a6]"
+              className="mr-6 text-[16px] text-[#9d99a6] sm:text-[18px]"
             >
               ‹ Back
             </button>
-            <h1 className="text-[39px] font-medium">Promote Ad</h1>
+            <h1 className="text-[22px] font-medium sm:text-[26px]">Promote Ad</h1>
           </div>
 
           <section className="rounded-[24px] bg-white p-5">
@@ -38,7 +38,7 @@ export default function PromoteAdPage() {
               Choose one of the following options to boost your ad. Boosted ads get displayed first above others.
             </p>
 
-            <button className="mb-5 flex h-[50px] w-full items-center justify-between rounded-[10px] border-2 border-orange px-3.5 text-[17px] text-[#8f8c98]">
+            <button className="mb-5 flex h-[50px] w-full items-center justify-between rounded-[10px] border-2 border-orange px-3.5 text-[15px] text-[#8f8c98] sm:text-[16px]">
               <span>Standard ad</span>
               <span className="text-[#d7d7de]">Free</span>
             </button>
@@ -48,13 +48,13 @@ export default function PromoteAdPage() {
               onClick={() => navigate("/plan-payment")}
               className="mb-5 w-full rounded-[10px] border border-[#d8d8de] p-3 text-left"
             >
-              <p className="mb-3 text-[16px] text-[#8f8c98]">TOP</p>
+              <p className="mb-3 text-[14px] text-[#8f8c98] sm:text-[15px]">TOP</p>
               <div className="flex items-center justify-between">
                 <div className="flex gap-2">
                   <DayPill label="7 Days" active />
                   <DayPill label="30 Days" />
                 </div>
-                <span className="text-[20px] text-[#9b97a4]">₦1,500</span>
+                <span className="text-[18px] text-[#9b97a4] sm:text-[20px]">₦1,500</span>
               </div>
             </button>
 
@@ -63,19 +63,19 @@ export default function PromoteAdPage() {
               onClick={() => navigate("/premium-plan-payment")}
               className="mb-6 w-full rounded-[10px] border border-[#d8d8de] p-3 text-left"
             >
-              <p className="mb-3 text-[16px] text-[#8f8c98]">Premium</p>
+              <p className="mb-3 text-[14px] text-[#8f8c98] sm:text-[15px]">Premium</p>
               <div className="flex items-center justify-between">
                 <div className="flex gap-2">
                   <DayPill label="7 Days" />
                   <DayPill label="30 Days" active />
                 </div>
-                <span className="text-[20px] text-[#9b97a4]">₦4,000</span>
+                <span className="text-[18px] text-[#9b97a4] sm:text-[20px]">₦4,000</span>
               </div>
             </button>
 
             <button
               onClick={() => navigate("/post")}
-              className="h-[50px] w-full rounded-[11px] bg-gradient-to-r from-amber to-orange text-[18px] text-white shadow-glow"
+              className="h-[50px] w-full rounded-[11px] bg-gradient-to-r from-amber to-orange text-[16px] text-white shadow-glow sm:text-[18px]"
             >
               Post Ad
             </button>

@@ -1,24 +1,7 @@
 import { useState } from "react";
 import { useNavigate } from "react-router-dom";
-
-function GoogleIcon() {
-  return (
-    <svg viewBox="0 0 24 24" className="h-[18px] w-[18px]" aria-hidden="true">
-      <path fill="#EA4335" d="M12 10.2v3.9h5.5c-.2 1.2-1.4 3.6-5.5 3.6A6 6 0 0 1 12 5.8c2.3 0 3.8 1 4.6 1.8l3.1-3A10.5 10.5 0 0 0 12 1.5a10.5 10.5 0 1 0 0 21c6 0 10-4.2 10-10.1 0-.7-.1-1.3-.2-1.9H12Z" />
-      <path fill="#34A853" d="M3 7.2 6.6 9.8A6 6 0 0 1 12 5.8c2.3 0 3.8 1 4.6 1.8l3.1-3A10.5 10.5 0 0 0 3 7.2Z" />
-      <path fill="#FBBC05" d="M12 22.5c2.8 0 5.2-.9 6.9-2.5l-3.2-2.6c-.9.6-2.1 1-3.7 1a6 6 0 0 1-5.6-4L3 17a10.5 10.5 0 0 0 9 5.5Z" />
-      <path fill="#4285F4" d="M22 12.4c0-.7-.1-1.3-.2-1.9H12v3.9h5.5c-.3 1.3-1.1 2.3-2.2 3l3.2 2.6c1.9-1.8 3.5-4.4 3.5-7.6Z" />
-    </svg>
-  );
-}
-
-function FacebookIcon() {
-  return (
-    <svg viewBox="0 0 24 24" className="h-[18px] w-[18px]" fill="currentColor" aria-hidden="true">
-      <path d="M14 8h2V5h-2c-2.2 0-4 1.8-4 4v2H8v3h2v5h3v-5h2.2l.8-3H13V9c0-.6.4-1 1-1Z" />
-    </svg>
-  );
-}
+import { FacebookIcon, GoogleIcon } from "../components/icons/SocialIcons";
+import AuthLayout from "../components/layout/AuthLayout";
 
 export default function SignInPage() {
   const navigate = useNavigate();
@@ -28,23 +11,14 @@ export default function SignInPage() {
   const canContinue = isEmailValid && acceptedTerms;
 
   return (
-    <div className="min-h-screen overflow-hidden bg-[#f3f3f5] font-outfit text-[#1f1f29]">
-      <header className="flex items-center justify-between px-[68px] pt-[46px]">
-        <h1 className="text-[50px] font-normal leading-none text-[#ff8300]">qwik</h1>
-        <p className="text-[15px] text-[#9a99a6]">
-          New here?{" "}
-          <button className="text-[#ff8f00]" onClick={() => navigate("/signup")}>
-            Create an account
-          </button>
-        </p>
-      </header>
-
-      <main className="mx-auto flex h-[calc(100vh-124px)] w-full max-w-[1728px] items-center justify-center px-4 pb-8">
-        <section className="mx-auto w-[455px] rounded-[22px] bg-white px-[22px] pb-[22px] pt-[16px]">
-          <h2 className="mb-[12px] text-center text-[30px] font-normal leading-[1.05] text-[#22222b]">
-            Sign in to your account
-          </h2>
-
+    <AuthLayout
+      title="Sign in to your account"
+      onLogoClick={() => navigate("/")}
+      onCreateAccountClick={() => navigate("/signup")}
+      cardClassName="w-[455px] rounded-[22px] px-[22px] pb-[22px] pt-[16px]"
+      titleClassName="mb-[12px] text-[30px]"
+      headerClassName="px-[68px] pt-[46px]"
+    >
           <button
             className="mb-[10px] flex h-[48px] w-full items-center justify-center gap-2 rounded-[10px] bg-[#d9d9dc] text-[14px] text-[#20212a]"
             onClick={() => window.alert("Google auth UI clicked")}
@@ -94,8 +68,6 @@ export default function SignInPage() {
           >
             Next
           </button>
-        </section>
-      </main>
-    </div>
+    </AuthLayout>
   );
 }

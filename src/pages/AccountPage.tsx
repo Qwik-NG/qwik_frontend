@@ -2,6 +2,7 @@ import type { ReactNode } from "react";
 import { useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { SiteFooter, SiteHeader } from "../components/AppShell";
+import { MobileSettingsMenu } from "../components/settings/SettingsSidebar";
 
 type TabKey = "profile" | "company" | "chat";
 type MenuItem = { label: string; icon: ReactNode; active?: boolean; to?: string };
@@ -214,8 +215,8 @@ function ProfileSummary() {
           </button>
         </div>
         <div className="min-w-0">
-          <h1 className="truncate text-[25px] font-normal leading-tight text-ink">Sherry James</h1>
-          <p className="truncate text-[17px] text-muted">lmshuvo97@gmail.com</p>
+          <h1 className="truncate text-[22px] font-normal leading-tight text-ink sm:text-[26px]">Sherry James</h1>
+          <p className="truncate text-[14px] text-muted sm:text-[16px]">lmshuvo97@gmail.com</p>
         </div>
       </div>
 
@@ -226,8 +227,8 @@ function ProfileSummary() {
           ["17", "adverts"]
         ].map(([value, label]) => (
           <div key={label}>
-            <p className="text-[24px] leading-tight text-ink">{value}</p>
-            <p className="text-[16px] text-muted">{label}</p>
+            <p className="text-[22px] leading-tight text-ink sm:text-[24px]">{value}</p>
+            <p className="text-[14px] text-muted sm:text-[16px]">{label}</p>
           </div>
         ))}
       </div>
@@ -247,7 +248,7 @@ function Tabs({ activeTab, onChange }: { activeTab: TabKey; onChange: (tab: TabK
       {tabs.map((tab) => (
         <button
           key={tab.key}
-          className={`shrink-0 text-[24px] leading-none md:text-[25px] ${activeTab === tab.key ? "text-ink" : "text-[#9c98a5]"}`}
+          className={`shrink-0 text-[16px] leading-none sm:text-[18px] ${activeTab === tab.key ? "text-ink" : "text-[#9c98a5]"}`}
           onClick={() => onChange(tab.key)}
         >
           {tab.label}
@@ -384,12 +385,23 @@ export default function AccountPage() {
     { label: "Log out", icon: <LogoutIcon />, to: "/signin" }
   ];
 
+  const mobileItems = menuItems.map((item) => ({
+    label: item.label,
+    icon: item.icon,
+    active: item.active,
+    onClick: () => {
+      if (item.to) {
+        navigate(item.to);
+      }
+    },
+  }));
+
   return (
     <div className="min-h-screen bg-page font-outfit text-ink">
       <SiteHeader navigate={navigate} />
 
       <main className="mx-auto grid w-full max-w-[1512px] grid-cols-1 gap-[32px] px-[24px] pb-[60px] pt-[48px] sm:px-[60px] lg:grid-cols-[310px_1fr] lg:gap-[32px] lg:pb-[58px]">
-        <aside className="min-w-0 self-start rounded-[18px] bg-white p-[16px]">
+        <aside className="hidden min-w-0 self-start rounded-[18px] bg-white p-[16px] md:block">
           <nav className="grid grid-cols-1 gap-3 sm:grid-cols-2 lg:flex lg:flex-col lg:gap-[22px]">
             {menuItems.map((item) => (
               <button
@@ -407,6 +419,9 @@ export default function AccountPage() {
         </aside>
 
         <section className="min-w-0">
+          <div className="mb-4">
+            <MobileSettingsMenu items={mobileItems} label="Menu" title="Account" />
+          </div>
           <ProfileSummary />
           <div className="mt-[42px]">
             <Tabs activeTab={activeTab} onChange={setActiveTab} />
