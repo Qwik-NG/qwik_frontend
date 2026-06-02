@@ -1,7 +1,8 @@
 import { useNavigate } from "react-router-dom";
 import { SiteFooter, SiteHeader } from "../components/AppShell";
-import { BellIcon, BoxIcon, InfoIcon, LogoutIcon, PhoneIcon, TicketIcon, UserIcon } from "../components/icons/SettingsIcons";
+import { LocationPin } from "../components/icons/LocationPin";
 import SettingsSidebar, { MobileSettingsMenu } from "../components/settings/SettingsSidebar";
+import { getSettingsNavItems } from "../lib/settings-nav-config";
 
 type Ad = {
   price: string;
@@ -47,15 +48,6 @@ function StateChip({ label, active = false }: { label: string; active?: boolean 
   );
 }
 
-function LocationPin() {
-  return (
-    <svg viewBox="0 0 24 24" className="h-4 w-4" fill="none" stroke="currentColor" strokeWidth="2" aria-hidden="true">
-      <path d="M19 10c0 5.3-7 10-7 10s-7-4.7-7-10a7 7 0 1 1 14 0Z" />
-      <circle cx="12" cy="10" r="2.4" />
-    </svg>
-  );
-}
-
 function AdCard({ ad }: { ad: Ad }) {
   return (
     <article className="rounded-[20px] bg-white p-3.5">
@@ -89,28 +81,12 @@ export default function AdsDashboardPage() {
         <div className="grid grid-cols-1 gap-6 xl:grid-cols-[310px_1fr]">
           <SettingsSidebar
             className="hidden md:block"
-            items={[
-              { label: "Profile", icon: <UserIcon />, onClick: () => navigate("/profile-settings") },
-              { label: "Ads", icon: <BoxIcon />, active: true, onClick: () => navigate("/ads-dashboard") },
-              { label: "Make money", icon: <TicketIcon />, onClick: () => navigate("/promote-ad") },
-              { label: "Notification", icon: <BellIcon />, onClick: () => navigate("/notification-settings") },
-              { label: "Help", icon: <PhoneIcon />, onClick: () => navigate("/messages") },
-              { label: "About", icon: <InfoIcon />, onClick: () => navigate("/") },
-              { label: "Log out", icon: <LogoutIcon />, onClick: () => navigate("/signin") },
-            ]}
+            items={getSettingsNavItems(navigate, "ads")}
           />
 
           <section>
             <div className="mb-4">
-              <MobileSettingsMenu items={[
-                { label: "Profile", icon: <UserIcon />, onClick: () => navigate("/profile-settings") },
-                { label: "Ads", icon: <BoxIcon />, active: true, onClick: () => navigate("/ads-dashboard") },
-                { label: "Make money", icon: <TicketIcon />, onClick: () => navigate("/promote-ad") },
-                { label: "Notification", icon: <BellIcon />, onClick: () => navigate("/notification-settings") },
-                { label: "Help", icon: <PhoneIcon />, onClick: () => navigate("/messages") },
-                { label: "About", icon: <InfoIcon />, onClick: () => navigate("/") },
-                { label: "Log out", icon: <LogoutIcon />, onClick: () => navigate("/signin") },
-              ]} label="Settings" />
+              <MobileSettingsMenu items={getSettingsNavItems(navigate, "ads")} label="Settings" />
             </div>
             <div className="mb-6 flex flex-wrap gap-3">
               <StateChip label="Active" active />

@@ -2,6 +2,7 @@ import type { ReactNode } from "react";
 import { useNavigate } from "react-router-dom";
 import { SiteFooter, SiteHeader } from "../components/AppShell";
 import ListingCard, { type ListingCardItem } from "../components/listings/ListingCard";
+import { FilterCard } from "../components/ui/FilterCard";
 
 type Listing = ListingCardItem;
 
@@ -30,15 +31,6 @@ const listings: Listing[] = [
 ];
 
 const repeated = [...listings, ...listings, ...listings];
-
-function FilterCard({ title, children }: { title: string; children: ReactNode }) {
-  return (
-    <div className="rounded-[16px] bg-[#efefef] p-4">
-      <p className="mb-3 text-[14px] font-medium">{title}</p>
-      {children}
-    </div>
-  );
-}
 
 export default function SearchResultsPage() {
   const navigate = useNavigate();

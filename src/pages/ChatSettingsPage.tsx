@@ -1,8 +1,8 @@
 import { useNavigate } from "react-router-dom";
 import { SiteFooter, SiteHeader } from "../components/AppShell";
-import { BellIcon, BoxIcon, InfoIcon, LogoutIcon, PhoneIcon, TicketIcon, UserIcon } from "../components/icons/SettingsIcons";
 import SettingsSidebar, { MobileSettingsMenu } from "../components/settings/SettingsSidebar";
 import Toggle from "../components/ui/Toggle";
+import { getSettingsNavItems } from "../lib/settings-nav-config";
 
 function ToggleRow({ label }: { label: string }) {
   return (
@@ -24,28 +24,12 @@ export default function ChatSettingsPage() {
         <div className="grid grid-cols-1 gap-6 xl:grid-cols-[310px_1fr]">
           <SettingsSidebar
             className="hidden md:block"
-            items={[
-              { label: "Profile", icon: <UserIcon />, active: true, onClick: () => navigate("/profile-settings") },
-              { label: "Ads", icon: <BoxIcon />, onClick: () => navigate("/ads-dashboard") },
-              { label: "Make money", icon: <TicketIcon />, onClick: () => navigate("/promote-ad") },
-              { label: "Notification", icon: <BellIcon />, onClick: () => navigate("/notification-settings") },
-              { label: "Help", icon: <PhoneIcon />, onClick: () => navigate("/messages") },
-              { label: "About", icon: <InfoIcon />, onClick: () => navigate("/") },
-              { label: "Log out", icon: <LogoutIcon />, onClick: () => navigate("/signin") },
-            ]}
+            items={getSettingsNavItems(navigate, "chat")}
           />
 
           <section>
             <div className="mb-4">
-              <MobileSettingsMenu items={[
-                { label: "Profile", icon: <UserIcon />, active: true, onClick: () => navigate("/profile-settings") },
-                { label: "Ads", icon: <BoxIcon />, onClick: () => navigate("/ads-dashboard") },
-                { label: "Make money", icon: <TicketIcon />, onClick: () => navigate("/promote-ad") },
-                { label: "Notification", icon: <BellIcon />, onClick: () => navigate("/notification-settings") },
-                { label: "Help", icon: <PhoneIcon />, onClick: () => navigate("/messages") },
-                { label: "About", icon: <InfoIcon />, onClick: () => navigate("/") },
-                { label: "Log out", icon: <LogoutIcon />, onClick: () => navigate("/signin") },
-              ]} label="Settings" />
+              <MobileSettingsMenu items={getSettingsNavItems(navigate, "chat")} label="Settings" />
             </div>
             <div className="rounded-[20px] bg-white p-6">
               <div className="flex flex-wrap items-center justify-between gap-6">

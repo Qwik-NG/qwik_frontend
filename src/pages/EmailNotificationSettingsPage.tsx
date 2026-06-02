@@ -1,16 +1,9 @@
 import { useNavigate } from "react-router-dom";
 import { SiteFooter, SiteHeader } from "../components/AppShell";
-import { BellIcon, BoxIcon, InfoIcon, LogoutIcon, PhoneIcon, TicketIcon, UserIcon } from "../components/icons/SettingsIcons";
 import SettingsSidebar, { MobileSettingsMenu } from "../components/settings/SettingsSidebar";
 import Toggle from "../components/ui/Toggle";
-
-function Tab({ label, active = false, onClick }: { label: string; active?: boolean; onClick: () => void }) {
-  return (
-    <button onClick={onClick} className={`text-[18px] sm:text-[22px] ${active ? "text-[#1f1d27]" : "text-[#9794a1]"}`} type="button">
-      {label}
-    </button>
-  );
-}
+import { Tab } from "../components/ui/Tab";
+import { getSettingsNavItems } from "../lib/settings-nav-config";
 
 export default function EmailNotificationSettingsPage() {
   const navigate = useNavigate();
@@ -23,28 +16,12 @@ export default function EmailNotificationSettingsPage() {
         <div className="grid grid-cols-1 gap-6 xl:grid-cols-[310px_1fr]">
           <SettingsSidebar
             className="hidden md:block"
-            items={[
-              { label: "Profile", icon: <UserIcon />, onClick: () => navigate("/profile-settings") },
-              { label: "Ads", icon: <BoxIcon />, onClick: () => navigate("/ads-dashboard") },
-              { label: "Make money", icon: <TicketIcon />, onClick: () => navigate("/promote-ad") },
-              { label: "Notification", icon: <BellIcon />, active: true, onClick: () => navigate("/notification-settings-email") },
-              { label: "Help", icon: <PhoneIcon />, onClick: () => navigate("/messages") },
-              { label: "About", icon: <InfoIcon />, onClick: () => navigate("/") },
-              { label: "Log out", icon: <LogoutIcon />, onClick: () => navigate("/signin") },
-            ]}
+            items={getSettingsNavItems(navigate, "notification")}
           />
 
           <section className="max-w-[760px]">
             <div className="mb-4">
-              <MobileSettingsMenu items={[
-                { label: "Profile", icon: <UserIcon />, onClick: () => navigate("/profile-settings") },
-                { label: "Ads", icon: <BoxIcon />, onClick: () => navigate("/ads-dashboard") },
-                { label: "Make money", icon: <TicketIcon />, onClick: () => navigate("/promote-ad") },
-                { label: "Notification", icon: <BellIcon />, active: true, onClick: () => navigate("/notification-settings-email") },
-                { label: "Help", icon: <PhoneIcon />, onClick: () => navigate("/messages") },
-                { label: "About", icon: <InfoIcon />, onClick: () => navigate("/") },
-                { label: "Log out", icon: <LogoutIcon />, onClick: () => navigate("/signin") },
-              ]} label="Settings" />
+              <MobileSettingsMenu items={getSettingsNavItems(navigate, "notification")} label="Settings" />
             </div>
             <div className="mb-8 flex gap-10">
               <Tab label="Push" onClick={() => navigate("/notification-settings")} />
