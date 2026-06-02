@@ -2,6 +2,8 @@ import { useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { FacebookIcon, GoogleIcon } from "../components/icons/SocialIcons";
 import AuthLayout from "../components/layout/AuthLayout";
+import FormInput from "../components/ui/FormInput";
+import FormButton from "../components/ui/FormButton";
 import { setLoginEmail } from "../services/auth";
 
 export default function LoginPage() {
@@ -39,26 +41,23 @@ export default function LoginPage() {
             <span className="h-px flex-1 bg-[#d1d1d6]" />
           </div>
 
-          <input
+          <FormInput
             type="email"
             placeholder="Email"
             value={email}
             onChange={(e) => setEmail(e.target.value)}
-            className="mb-[16px] h-[48px] w-full rounded-[10px] border border-[#dedee1] bg-[#ececee] px-3 text-[14px] text-[#20212a] placeholder:text-[#a3a2ad] focus:outline-none"
+            containerClassName="mb-[16px]"
           />
 
-          <button
+          <FormButton
             disabled={!canContinue}
             onClick={() => {
               setLoginEmail(email.trim().toLowerCase());
               navigate("/login-password");
             }}
-            className={`h-[48px] w-full rounded-[10px] text-[14px] ${
-              canContinue ? "bg-[#3f5db2] text-white" : "bg-[#d8d8dc] text-[#b5b4be]"
-            }`}
           >
             Next
-          </button>
+          </FormButton>
     </AuthLayout>
   );
 }

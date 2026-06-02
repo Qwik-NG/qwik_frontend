@@ -2,6 +2,8 @@ import { useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { api } from "../services/api";
 import { setResetToken } from "../services/auth";
+import FormInput from "../components/ui/FormInput";
+import FormButton from "../components/ui/FormButton";
 
 export default function RecoverPasswordPage() {
   const navigate = useNavigate();
@@ -30,15 +32,15 @@ export default function RecoverPasswordPage() {
             Enter the email connected to your account, we will send you a link to create a new password
           </p>
 
-          <input
+          <FormInput
             type="email"
             placeholder="Email"
             value={email}
             onChange={(e) => setEmail(e.target.value)}
-            className="mb-[14px] h-[48px] w-full rounded-[10px] border border-[#dedee1] bg-[#ececee] px-3 text-[14px] text-[#20212a] placeholder:text-[#a3a2ad] focus:outline-none"
+            containerClassName="mb-[14px]"
           />
 
-          <button
+          <FormButton
             disabled={!canSend || isSubmitting}
             onClick={async () => {
               try {
@@ -54,12 +56,11 @@ export default function RecoverPasswordPage() {
                 setIsSubmitting(false);
               }
             }}
-            className={`h-[48px] w-full rounded-[10px] text-[14px] ${
-              canSend && !isSubmitting ? "bg-[#3f5db2] text-white" : "bg-[#d8d8dc] text-[#b5b4be]"
-            }`}
+            isLoading={isSubmitting}
+            loadingText="Sending..."
           >
-            {isSubmitting ? "Sending..." : "Send"}
-          </button>
+            Send
+          </FormButton>
         </section>
       </main>
     </div>

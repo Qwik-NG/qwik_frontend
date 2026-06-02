@@ -2,6 +2,8 @@ import { useMemo, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { api } from "../services/api";
 import { setToken } from "../services/auth";
+import FormInput from "../components/ui/FormInput";
+import FormButton from "../components/ui/FormButton";
 
 export default function SignUpPage() {
   const navigate = useNavigate();
@@ -34,39 +36,36 @@ export default function SignUpPage() {
             Create a fresh account
           </h2>
 
-          <input
+          <FormInput
             type="email"
             placeholder="Email"
             value={email}
             onChange={(e) => setEmail(e.target.value)}
-            className="mb-[12px] h-[54px] w-full rounded-[10px] border border-[#dedee1] bg-[#ececee] px-3 text-[11px] text-[#20212a] placeholder:text-[#a3a2ad] focus:outline-none"
           />
 
-          <input
+          <FormInput
             type="text"
             placeholder="Full Name"
             value={fullName}
             onChange={(e) => setFullName(e.target.value)}
-            className="mb-[12px] h-[54px] w-full rounded-[10px] border border-[#dedee1] bg-[#ececee] px-3 text-[11px] text-[#20212a] placeholder:text-[#a3a2ad] focus:outline-none"
           />
 
-          <input
+          <FormInput
             type="tel"
             placeholder="Phone no."
             value={phone}
             onChange={(e) => setPhone(e.target.value)}
-            className="mb-[12px] h-[54px] w-full rounded-[10px] border border-[#dedee1] bg-[#ececee] px-3 text-[11px] text-[#20212a] placeholder:text-[#a3a2ad] focus:outline-none"
           />
 
-          <input
+          <FormInput
             type="password"
             placeholder="Password"
             value={password}
             onChange={(e) => setPassword(e.target.value)}
-            className="mb-[16px] h-[54px] w-full rounded-[10px] border border-[#dedee1] bg-[#ececee] px-3 text-[11px] text-[#20212a] placeholder:text-[#a3a2ad] focus:outline-none"
+            containerClassName="mb-[16px]"
           />
 
-          <button
+          <FormButton
             disabled={!canCreate || isSubmitting}
             onClick={async () => {
               try {
@@ -80,12 +79,11 @@ export default function SignUpPage() {
                 setIsSubmitting(false);
               }
             }}
-            className={`h-[54px] w-full rounded-[10px] text-[11px] ${
-              canCreate && !isSubmitting ? "bg-[#3f5db2] text-white" : "bg-[#d8d8dc] text-[#b5b4be]"
-            }`}
+            isLoading={isSubmitting}
+            loadingText="Creating..."
           >
-            {isSubmitting ? "Creating..." : "Create Account"}
-          </button>
+            Create Account
+          </FormButton>
         </section>
       </main>
     </div>

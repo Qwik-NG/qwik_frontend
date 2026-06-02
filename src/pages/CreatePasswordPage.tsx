@@ -2,6 +2,8 @@ import { useMemo, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { api } from "../services/api";
 import { getResetToken } from "../services/auth";
+import FormInput from "../components/ui/FormInput";
+import FormButton from "../components/ui/FormButton";
 
 export default function CreatePasswordPage() {
   const navigate = useNavigate();
@@ -31,23 +33,22 @@ export default function CreatePasswordPage() {
         <section className="mx-auto w-[430px] rounded-[24px] bg-white px-[22px] pb-[24px] pt-[18px]">
           <h2 className="mb-[14px] text-center text-[28px] font-normal leading-[1.05] text-[#22222b]">Create new password</h2>
 
-          <input
+          <FormInput
             type="password"
             placeholder="New Password"
             value={newPassword}
             onChange={(e) => setNewPassword(e.target.value)}
-            className="mb-[12px] h-[48px] w-full rounded-[10px] border border-[#dedee1] bg-[#ececee] px-3 text-[14px] text-[#20212a] placeholder:text-[#a3a2ad] focus:outline-none"
           />
 
-          <input
+          <FormInput
             type="password"
             placeholder="Confirm Password"
             value={confirmPassword}
             onChange={(e) => setConfirmPassword(e.target.value)}
-            className="mb-[16px] h-[48px] w-full rounded-[10px] border border-[#dedee1] bg-[#ececee] px-3 text-[14px] text-[#20212a] placeholder:text-[#a3a2ad] focus:outline-none"
+            containerClassName="mb-[16px]"
           />
 
-          <button
+          <FormButton
             disabled={!canSend || isSubmitting}
             onClick={async () => {
               try {
@@ -66,12 +67,11 @@ export default function CreatePasswordPage() {
                 setIsSubmitting(false);
               }
             }}
-            className={`h-[48px] w-full rounded-[10px] text-[14px] ${
-              canSend && !isSubmitting ? "bg-[#3f5db2] text-white" : "bg-[#d8d8dc] text-[#b5b4be]"
-            }`}
+            isLoading={isSubmitting}
+            loadingText="Submitting..."
           >
-            {isSubmitting ? "Submitting..." : "Send"}
-          </button>
+            Send
+          </FormButton>
         </section>
       </main>
     </div>
