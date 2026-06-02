@@ -22,7 +22,7 @@ export default function FormSelect({
   ...props
 }: FormSelectProps) {
   const baseSelectClass =
-    "h-[48px] w-full rounded-[10px] border border-[#dedee1] bg-[#ececee] px-3 text-[14px] text-[#20212a] focus:outline-none";
+    "h-[48px] w-full rounded-btn border border-[#dedee1] bg-[#ececee] px-3 text-[14px] text-[#20212a] focus:outline-none";
 
   return (
     <div className={`mb-[14px] ${containerClassName}`}>

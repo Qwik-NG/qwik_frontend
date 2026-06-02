@@ -58,7 +58,7 @@ export function MobileSettingsMenu({
                     setOpen(false);
                   }}
                   type="button"
-                  className={`flex w-full items-center gap-3 rounded-[12px] px-3 py-2 text-left text-[15px] ${
+                  className={`flex w-full items-center gap-3 rounded-panel px-3 py-2 text-left text-[15px] ${
                     item.active ? "bg-[#efefef] text-[#1f1d27]" : "text-[#94919d]"
                   }`}
                 >
@@ -82,14 +82,14 @@ export default function SettingsSidebar({
   className?: string;
 }) {
   return (
-    <aside className={`rounded-[20px] bg-white p-4 ${className}`}>
+    <aside className={`rounded-card bg-white p-4 ${className}`}>
       <div className="space-y-2">
         {items.map((item) => (
           <button
             key={item.label}
             onClick={item.onClick}
             type="button"
-            className={`flex h-[58px] w-full items-center gap-3 rounded-[12px] px-4 text-left text-[16px] ${
+            className={`flex h-[58px] w-full items-center gap-3 rounded-panel px-4 text-left text-[16px] ${
               item.active ? "bg-[#efefef] text-[#1f1d27]" : "text-[#94919d]"
             }`}
           >

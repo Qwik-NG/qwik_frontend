@@ -20,7 +20,7 @@ export default function FormButton({
   const isDisabledState = disabled || isLoading;
 
   const baseButtonClass =
-    "h-[48px] w-full rounded-[10px] text-[14px] font-medium transition-colors";
+    "h-[48px] w-full rounded-btn text-[14px] font-medium transition-colors";
 
   const stateClass = isDisabledState
     ? "bg-[#d8d8dc] text-[#b5b4be] cursor-not-allowed"

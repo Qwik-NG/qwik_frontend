@@ -92,7 +92,7 @@ export default function ProductDetailsPage() {
               </p>
               <div className="mb-2 flex items-center gap-3">
                 <h2 className="text-[54px] font-semibold">₦ 16,000,000</h2>
-                <span className="rounded-[8px] bg-[#f5ebdc] px-2.5 py-1 text-[16px] text-[#ff9715]">New</span>
+                <span className="rounded-[8px] bg-badge-bg px-2.5 py-1 text-[16px] text-[#ff9715]">New</span>
               </div>
               <p className="mb-6 text-[18px] text-[#57b77a]">Check market price</p>
               <div className="flex items-center gap-3">
@@ -129,7 +129,7 @@ export default function ProductDetailsPage() {
             <h3 className="mb-5 text-[40px] font-medium">Reviews</h3>
             <div className="mb-4 flex gap-2">
               <img src="https://images.unsplash.com/photo-1542204625-de293a53e17a?w=64" alt="user" className="h-7 w-7 rounded-full object-cover" />
-              <div className="flex-1 rounded-[12px] border border-[#d9d7df] bg-white p-3">
+              <div className="flex-1 rounded-panel border border-[#d9d7df] bg-white p-3">
                 <input className="w-full border-none bg-transparent text-[14px] outline-none" placeholder="I noticed that..." />
                 <div className="mt-3 flex items-center justify-between">
                   <span className="text-[18px] text-[#ff9a00]">★★★★★</span>
@@ -166,7 +166,7 @@ export default function ProductDetailsPage() {
             </div>
             <div className="mt-4 flex gap-2">
               <button className="h-10 rounded-[8px] bg-gradient-to-r from-amber to-orange px-4 text-white shadow-glow" onClick={() => navigate("/make-offer")} type="button">Make an offer</button>
-              <button className="h-10 rounded-[8px] bg-[#f5ebdc] px-4 text-[#ff9715]" type="button">Call</button>
+              <button className="h-10 rounded-[8px] bg-badge-bg px-4 text-[#ff9715]" type="button">Call</button>
             </div>
           </div>
           <div className="rounded-[18px] bg-[#efefef] p-6">
@@ -178,7 +178,7 @@ export default function ProductDetailsPage() {
               <li>Check all documentation and only pay if you&apos;re satisfied</li>
             </ul>
             <div className="mt-4 flex gap-2">
-              <button className="rounded-[8px] bg-[#f5ebdc] px-3 py-2 text-[#ff9715]" type="button">Mark Unavailable</button>
+              <button className="rounded-[8px] bg-badge-bg px-3 py-2 text-[#ff9715]" type="button">Mark Unavailable</button>
               <button className="rounded-[8px] bg-[#ffe7e7] px-3 py-2 text-[#ff4e4e]" type="button">Report</button>
             </div>
           </div>

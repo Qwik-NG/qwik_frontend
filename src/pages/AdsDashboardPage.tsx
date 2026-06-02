@@ -38,7 +38,7 @@ function StateChip({ label, active = false }: { label: string; active?: boolean 
   return (
     <button
       className={`flex h-[48px] items-center gap-2 rounded-[10px] px-6 text-[31px] ${
-        active ? "bg-[#f5ebdc] text-[#ff9715]" : "bg-[#e9e9ee] text-[#b0adb8]"
+        active ? "bg-badge-bg text-[#ff9715]" : "bg-[#e9e9ee] text-[#b0adb8]"
       }`}
       type="button"
     >
@@ -50,14 +50,14 @@ function StateChip({ label, active = false }: { label: string; active?: boolean 
 
 function AdCard({ ad }: { ad: Ad }) {
   return (
-    <article className="rounded-[20px] bg-white p-3.5">
+    <article className="rounded-card bg-white p-3.5">
       <div className="h-[300px] w-full overflow-hidden rounded-[16px] bg-white">
         <img src={ad.image} alt={ad.title} className={`h-full w-full ${ad.fit === "contain" ? "object-contain p-4" : "object-cover"}`} />
       </div>
       <div className="pt-3.5">
         <div className="mb-2 flex items-center justify-between">
           <h3 className="text-[30px] font-semibold leading-none">{ad.price}</h3>
-          <span className="rounded-[10px] bg-[#f5ebdc] px-2.5 py-1 text-[13px] text-[#ff9715]">New</span>
+          <span className="rounded-[10px] bg-badge-bg px-2.5 py-1 text-[13px] text-[#ff9715]">New</span>
         </div>
         <h4 className="mb-2 text-[17px] font-medium leading-tight">{ad.title}</h4>
         <p className="mb-2 text-[14px] leading-[1.35] text-[#6d6a74]">{ad.description}</p>

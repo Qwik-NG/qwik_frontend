@@ -175,7 +175,7 @@ function ChatBubble({ message }: { message: ChatMessage }) {
   return (
     <div className={`flex ${message.mine ? "justify-end" : "justify-start"}`}>
       <div
-        className={`max-w-[78%] rounded-[20px] px-[18px] py-[13px] text-[15px] leading-[1.45] ${
+        className={`max-w-[78%] rounded-card px-[18px] py-[13px] text-[15px] leading-[1.45] ${
           message.mine ? "rounded-br-[6px] bg-gradient-to-r from-amber to-orange text-white" : "rounded-bl-[6px] bg-card text-ink"
         }`}
       >
@@ -227,7 +227,7 @@ export default function MessagesPage() {
             </div>
 
             <div className="px-[12px] pb-[12px] lg:px-[26px] lg:pb-[24px]">
-              <div className="flex min-w-0 items-center gap-[8px] rounded-[20px] bg-card px-[12px] py-[10px]">
+              <div className="flex min-w-0 items-center gap-[8px] rounded-card bg-card px-[12px] py-[10px]">
                 <button className="grid h-[38px] w-[38px] shrink-0 place-items-center rounded-full text-muted">
                   <SmileIcon />
                 </button>

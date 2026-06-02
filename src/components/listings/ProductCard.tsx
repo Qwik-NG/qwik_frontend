@@ -30,7 +30,7 @@ export default function ProductCard({
         <div className="mb-2 flex items-center justify-between">
           <h4 className="text-[20px] font-semibold">{item.price}</h4>
           {showBadge && (
-            <span className="rounded-[8px] bg-[#f5ebdc] px-2.5 py-1 text-[14px] text-[#ff9715]">
+            <span className="rounded-[8px] bg-badge-bg px-2.5 py-1 text-[14px] text-[#ff9715]">
               {badgeLabel}
             </span>
           )}

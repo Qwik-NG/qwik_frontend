@@ -37,7 +37,7 @@ export default function PlanPaymentPage() {
             <p className="mt-2 text-[28px] text-[#8d8996] sm:text-[30px]">Everything you need to grow and scale your business</p>
             <p className="mt-4 text-[46px] font-semibold leading-none sm:text-[42px]">₦1,500 <span className="text-[28px] font-medium text-[#1f1d27]">/ 7 Days</span></p>
 
-            <div className="mt-5 rounded-[20px] border border-[#d9d7de] bg-white p-5 sm:p-6">
+            <div className="mt-5 rounded-card border border-[#d9d7de] bg-white p-5 sm:p-6">
               <ul className="space-y-4 text-[31px] sm:text-[27px]">
                 {[
                   "Unlimited product listings",
@@ -55,7 +55,7 @@ export default function PlanPaymentPage() {
               </ul>
             </div>
 
-            <div className="mt-5 rounded-[20px] border border-[#d9d7de] bg-white p-5 sm:p-6">
+            <div className="mt-5 rounded-card border border-[#d9d7de] bg-white p-5 sm:p-6">
               <div className="space-y-4 text-[31px] sm:text-[27px]">
                 <div className="flex items-center justify-between"><span>Plan</span><span>₦1,500</span></div>
                 <div className="flex items-center justify-between"><span>VAT</span><span>₦112.50</span></div>

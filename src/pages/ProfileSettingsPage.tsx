@@ -38,7 +38,7 @@ export default function ProfileSettingsPage() {
             <div className="mb-4">
               <MobileSettingsMenu items={getSettingsNavItems(navigate, "profile")} label="Settings" />
             </div>
-            <div className="rounded-[20px] bg-white p-6">
+            <div className="rounded-card bg-white p-6">
               <div className="flex flex-wrap items-center justify-between gap-6">
                 <div className="flex items-center gap-4">
                   <div className="relative">

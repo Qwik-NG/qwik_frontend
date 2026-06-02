@@ -46,7 +46,7 @@ function ListCard({ item, onClick }: { item: Listing; onClick: () => void }) {
         <div>
           <div className="mb-2 flex items-center gap-3">
             <h4 className="text-[42px] font-semibold leading-none">{item.price}</h4>
-            <span className="rounded-[9px] bg-[#f5ebdc] px-2.5 py-1 text-[14px] text-[#ff9715]">New</span>
+            <span className="rounded-[9px] bg-badge-bg px-2.5 py-1 text-[14px] text-[#ff9715]">New</span>
           </div>
           <h5 className="mb-2 text-[18px] font-medium leading-tight">{item.title}</h5>
           <p className="mb-2 text-[16px] leading-[1.35] text-[#6d6a74]">{item.description}</p>

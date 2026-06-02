@@ -5,7 +5,7 @@ function DayPill({ label, active = false }: { label: string; active?: boolean })
   return (
     <button
       className={`rounded-[10px] px-3 py-1 text-[15px] ${
-        active ? "bg-[#ff9a12] text-white" : "bg-[#f5ebdc] text-[#ff9715]"
+        active ? "bg-[#ff9a12] text-white" : "bg-badge-bg text-[#ff9715]"
       }`}
       type="button"
     >
@@ -23,7 +23,7 @@ export default function PromoteAdPage() {
 
       <main className="mx-auto w-full max-w-[1728px] px-12 pb-24 pt-8">
         <div className="mx-auto w-full max-w-[430px]">
-          <div className="mb-4 flex h-[44px] items-center rounded-[20px] bg-white px-6">
+          <div className="mb-4 flex h-[44px] items-center rounded-card bg-white px-6">
             <button
               onClick={() => (window.history.length > 1 ? navigate(-1) : navigate("/"))}
               className="mr-6 text-[16px] text-[#9d99a6] sm:text-[18px]"
