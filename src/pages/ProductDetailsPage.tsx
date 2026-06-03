@@ -1,5 +1,5 @@
 import { useMemo, useState } from "react";
-import { useNavigate } from "react-router-dom";
+import { useNavigate, useParams } from "react-router-dom";
 import { SiteFooter, SiteHeader } from "../components/AppShell";
 import { LocationPin } from "../components/icons/LocationPin";
 import ProductCard from "../components/listings/ProductCard";
@@ -58,8 +58,12 @@ const similarAds: SimilarAd[] = [
 
 export default function ProductDetailsPage() {
   const navigate = useNavigate();
+  const { id } = useParams<{ id?: string }>();
   const [activeImage, setActiveImage] = useState(0);
   const selected = useMemo(() => gallery[activeImage], [activeImage]);
+
+  // TODO: When backend is connected, use `id` to fetch product details from API
+  // For now, the page displays mock data regardless of the ID parameter
 
   return (
     <div className="min-h-screen bg-page text-ink">

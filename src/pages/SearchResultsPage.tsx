@@ -1,5 +1,5 @@
 import type { ReactNode } from "react";
-import { useNavigate } from "react-router-dom";
+import { useNavigate, useSearchParams } from "react-router-dom";
 import { SiteFooter, SiteHeader } from "../components/AppShell";
 import ListingCard, { type ListingCardItem } from "../components/listings/ListingCard";
 import { FilterCard } from "../components/ui/FilterCard";
@@ -34,6 +34,11 @@ const repeated = [...listings, ...listings, ...listings];
 
 export default function SearchResultsPage() {
   const navigate = useNavigate();
+  const [searchParams] = useSearchParams();
+  const query = searchParams.get("q");
+
+  // TODO: When backend is connected, use `query` parameter to fetch search results from API
+  // For now, the page displays mock data regardless of the search query
 
   return (
     <div className="min-h-screen bg-page text-ink">

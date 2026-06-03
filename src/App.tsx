@@ -1,4 +1,5 @@
-import { Navigate, Route, Routes } from "react-router-dom";
+import { Route, Routes } from "react-router-dom";
+import { ROUTES } from "./constants/routes";
 import SignInPage from "./pages/SignInPage";
 import HomePage from "./pages/HomePage";
 import SignUpPage from "./pages/SignUpPage";
@@ -27,39 +28,64 @@ import SavedPage from "./pages/SavedPage";
 import NewAdvertDetailsPage from "./pages/NewAdvertDetailsPage";
 import PlanPaymentPage from "./pages/PlanPaymentPage";
 import PremiumPlanPaymentPage from "./pages/PremiumPlanPaymentPage";
+import NotFoundPage from "./pages/NotFoundPage";
 
 export default function App() {
   return (
     <Routes>
-      <Route path="/" element={<HomePage />} />
-      <Route path="/signin" element={<SignInPage />} />
-      <Route path="/signup" element={<SignUpPage />} />
-      <Route path="/login" element={<LoginPage />} />
-      <Route path="/login-password" element={<LoginPasswordPage />} />
-      <Route path="/recover-password" element={<RecoverPasswordPage />} />
-      <Route path="/create-password" element={<CreatePasswordPage />} />
-      <Route path="/welcome" element={<WelcomePage />} />
-      <Route path="/promote-ad" element={<PromoteAdPage />} />
-      <Route path="/notifications" element={<NotificationPage />} />
-      <Route path="/product-details" element={<ProductDetailsPage />} />
-      <Route path="/make-offer" element={<MakeOfferPage />} />
-      <Route path="/search-results" element={<SearchResultsPage />} />
-      <Route path="/search-results-list" element={<SearchResultsListPage />} />
-      <Route path="/profile-settings" element={<ProfileSettingsPage />} />
-      <Route path="/chat-settings" element={<ChatSettingsPage />} />
-      <Route path="/ads-dashboard" element={<AdsDashboardPage />} />
-      <Route path="/notification-settings" element={<NotificationSettingsPage />} />
-      <Route path="/notification-settings-email" element={<EmailNotificationSettingsPage />} />
-      <Route path="/notification-empty" element={<NotificationEmptyPage />} />
-      <Route path="/account" element={<AccountPage />} />
-      <Route path="/messages" element={<MessagesPage />} />
-      <Route path="/post" element={<PostPage />} />
-      <Route path="/post-details" element={<PostDetailsPage />} />
-      <Route path="/new-advert-details" element={<NewAdvertDetailsPage />} />
-      <Route path="/plan-payment" element={<PlanPaymentPage />} />
-      <Route path="/premium-plan-payment" element={<PremiumPlanPaymentPage />} />
-      <Route path="/saved" element={<SavedPage />} />
-      <Route path="*" element={<Navigate to="/" replace />} />
+      {/* Home & Welcome */}
+      <Route path={ROUTES.HOME} element={<HomePage />} />
+      <Route path={ROUTES.WELCOME} element={<WelcomePage />} />
+
+      {/* Authentication & Access Control */}
+      <Route path={ROUTES.SIGNIN} element={<SignInPage />} />
+      <Route path={ROUTES.SIGNUP} element={<SignUpPage />} />
+      <Route path={ROUTES.LOGIN} element={<LoginPage />} />
+      <Route path={ROUTES.LOGIN_PASSWORD} element={<LoginPasswordPage />} />
+      <Route path={ROUTES.RECOVER_PASSWORD} element={<RecoverPasswordPage />} />
+      <Route path={ROUTES.CREATE_PASSWORD} element={<CreatePasswordPage />} />
+
+      {/* Products & Listings */}
+      <Route path={ROUTES.PRODUCT_DETAILS} element={<ProductDetailsPage />} />
+      <Route path={ROUTES.PRODUCT_DETAILS_WITH_ID} element={<ProductDetailsPage />} />
+      <Route path={ROUTES.PRODUCTS_WITH_ID} element={<ProductDetailsPage />} />
+      <Route path={ROUTES.POST} element={<PostPage />} />
+      <Route path={ROUTES.POST_DETAILS} element={<PostDetailsPage />} />
+      <Route path={ROUTES.NEW_ADVERT_DETAILS} element={<NewAdvertDetailsPage />} />
+      <Route path={ROUTES.PROMOTE_AD} element={<PromoteAdPage />} />
+      <Route path={ROUTES.MAKE_OFFER} element={<MakeOfferPage />} />
+
+      {/* Search & Discovery */}
+      <Route path={ROUTES.SEARCH_RESULTS} element={<SearchResultsPage />} />
+      <Route path={ROUTES.SEARCH_RESULTS_LIST} element={<SearchResultsListPage />} />
+
+      {/* Dashboard & Ads Management */}
+      <Route path={ROUTES.ADS_DASHBOARD} element={<AdsDashboardPage />} />
+
+      {/* Notifications */}
+      <Route path={ROUTES.NOTIFICATIONS} element={<NotificationPage />} />
+      <Route path={ROUTES.NOTIFICATION_EMPTY} element={<NotificationEmptyPage />} />
+      <Route path={ROUTES.NOTIFICATION_SETTINGS} element={<NotificationSettingsPage />} />
+      <Route path={ROUTES.NOTIFICATION_SETTINGS_EMAIL} element={<EmailNotificationSettingsPage />} />
+
+      {/* Settings & Account Management */}
+      <Route path={ROUTES.PROFILE_SETTINGS} element={<ProfileSettingsPage />} />
+      <Route path={ROUTES.CHAT_SETTINGS} element={<ChatSettingsPage />} />
+      <Route path={ROUTES.ACCOUNT} element={<AccountPage />} />
+
+      {/* Messages & Communication */}
+      <Route path={ROUTES.MESSAGES} element={<MessagesPage />} />
+
+      {/* Collections & Saved Items */}
+      <Route path={ROUTES.SAVED} element={<SavedPage />} />
+
+      {/* Payment & Subscriptions */}
+      <Route path={ROUTES.PLAN_PAYMENT} element={<PlanPaymentPage />} />
+      <Route path={ROUTES.PREMIUM_PLAN_PAYMENT} element={<PremiumPlanPaymentPage />} />
+
+      {/* Error Pages */}
+      <Route path={ROUTES.NOT_FOUND} element={<NotFoundPage />} />
+      <Route path="*" element={<NotFoundPage />} />
     </Routes>
   );
 }
