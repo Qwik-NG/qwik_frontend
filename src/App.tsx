@@ -1,5 +1,6 @@
 import { Route, Routes } from "react-router-dom";
 import { ROUTES } from "./constants/routes";
+import { ProtectedRoute } from "./components/auth/ProtectedRoute";
 import SignInPage from "./pages/SignInPage";
 import HomePage from "./pages/HomePage";
 import SignUpPage from "./pages/SignUpPage";
@@ -49,9 +50,9 @@ export default function App() {
       <Route path={ROUTES.PRODUCT_DETAILS} element={<ProductDetailsPage />} />
       <Route path={ROUTES.PRODUCT_DETAILS_WITH_ID} element={<ProductDetailsPage />} />
       <Route path={ROUTES.PRODUCTS_WITH_ID} element={<ProductDetailsPage />} />
-      <Route path={ROUTES.POST} element={<PostPage />} />
-      <Route path={ROUTES.POST_DETAILS} element={<PostDetailsPage />} />
-      <Route path={ROUTES.NEW_ADVERT_DETAILS} element={<NewAdvertDetailsPage />} />
+      <Route path={ROUTES.POST} element={<ProtectedRoute><PostPage /></ProtectedRoute>} />
+      <Route path={ROUTES.POST_DETAILS} element={<ProtectedRoute><PostDetailsPage /></ProtectedRoute>} />
+      <Route path={ROUTES.NEW_ADVERT_DETAILS} element={<ProtectedRoute><NewAdvertDetailsPage /></ProtectedRoute>} />
       <Route path={ROUTES.PROMOTE_AD} element={<PromoteAdPage />} />
       <Route path={ROUTES.MAKE_OFFER} element={<MakeOfferPage />} />
 
@@ -60,24 +61,24 @@ export default function App() {
       <Route path={ROUTES.SEARCH_RESULTS_LIST} element={<SearchResultsListPage />} />
 
       {/* Dashboard & Ads Management */}
-      <Route path={ROUTES.ADS_DASHBOARD} element={<AdsDashboardPage />} />
+      <Route path={ROUTES.ADS_DASHBOARD} element={<ProtectedRoute><AdsDashboardPage /></ProtectedRoute>} />
 
       {/* Notifications */}
-      <Route path={ROUTES.NOTIFICATIONS} element={<NotificationPage />} />
-      <Route path={ROUTES.NOTIFICATION_EMPTY} element={<NotificationEmptyPage />} />
-      <Route path={ROUTES.NOTIFICATION_SETTINGS} element={<NotificationSettingsPage />} />
-      <Route path={ROUTES.NOTIFICATION_SETTINGS_EMAIL} element={<EmailNotificationSettingsPage />} />
+      <Route path={ROUTES.NOTIFICATIONS} element={<ProtectedRoute><NotificationPage /></ProtectedRoute>} />
+      <Route path={ROUTES.NOTIFICATION_EMPTY} element={<ProtectedRoute><NotificationEmptyPage /></ProtectedRoute>} />
+      <Route path={ROUTES.NOTIFICATION_SETTINGS} element={<ProtectedRoute><NotificationSettingsPage /></ProtectedRoute>} />
+      <Route path={ROUTES.NOTIFICATION_SETTINGS_EMAIL} element={<ProtectedRoute><EmailNotificationSettingsPage /></ProtectedRoute>} />
 
       {/* Settings & Account Management */}
-      <Route path={ROUTES.PROFILE_SETTINGS} element={<ProfileSettingsPage />} />
-      <Route path={ROUTES.CHAT_SETTINGS} element={<ChatSettingsPage />} />
-      <Route path={ROUTES.ACCOUNT} element={<AccountPage />} />
+      <Route path={ROUTES.PROFILE_SETTINGS} element={<ProtectedRoute><ProfileSettingsPage /></ProtectedRoute>} />
+      <Route path={ROUTES.CHAT_SETTINGS} element={<ProtectedRoute><ChatSettingsPage /></ProtectedRoute>} />
+      <Route path={ROUTES.ACCOUNT} element={<ProtectedRoute><AccountPage /></ProtectedRoute>} />
 
       {/* Messages & Communication */}
-      <Route path={ROUTES.MESSAGES} element={<MessagesPage />} />
+      <Route path={ROUTES.MESSAGES} element={<ProtectedRoute><MessagesPage /></ProtectedRoute>} />
 
       {/* Collections & Saved Items */}
-      <Route path={ROUTES.SAVED} element={<SavedPage />} />
+      <Route path={ROUTES.SAVED} element={<ProtectedRoute><SavedPage /></ProtectedRoute>} />
 
       {/* Payment & Subscriptions */}
       <Route path={ROUTES.PLAN_PAYMENT} element={<PlanPaymentPage />} />

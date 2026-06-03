@@ -185,12 +185,91 @@ All pages using data from `src/types/index.ts` will:
 - Request state components are optional and can be adopted incrementally
 - Frontend remains fully functional with mock data during backend development
 
+## Phase 6 — Authentication & Access Control Readiness
+
+### What Was Implemented
+
+**1. ProtectedRoute Wrapper Component** (`src/components/auth/ProtectedRoute.tsx`)
+- Simple HOC that checks token existence via `getToken()`
+- If unauthenticated: redirects to `/login` using `<Navigate />`
+- If authenticated: renders children normally
+- Reusable across all protected routes
+- No UI changes or new styling required
+
+**2. useAuth Hook** (`src/hooks/useAuth.ts`)
+- Provides `isAuthenticated`, `token`, and `logout()` to any component
+- Useful for pages that need to conditionally show auth-aware UI
+- Logout clears all auth state and redirects to home
+- Ready for navbar/header integration
+
+**3. Enhanced Auth Service** (`src/services/auth.ts`)
+- Added `clearAllAuthData()` for complete session cleanup on logout
+- Added `clearLoginEmail()` and `clearResetToken()` for granular cleanup
+- All functions documented with clear purposes
+- Frontend-only implementation (backend logout not yet required)
+
+**4. Protected Routes Configuration** (`src/App.tsx`)
+- Wrapped 11 protected routes with `<ProtectedRoute>` wrapper:
+  - Account management: `/account`, `/profile-settings`, `/chat-settings`
+  - Notifications: `/notifications`, `/notification-settings`, `/notification-settings-email`, `/notification-empty`
+  - Dashboard: `/ads-dashboard`
+  - Messages: `/messages`
+  - Collections: `/saved`
+  - Content creation: `/post`, `/post-details`, `/new-advert-details`
+
+- Public routes remain accessible:
+  - Home & Welcome: `/`, `/welcome`
+  - Authentication pages: `/signin`, `/signup`, `/login`, `/login-password`, `/recover-password`, `/create-password`
+  - Product browsing: `/product-details`, `/product-details/:id`, `/products/:id`
+  - Search: `/search-results`, `/search-results-list`
+  - Other: `/promote-ad`, `/make-offer`, `/plan-payment`, `/premium-plan-payment`
+
+### How It Works
+
+1. **User attempts to access protected route** (e.g., `/messages`)
+2. **ProtectedRoute checks token**
+   - If token exists: render `<MessagesPage />`
+   - If no token: redirect to `/login`
+3. **User logs in**
+   - Backend provides token in response
+   - Frontend stores via `setToken(token)` in auth.ts
+   - User navigates back to original route (already protected)
+   - Now has token, so route renders normally
+4. **User logs out**
+   - Call `logout()` from `useAuth` hook
+   - Clears all auth data via `clearAllAuthData()`
+   - Redirects to home
+   - Next attempt to access protected route shows redirect to login
+
+### Integration Notes
+
+- **No Backend Changes Required**: ProtectedRoute works with existing token-based auth
+- **Token Storage**: Uses existing localStorage implementation in `auth.ts`
+- **Logout Endpoint**: Currently calls `clearAllAuthData()` only. When backend implements logout endpoint, update `useAuth` hook to call `api.logout()` before clearing
+- **Session Persistence**: Token persists across page reloads (stored in localStorage)
+- **Type Safety**: All auth utilities are fully typed (TypeScript)
+
+### Files Modified
+
+- ✅ `src/App.tsx` - Wrapped protected routes with ProtectedRoute
+- ✅ `src/services/auth.ts` - Enhanced with granular cleanup functions
+- ✅ `src/components/auth/ProtectedRoute.tsx` - New component (created)
+- ✅ `src/hooks/useAuth.ts` - New hook (created)
+
+### Build Status
+
+- ✅ Build passes: 0 TypeScript errors
+- ✅ All 11 protected routes working without errors
+- ✅ All public routes still accessible
+- ✅ No UI redesign or visual changes
+- ✅ Backward compatible with existing auth pages
+
 ## Next Steps
 
-1. Backend team implements API endpoints listed in `src/services/api.ts`
-2. Frontend team replaces mock data with API calls one page at a time
-3. Use `RequestState<T>` type for consistent loading/error handling
-4. Test with provided `mockData.ts` types as reference
-5. No changes to routes, page designs, or component structure needed
+1. Backend team implements `/logout` endpoint (optional, logout works frontend-only for now)
+2. When `/logout` available, update `useAuth()` hook to call `api.logout()` before `clearAllAuthData()`
+3. Frontend team can now proceed to Phase 7 (real data migration) with confidence that protected routes are enforced
+4. Test access control: logged-out users should be redirected from protected pages
+5. Test session persistence: tokens should survive page reloads
 
 
