@@ -3,6 +3,7 @@ import { useNavigate } from "react-router-dom";
 import { SiteFooter, SiteHeader } from "../components/AppShell";
 import SettingsSidebar, { MobileSettingsMenu } from "../components/settings/SettingsSidebar";
 import { getSettingsNavItems } from "../lib/settings-nav-config";
+import { ROUTES } from "../constants/routes";
 
 function BenefitIconWrapper({ children }: { children: ReactNode }) {
   return (
@@ -236,6 +237,7 @@ export default function GetVerifiedPage() {
             <button
               className="mt-5 flex h-[52px] w-full items-center justify-between rounded-[12px] bg-gradient-to-r from-amber to-orange px-4 text-[15px] font-medium text-white shadow-glow"
               type="button"
+              onClick={() => navigate(ROUTES.GET_VERIFIED_BUSINESS_INFO)}
             >
               <span>Start Verification</span>
               <span className="text-[20px]">→</span>

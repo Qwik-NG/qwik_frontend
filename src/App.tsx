@@ -31,6 +31,7 @@ import PlanPaymentPage from "./pages/PlanPaymentPage";
 import PremiumPlanPaymentPage from "./pages/PremiumPlanPaymentPage";
 import NotFoundPage from "./pages/NotFoundPage";
 import GetVerifiedPage from "./pages/GetVerifiedPage";
+import GetVerifiedBusinessInfoPage from "./pages/GetVerifiedBusinessInfoPage";
 
 export default function App() {
   return (
@@ -75,6 +76,7 @@ export default function App() {
       <Route path={ROUTES.CHAT_SETTINGS} element={<ProtectedRoute><ChatSettingsPage /></ProtectedRoute>} />
       <Route path={ROUTES.ACCOUNT} element={<ProtectedRoute><AccountPage /></ProtectedRoute>} />
       <Route path={ROUTES.GET_VERIFIED} element={<ProtectedRoute><GetVerifiedPage /></ProtectedRoute>} />
+      <Route path={ROUTES.GET_VERIFIED_BUSINESS_INFO} element={<ProtectedRoute><GetVerifiedBusinessInfoPage /></ProtectedRoute>} />
 
       {/* Messages & Communication */}
       <Route path={ROUTES.MESSAGES} element={<ProtectedRoute><MessagesPage /></ProtectedRoute>} />

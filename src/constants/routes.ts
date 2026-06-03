@@ -47,6 +47,7 @@ export const ROUTES = {
   CHAT_SETTINGS: "/chat-settings",
   ACCOUNT: "/account",
   GET_VERIFIED: "/get-verified",
+  GET_VERIFIED_BUSINESS_INFO: "/get-verified/business-info",
   
   // Messages & Social
   MESSAGES: "/messages",
