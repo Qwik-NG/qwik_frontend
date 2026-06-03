@@ -37,8 +37,15 @@ export default function SearchResultsPage() {
   const [searchParams] = useSearchParams();
   const query = searchParams.get("q");
 
-  // TODO: When backend is connected, use `query` parameter to fetch search results from API
-  // For now, the page displays mock data regardless of the search query
+  // TODO: INTEGRATION READY
+  // When backend is connected:
+  // 1. Extract filters from URL (query, category, price, location, sort)
+  // 2. Call: const { data: results } = await api.searchAds({ query, ...filters })
+  // 3. Display results using SearchResults type
+  // 4. Use RequestStateWrapper for loading/error states
+  // 5. Implement pagination if totalPages > 1
+  // Types ready: SearchFilters, SearchResults, Ad from src/types/index.ts
+  // Mock search available: getMockSearchResults(query) from src/lib/mockData.ts
 
   return (
     <div className="min-h-screen bg-page text-ink">

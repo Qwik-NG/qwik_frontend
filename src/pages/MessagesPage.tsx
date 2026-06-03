@@ -188,6 +188,17 @@ function ChatBubble({ message }: { message: ChatMessage }) {
 export default function MessagesPage() {
   const navigate = useNavigate();
 
+  // TODO: INTEGRATION READY
+  // When backend is connected:
+  // 1. Call: const { data: conversations } = await api.getConversations()
+  // 2. Call: const { data: messages } = await api.getConversation(selectedConversationId) on select
+  // 3. For sending: await api.sendMessage({ conversationId, text })
+  // 4. Implement real-time updates (WebSocket or polling for new messages)
+  // 5. Use RequestStateWrapper for loading/error states
+  // 6. Show EmptyState when no conversations: title="No Messages", description="Start a conversation to begin"
+  // Types ready: Conversation[], Message[], ConversationCreatePayload from src/types/index.ts
+  // Mock data available: mockConversations, mockMessages from src/lib/mockData.ts
+
   return (
     <div className="min-h-screen bg-page font-outfit text-ink">
       <SiteHeader navigate={navigate} activeIcon="mail" />

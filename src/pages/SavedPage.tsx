@@ -43,6 +43,15 @@ function BookmarkIcon({ className = "h-7 w-7" }: { className?: string }) {
 export default function SavedPage() {
   const navigate = useNavigate();
 
+  // TODO: INTEGRATION READY
+  // When backend is connected:
+  // 1. Call: const { data: savedAds } = await api.savedAds()
+  // 2. Replace hardcoded `repeated` with fetched savedAds
+  // 3. Use RequestStateWrapper for loading/error states
+  // 4. Show EmptyState when no saved ads: title="No Saved Items", description="Start saving ads to view them here"
+  // Types ready: Ad[], SavedAd from src/types/index.ts
+  // Mock data available: mockSavedAds from src/lib/mockData.ts
+
   return (
     <div className="min-h-screen bg-page text-ink">
       <SiteHeader navigate={navigate} activeIcon="bookmark" />

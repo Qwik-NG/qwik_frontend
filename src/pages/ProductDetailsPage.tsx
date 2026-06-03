@@ -62,8 +62,14 @@ export default function ProductDetailsPage() {
   const [activeImage, setActiveImage] = useState(0);
   const selected = useMemo(() => gallery[activeImage], [activeImage]);
 
-  // TODO: When backend is connected, use `id` to fetch product details from API
-  // For now, the page displays mock data regardless of the ID parameter
+  // TODO: INTEGRATION READY
+  // When backend is connected:
+  // 1. Use `id` parameter to fetch: const { data: ad } = await api.adById(id) if id exists
+  // 2. Replace hardcoded product details with fetched `ad` data
+  // 3. Replace similarAds array with: const { data: related } = await api.ads() filtered by category
+  // 4. Use RequestStateWrapper for loading/error states
+  // 5. Handle isSaved state with: const isSaved = await api.isSaved(id) (TODO endpoint)
+  // Types ready: Ad, AdImage from src/types/index.ts
 
   return (
     <div className="min-h-screen bg-page text-ink">

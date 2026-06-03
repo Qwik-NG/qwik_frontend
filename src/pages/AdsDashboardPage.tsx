@@ -73,6 +73,16 @@ function AdCard({ ad }: { ad: Ad }) {
 export default function AdsDashboardPage() {
   const navigate = useNavigate();
 
+  // TODO: INTEGRATION READY
+  // When backend is connected:
+  // 1. Call: const { data: userAds } = await api.getUserAds() or api.getUserAds(status)
+  // 2. Replace hardcoded `ads` array with fetched userAds
+  // 3. Filter ads by status (Active, Sold, etc.) based on ad.status field
+  // 4. Use RequestStateWrapper for loading/error states
+  // 5. Show EmptyState when no ads: title="No Ads Yet", description="Create your first ad to start selling"
+  // Types ready: Ad[], AdUpdatePayload from src/types/index.ts
+  // Mock data available: mockAds from src/lib/mockData.ts
+
   return (
     <div className="min-h-screen bg-page text-ink">
       <SiteHeader navigate={navigate} />

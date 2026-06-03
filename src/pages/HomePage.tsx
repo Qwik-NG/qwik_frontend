@@ -55,6 +55,13 @@ const products = [...seed, ...seed, ...seed];
 
 export default function HomePage() {
   const navigate = useNavigate();
+
+  // TODO: INTEGRATION READY
+  // Replace static `categories` array with: const { data: categories } = await api.categories()
+  // Replace static `seed` array with: const { data: ads } = await api.ads()
+  // Use RequestStateWrapper component for loading/error states
+  // Types ready in src/types/index.ts: Category[], Ad[]
+
   return (
     <div className="min-h-screen bg-page text-ink">
       <SiteHeader navigate={navigate} />

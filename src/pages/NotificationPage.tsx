@@ -27,6 +27,17 @@ function IconBox({ children, active = false }: { children: ReactNode; active?: b
 export default function NotificationPage() {
   const navigate = useNavigate();
 
+  // TODO: INTEGRATION READY
+  // When backend is connected:
+  // 1. Call: const { data: notifications } = await api.getNotifications()
+  // 2. For marking as read: await api.markNotificationAsRead(notificationId)
+  // 3. Replace hardcoded notifications with fetched data
+  // 4. Use RequestStateWrapper for loading/error states
+  // 5. Show EmptyState when no notifications: title="No Notifications", description="Check back soon for updates"
+  // 6. Implement real-time updates (WebSocket for new notifications)
+  // Types ready: Notification[], NotificationSettings from src/types/index.ts
+  // Mock data available: mockNotifications from src/lib/mockData.ts
+
   return (
     <div className="min-h-screen bg-page text-ink">
       <SiteHeader navigate={navigate} />
