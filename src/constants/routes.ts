@@ -48,6 +48,7 @@ export const ROUTES = {
   ACCOUNT: "/account",
   GET_VERIFIED: "/get-verified",
   GET_VERIFIED_BUSINESS_INFO: "/get-verified/business-info",
+  GET_VERIFIED_DOCUMENT_UPLOAD: "/get-verified/document-upload",
   
   // Messages & Social
   MESSAGES: "/messages",

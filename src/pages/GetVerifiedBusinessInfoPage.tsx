@@ -210,7 +210,7 @@ export default function GetVerifiedBusinessInfoPage() {
                 <button
                   className="flex h-[48px] items-center gap-3 rounded-[12px] bg-gradient-to-r from-amber to-orange px-5 text-[14px] font-medium text-white shadow-glow"
                   type="button"
-                  onClick={() => navigate("/get-verified/document-upload")}
+                  onClick={() => navigate(ROUTES.GET_VERIFIED_DOCUMENT_UPLOAD)}
                 >
                   <span>Continue to upload Document</span>
                   <span className="text-[18px]">-&gt;</span>
