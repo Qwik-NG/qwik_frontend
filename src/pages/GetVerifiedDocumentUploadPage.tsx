@@ -131,7 +131,7 @@ export default function GetVerifiedDocumentUploadPage() {
                 <button
                   className="flex h-[44px] items-center gap-3 rounded-[12px] bg-gradient-to-r from-amber to-orange px-6 text-[13px] font-medium text-white shadow-glow"
                   type="button"
-                  onClick={() => navigate("/get-verified/review")}
+                  onClick={() => navigate(ROUTES.GET_VERIFIED_REVIEW)}
                 >
                   <span>Continue to Review</span>
                   <span className="text-[16px]">-&gt;</span>
