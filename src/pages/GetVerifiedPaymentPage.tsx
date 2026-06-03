@@ -305,7 +305,7 @@ export default function GetVerifiedPaymentPage() {
                   <button
                     className="mt-6 flex h-[48px] w-full items-center justify-center gap-4 rounded-[12px] bg-gradient-to-r from-amber to-orange px-6 text-[15px] font-semibold text-white shadow-glow"
                     type="button"
-                    onClick={() => navigate("/get-verified/successful")}
+                    onClick={() => navigate(ROUTES.GET_VERIFIED_SUCCESSFUL)}
                   >
                     <span>Pay ₦5,300.00</span>
                     <span className="text-[18px]">-&gt;</span>
