@@ -171,6 +171,7 @@ Frontend UI Pages
 ## Type Safety Guarantees
 
 All pages using data from `src/types/index.ts` will:
+
 - ✅ Have TypeScript compile-time checking
 - ✅ Catch type mismatches when backend changes
 - ✅ Provide IDE autocomplete for all data properties
@@ -190,6 +191,7 @@ All pages using data from `src/types/index.ts` will:
 ### What Was Implemented
 
 **1. ProtectedRoute Wrapper Component** (`src/components/auth/ProtectedRoute.tsx`)
+
 - Simple HOC that checks token existence via `getToken()`
 - If unauthenticated: redirects to `/login` using `<Navigate />`
 - If authenticated: renders children normally
@@ -197,18 +199,21 @@ All pages using data from `src/types/index.ts` will:
 - No UI changes or new styling required
 
 **2. useAuth Hook** (`src/hooks/useAuth.ts`)
+
 - Provides `isAuthenticated`, `token`, and `logout()` to any component
 - Useful for pages that need to conditionally show auth-aware UI
 - Logout clears all auth state and redirects to home
 - Ready for navbar/header integration
 
 **3. Enhanced Auth Service** (`src/services/auth.ts`)
+
 - Added `clearAllAuthData()` for complete session cleanup on logout
 - Added `clearLoginEmail()` and `clearResetToken()` for granular cleanup
 - All functions documented with clear purposes
 - Frontend-only implementation (backend logout not yet required)
 
 **4. Protected Routes Configuration** (`src/App.tsx`)
+
 - Wrapped 11 protected routes with `<ProtectedRoute>` wrapper:
   - Account management: `/account`, `/profile-settings`, `/chat-settings`
   - Notifications: `/notifications`, `/notification-settings`, `/notification-settings-email`, `/notification-empty`
@@ -271,5 +276,3 @@ All pages using data from `src/types/index.ts` will:
 3. Frontend team can now proceed to Phase 7 (real data migration) with confidence that protected routes are enforced
 4. Test access control: logged-out users should be redirected from protected pages
 5. Test session persistence: tokens should survive page reloads
-
-

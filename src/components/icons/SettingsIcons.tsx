@@ -59,3 +59,12 @@ export function LogoutIcon() {
     </svg>
   );
 }
+
+export function ShieldCheckIcon() {
+  return (
+    <svg viewBox="0 0 24 24" className="h-5 w-5" fill="none" stroke="currentColor" strokeLinecap="round" strokeLinejoin="round" strokeWidth="1.8">
+      <path d="M12 3 5 6v6c0 5 3.4 8.8 7 10 3.6-1.2 7-5 7-10V6l-7-3Z" />
+      <path d="m9.4 12.2 1.9 1.9 3.6-4.1" />
+    </svg>
+  );
+}
