@@ -34,6 +34,7 @@ import GetVerifiedPage from "./pages/GetVerifiedPage";
 import GetVerifiedBusinessInfoPage from "./pages/GetVerifiedBusinessInfoPage";
 import GetVerifiedDocumentUploadPage from "./pages/GetVerifiedDocumentUploadPage";
 import GetVerifiedReviewPage from "./pages/GetVerifiedReviewPage";
+import GetVerifiedPaymentPage from "./pages/GetVerifiedPaymentPage";
 
 export default function App() {
   return (
@@ -81,6 +82,7 @@ export default function App() {
       <Route path={ROUTES.GET_VERIFIED_BUSINESS_INFO} element={<ProtectedRoute><GetVerifiedBusinessInfoPage /></ProtectedRoute>} />
       <Route path={ROUTES.GET_VERIFIED_DOCUMENT_UPLOAD} element={<ProtectedRoute><GetVerifiedDocumentUploadPage /></ProtectedRoute>} />
       <Route path={ROUTES.GET_VERIFIED_REVIEW} element={<ProtectedRoute><GetVerifiedReviewPage /></ProtectedRoute>} />
+      <Route path={ROUTES.GET_VERIFIED_PAYMENT} element={<ProtectedRoute><GetVerifiedPaymentPage /></ProtectedRoute>} />
 
       {/* Messages & Communication */}
       <Route path={ROUTES.MESSAGES} element={<ProtectedRoute><MessagesPage /></ProtectedRoute>} />

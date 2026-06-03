@@ -201,7 +201,7 @@ export default function GetVerifiedReviewPage() {
                 <button
                   className="flex h-[44px] items-center gap-3 rounded-[12px] bg-gradient-to-r from-amber to-orange px-6 text-[13px] font-medium text-white shadow-glow"
                   type="button"
-                  onClick={() => navigate("/get-verified/payment")}
+                  onClick={() => navigate(ROUTES.GET_VERIFIED_PAYMENT)}
                 >
                   <span>Proceed to Payment</span>
                   <span className="text-[16px]">-&gt;</span>

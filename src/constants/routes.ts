@@ -50,6 +50,7 @@ export const ROUTES = {
   GET_VERIFIED_BUSINESS_INFO: "/get-verified/business-info",
   GET_VERIFIED_DOCUMENT_UPLOAD: "/get-verified/document-upload",
   GET_VERIFIED_REVIEW: "/get-verified/review",
+  GET_VERIFIED_PAYMENT: "/get-verified/payment",
   
   // Messages & Social
   MESSAGES: "/messages",
