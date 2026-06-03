@@ -30,24 +30,24 @@ export default function NotificationSettingsPage() {
 
             <div className="space-y-6">
               <div className="flex items-center justify-between">
-                <p className="text-[16px] sm:text-[18px] text-[#9794a1]">Deals, recommendations, news</p>
+                <p className="text-[15px] sm:text-[16px] text-[#9794a1]">Deals, recommendations, news</p>
                 <Toggle checked />
               </div>
               <div className="flex items-center justify-between">
-                <p className="text-[16px] sm:text-[18px] text-[#9794a1]">Message from users</p>
+                <p className="text-[15px] sm:text-[16px] text-[#9794a1]">Message from users</p>
                 <Toggle />
               </div>
               <div className="flex items-center justify-between">
-                <p className="text-[16px] sm:text-[18px] text-[#9794a1]">Info about your ads</p>
+                <p className="text-[15px] sm:text-[16px] text-[#9794a1]">Info about your ads</p>
                 <Toggle />
               </div>
               <div className="flex items-center justify-between">
-                <p className="text-[16px] sm:text-[18px] text-[#9794a1]">Other useful Info</p>
+                <p className="text-[15px] sm:text-[16px] text-[#9794a1]">Other useful Info</p>
                 <Toggle />
               </div>
             </div>
 
-            <button className="mt-8 h-[48px] w-full max-w-[420px] rounded-[14px] bg-gradient-to-r from-amber to-orange text-[18px] text-white shadow-glow sm:h-[54px] sm:text-[20px]" type="button">
+            <button className="mt-8 h-[48px] w-full max-w-[420px] rounded-[14px] bg-gradient-to-r from-amber to-orange text-[16px] text-white shadow-glow sm:h-[52px] sm:text-[18px]" type="button">
               Save
             </button>
           </section>

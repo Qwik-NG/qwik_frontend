@@ -279,11 +279,11 @@ function ChatSettingsForm() {
     <div className="mt-[62px] w-full max-w-[584px]">
       <div className="space-y-[34px]">
         <div className="flex max-w-[584px] items-center justify-between gap-6">
-          <span className="text-[22px] text-[#9c98a5]">Receive messages</span>
+          <span className="text-[16px] text-[#9c98a5]">Receive messages</span>
           <Toggle />
         </div>
         <div className="flex max-w-[584px] items-center justify-between gap-6">
-          <span className="text-[22px] text-[#9c98a5]">Receive messages</span>
+          <span className="text-[16px] text-[#9c98a5]">Receive messages</span>
           <Toggle />
         </div>
       </div>

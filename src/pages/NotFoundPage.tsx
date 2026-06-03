@@ -11,8 +11,8 @@ export default function NotFoundPage() {
       
       <main className="flex-1 mx-auto w-full max-w-[1512px] px-[24px] py-[80px] sm:px-[60px] flex flex-col items-center justify-center">
         <div className="text-center">
-          <h1 className="text-[64px] sm:text-[96px] font-bold text-[#ff4e4e] mb-4">404</h1>
-          <h2 className="text-[32px] sm:text-[48px] font-semibold text-ink mb-4">Page Not Found</h2>
+          <h1 className="text-[52px] sm:text-[64px] font-bold text-[#ff4e4e] mb-4">404</h1>
+          <h2 className="text-[24px] sm:text-[32px] font-semibold text-ink mb-4">Page Not Found</h2>
           <p className="text-[16px] sm:text-[18px] text-muted-text mb-8 max-w-[500px]">
             Sorry, the page you're looking for doesn't exist. It might have been moved or deleted.
           </p>

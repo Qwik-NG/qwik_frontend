@@ -94,19 +94,19 @@ export default function ProductDetailsPage() {
               </div>
             </div>
             <div className="pt-10">
-              <p className="mb-2 text-[18px] text-[#57b77a]">Verified Seller</p>
-              <h1 className="text-[42px] leading-tight">Mercedes-Benz GLA 250 2015 Blue</h1>
-              <p className="mb-6 mt-1 flex items-center gap-1 text-[18px] text-[#6d6a74]">
+              <p className="mb-2 text-[16px] text-[#57b77a]">Verified Seller</p>
+              <h1 className="text-[28px] leading-tight sm:text-[32px]">Mercedes-Benz GLA 250 2015 Blue</h1>
+              <p className="mb-6 mt-1 flex items-center gap-1 text-[15px] text-[#6d6a74]">
                 <LocationPin className="h-5 w-5" />
                 <span>Abuja, Apo</span>
               </p>
               <div className="mb-2 flex items-center gap-3">
-                <h2 className="text-[54px] font-semibold">₦ 16,000,000</h2>
-                <span className="rounded-[8px] bg-badge-bg px-2.5 py-1 text-[16px] text-[#ff9715]">New</span>
+                <h2 className="text-[32px] font-semibold sm:text-[36px]">₦ 16,000,000</h2>
+                <span className="rounded-[8px] bg-badge-bg px-2.5 py-1 text-[13px] text-[#ff9715]">New</span>
               </div>
-              <p className="mb-6 text-[18px] text-[#57b77a]">Check market price</p>
+              <p className="mb-6 text-[15px] text-[#57b77a]">Check market price</p>
               <div className="flex items-center gap-3">
-                <button className="h-[44px] rounded-[8px] bg-gradient-to-r from-amber to-orange px-4 text-[16px] text-white shadow-glow" onClick={() => navigate("/make-offer")} type="button">
+                <button className="h-[44px] rounded-[8px] bg-gradient-to-r from-amber to-orange px-4 text-[14px] text-white shadow-glow" onClick={() => navigate("/make-offer")} type="button">
                   Chat Seller
                 </button>
                 <button className="h-[44px] w-[44px] rounded-[8px] bg-white text-[22px]" type="button">Save</button>
@@ -117,8 +117,8 @@ export default function ProductDetailsPage() {
 
         <section className="mt-10 grid grid-cols-1 gap-10 xl:grid-cols-2">
           <div>
-            <h3 className="mb-5 text-[40px] font-medium">Product Details</h3>
-            <p className="mb-8 max-w-[540px] text-[18px] leading-[1.35] text-[#5f5c68]">
+            <h3 className="mb-5 text-[24px] font-medium sm:text-[28px]">Product Details</h3>
+            <p className="mb-8 max-w-[540px] text-[15px] leading-[1.45] text-[#5f5c68]">
               Keyless entry Panoramic roof Led intelligent light Custom duty fully paid This is a very sharp car and drives Premium speakers Keyless entry Push start
             </p>
             <div className="grid grid-cols-2 gap-x-10 gap-y-5 text-[16px]">
@@ -136,13 +136,13 @@ export default function ProductDetailsPage() {
           </div>
 
           <div>
-            <h3 className="mb-5 text-[40px] font-medium">Reviews</h3>
+            <h3 className="mb-5 text-[24px] font-medium sm:text-[28px]">Reviews</h3>
             <div className="mb-4 flex gap-2">
               <img src="https://images.unsplash.com/photo-1542204625-de293a53e17a?w=64" alt="user" className="h-7 w-7 rounded-full object-cover" />
               <div className="flex-1 rounded-panel border border-[#d9d7df] bg-white p-3">
                 <input className="w-full border-none bg-transparent text-[14px] outline-none" placeholder="I noticed that..." />
                 <div className="mt-3 flex items-center justify-between">
-                  <span className="text-[18px] text-[#ff9a00]">★★★★★</span>
+                  <span className="text-[16px] text-[#ff9a00]">★★★★★</span>
                   <button className="h-7 w-7 rounded-full bg-[#ff9a00] text-white" type="button">Post</button>
                 </div>
               </div>
@@ -180,7 +180,7 @@ export default function ProductDetailsPage() {
             </div>
           </div>
           <div className="rounded-[18px] bg-[#efefef] p-6">
-            <h4 className="mb-2 text-[20px] font-medium">Safety tips</h4>
+            <h4 className="mb-2 text-[18px] font-medium">Safety tips</h4>
             <ul className="list-disc pl-4 text-[14px] text-[#8f8b98]">
               <li>Remember, don&apos;t send any pre-payments</li>
               <li>Meet the seller at a safe public place</li>
@@ -195,7 +195,7 @@ export default function ProductDetailsPage() {
         </section>
 
         <section className="mt-10">
-          <h3 className="mb-4 text-[40px] font-medium">Similar Ads</h3>
+          <h3 className="mb-4 text-[24px] font-medium sm:text-[28px]">Similar Ads</h3>
           <div className="grid grid-cols-2 gap-4 xl:grid-cols-4">
             {similarAds.map((item) => (
               <ProductCard key={item.title} item={item} onClick={() => navigate("/product-details")} />

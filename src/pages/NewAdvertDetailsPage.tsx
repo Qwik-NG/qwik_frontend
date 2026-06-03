@@ -22,7 +22,7 @@ function InputField({ label, placeholder }: { label: string; placeholder: string
   return (
     <label className="block">
       <span className="mb-2 block text-[16px] text-[#9c98a5]">{label}</span>
-      <div className="flex h-[50px] items-center justify-between rounded-[10px] border border-[#e1e0e6] px-3 text-[22px] leading-none text-[#afacb8] sm:h-[52px] sm:text-[16px]">
+      <div className="flex h-[50px] items-center justify-between rounded-[10px] border border-[#e1e0e6] px-3 text-[16px] leading-none text-[#afacb8] sm:h-[52px] sm:text-[16px]">
         <span>{placeholder}</span>
         <ChevronDownIcon />
       </div>
@@ -47,14 +47,14 @@ export default function NewAdvertDetailsPage() {
             >
               ‹ Back
             </button>
-            <h1 className="text-[42px] font-normal leading-none text-ink sm:text-[16px]">New advert</h1>
+            <h1 className="text-[20px] font-normal leading-none text-ink sm:text-[24px]">New advert</h1>
           </div>
 
           <section className="rounded-[28px] bg-white p-4 sm:p-5">
             <label className="block">
               <span className="mb-2 block text-[16px] text-[#9c98a5]">Price</span>
               <input
-                className="h-[50px] w-full rounded-[10px] border border-[#e1e0e6] bg-transparent px-3 text-[22px] text-[#afacb8] outline-none sm:h-[52px] sm:text-[16px]"
+                className="h-[50px] w-full rounded-[10px] border border-[#e1e0e6] bg-transparent px-3 text-[16px] text-[#afacb8] outline-none sm:h-[52px] sm:text-[16px]"
                 placeholder="₦ 0.0"
               />
             </label>

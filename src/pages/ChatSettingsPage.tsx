@@ -42,29 +42,29 @@ export default function ChatSettingsPage() {
                     />
                   </div>
                   <div>
-                    <h1 className="text-[26px] font-medium leading-tight sm:text-[30px]">Sherry James</h1>
-                    <p className="text-[16px] text-[#8c8996] sm:text-[18px]">Imshuvo97@gmail.com</p>
+                    <h1 className="text-[24px] font-medium leading-tight sm:text-[28px]">Sherry James</h1>
+                    <p className="text-[15px] text-[#8c8996] sm:text-[16px]">Imshuvo97@gmail.com</p>
                   </div>
                 </div>
                 <div className="flex gap-10 text-center">
                   <div>
-                    <p className="text-[24px] sm:text-[28px]">12</p>
-                    <p className="text-[18px] text-[#8c8996]">Following</p>
+                    <p className="text-[20px] sm:text-[22px]">12</p>
+                    <p className="text-[14px] text-[#8c8996]">Following</p>
                   </div>
                   <div>
-                    <p className="text-[24px] sm:text-[28px]">23</p>
-                    <p className="text-[18px] text-[#8c8996]">Followers</p>
+                    <p className="text-[20px] sm:text-[22px]">23</p>
+                    <p className="text-[14px] text-[#8c8996]">Followers</p>
                   </div>
                   <div>
-                    <p className="text-[24px] sm:text-[28px]">17</p>
-                    <p className="text-[18px] text-[#8c8996]">adverts</p>
+                    <p className="text-[20px] sm:text-[22px]">17</p>
+                    <p className="text-[14px] text-[#8c8996]">adverts</p>
                   </div>
                 </div>
               </div>
             </div>
 
             <div className="mt-6 max-w-[760px]">
-              <div className="mb-10 flex flex-nowrap gap-5 text-[16px] sm:text-[20px]">
+              <div className="mb-10 flex flex-nowrap gap-5 text-[15px] sm:text-[17px]">
                 <button className="whitespace-nowrap text-[#9794a1]" onClick={() => navigate("/profile-settings")} type="button">
                   Edit Profile
                 </button>
@@ -79,7 +79,7 @@ export default function ChatSettingsPage() {
               <ToggleRow label="Receive messages" />
               <ToggleRow label="Receive messages" />
 
-              <button className="mt-2 h-[48px] w-full max-w-[420px] rounded-[14px] bg-gradient-to-r from-amber to-orange text-[18px] text-white shadow-glow sm:h-[54px] sm:text-[20px]" type="button">
+              <button className="mt-2 h-[48px] w-full max-w-[420px] rounded-[14px] bg-gradient-to-r from-amber to-orange text-[16px] text-white shadow-glow sm:h-[52px] sm:text-[18px]" type="button">
                 Save
               </button>
             </div>

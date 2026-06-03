@@ -14,7 +14,7 @@ export default function RecoverPasswordPage() {
   return (
     <div className="min-h-screen overflow-hidden bg-[#f3f3f5] font-outfit text-[#1f1f29]">
       <header className="flex items-center justify-between px-[60px] pt-[48px]">
-        <button onClick={() => navigate("/")} className="text-[56px] font-normal leading-none text-[#ff8300]">
+        <button onClick={() => navigate("/")} className="text-[36px] font-normal leading-none text-[#ff8300] sm:text-[40px]">
           qwik
         </button>
         <p className="text-[16px] text-[#9a99a6]">

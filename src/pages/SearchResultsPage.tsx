@@ -90,14 +90,14 @@ export default function SearchResultsPage() {
 
           <section>
             <div className="mb-4 flex items-center justify-between gap-4">
-              <h1 className="text-[44px] font-medium">
+              <h1 className="text-[24px] font-medium sm:text-[28px]">
                 Found <span className="text-[#ff9715]">23,029</span> results for “Home”
               </h1>
               <div className="flex items-center gap-2">
                 <button
                   type="button"
                   onClick={() => navigate("/search-results")}
-                  className="rounded-[8px] bg-[#ececec] px-2 py-1 text-[28px] text-[#1f1c26]"
+                    className="rounded-[8px] bg-[#ececec] px-2 py-1 text-[18px] text-[#1f1c26]"
                   aria-label="Grid view"
                   title="Grid view"
                 >
@@ -106,7 +106,7 @@ export default function SearchResultsPage() {
                 <button
                   type="button"
                   onClick={() => navigate("/search-results-list")}
-                  className="rounded-[8px] px-2 py-1 text-[28px] text-[#1f1c26] hover:bg-[#ececec]"
+                    className="rounded-[8px] px-2 py-1 text-[18px] text-[#1f1c26] hover:bg-[#ececec]"
                   aria-label="List view"
                   title="List view"
                 >

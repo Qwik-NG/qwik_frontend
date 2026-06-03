@@ -45,12 +45,12 @@ function ListCard({ item, onClick }: { item: Listing; onClick: () => void }) {
         <img src={item.image} alt={item.title} className="h-[220px] w-full rounded-[12px] object-cover" />
         <div>
           <div className="mb-2 flex items-center gap-3">
-            <h4 className="text-[42px] font-semibold leading-none">{item.price}</h4>
+            <h4 className="text-[24px] font-semibold leading-none sm:text-[28px]">{item.price}</h4>
             <span className="rounded-[9px] bg-badge-bg px-2.5 py-1 text-[14px] text-[#ff9715]">New</span>
           </div>
           <h5 className="mb-2 text-[18px] font-medium leading-tight">{item.title}</h5>
-          <p className="mb-2 text-[16px] leading-[1.35] text-[#6d6a74]">{item.description}</p>
-          <small className="flex items-center gap-1 text-[15px] text-[#4b4a54]">
+          <p className="mb-2 text-[15px] leading-[1.45] text-[#6d6a74]">{item.description}</p>
+          <small className="flex items-center gap-1 text-[14px] text-[#4b4a54]">
             <LocationPin className="h-4 w-4" />
             <span>{item.location}</span>
           </small>
@@ -118,14 +118,14 @@ export default function SearchResultsListPage() {
 
           <section>
             <div className="mb-4 flex items-center justify-between gap-4">
-              <h1 className="text-[44px] font-medium">
+              <h1 className="text-[24px] font-medium sm:text-[28px]">
                 Found <span className="text-[#ff9715]">23,029</span> results for “Home”
               </h1>
               <div className="flex items-center gap-2">
                 <button
                   type="button"
                   onClick={() => navigate("/search-results")}
-                  className="rounded-[8px] px-2 py-1 text-[28px] text-[#1f1c26] hover:bg-[#ececec]"
+                  className="rounded-[8px] px-2 py-1 text-[18px] text-[#1f1c26] hover:bg-[#ececec]"
                   aria-label="Grid view"
                   title="Grid view"
                 >
@@ -134,7 +134,7 @@ export default function SearchResultsListPage() {
                 <button
                   type="button"
                   onClick={() => navigate("/search-results-list")}
-                  className="rounded-[8px] bg-[#ececec] px-2 py-1 text-[28px] text-[#1f1c26]"
+                  className="rounded-[8px] bg-[#ececec] px-2 py-1 text-[18px] text-[#1f1c26]"
                   aria-label="List view"
                   title="List view"
                 >

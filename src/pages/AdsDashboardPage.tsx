@@ -37,12 +37,12 @@ const ads: Ad[] = [
 function StateChip({ label, active = false }: { label: string; active?: boolean }) {
   return (
     <button
-      className={`flex h-[48px] items-center gap-2 rounded-[10px] px-6 text-[31px] ${
+      className={`flex h-[40px] items-center gap-2 rounded-[10px] px-4 text-[15px] ${
         active ? "bg-badge-bg text-[#ff9715]" : "bg-[#e9e9ee] text-[#b0adb8]"
       }`}
       type="button"
     >
-      <span className="text-[23px]">{active ? "✶" : "◷"}</span>
+      <span className="text-[16px]">{active ? "✶" : "◷"}</span>
       <span>{label}</span>
     </button>
   );
@@ -56,7 +56,7 @@ function AdCard({ ad }: { ad: Ad }) {
       </div>
       <div className="pt-3.5">
         <div className="mb-2 flex items-center justify-between">
-          <h3 className="text-[30px] font-semibold leading-none">{ad.price}</h3>
+          <h3 className="text-[22px] font-semibold leading-none">{ad.price}</h3>
           <span className="rounded-[10px] bg-badge-bg px-2.5 py-1 text-[13px] text-[#ff9715]">New</span>
         </div>
         <h4 className="mb-2 text-[17px] font-medium leading-tight">{ad.title}</h4>

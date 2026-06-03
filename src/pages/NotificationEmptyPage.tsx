@@ -34,7 +34,7 @@ export default function NotificationEmptyPage() {
       <main className="mx-auto w-full max-w-[1728px] px-12 pb-20 pt-8">
         <div className="mb-10 flex items-center gap-3">
           <BellIcon />
-          <h1 className="text-[48px] font-medium">Notification</h1>
+          <h1 className="text-[24px] font-medium sm:text-[28px]">Notification</h1>
         </div>
 
         <div className="flex min-h-[680px] items-center justify-center">
@@ -42,10 +42,10 @@ export default function NotificationEmptyPage() {
             <div className="mb-4 flex justify-center">
               <EmptyBoxIcon />
             </div>
-            <h2 className="text-[50px] font-medium leading-none">Nothing to see here</h2>
-            <p className="mt-3 text-[39px] text-[#9a98a4]">You don&apos;t have any notification yet</p>
+            <h2 className="text-[28px] font-medium leading-none sm:text-[32px]">Nothing to see here</h2>
+            <p className="mt-3 text-[16px] text-[#9a98a4] sm:text-[18px]">You don&apos;t have any notification yet</p>
             <button
-              className="mt-6 rounded-[10px] bg-gradient-to-r from-amber to-orange px-6 py-3 text-[18px] text-white shadow-glow"
+              className="mt-6 rounded-[10px] bg-gradient-to-r from-amber to-orange px-6 py-3 text-[16px] text-white shadow-glow"
               onClick={() => navigate("/notifications")}
               type="button"
             >
