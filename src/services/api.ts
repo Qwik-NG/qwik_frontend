@@ -25,7 +25,11 @@ import type {
   OfferCreatePayload
 } from "../types/index";
 
-const API_BASE_URL = import.meta.env.VITE_API_URL ?? "http://localhost:4000/api";
+export const API_BASE_URL = import.meta.env.VITE_API_URL ?? "http://localhost:4000/api";
+
+export function apiUrl(path: string) {
+  return `${API_BASE_URL}${path.startsWith("/") ? path : `/${path}`}`;
+}
 
 type ApiResponse<T> = {
   success: boolean;
@@ -122,8 +126,7 @@ export const api = {
   // TODO: deleteAd - delete an ad
   // deleteAd: (id: string) => request<null>(`/ads/${id}`, { method: "DELETE" }),
 
-  // TODO: getUserAds - get user's ads with status filter
-  // getUserAds: (status?: string) => request<Ad[]>(`/users/me/ads${status ? `?status=${status}` : ""}`),
+  getUserAds: (status?: string) => request<Ad[]>(`/users/me/ads${status ? `?status=${status}` : ""}`),
 
   // ===== Saved Ads Endpoints =====
   savedAds: () => request<Ad[]>("/users/me/saved"),

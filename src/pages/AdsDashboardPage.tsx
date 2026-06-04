@@ -1,10 +1,15 @@
+import { useEffect, useMemo, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { SiteFooter, SiteHeader } from "../components/AppShell";
 import { LocationPin } from "../components/icons/LocationPin";
 import SettingsSidebar, { MobileSettingsMenu } from "../components/settings/SettingsSidebar";
 import { getSettingsNavItems } from "../lib/settings-nav-config";
+import { api } from "../services/api";
+import type { Ad } from "../types";
 
-type Ad = {
+type DashboardAd = {
+  id: string;
+  status: "ACTIVE" | "DRAFT" | "ARCHIVED" | "SOLD";
   price: string;
   title: string;
   description: string;
@@ -13,30 +18,31 @@ type Ad = {
   fit?: "cover" | "contain";
 };
 
-const ads: Ad[] = [
-  {
-    price: "₦ 1,900,000",
-    title: "Apple MacBook Pro",
-    description: "New Laptop Apple MacBook Pro 32GB Apple M1 SSD 1T",
-    location: "Lagos, Ikeja",
-    image: "https://images.unsplash.com/photo-1517336714739-489689fd1ca8?w=1200",
-    fit: "contain",
-  },
-  {
-    price: "₦ 11,000,000",
-    title: "Mercedes-Benz GLA 250 2015 Blue",
-    description:
-      "Keyless entry Panoramic roof Led intelligent light Custom duty fully paid This is a very sharp...",
-    location: "Abuja, Apo",
-    image: "https://images.unsplash.com/photo-1542282088-fe8426682b8f?w=1200",
-    fit: "cover",
-  },
+type FilterState = "ACTIVE" | "DRAFT" | "ARCHIVED";
+
+const stateOptions: Array<{ label: string; value: FilterState }> = [
+  { label: "Active", value: "ACTIVE" },
+  { label: "Reviewing", value: "DRAFT" },
+  { label: "Declined", value: "ARCHIVED" },
 ];
 
+function toDashboardAd(ad: Ad): DashboardAd {
+  return {
+    id: ad.id,
+    status: (ad.status as DashboardAd["status"]) || "ACTIVE",
+    price: `₦ ${ad.price.toLocaleString()}`,
+    title: ad.title,
+    description: ad.description,
+    location: ad.location,
+    image: ad.images?.[0]?.url || "https://via.placeholder.com/1200x900?text=No+Image",
+    fit: "cover",
+  };
+}
 
-function StateChip({ label, active = false }: { label: string; active?: boolean }) {
+function StateChip({ label, active = false, onClick }: { label: string; active?: boolean; onClick: () => void }) {
   return (
     <button
+      onClick={onClick}
       className={`flex h-[40px] items-center gap-2 rounded-[10px] px-4 text-[15px] ${
         active ? "bg-badge-bg text-[#ff9715]" : "bg-[#e9e9ee] text-[#b0adb8]"
       }`}
@@ -48,7 +54,7 @@ function StateChip({ label, active = false }: { label: string; active?: boolean 
   );
 }
 
-function AdCard({ ad }: { ad: Ad }) {
+function AdCard({ ad }: { ad: DashboardAd }) {
   return (
     <article className="rounded-card bg-white p-3.5">
       <div className="h-[300px] w-full overflow-hidden rounded-[16px] bg-white">
@@ -72,16 +78,33 @@ function AdCard({ ad }: { ad: Ad }) {
 
 export default function AdsDashboardPage() {
   const navigate = useNavigate();
+  const [activeFilter, setActiveFilter] = useState<FilterState>("ACTIVE");
+  const [ads, setAds] = useState<DashboardAd[]>([]);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState<string | null>(null);
 
-  // TODO: INTEGRATION READY
-  // When backend is connected:
-  // 1. Call: const { data: userAds } = await api.getUserAds() or api.getUserAds(status)
-  // 2. Replace hardcoded `ads` array with fetched userAds
-  // 3. Filter ads by status (Active, Sold, etc.) based on ad.status field
-  // 4. Use RequestStateWrapper for loading/error states
-  // 5. Show EmptyState when no ads: title="No Ads Yet", description="Create your first ad to start selling"
-  // Types ready: Ad[], AdUpdatePayload from src/types/index.ts
-  // Mock data available: mockAds from src/lib/mockData.ts
+  useEffect(() => {
+    const loadUserAds = async () => {
+      try {
+        setLoading(true);
+        setError(null);
+        const response = await api.getUserAds(activeFilter);
+        setAds(response.data.map(toDashboardAd));
+      } catch (err) {
+        setError(err instanceof Error ? err.message : "Failed to load ads");
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    void loadUserAds();
+  }, [activeFilter]);
+
+  const emptyMessage = useMemo(() => {
+    if (activeFilter === "ACTIVE") return "No active ads yet.";
+    if (activeFilter === "DRAFT") return "No ads are under review.";
+    return "No declined ads found.";
+  }, [activeFilter]);
 
   return (
     <div className="min-h-screen bg-page text-ink">
@@ -99,18 +122,31 @@ export default function AdsDashboardPage() {
               <MobileSettingsMenu items={getSettingsNavItems(navigate, "ads")} label="Settings" />
             </div>
             <div className="mb-6 flex flex-wrap gap-3">
-              <StateChip label="Active" active />
-              <StateChip label="Reviewing" />
-              <StateChip label="Declined" />
-            </div>
-
-            <div className="grid grid-cols-1 gap-5 md:grid-cols-2 xl:max-w-[620px]">
-              {ads.map((ad) => (
-                <div key={ad.title} className="max-w-[300px]">
-                  <AdCard ad={ad} />
-                </div>
+              {stateOptions.map((option) => (
+                <StateChip
+                  key={option.value}
+                  label={option.label}
+                  active={activeFilter === option.value}
+                  onClick={() => setActiveFilter(option.value)}
+                />
               ))}
             </div>
+
+            {loading ? (
+              <p className="text-[15px] text-[#6d6a74]">Loading ads...</p>
+            ) : error ? (
+              <p className="text-[15px] text-[#d14343]">Error: {error}</p>
+            ) : ads.length === 0 ? (
+              <p className="text-[15px] text-[#6d6a74]">{emptyMessage}</p>
+            ) : (
+              <div className="grid grid-cols-1 gap-5 md:grid-cols-2 xl:max-w-[620px]">
+                {ads.map((ad) => (
+                  <div key={ad.id} className="max-w-[300px]">
+                    <AdCard ad={ad} />
+                  </div>
+                ))}
+              </div>
+            )}
           </section>
         </div>
       </main>
