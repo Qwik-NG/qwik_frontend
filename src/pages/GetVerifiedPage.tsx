@@ -189,7 +189,7 @@ export default function GetVerifiedPage() {
               <div className="flex items-center justify-center">
                 <div className="h-[240px] w-[240px] overflow-hidden">
                   <img
-                    src="/image.png"
+                    src="/image copy.png"
                     alt="Verified badge"
                     className="h-full w-full object-contain"
                   />
