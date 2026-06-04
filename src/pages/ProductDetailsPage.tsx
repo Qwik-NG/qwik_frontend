@@ -194,7 +194,7 @@ export default function ProductDetailsPage() {
   const specArray = Object.entries(specs).map(([k, v]) => [
     k.replace(/([A-Z])/g, " $1").replace(/^./, (str: string) => str.toUpperCase()).trim(),
     v
-  ]);
+  ]) as Array<[string, unknown]>;
 
   return (
     <div className="min-h-screen bg-page text-ink">
@@ -275,7 +275,7 @@ export default function ProductDetailsPage() {
             </p>
             {specArray.length > 0 && (
               <div className="grid grid-cols-2 gap-x-10 gap-y-5 text-[16px]">
-                {specArray.map(([k, v]) => (
+                {specArray.map(([k, v]: [string, unknown]) => (
                   <div key={k}>
                     <p className="text-[#8f8b98]">{k}</p>
                     <p className="font-medium">{String(v)}</p>
