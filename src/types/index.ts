@@ -28,7 +28,7 @@ export interface UserProfile {
 
 export interface AuthResponse {
   token: string;
-  user: User;
+  user: User & { role: 'USER' | 'ADMIN' };
 }
 
 export interface LoginPayload {

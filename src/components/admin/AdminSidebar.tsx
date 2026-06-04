@@ -1,0 +1,89 @@
+import { useNavigate, useLocation } from 'react-router-dom';
+import { clearToken } from '../../services/auth';
+import { 
+  BarChart3, 
+  Users, 
+  Package, 
+  AlertCircle, 
+  CheckCircle, 
+  Settings, 
+  TrendingUp, 
+  LogOut 
+} from 'lucide-react';
+
+export default function AdminSidebar() {
+  const navigate = useNavigate();
+  const location = useLocation();
+
+  const navItems = [
+    { label: 'Dashboard', icon: BarChart3, path: '/admin' },
+    { label: 'Users', icon: Users, path: '/admin/users' },
+    { label: 'Ads', icon: Package, path: '/admin/ads' },
+    { label: 'Reports', icon: AlertCircle, path: '/admin/reports' },
+    { label: 'Verification', icon: CheckCircle, path: '/admin/verification' },
+    { label: 'Settings', icon: Settings, path: '/admin/settings' },
+    { label: 'Analytics', icon: TrendingUp, path: '/admin/analytics' },
+  ];
+
+  const isActive = (path: string) => location.pathname === path;
+
+  const handleLogout = () => {
+    if (confirm('Are you sure you want to logout?')) {
+      clearToken();
+      navigate('/admin/login');
+    }
+  };
+
+  return (
+    <aside className="fixed left-0 top-0 h-screen w-[240px] bg-white border-r border-[#e8e8ea] overflow-y-auto">
+      {/* Logo */}
+      <div className="px-6 py-8 border-b border-[#e8e8ea]">
+        <button
+          onClick={() => navigate('/admin')}
+          className="text-3xl font-normal text-[#ff9715] hover:text-[#e68a0e] transition"
+        >
+          qwik
+        </button>
+        <div className="text-xs text-[#9a99a6] font-medium mt-2">Admin Panel</div>
+      </div>
+
+      {/* Navigation */}
+      <nav className="p-4 space-y-2">
+        {navItems.map((item) => {
+          const Icon = item.icon;
+          return (
+            <button
+              key={item.path}
+              onClick={() => navigate(item.path)}
+              className={`w-full flex items-center gap-3 px-4 py-3 rounded-lg transition ${
+                isActive(item.path)
+                  ? 'bg-[#fff0e6] text-[#ff9715] border border-[#ff9715]'
+                  : 'text-[#7f7e88] hover:bg-[#f9f9fb] hover:text-[#1f1f29]'
+              }`}
+            >
+              <Icon size={20} />
+              <span className="text-sm font-medium">{item.label}</span>
+              {isActive(item.path) && (
+                <div className="ml-auto w-2 h-2 rounded-full bg-[#ff9715]"></div>
+              )}
+            </button>
+          );
+        })}
+      </nav>
+
+      {/* Divider */}
+      <div className="mx-4 my-6 h-px bg-[#e8e8ea]"></div>
+
+      {/* Logout */}
+      <div className="p-4">
+        <button
+          onClick={handleLogout}
+          className="w-full flex items-center gap-3 px-4 py-3 rounded-lg text-[#d32f2f] hover:bg-[#ffebee] transition text-sm font-medium"
+        >
+          <LogOut size={20} />
+          <span>Logout</span>
+        </button>
+      </div>
+    </aside>
+  );
+}

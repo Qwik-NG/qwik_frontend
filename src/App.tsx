@@ -36,6 +36,11 @@ import GetVerifiedDocumentUploadPage from "./pages/GetVerifiedDocumentUploadPage
 import GetVerifiedReviewPage from "./pages/GetVerifiedReviewPage";
 import GetVerifiedPaymentPage from "./pages/GetVerifiedPaymentPage";
 import GetVerifiedSuccessfulPage from "./pages/GetVerifiedSuccessfulPage";
+import AdminLogin from "./pages/AdminLogin";
+import AdminDashboard from "./pages/AdminDashboard";
+import AdminUsers from "./pages/AdminUsers";
+import AdminAds from "./pages/AdminAds";
+import AdminReports from "./pages/AdminReports";
 
 export default function App() {
   return (
@@ -51,6 +56,7 @@ export default function App() {
       <Route path={ROUTES.LOGIN_PASSWORD} element={<LoginPasswordPage />} />
       <Route path={ROUTES.RECOVER_PASSWORD} element={<RecoverPasswordPage />} />
       <Route path={ROUTES.CREATE_PASSWORD} element={<CreatePasswordPage />} />
+      <Route path="/admin/login" element={<AdminLogin />} />
 
       {/* Products & Listings */}
       <Route path={ROUTES.PRODUCT_DETAILS} element={<ProductDetailsPage />} />
@@ -95,6 +101,12 @@ export default function App() {
       {/* Payment & Subscriptions */}
       <Route path={ROUTES.PLAN_PAYMENT} element={<PlanPaymentPage />} />
       <Route path={ROUTES.PREMIUM_PLAN_PAYMENT} element={<PremiumPlanPaymentPage />} />
+
+      {/* Admin Dashboard */}
+      <Route path="/admin" element={<ProtectedRoute><AdminDashboard /></ProtectedRoute>} />
+      <Route path="/admin/users" element={<ProtectedRoute><AdminUsers /></ProtectedRoute>} />
+      <Route path="/admin/ads" element={<ProtectedRoute><AdminAds /></ProtectedRoute>} />
+      <Route path="/admin/reports" element={<ProtectedRoute><AdminReports /></ProtectedRoute>} />
 
       {/* Error Pages */}
       <Route path={ROUTES.NOT_FOUND} element={<NotFoundPage />} />

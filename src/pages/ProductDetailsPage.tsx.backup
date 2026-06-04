@@ -1,16 +1,8 @@
 import { useState, useEffect } from "react";
 import { useNavigate, useParams } from "react-router-dom";
 import { SiteFooter, SiteHeader } from "../components/AppShell";
+import { LocationPin } from "../components/icons/LocationPin";
 import { getToken } from "../services/auth";
-
-function LocationPin({ className = "h-5 w-5" }: { className?: string }) {
-  return (
-    <svg viewBox="0 0 24 24" fill="none" className={className} aria-hidden="true">
-      <path d="M12 21s7-6.2 7-11a7 7 0 1 0-14 0c0 4.8 7 11 7 11Z" stroke="currentColor" strokeWidth="1.8" />
-      <circle cx="12" cy="10" r="2.2" stroke="currentColor" strokeWidth="1.8" />
-    </svg>
-  );
-}
 
 type SimilarAd = {
   id: string;
@@ -61,15 +53,15 @@ export default function ProductDetailsPage() {
         setLoading(true);
         if (!id) throw new Error("No product ID provided");
         
-        // Fetch main ad
+        // Fetch main ad (full images for this product)
         const response = await fetch(`http://localhost:4000/api/ads/${id}`);
         if (!response.ok) throw new Error("Failed to fetch product");
         const result = await response.json();
         setAd(result.data);
 
-        // Fetch similar ads
+        // Fetch similar ads (only 1 image each for faster loading)
         const categoryId = result.data.categoryId;
-        const similarResponse = await fetch(`http://localhost:4000/api/ads?pageSize=4&categoryId=${categoryId}`);
+        const similarResponse = await fetch(`http://localhost:4000/api/ads?pageSize=4&categoryId=${categoryId}&imagesLimit=1`);
         if (similarResponse.ok) {
           const similarResult = await similarResponse.json();
           setSimilarAds(similarResult.data.filter((item: any) => item.id !== id).slice(0, 4));
@@ -191,7 +183,7 @@ export default function ProductDetailsPage() {
   const specs = ad.specifications || {};
 
   // Convert specs to array for display
-  const specArray = Object.entries(specs).map(([k, v]) => [
+  const specArray: Array<[string, unknown]> = Object.entries(specs).map(([k, v]: [string, unknown]) => [
     k.replace(/([A-Z])/g, " $1").replace(/^./, (str: string) => str.toUpperCase()).trim(),
     v
   ]);
@@ -275,8 +267,8 @@ export default function ProductDetailsPage() {
             </p>
             {specArray.length > 0 && (
               <div className="grid grid-cols-2 gap-x-10 gap-y-5 text-[16px]">
-                {specArray.map(([k, v]) => (
-                  <div key={k}>
+                {specArray.map(([k, v]: [string, unknown], idx: number) => (
+                  <div key={idx}>
                     <p className="text-[#8f8b98]">{k}</p>
                     <p className="font-medium">{String(v)}</p>
                   </div>

@@ -158,7 +158,7 @@ export default function GetVerifiedPage() {
       <SiteHeader navigate={navigate} />
 
       <main className="mx-auto w-full max-w-[1728px] px-4 pb-16 pt-8 sm:px-6 lg:px-12">
-        <div className="grid grid-cols-1 gap-6 xl:grid-cols-[310px_minmax(0,1fr)_380px]">
+        <div className="grid grid-cols-1 gap-6 xl:grid-cols-[310px_1fr_400px]">
           <SettingsSidebar
             className="hidden md:block"
             items={getSettingsNavItems(navigate, "get-verified")}
@@ -180,25 +180,45 @@ export default function GetVerifiedPage() {
               </p>
             </div>
 
-            <div className="mt-8 grid gap-6 lg:grid-cols-[1fr_320px_1fr] lg:items-center">
-              <div className="flex flex-col items-center gap-6 lg:items-end lg:text-right">
-                <BenefitBlock title="Verified Seller Badge" icon={<ShieldBadgeIcon />} align="lg:items-end" />
-                <BenefitBlock title="Priority Support" icon={<HeadsetIcon />} align="lg:items-end" />
-              </div>
-
-              <div className="flex items-center justify-center">
-                <div className="h-[240px] w-[240px] overflow-hidden">
-                  <img
-                    src="/image copy.png"
-                    alt="Verified badge"
-                    className="h-full w-full object-contain"
-                  />
+            <div className="mt-8 max-w-2xl mx-auto">
+              <div className="grid gap-8 grid-cols-3 items-center justify-items-center">
+                <div className="flex flex-col items-center gap-3 text-center">
+                  <span className="flex h-[60px] w-[60px] items-center justify-center rounded-full border border-[#e8e7ed] bg-white text-[#ff7f1f] shadow-sm">
+                    <ShieldBadgeIcon />
+                  </span>
+                  <p className="text-[15px] font-medium text-[#1f1d27]">Verified Seller Badge</p>
                 </div>
-              </div>
 
-              <div className="flex flex-col items-center gap-6 lg:items-start lg:text-left">
-                <BenefitBlock title="Increased Customer Trust" icon={<UsersIcon />} align="lg:items-start" />
-                <BenefitBlock title="Higher Search Visibility" icon={<TrendUpIcon />} align="lg:items-start" />
+                <div className="flex flex-col items-center gap-3 text-center row-span-2">
+                  <div className="h-[200px] w-[200px] overflow-hidden">
+                    <img
+                      src="/image copy.png"
+                      alt="Verified badge"
+                      className="h-full w-full object-contain"
+                    />
+                  </div>
+                </div>
+
+                <div className="flex flex-col items-center gap-3 text-center">
+                  <span className="flex h-[60px] w-[60px] items-center justify-center rounded-full border border-[#e8e7ed] bg-white text-[#ff7f1f] shadow-sm">
+                    <UsersIcon />
+                  </span>
+                  <p className="text-[15px] font-medium text-[#1f1d27]">Increased Customer Trust</p>
+                </div>
+
+                <div className="flex flex-col items-center gap-3 text-center">
+                  <span className="flex h-[60px] w-[60px] items-center justify-center rounded-full border border-[#e8e7ed] bg-white text-[#ff7f1f] shadow-sm">
+                    <HeadsetIcon />
+                  </span>
+                  <p className="text-[15px] font-medium text-[#1f1d27]">Priority Support</p>
+                </div>
+
+                <div className="flex flex-col items-center gap-3 text-center">
+                  <span className="flex h-[60px] w-[60px] items-center justify-center rounded-full border border-[#e8e7ed] bg-white text-[#ff7f1f] shadow-sm">
+                    <TrendUpIcon />
+                  </span>
+                  <p className="text-[15px] font-medium text-[#1f1d27]">Higher Search Visibility</p>
+                </div>
               </div>
             </div>
 
@@ -253,9 +273,10 @@ export default function GetVerifiedPage() {
         </div>
 
         <div className="mt-8 rounded-card bg-[#f2f2f5] px-4 py-5 sm:px-6">
-          <div className="grid gap-4 sm:grid-cols-2">
-            <div className="flex items-center gap-3">
-              <span className="flex h-[42px] w-[42px] items-center justify-center rounded-full bg-[#ffe7d4] text-[#ff7f1f]">
+          <div className="grid gap-4 grid-cols-3">
+            <div></div>
+            <div className="flex items-center gap-3 justify-center">
+              <span className="flex h-[42px] w-[42px] items-center justify-center rounded-full bg-[#ffe7d4] text-[#ff7f1f] flex-shrink-0">
                 <TrustBadgeIcon />
               </span>
               <div>
@@ -263,8 +284,8 @@ export default function GetVerifiedPage() {
                 <p className="text-[12px] text-[#8f8b98]">Join 1000+ verified sellers</p>
               </div>
             </div>
-            <div className="flex items-center gap-3">
-              <span className="flex h-[42px] w-[42px] items-center justify-center rounded-full bg-[#ffe7d4] text-[#ff7f1f]">
+            <div className="flex items-center gap-3 justify-center">
+              <span className="flex h-[42px] w-[42px] items-center justify-center rounded-full bg-[#ffe7d4] text-[#ff7f1f] flex-shrink-0">
                 <TrustBadgeIcon />
               </span>
               <div>

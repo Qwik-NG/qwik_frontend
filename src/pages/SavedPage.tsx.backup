@@ -1,7 +1,9 @@
 import { useNavigate } from "react-router-dom";
+import { useState, useEffect } from "react";
 import { SiteFooter, SiteHeader } from "../components/AppShell";
 
 type SavedAd = {
+  id: string;
   price: string;
   title: string;
   description: string;
@@ -10,25 +12,14 @@ type SavedAd = {
   fit?: "cover" | "contain";
 };
 
-const savedAds: SavedAd[] = [
-  {
-    price: "₦ 1,900,000",
-    title: "Apple MacBook Pro",
-    description: "New Laptop Apple MacBook Pro 32GB Apple M1 SSD 1T",
-    location: "Lagos, Ikeja",
-    image: "https://images.unsplash.com/photo-1517336714739-489689fd1ca8?w=1200",
-    fit: "contain",
-  },
-  {
-    price: "₦ 11,000,000",
-    title: "Mercedes-Benz GLA 250 2015 Blue",
-    description:
-      "Keyless entry Panoramic roof Led intelligent light Custom duty fully paid This is a very sharp...",
-    location: "Abuja, Apo",
-    image: "https://images.unsplash.com/photo-1542282088-fe8426682b8f?w=1200",
-    fit: "cover",
-  },
-];
+type DatabaseAd = {
+  id: string;
+  price: number;
+  title: string;
+  description: string;
+  location: string;
+  images: Array<{ url: string }>;
+};
 
 function BookmarkIcon({ className = "h-7 w-7" }: { className?: string }) {
   return (
@@ -90,6 +81,40 @@ function SavedCard({ ad }: { ad: SavedAd }) {
 
 export default function SavedPage() {
   const navigate = useNavigate();
+  const [savedAds, setSavedAds] = useState<SavedAd[]>([]);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState<string | null>(null);
+
+  useEffect(() => {
+    const fetchSavedAds = async () => {
+      try {
+        setLoading(true);
+        // Fetch all ads with only 1 image each for faster loading
+        const response = await fetch("http://localhost:4000/api/ads?pageSize=100&imagesLimit=1");
+        if (!response.ok) throw new Error("Failed to fetch saved ads");
+        const result = await response.json();
+        
+        // Convert database format to SavedAd format
+        const converted: SavedAd[] = (result.data || []).map((ad: DatabaseAd) => ({
+          id: ad.id,
+          price: `₦ ${ad.price.toLocaleString()}`,
+          title: ad.title,
+          description: ad.description,
+          location: ad.location,
+          image: ad.images?.[0]?.url || "https://via.placeholder.com/260",
+          fit: "cover" as const,
+        }));
+        setSavedAds(converted);
+      } catch (err) {
+        setError(err instanceof Error ? err.message : "Unknown error");
+        console.error("Error fetching saved ads:", err);
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    fetchSavedAds();
+  }, []);
 
   return (
     <div className="min-h-screen bg-page text-ink">
@@ -101,11 +126,20 @@ export default function SavedPage() {
           <h1 className="text-[34px] font-normal leading-none text-ink">Saved</h1>
         </div>
 
-        <section className="grid grid-cols-2 gap-4 xl:grid-cols-4">
-          {savedAds.map((ad) => (
-            <SavedCard key={ad.title} ad={ad} />
-          ))}
-        </section>
+        {loading && <p className="text-center text-lg text-gray-500">Loading saved ads...</p>}
+        {error && <p className="text-center text-lg text-red-500">Error: {error}</p>}
+        
+        {!loading && !error && savedAds.length === 0 && (
+          <p className="text-center text-lg text-gray-500">No saved ads yet</p>
+        )}
+
+        {!loading && !error && savedAds.length > 0 && (
+          <section className="grid grid-cols-2 gap-4 xl:grid-cols-4">
+            {savedAds.map((ad) => (
+              <SavedCard key={ad.id} ad={ad} />
+            ))}
+          </section>
+        )}
       </main>
 
       <SiteFooter navigate={navigate} />

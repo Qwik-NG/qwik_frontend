@@ -64,7 +64,13 @@ export default function LoginPasswordPage() {
                 }
                 const res = await api.login({ email, password });
                 setToken(res.data.token);
-                navigate("/welcome");
+                
+                // Redirect based on user role
+                if (res.data.user.role === 'ADMIN') {
+                  navigate("/admin");
+                } else {
+                  navigate("/welcome");
+                }
               } catch (error) {
                 window.alert(error instanceof Error ? error.message : "Login failed");
               } finally {
