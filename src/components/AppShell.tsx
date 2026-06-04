@@ -1,5 +1,6 @@
-import type { ReactNode } from "react";
+import { useState, type ReactNode } from "react";
 import { LocationPin } from "./icons/LocationPin";
+import { buildSearchResultsRoute } from "../constants/routes";
 
 type NavigateTo = (to: string) => void;
 type HeaderIcon = "bell" | "bookmark" | "mail";
@@ -46,6 +47,13 @@ export function SiteHeader({
   navigate: NavigateTo;
   activeIcon?: HeaderIcon;
 }) {
+  const [searchQuery, setSearchQuery] = useState("");
+
+  const handleSearchSubmit = (event: React.FormEvent<HTMLFormElement>) => {
+    event.preventDefault();
+    navigate(buildSearchResultsRoute(searchQuery.trim() || undefined));
+  };
+
   return (
     <header className="sticky top-0 z-[100] mx-auto flex w-full max-w-[1728px] flex-wrap items-center gap-2 bg-page/95 px-4 py-0.5 backdrop-blur-sm sm:px-6 lg:gap-4 lg:px-12 lg:py-1">
       <button
@@ -60,16 +68,21 @@ export function SiteHeader({
       </button>
 
       <div className="order-3 mt-2.5 flex w-full items-center gap-2.5 lg:order-2 lg:mt-0 lg:flex-1">
-        <button
-          type="button"
-          onClick={() => navigate("/search-results")}
+        <form
+          onSubmit={handleSearchSubmit}
           className="flex h-11 w-full items-center gap-2 rounded-[10px] border-2 border-orange px-3 text-left text-[14px] text-[#b6b3bd] lg:h-[42px] lg:w-[250px] lg:rounded-[8px] lg:px-[13px] lg:text-[16px]"
         >
-          <span className="text-[#f5932b]">
+          <button type="submit" className="text-[#f5932b]" aria-label="Search">
             <SearchIcon />
-          </span>
-          <span>I am looking for ...</span>
-        </button>
+          </button>
+          <input
+            value={searchQuery}
+            onChange={(event) => setSearchQuery(event.target.value)}
+            className="w-full bg-transparent text-[#1f1d27] outline-none placeholder:text-[#b6b3bd]"
+            placeholder="I am looking for ..."
+            aria-label="Search listings"
+          />
+        </form>
         <div className="flex shrink-0 items-center gap-1 text-[15px] text-[#9c98a5] sm:text-[16px]">
           <LocationPin className="h-4 w-4" />
           <span>Nig.</span>

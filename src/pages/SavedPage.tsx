@@ -1,7 +1,11 @@
+import { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { SiteFooter, SiteHeader } from "../components/AppShell";
+import { api } from "../services/api";
+import type { Ad } from "../types";
 
-type SavedAd = {
+type SavedCardAd = {
+  id: string;
   price: string;
   title: string;
   description: string;
@@ -10,25 +14,17 @@ type SavedAd = {
   fit?: "cover" | "contain";
 };
 
-const savedAds: SavedAd[] = [
-  {
-    price: "₦ 1,900,000",
-    title: "Apple MacBook Pro",
-    description: "New Laptop Apple MacBook Pro 32GB Apple M1 SSD 1T",
-    location: "Lagos, Ikeja",
-    image: "https://images.unsplash.com/photo-1517336714739-489689fd1ca8?w=1200",
-    fit: "contain",
-  },
-  {
-    price: "₦ 11,000,000",
-    title: "Mercedes-Benz GLA 250 2015 Blue",
-    description:
-      "Keyless entry Panoramic roof Led intelligent light Custom duty fully paid This is a very sharp...",
-    location: "Abuja, Apo",
-    image: "https://images.unsplash.com/photo-1542282088-fe8426682b8f?w=1200",
+function toSavedCardAd(ad: Ad): SavedCardAd {
+  return {
+    id: ad.id,
+    price: `₦ ${ad.price.toLocaleString()}`,
+    title: ad.title,
+    description: ad.description,
+    location: ad.location,
+    image: ad.images?.[0]?.url || "https://via.placeholder.com/1200x900?text=No+Image",
     fit: "cover",
-  },
-];
+  };
+}
 
 function BookmarkIcon({ className = "h-7 w-7" }: { className?: string }) {
   return (
@@ -62,7 +58,7 @@ function LocationPin() {
   );
 }
 
-function SavedCard({ ad }: { ad: SavedAd }) {
+function SavedCard({ ad }: { ad: SavedCardAd }) {
   return (
     <article className="rounded-[22px] bg-white p-2.5 sm:rounded-[26px] sm:p-4">
       <div className="h-[170px] w-full overflow-hidden rounded-[14px] bg-white sm:h-[260px] sm:rounded-[18px]">
@@ -90,6 +86,26 @@ function SavedCard({ ad }: { ad: SavedAd }) {
 
 export default function SavedPage() {
   const navigate = useNavigate();
+  const [savedAds, setSavedAds] = useState<SavedCardAd[]>([]);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState<string | null>(null);
+
+  useEffect(() => {
+    const loadSavedAds = async () => {
+      try {
+        setLoading(true);
+        setError(null);
+        const response = await api.savedAds();
+        setSavedAds(response.data.map(toSavedCardAd));
+      } catch (err) {
+        setError(err instanceof Error ? err.message : "Failed to load saved ads");
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    void loadSavedAds();
+  }, []);
 
   return (
     <div className="min-h-screen bg-page text-ink">
@@ -101,11 +117,30 @@ export default function SavedPage() {
           <h1 className="text-[34px] font-normal leading-none text-ink">Saved</h1>
         </div>
 
-        <section className="grid grid-cols-2 gap-4 xl:grid-cols-4">
-          {savedAds.map((ad) => (
-            <SavedCard key={ad.title} ad={ad} />
-          ))}
-        </section>
+        {loading ? (
+          <section className="grid grid-cols-2 gap-4 xl:grid-cols-4">
+            {Array.from({ length: 2 }).map((_, index) => (
+              <article key={index} className="rounded-[22px] bg-white p-2.5 sm:rounded-[26px] sm:p-4">
+                <div className="h-[170px] w-full animate-pulse rounded-[14px] bg-[#f2f2f4] sm:h-[260px] sm:rounded-[18px]" />
+                <div className="space-y-3 px-0 pb-1 pt-3 sm:pt-4">
+                  <div className="h-5 w-28 animate-pulse rounded bg-[#f2f2f4]" />
+                  <div className="h-4 w-3/4 animate-pulse rounded bg-[#f2f2f4]" />
+                  <div className="h-4 w-full animate-pulse rounded bg-[#f2f2f4]" />
+                </div>
+              </article>
+            ))}
+          </section>
+        ) : error ? (
+          <p className="text-[15px] text-[#d14343]">Error: {error}</p>
+        ) : savedAds.length === 0 ? (
+          <p className="text-[15px] text-[#6d6a74]">You have no saved ads yet.</p>
+        ) : (
+          <section className="grid grid-cols-2 gap-4 xl:grid-cols-4">
+            {savedAds.map((ad) => (
+              <SavedCard key={ad.id} ad={ad} />
+            ))}
+          </section>
+        )}
       </main>
 
       <SiteFooter navigate={navigate} />

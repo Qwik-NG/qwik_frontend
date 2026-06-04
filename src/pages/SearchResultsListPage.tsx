@@ -1,10 +1,14 @@
-import type { ReactNode } from "react";
+import { useEffect, useState } from "react";
 import { useNavigate, useSearchParams } from "react-router-dom";
+import { buildProductDetailsRoute } from "../constants/routes";
 import { SiteFooter, SiteHeader } from "../components/AppShell";
 import { LocationPin } from "../components/icons/LocationPin";
 import { FilterCard } from "../components/ui/FilterCard";
+import { api } from "../services/api";
+import type { Ad } from "../types";
 
 type Listing = {
+  id: string;
   price: string;
   title: string;
   description: string;
@@ -12,31 +16,16 @@ type Listing = {
   image: string;
 };
 
-const listings: Listing[] = [
-  {
-    price: "₦ 85,500,000",
-    title: "4bdrm Duplex in Lekki",
-    description: "A Well Built and Spacious 4bedroom Semi Detached",
-    location: "Lagos, Lekki",
-    image: "https://images.unsplash.com/photo-1600607687939-ce8a6c25118c?w=1200",
-  },
-  {
-    price: "₦ 85,500,000",
-    title: "4bdrm Duplex in Lekki",
-    description: "A Well Built and Spacious 4bedroom Semi Detached",
-    location: "Lagos, Lekki",
-    image: "https://images.unsplash.com/photo-1505693416388-ac5ce068fe85?w=1200",
-  },
-  {
-    price: "₦ 85,500,000",
-    title: "4bdrm Duplex in Lekki",
-    description: "A Well Built and Spacious 4bedroom Semi Detached",
-    location: "Lagos, Lekki",
-    image: "https://images.unsplash.com/photo-1564013799919-ab600027ffc6?w=1200",
-  },
-];
-
-const repeated = [...listings, ...listings];
+function toListing(ad: Ad): Listing {
+  return {
+    id: ad.id,
+    price: `₦ ${ad.price.toLocaleString()}`,
+    title: ad.title,
+    description: ad.description,
+    location: ad.location,
+    image: ad.images?.[0]?.url || "https://via.placeholder.com/220",
+  };
+}
 
 function ListCard({ item, onClick }: { item: Listing; onClick: () => void }) {
   return (
@@ -63,17 +52,33 @@ function ListCard({ item, onClick }: { item: Listing; onClick: () => void }) {
 export default function SearchResultsListPage() {
   const navigate = useNavigate();
   const [searchParams] = useSearchParams();
-  const query = searchParams.get("q");
+  const query = searchParams.get("q")?.trim() || "";
+  const [results, setResults] = useState<Listing[]>([]);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState<string | null>(null);
+  const [total, setTotal] = useState(0);
 
-  // TODO: INTEGRATION READY
-  // When backend is connected:
-  // 1. Extract filters from URL (query, category, price, location, sort)
-  // 2. Call: const { data: results } = await api.searchAds({ query, ...filters })
-  // 3. Display results in list format using SearchResults type
-  // 4. Use RequestStateWrapper for loading/error states
-  // 5. Implement pagination if totalPages > 1
-  // Types ready: SearchFilters, SearchResults, Ad from src/types/index.ts
-  // Mock search available: getMockSearchResults(query) from src/lib/mockData.ts
+  useEffect(() => {
+    const loadResults = async () => {
+      try {
+        setLoading(true);
+        setError(null);
+
+        const params = new URLSearchParams({ pageSize: "100", imagesLimit: "1" });
+        if (query) params.set("search", query);
+
+        const response = await api.ads(`?${params.toString()}`);
+        setResults(response.data.map(toListing));
+        setTotal(response.meta?.total ?? response.data.length);
+      } catch (err) {
+        setError(err instanceof Error ? err.message : "Failed to load search results");
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    void loadResults();
+  }, [query]);
 
   return (
     <div className="min-h-screen bg-page text-ink">
@@ -119,7 +124,7 @@ export default function SearchResultsListPage() {
           <section>
             <div className="mb-4 flex items-center justify-between gap-4">
               <h1 className="text-[24px] font-medium sm:text-[28px]">
-                Found <span className="text-[#ff9715]">23,029</span> results for “Home”
+                Found <span className="text-[#ff9715]">{total.toLocaleString()}</span> results for “{query || "All Ads"}”
               </h1>
               <div className="flex items-center gap-2">
                 <button
@@ -142,11 +147,19 @@ export default function SearchResultsListPage() {
                 </button>
               </div>
             </div>
-            <div className="space-y-3">
-              {repeated.map((item, idx) => (
-                <ListCard key={`${item.title}-${idx}`} item={item} onClick={() => navigate("/product-details")} />
-              ))}
-            </div>
+            {loading ? (
+              <p className="text-[15px] text-[#6d6a74]">Loading search results...</p>
+            ) : error ? (
+              <p className="text-[15px] text-[#d14343]">Error: {error}</p>
+            ) : results.length === 0 ? (
+              <p className="text-[15px] text-[#6d6a74]">No results found.</p>
+            ) : (
+              <div className="space-y-3">
+                {results.map((item) => (
+                  <ListCard key={item.id} item={item} onClick={() => navigate(buildProductDetailsRoute(item.id))} />
+                ))}
+              </div>
+            )}
           </section>
         </div>
       </main>
