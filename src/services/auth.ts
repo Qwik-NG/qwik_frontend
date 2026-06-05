@@ -5,6 +5,7 @@
  */
 
 const TOKEN_KEY = "qwik_token";
+const ROLE_KEY = "qwik_role";
 const LOGIN_EMAIL_KEY = "qwik_login_email";
 const RESET_TOKEN_KEY = "qwik_reset_token";
 const DEV_TEST_TOKENS = new Set(["test-token", "dev-test-token"]);
@@ -73,6 +74,18 @@ export function clearToken() {
   localStorage.removeItem(TOKEN_KEY);
 }
 
+export function getRole() {
+  return localStorage.getItem(ROLE_KEY);
+}
+
+export function setRole(role: string) {
+  localStorage.setItem(ROLE_KEY, role);
+}
+
+export function clearRole() {
+  localStorage.removeItem(ROLE_KEY);
+}
+
 // ===== Email & Reset Token Management =====
 export function setLoginEmail(email: string) {
   localStorage.setItem(LOGIN_EMAIL_KEY, email);
@@ -105,6 +118,7 @@ export function clearResetToken() {
  */
 export function clearAllAuthData() {
   clearToken();
+  clearRole();
   clearLoginEmail();
   clearResetToken();
 }

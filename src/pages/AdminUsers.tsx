@@ -2,6 +2,7 @@ import { useEffect, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import AdminLayout from '../components/admin/AdminLayout';
 import { useToast } from '../context/ToastContext';
+import { apiUrl } from '../services/api';
 
 interface User {
   id: string;
@@ -30,7 +31,7 @@ export default function AdminUsers() {
 
   const fetchUsers = async () => {
     try {
-      const response = await fetch('http://localhost:4000/api/admin/users', {
+      const response = await fetch(apiUrl('/admin/users'), {
         headers: {
           'Authorization': `Bearer ${localStorage.getItem('qwik_token')}`,
         },
@@ -53,7 +54,7 @@ export default function AdminUsers() {
     if (!confirm('Are you sure you want to ban this user?')) return;
 
     try {
-      const response = await fetch(`http://localhost:4000/api/admin/users/${userId}/ban`, {
+      const response = await fetch(apiUrl(`/admin/users/${userId}/ban`), {
         method: 'POST',
         headers: {
           'Authorization': `Bearer ${localStorage.getItem('qwik_token')}`,

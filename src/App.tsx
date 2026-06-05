@@ -1,5 +1,6 @@
 import { Route, Routes } from "react-router-dom";
 import { ROUTES } from "./constants/routes";
+import { AdminRoute } from "./components/auth/AdminRoute";
 import { ProtectedRoute } from "./components/auth/ProtectedRoute";
 import SignInPage from "./pages/SignInPage";
 import HomePage from "./pages/HomePage";
@@ -115,10 +116,10 @@ export default function App() {
       <Route path={ROUTES.PREMIUM_PLAN_PAYMENT} element={<PremiumPlanPaymentPage />} />
 
       {/* Admin Dashboard */}
-      <Route path="/admin" element={<ProtectedRoute><AdminDashboard /></ProtectedRoute>} />
-      <Route path="/admin/users" element={<ProtectedRoute><AdminUsers /></ProtectedRoute>} />
-      <Route path="/admin/ads" element={<ProtectedRoute><AdminAds /></ProtectedRoute>} />
-      <Route path="/admin/reports" element={<ProtectedRoute><AdminReports /></ProtectedRoute>} />
+      <Route path="/admin" element={<AdminRoute><AdminDashboard /></AdminRoute>} />
+      <Route path="/admin/users" element={<AdminRoute><AdminUsers /></AdminRoute>} />
+      <Route path="/admin/ads" element={<AdminRoute><AdminAds /></AdminRoute>} />
+      <Route path="/admin/reports" element={<AdminRoute><AdminReports /></AdminRoute>} />
 
       {/* Error Pages */}
       <Route path={ROUTES.NOT_FOUND} element={<NotFoundPage />} />

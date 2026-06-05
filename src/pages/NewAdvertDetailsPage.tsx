@@ -1,5 +1,40 @@
+import { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { SiteFooter, SiteHeader } from "../components/AppShell";
+import { api } from "../services/api";
+import type { Category } from "../types";
+
+const POST_DRAFT_KEY = "qwik_post_draft";
+
+type PostDraft = {
+  title?: string;
+  description?: string;
+  imageUrls?: string[];
+  price?: string;
+  negotiable?: boolean;
+  categoryId?: string;
+  brand?: string;
+  model?: string;
+  condition?: string;
+  color?: string;
+  location?: string;
+  exchangeAvailable?: boolean;
+};
+
+function readDraft(): PostDraft {
+  if (typeof window === "undefined") return {};
+  try {
+    const raw = window.sessionStorage.getItem(POST_DRAFT_KEY);
+    return raw ? (JSON.parse(raw) as PostDraft) : {};
+  } catch {
+    return {};
+  }
+}
+
+function writeDraft(draft: PostDraft) {
+  if (typeof window === "undefined") return;
+  window.sessionStorage.setItem(POST_DRAFT_KEY, JSON.stringify(draft));
+}
 
 function ChevronDownIcon() {
   return (
@@ -18,12 +53,27 @@ function ChevronDownIcon() {
   );
 }
 
-function InputField({ label, placeholder }: { label: string; placeholder: string }) {
+function InputField({
+  label,
+  placeholder,
+  value,
+  onChange,
+}: {
+  label: string;
+  placeholder: string;
+  value: string;
+  onChange: (value: string) => void;
+}) {
   return (
     <label className="block">
       <span className="mb-2 block text-[16px] text-[#9c98a5]">{label}</span>
       <div className="flex h-[50px] items-center justify-between rounded-[10px] border border-[#e1e0e6] px-3 text-[16px] leading-none text-[#afacb8] sm:h-[52px] sm:text-[16px]">
-        <span>{placeholder}</span>
+        <input
+          className="w-full bg-transparent text-[#1f1d27] outline-none placeholder:text-[#afacb8]"
+          placeholder={placeholder}
+          value={value}
+          onChange={(event) => onChange(event.target.value)}
+        />
         <ChevronDownIcon />
       </div>
     </label>
@@ -32,6 +82,47 @@ function InputField({ label, placeholder }: { label: string; placeholder: string
 
 export default function NewAdvertDetailsPage() {
   const navigate = useNavigate();
+  const [price, setPrice] = useState("");
+  const [negotiable, setNegotiable] = useState(true);
+  const [categoryId, setCategoryId] = useState("");
+  const [brand, setBrand] = useState("");
+  const [model, setModel] = useState("");
+  const [categories, setCategories] = useState<Category[]>([]);
+  const [error, setError] = useState<string | null>(null);
+
+  useEffect(() => {
+    const draft = readDraft();
+    setPrice(draft.price || "");
+    setNegotiable(draft.negotiable ?? true);
+    setCategoryId(draft.categoryId || "");
+    setBrand(draft.brand || "");
+    setModel(draft.model || "");
+
+    const loadCategories = async () => {
+      try {
+        const response = await api.categories();
+        setCategories(response.data);
+      } catch (err) {
+        setError(err instanceof Error ? err.message : "Failed to load categories");
+      }
+    };
+
+    void loadCategories();
+  }, []);
+
+  const canProceed = Number(price) > 0 && categoryId;
+
+  const handleNext = () => {
+    writeDraft({
+      ...readDraft(),
+      price,
+      negotiable,
+      categoryId,
+      brand: brand.trim(),
+      model: model.trim(),
+    });
+    navigate("/post-details");
+  };
 
   return (
     <div className="min-h-screen bg-page text-ink">
@@ -58,6 +149,8 @@ export default function NewAdvertDetailsPage() {
                 inputMode="numeric"
                 className="h-[50px] w-full rounded-[10px] border border-[#e1e0e6] bg-transparent px-3 text-[16px] text-[#afacb8] outline-none sm:h-[52px] sm:text-[16px]"
                 placeholder="₦ 0.0"
+                value={price}
+                onChange={(event) => setPrice(event.target.value.replace(/[^\d.]/g, ""))}
               />
             </label>
 
@@ -65,21 +158,40 @@ export default function NewAdvertDetailsPage() {
               <input
                 type="checkbox"
                 className="h-5 w-5 rounded border border-[#c9c7d2]"
-                defaultChecked
+                checked={negotiable}
+                onChange={(event) => setNegotiable(event.target.checked)}
               />
               <span>Negotiable</span>
             </label>
 
             <div className="mt-4 space-y-4">
-              <InputField label="Category" placeholder="What time of item is it?" />
-              <InputField label="Brand" placeholder="Who's the creator?" />
-              <InputField label="Model" placeholder="What's the model?" />
+              <label className="block">
+                <span className="mb-2 block text-[16px] text-[#9c98a5]">Category</span>
+                <div className="flex h-[50px] items-center justify-between rounded-[10px] border border-[#e1e0e6] px-3 text-[16px] leading-none text-[#afacb8] sm:h-[52px] sm:text-[16px]">
+                  <select
+                    className="w-full bg-transparent text-[#1f1d27] outline-none"
+                    value={categoryId}
+                    onChange={(event) => setCategoryId(event.target.value)}
+                  >
+                    <option value="">What type of item is it?</option>
+                    {categories.map((category) => (
+                      <option key={category.id} value={category.id}>{category.name}</option>
+                    ))}
+                  </select>
+                  <ChevronDownIcon />
+                </div>
+              </label>
+              <InputField label="Brand" placeholder="Who's the creator?" value={brand} onChange={setBrand} />
+              <InputField label="Model" placeholder="What's the model?" value={model} onChange={setModel} />
             </div>
+
+            {error && <p className="mt-4 text-[15px] text-[#d14343]">{error}</p>}
 
             <button
               type="button"
+              onClick={handleNext}
               className="mt-4 h-[48px] w-full rounded-[10px] bg-[#e1e1e6] text-[16px] text-[#c3c1cb]"
-              disabled
+              disabled={!canProceed}
             >
               Next
             </button>

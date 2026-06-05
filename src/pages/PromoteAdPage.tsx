@@ -3,14 +3,13 @@ import { SiteFooter, SiteHeader } from "../components/AppShell";
 
 function DayPill({ label, active = false }: { label: string; active?: boolean }) {
   return (
-    <button
+    <span
       className={`rounded-[10px] px-3 py-1 text-[15px] ${
         active ? "bg-[#ff9a12] text-white" : "bg-badge-bg text-[#ff9715]"
       }`}
-      type="button"
     >
       {label}
-    </button>
+    </span>
   );
 }
 
@@ -38,7 +37,7 @@ export default function PromoteAdPage() {
               Choose one of the following options to boost your ad. Boosted ads get displayed first above others.
             </p>
 
-            <button className="mb-5 flex h-[50px] w-full items-center justify-between rounded-[10px] border-2 border-orange px-3.5 text-[15px] text-[#8f8c98] sm:text-[16px]">
+            <button type="button" className="mb-5 flex h-[50px] w-full items-center justify-between rounded-[10px] border-2 border-orange px-3.5 text-[15px] text-[#8f8c98] sm:text-[16px]">
               <span>Standard ad</span>
               <span className="text-[#d7d7de]">Free</span>
             </button>
@@ -74,6 +73,7 @@ export default function PromoteAdPage() {
             </button>
 
             <button
+              type="button"
               onClick={() => navigate("/post")}
               className="h-[50px] w-full rounded-[11px] bg-gradient-to-r from-amber to-orange text-[16px] text-white shadow-glow sm:text-[18px]"
             >

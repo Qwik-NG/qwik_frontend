@@ -6,6 +6,7 @@ import { UserAvatar } from "../components/ui/UserAvatar";
 import { useToast } from "../context/ToastContext";
 import { formatMemberSince } from "../lib/currentUser";
 import { getToken } from "../services/auth";
+import { apiUrl } from "../services/api";
 
 function LocationPin({ className = "h-5 w-5" }: { className?: string }) {
   return (
@@ -73,21 +74,21 @@ export default function ProductDetailsPage() {
         if (!id) throw new Error("No product ID provided");
         
         // Fetch main ad
-        const response = await fetch(`http://localhost:4000/api/ads/${id}`);
+        const response = await fetch(apiUrl(`/ads/${id}`));
         if (!response.ok) throw new Error("Failed to fetch product");
         const result = await response.json();
         setAd(result.data);
 
         // Fetch similar ads
         const categoryId = result.data.categoryId;
-        const similarResponse = await fetch(`http://localhost:4000/api/ads?pageSize=4&categoryId=${categoryId}`);
+        const similarResponse = await fetch(apiUrl(`/ads?pageSize=4&categoryId=${categoryId}`));
         if (similarResponse.ok) {
           const similarResult = await similarResponse.json();
           setSimilarAds(similarResult.data.filter((item: any) => item.id !== id).slice(0, 4));
         }
 
         // Fetch reviews
-        const reviewsResponse = await fetch(`http://localhost:4000/api/ads/${id}/reviews`);
+        const reviewsResponse = await fetch(apiUrl(`/ads/${id}/reviews`));
         if (reviewsResponse.ok) {
           const reviewsResult = await reviewsResponse.json();
           setReviews(reviewsResult.data || []);
@@ -112,7 +113,7 @@ export default function ProductDetailsPage() {
         showError("Please log in to post a review");
         return;
       }
-      const response = await fetch(`http://localhost:4000/api/ads/${id}/reviews`, {
+      const response = await fetch(apiUrl(`/ads/${id}/reviews`), {
         method: "POST",
         headers: { 
           "Content-Type": "application/json",
@@ -144,7 +145,7 @@ export default function ProductDetailsPage() {
         return;
       }
       const method = isSaved ? "DELETE" : "POST";
-      const response = await fetch(`http://localhost:4000/api/ads/${id}/save`, { 
+      const response = await fetch(apiUrl(`/ads/${id}/save`), { 
         method,
         headers: { "Authorization": `Bearer ${token}` }
       });
@@ -160,7 +161,7 @@ export default function ProductDetailsPage() {
 
   const handleMarkUnavailable = async () => {
     try {
-      const response = await fetch(`http://localhost:4000/api/ads/${id}/mark-unavailable`, {
+      const response = await fetch(apiUrl(`/ads/${id}/mark-unavailable`), {
         method: "PATCH",
         headers: { "Content-Type": "application/json" },
       });
@@ -182,7 +183,7 @@ export default function ProductDetailsPage() {
         showError("Please log in to report ads");
         return;
       }
-      const response = await fetch(`http://localhost:4000/api/ads/${id}/report`, {
+      const response = await fetch(apiUrl(`/ads/${id}/report`), {
         method: "POST",
         headers: { 
           "Content-Type": "application/json",
@@ -197,6 +198,28 @@ export default function ProductDetailsPage() {
       console.error("Error reporting ad:", err);
       showError("Unable to send your report right now");
     }
+  };
+
+  const handleChatSeller = () => {
+    const token = getToken();
+    if (!token) {
+      alert("Please log in to chat with the seller");
+      return;
+    }
+
+    if (!ad?.user?.id) {
+      alert("Seller information is unavailable for this ad");
+      return;
+    }
+
+    const params = new URLSearchParams({
+      recipient: ad.user.id,
+      ad: ad.id,
+      seller: ad.user.fullName || "Seller",
+      title: ad.title,
+    });
+
+    navigate(`/messages?${params.toString()}`);
   };
 
   if (loading) return <div className="min-h-screen bg-page text-ink flex items-center justify-center"><p>Loading...</p></div>;
@@ -264,7 +287,7 @@ export default function ProductDetailsPage() {
               <div className="flex items-center gap-3">
                 <button 
                   className="h-[44px] rounded-[8px] bg-gradient-to-r from-amber to-orange px-4 text-[16px] text-white shadow-glow transition-all duration-200 hover:opacity-95 active:scale-[0.99] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#ffb357] focus-visible:ring-offset-2 focus-visible:ring-offset-white"
-                  onClick={() => navigate("/make-offer")} 
+                  onClick={handleChatSeller} 
                   type="button"
                 >
                   Chat Seller

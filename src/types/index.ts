@@ -99,6 +99,10 @@ export interface AdCreatePayload {
   price: number;
   location: string;
   imageUrls: string[];
+  brand?: string;
+  model?: string;
+  condition?: string;
+  specifications?: Record<string, unknown>;
 }
 
 export interface AdUpdatePayload extends Partial<AdCreatePayload> {
@@ -131,6 +135,11 @@ export interface Message {
 
 export interface Conversation {
   id: string;
+  ad?: {
+    id: string;
+    title: string;
+    images: Array<{ id?: string; url: string }>;
+  };
   participants: User[];
   lastMessage?: Message;
   lastMessageAt?: string;
@@ -141,6 +150,7 @@ export interface Conversation {
 export interface ConversationCreatePayload {
   recipientId: string;
   message: string;
+  adId?: string;
 }
 
 export interface MessageSendPayload {

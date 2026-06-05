@@ -1,6 +1,7 @@
 import { useEffect, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import AdminLayout from '../components/admin/AdminLayout';
+import { apiUrl } from '../services/api';
 import {
   Users,
   Package,
@@ -32,7 +33,7 @@ export default function AdminDashboard() {
 
   const fetchStats = async () => {
     try {
-      const response = await fetch('http://localhost:4000/api/admin/stats', {
+      const response = await fetch(apiUrl('/admin/stats'), {
         headers: {
           'Authorization': `Bearer ${localStorage.getItem('qwik_token')}`,
         },

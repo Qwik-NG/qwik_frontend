@@ -1,9 +1,45 @@
 import type { ReactNode } from "react";
+import { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { SiteFooter, SiteHeader } from "../components/AppShell";
-import { QwikLogo } from "../components/ui/QwikLogo";
-import { IconButton } from "../components/ui/IconButton";
-import Toggle from "../components/ui/Toggle";
+import { api } from "../services/api";
+
+const POST_DRAFT_KEY = "qwik_post_draft";
+
+type PostDraft = {
+  title?: string;
+  description?: string;
+  imageUrls?: string[];
+  price?: string;
+  negotiable?: boolean;
+  categoryId?: string;
+  brand?: string;
+  model?: string;
+  condition?: string;
+  color?: string;
+  location?: string;
+  exchangeAvailable?: boolean;
+};
+
+function readDraft(): PostDraft {
+  if (typeof window === "undefined") return {};
+  try {
+    const raw = window.sessionStorage.getItem(POST_DRAFT_KEY);
+    return raw ? (JSON.parse(raw) as PostDraft) : {};
+  } catch {
+    return {};
+  }
+}
+
+function writeDraft(draft: PostDraft) {
+  if (typeof window === "undefined") return;
+  window.sessionStorage.setItem(POST_DRAFT_KEY, JSON.stringify(draft));
+}
+
+function clearDraft() {
+  if (typeof window === "undefined") return;
+  window.sessionStorage.removeItem(POST_DRAFT_KEY);
+}
 
 function SearchIcon() {
   return (
@@ -215,9 +251,13 @@ function Footer() {
 function TextField({
   label,
   placeholder,
+  value,
+  onChange,
 }: {
   label: string;
   placeholder: string;
+  value: string;
+  onChange: (value: string) => void;
 }) {
   return (
     <label className="block">
@@ -228,13 +268,83 @@ function TextField({
         type="text"
         className="h-[54px] w-full rounded-[9px] border-2 border-card bg-white px-[16px] text-[17px] text-ink outline-none placeholder:text-[#a4a0aa] focus:border-orange"
         placeholder={placeholder}
+        value={value}
+        onChange={(event) => onChange(event.target.value)}
       />
     </label>
   );
 }
 
+function Toggle({ enabled, onToggle }: { enabled: boolean; onToggle: () => void }) {
+
+  return (
+    <button
+      className={`flex h-[24px] w-[44px] items-center rounded-full p-[2px] transition ${enabled ? "justify-end bg-gradient-to-r from-amber/30 to-orange/20" : "justify-start bg-card"}`}
+      onClick={onToggle}
+      type="button"
+    >
+      <span
+        className={`h-[20px] w-[20px] rounded-full ${enabled ? "bg-gradient-to-r from-amber to-orange" : "bg-muted"}`}
+      />
+    </button>
+  );
+}
 export default function PostDetailsPage() {
   const navigate = useNavigate();
+  const [condition, setCondition] = useState("");
+  const [color, setColor] = useState("");
+  const [location, setLocation] = useState("");
+  const [exchangeAvailable, setExchangeAvailable] = useState(true);
+  const [submitting, setSubmitting] = useState(false);
+  const [error, setError] = useState<string | null>(null);
+
+  useEffect(() => {
+    const draft = readDraft();
+    setCondition(draft.condition || "");
+    setColor(draft.color || "");
+    setLocation(draft.location || "");
+    setExchangeAvailable(draft.exchangeAvailable ?? true);
+  }, []);
+
+  const handleSubmit = async () => {
+    const draft = readDraft();
+
+    if (!draft.title || !draft.description || !draft.categoryId || !draft.price || !draft.imageUrls?.length) {
+      setError("Please complete the previous steps first.");
+      return;
+    }
+
+    try {
+      setSubmitting(true);
+      setError(null);
+
+      const response = await api.createAd({
+        categoryId: draft.categoryId,
+        title: draft.title,
+        description: draft.description,
+        price: Number(draft.price),
+        location: location.trim(),
+        imageUrls: draft.imageUrls,
+        brand: draft.brand,
+        model: draft.model,
+        condition: condition.trim(),
+        specifications: {
+          color: color.trim(),
+          negotiable: draft.negotiable ?? true,
+          exchangeAvailable,
+        },
+      });
+
+      clearDraft();
+      navigate(`/product-details/${response.data.id}`);
+    } catch (err) {
+      setError(err instanceof Error ? err.message : "Failed to create advert");
+    } finally {
+      setSubmitting(false);
+    }
+  };
+
+  const canSubmit = condition.trim().length > 0 && color.trim().length > 0 && location.trim().length > 0 && !submitting;
 
   return (
     <div className="min-h-screen bg-page font-outfit text-ink">
@@ -260,22 +370,30 @@ export default function PostDetailsPage() {
             <TextField
               label="Condition"
               placeholder="Is it new, used, which?"
+              value={condition}
+              onChange={setCondition}
             />
-            <TextField label="Colour" placeholder="What's the colour?" />
-            <TextField label="Location" placeholder="Where do you live?" />
+            <TextField label="Colour" placeholder="What's the colour?" value={color} onChange={setColor} />
+            <TextField label="Location" placeholder="Where do you live?" value={location} onChange={setLocation} />
           </div>
 
           <div className="mt-[26px] flex items-center justify-between gap-4">
             <span className="text-[16px] text-[#9c98a5]">
               Exchange available
             </span>
-            <Toggle size="sm" defaultChecked ariaLabelChecked="Disable exchange availability" ariaLabelUnchecked="Enable exchange availability" className="bg-card" />
+            <Toggle enabled={exchangeAvailable} onToggle={() => setExchangeAvailable((value) => !value)} />
           </div>
+
+          {error && <p className="mt-[20px] text-[15px] text-[#d14343]">{error}</p>}
 
           <button
             type="button"
+            onClick={() => {
+              writeDraft({ ...readDraft(), condition: condition.trim(), color: color.trim(), location: location.trim(), exchangeAvailable });
+              void handleSubmit();
+            }}
             className="mt-[26px] h-[56px] w-full rounded-[9px] bg-card text-[18px] text-[#b9b6be]"
-            disabled
+            disabled={!canSubmit}
           >
             Next
           </button>

@@ -2,6 +2,7 @@ import { useEffect, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import AdminLayout from '../components/admin/AdminLayout';
 import { useToast } from '../context/ToastContext';
+import { apiUrl } from '../services/api';
 
 interface Report {
   id: string;
@@ -32,7 +33,7 @@ export default function AdminReports() {
 
   const fetchReports = async () => {
     try {
-      const response = await fetch('http://localhost:4000/api/admin/reports', {
+      const response = await fetch(apiUrl('/admin/reports'), {
         headers: {
           'Authorization': `Bearer ${localStorage.getItem('qwik_token')}`,
         },
@@ -53,7 +54,7 @@ export default function AdminReports() {
 
   const handleUpdateStatus = async (reportId: string, newStatus: string) => {
     try {
-      const response = await fetch(`http://localhost:4000/api/admin/reports/${reportId}`, {
+      const response = await fetch(apiUrl(`/admin/reports/${reportId}`), {
         method: 'PATCH',
         headers: {
           'Authorization': `Bearer ${localStorage.getItem('qwik_token')}`,

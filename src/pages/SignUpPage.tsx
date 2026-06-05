@@ -3,6 +3,7 @@ import { useNavigate } from "react-router-dom";
 import { api } from "../services/api";
 import { useToast } from "../context/ToastContext";
 import { setToken } from "../services/auth";
+import { setRole, setToken } from "../services/auth";
 import FormInput from "../components/ui/FormInput";
 import FormButton from "../components/ui/FormButton";
 
@@ -74,6 +75,8 @@ export default function SignUpPage() {
                 setIsSubmitting(true);
                 const res = await api.register({ email: email.trim().toLowerCase(), password, fullName: fullName.trim(), phone: phone.trim() });
                 setToken(res.data.token);
+                success("Account created successfully");
+                setRole(res.data.user.role);
                 success("Account created successfully");
                 navigate("/welcome");
               } catch (error) {

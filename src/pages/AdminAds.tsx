@@ -2,6 +2,7 @@ import { useEffect, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import AdminLayout from '../components/admin/AdminLayout';
 import { useToast } from '../context/ToastContext';
+import { apiUrl } from '../services/api';
 
 interface Ad {
   id: string;
@@ -38,7 +39,7 @@ export default function AdminAds() {
 
   const fetchAds = async () => {
     try {
-      const response = await fetch('http://localhost:4000/api/admin/ads', {
+      const response = await fetch(apiUrl('/admin/ads'), {
         headers: {
           'Authorization': `Bearer ${localStorage.getItem('qwik_token')}`,
         },
@@ -61,7 +62,7 @@ export default function AdminAds() {
     if (!confirm('Are you sure you want to delete this ad?')) return;
 
     try {
-      const response = await fetch(`http://localhost:4000/api/admin/ads/${adId}`, {
+      const response = await fetch(apiUrl(`/admin/ads/${adId}`), {
         method: 'DELETE',
         headers: {
           'Authorization': `Bearer ${localStorage.getItem('qwik_token')}`,

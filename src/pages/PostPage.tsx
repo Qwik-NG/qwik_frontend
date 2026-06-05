@@ -1,10 +1,40 @@
-import type { ReactNode } from "react";
+import { useEffect, useRef, useState, type ReactNode } from "react";
 import { useNavigate } from "react-router-dom";
 import { SiteFooter, SiteHeader } from "../components/AppShell";
-import { QwikLogo } from "../components/ui/QwikLogo";
-import { IconButton } from "../components/ui/IconButton";
-
 import { PlusIcon } from "../components/icons/CoreIcons";
+import { API_BASE_URL, apiUrl } from "../services/api";
+
+const POST_DRAFT_KEY = "qwik_post_draft";
+
+type PostDraft = {
+  title?: string;
+  description?: string;
+  imageUrls?: string[];
+  price?: string;
+  negotiable?: boolean;
+  categoryId?: string;
+  brand?: string;
+  model?: string;
+  condition?: string;
+  color?: string;
+  location?: string;
+  exchangeAvailable?: boolean;
+};
+
+function readDraft(): PostDraft {
+  if (typeof window === "undefined") return {};
+  try {
+    const raw = window.sessionStorage.getItem(POST_DRAFT_KEY);
+    return raw ? (JSON.parse(raw) as PostDraft) : {};
+  } catch {
+    return {};
+  }
+}
+
+function writeDraft(draft: PostDraft) {
+  if (typeof window === "undefined") return;
+  window.sessionStorage.setItem(POST_DRAFT_KEY, JSON.stringify(draft));
+}
 
 function SearchIcon() {
   return (
@@ -125,7 +155,17 @@ function Footer() {
   );
 }
 
-function TextField({ label, placeholder }: { label: string; placeholder: string }) {
+function TextField({
+  label,
+  placeholder,
+  value,
+  onChange,
+}: {
+  label: string;
+  placeholder: string;
+  value: string;
+  onChange: (value: string) => void;
+}) {
   return (
     <label className="block">
       <span className="mb-[10px] block text-[16px] leading-none text-[#9c98a5]">{label}</span>
@@ -133,6 +173,8 @@ function TextField({ label, placeholder }: { label: string; placeholder: string 
         type="text"
         className="h-[54px] w-full rounded-[9px] border-2 border-card bg-white px-[16px] text-[17px] text-ink outline-none placeholder:text-[#a4a0aa] focus:border-orange"
         placeholder={placeholder}
+        value={value}
+        onChange={(event) => onChange(event.target.value)}
       />
     </label>
   );
@@ -140,6 +182,60 @@ function TextField({ label, placeholder }: { label: string; placeholder: string 
 
 export default function PostPage() {
   const navigate = useNavigate();
+  const fileInputRef = useRef<HTMLInputElement>(null);
+  const [title, setTitle] = useState("");
+  const [description, setDescription] = useState("");
+  const [imageUrls, setImageUrls] = useState<string[]>([]);
+  const [uploading, setUploading] = useState(false);
+  const [error, setError] = useState<string | null>(null);
+
+  useEffect(() => {
+    const draft = readDraft();
+    setTitle(draft.title || "");
+    setDescription(draft.description || "");
+    setImageUrls(draft.imageUrls || []);
+  }, []);
+
+  const handleFilesSelected = async (files: FileList | null) => {
+    if (!files || files.length === 0) return;
+
+    try {
+      setUploading(true);
+      setError(null);
+      const formData = new FormData();
+      Array.from(files).forEach((file) => formData.append("images", file));
+
+      const response = await fetch(apiUrl("/uploads/images"), {
+        method: "POST",
+        body: formData,
+      });
+      const payload = await response.json();
+
+      if (!response.ok || !payload.success) {
+        throw new Error(payload.message || "Failed to upload images");
+      }
+
+      const uploadedUrls = ((payload.data?.urls || []) as string[]).map((url) => new URL(url, API_BASE_URL).toString());
+      const nextImageUrls = [...imageUrls, ...uploadedUrls].slice(0, 10);
+      setImageUrls(nextImageUrls);
+      writeDraft({ ...readDraft(), title, description, imageUrls: nextImageUrls });
+    } catch (err) {
+      setError(err instanceof Error ? err.message : "Failed to upload images");
+    } finally {
+      setUploading(false);
+      if (fileInputRef.current) {
+        fileInputRef.current.value = "";
+      }
+    }
+  };
+
+  const handleNext = () => {
+    const nextDraft = { ...readDraft(), title: title.trim(), description: description.trim(), imageUrls };
+    writeDraft(nextDraft);
+    navigate("/new-advert-details");
+  };
+
+  const canProceed = title.trim().length > 0 && description.trim().length > 0 && imageUrls.length > 0 && !uploading;
 
   return (
     <div className="min-h-screen bg-page font-outfit text-ink">
@@ -156,24 +252,55 @@ export default function PostPage() {
             Add a minimum of 6 pictures - your first picture will be used as the cover
           </p>
 
-          <button type="button" className="mt-[18px] grid h-[104px] w-[104px] place-items-center rounded-[12px] border-2 border-card text-[#b9b6be]" aria-label="Add picture">
+          <input
+            ref={fileInputRef}
+            type="file"
+            accept="image/*"
+            multiple
+            className="hidden"
+            onChange={(event) => void handleFilesSelected(event.target.files)}
+          />
+
+          <button
+            type="button"
+            onClick={() => fileInputRef.current?.click()}
+            className="mt-[18px] grid h-[104px] w-[104px] place-items-center rounded-[12px] border-2 border-card text-[#b9b6be]"
+          >
             <PlusIcon />
           </button>
 
-          <p className="mt-[20px] text-[17px] leading-none text-[#b9b6be]">jpg, gif & png, 5MB max</p>
+          {imageUrls.length > 0 && (
+            <div className="mt-[16px] flex flex-wrap gap-2">
+              {imageUrls.map((url) => (
+                <img key={url} src={url} alt="Uploaded ad" className="h-[64px] w-[64px] rounded-[12px] object-cover" />
+              ))}
+            </div>
+          )}
+
+          <p className="mt-[20px] text-[17px] leading-none text-[#b9b6be]">
+            {uploading ? "Uploading images..." : "jpg, gif & png, 5MB max"}
+          </p>
+          {error && <p className="mt-[12px] text-[15px] text-[#d14343]">{error}</p>}
 
           <div className="mt-[34px] space-y-[28px]">
-            <TextField label="Title" placeholder="What are you selling?" />
+            <TextField label="Title" placeholder="What are you selling?" value={title} onChange={setTitle} />
             <label className="block">
               <span className="mb-[10px] block text-[16px] leading-none text-[#9c98a5]">Description</span>
               <textarea
                 className="h-[92px] w-full resize-none rounded-[9px] border-2 border-card bg-white px-[16px] py-[14px] text-[17px] leading-[1.45] text-ink outline-none placeholder:text-[#a4a0aa] focus:border-orange"
                 placeholder="A brief description of what it is that you're selling..."
+                value={description}
+                onChange={(event) => setDescription(event.target.value)}
               />
             </label>
           </div>
 
-          <button type="button" className="mt-[26px] h-[56px] w-full rounded-[9px] bg-card text-[18px] text-[#b9b6be]" disabled>
+          <button
+            type="button"
+            onClick={handleNext}
+            className="mt-[26px] h-[56px] w-full rounded-[9px] bg-card text-[18px] text-[#b9b6be] disabled:cursor-not-allowed"
+            disabled={!canProceed}
+          >
             Next
           </button>
         </section>

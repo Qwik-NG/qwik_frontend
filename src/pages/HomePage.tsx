@@ -17,6 +17,7 @@ import {
   SportsIcon,
 } from "../components/icons/CategoryIcons";
 import { ImagePlaceholder } from "../components/ui/ImagePlaceholder";
+import { apiUrl } from "../services/api";
 
 type Category = {
   name: string;
@@ -59,7 +60,7 @@ export default function HomePage() {
     const fetchAds = async () => {
       try {
         setLoading(true);
-        const response = await fetch("http://localhost:4000/api/ads?pageSize=12");
+        const response = await fetch(apiUrl("/ads?pageSize=12"));
         if (!response.ok) throw new Error("Failed to fetch ads");
         const result = await response.json();
         setProducts(result.data || []);

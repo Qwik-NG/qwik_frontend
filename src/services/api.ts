@@ -151,17 +151,15 @@ export const api = {
   // isSaved: (id: string) => request<{ saved: boolean }>(`/ads/${id}/saved`),
 
   // ===== Messaging Endpoints =====
-  // TODO: getConversations - fetch user's conversations list
-  // getConversations: () => request<Conversation[]>("/conversations"),
+  getConversations: () => request<Conversation[]>("/conversations"),
 
-  // TODO: getConversation - fetch conversation with message history
-  // getConversation: (id: string) => request<Conversation>(`/conversations/${id}`),
+  getConversation: (id: string) => request<Conversation>(`/conversations/${id}`),
 
-  // TODO: createConversation - start new conversation
-  // createConversation: (payload: ConversationCreatePayload) => request<Conversation>("/conversations", { method: "POST", body: JSON.stringify(payload) }),
+  createConversation: (payload: ConversationCreatePayload) =>
+    request<Conversation>("/conversations", { method: "POST", body: JSON.stringify(payload) }),
 
-  // TODO: sendMessage - send message in conversation
-  // sendMessage: (payload: MessageSendPayload) => request<Message>("/messages", { method: "POST", body: JSON.stringify(payload) }),
+  sendMessage: (payload: MessageSendPayload) =>
+    request<Message>("/messages", { method: "POST", body: JSON.stringify(payload) }),
 
   // ===== Notification Endpoints =====
   // TODO: getNotifications - fetch user's notifications

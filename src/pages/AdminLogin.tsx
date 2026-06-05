@@ -1,7 +1,7 @@
 import { useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { api } from "../services/api";
-import { setToken } from "../services/auth";
+import { setRole, setToken } from "../services/auth";
 import FormInput from "../components/ui/FormInput";
 import FormButton from "../components/ui/FormButton";
 
@@ -26,6 +26,7 @@ export default function AdminLogin() {
       }
       
       setToken(res.data.token);
+      setRole(res.data.user.role);
       navigate("/admin");
     } catch (err) {
       setError(err instanceof Error ? err.message : "Login failed");
