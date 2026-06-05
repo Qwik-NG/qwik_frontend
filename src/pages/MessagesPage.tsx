@@ -64,7 +64,6 @@ function ConversationItem({
         active ? "bg-white shadow-[0_18px_38px_rgba(10,10,24,0.08)]" : "bg-transparent"
       }`}
       onClick={onSelect}
-      type="button"
     >
       <img
         src={otherParticipant?.profile?.avatarUrl || "https://via.placeholder.com/120"}
@@ -230,7 +229,7 @@ export default function MessagesPage() {
         </div>
 
         <section className="mx-auto grid w-full max-w-[980px] grid-cols-1 overflow-hidden rounded-[28px] bg-white p-[14px] shadow-[0_24px_60px_rgba(10,10,24,0.04)] lg:grid-cols-[300px_minmax(0,1fr)] lg:p-[18px] xl:max-w-[1040px]">
-          <aside className={`min-w-0 border-card px-[4px] py-[6px] ${isMobileChatOpen ? "hidden" : "block border-b"} lg:block lg:border-b-0 lg:border-r lg:pr-[18px]`}>
+          <aside className="min-w-0 border-card px-[4px] py-[6px] border-b lg:border-b-0 lg:border-r lg:pr-[18px]">
             <div className="mb-[14px] flex items-center justify-between px-[12px]">
               <h2 className="text-[20px] font-semibold text-ink">Chats</h2>
               <span className="rounded-full bg-amber/10 px-3 py-1 text-[13px] text-orange">{conversations.length}</span>

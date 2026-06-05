@@ -2,7 +2,6 @@ import { useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { api } from "../services/api";
 import { useToast } from "../context/ToastContext";
-import { getLoginEmail, setToken } from "../services/auth";
 import { getLoginEmail, setRole, setToken } from "../services/auth";
 import FormInput from "../components/ui/FormInput";
 import FormCheckbox from "../components/ui/FormCheckbox";
