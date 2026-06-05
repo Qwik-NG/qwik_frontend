@@ -9,6 +9,7 @@ export type ListingCardItem = {
   location: string;
   image?: string;
   imageFit?: "cover" | "contain";
+  verifiedSeller?: boolean;
 };
 
 type ListingCardProps = {
@@ -22,6 +23,7 @@ type ListingCardProps = {
   clampTitleLines?: number;
   clampDescriptionLines?: number;
   clampLocationLines?: number;
+  imageHeightClassName?: string;
 };
 
 const clampStyle = (lines?: number): CSSProperties | undefined =>
@@ -40,15 +42,25 @@ export default function ListingCard({
   clampTitleLines,
   clampDescriptionLines,
   clampLocationLines,
+  imageHeightClassName = "h-[170px] sm:h-[260px]",
 }: ListingCardProps) {
   const interactiveClasses = interactive ? "cursor-pointer transition hover:scale-[1.01]" : "";
 
   return (
     <article
-      className={`rounded-[22px] bg-white p-2.5 sm:rounded-[26px] sm:p-4 ${interactiveClasses} ${className}`.trim()}
+      className={`rounded-[24px] border border-[#ddd9d2] bg-white p-3 shadow-[0_8px_24px_rgba(31,29,39,0.05)] sm:rounded-[28px] sm:p-4 ${interactiveClasses} ${className}`.trim()}
       onClick={onClick}
     >
-      <div className="h-[170px] w-full overflow-hidden rounded-[14px] bg-white sm:h-[260px] sm:rounded-[18px]">
+      <div className={`relative w-full overflow-hidden rounded-[18px] bg-white sm:rounded-[22px] ${imageHeightClassName}`.trim()}>
+        {item.verifiedSeller ? (
+          <span className="absolute left-3 top-3 z-10 inline-flex items-center gap-1 rounded-[8px] bg-[#73b784] px-2.5 py-1 text-[11px] font-medium text-white sm:left-4 sm:top-4">
+            <svg viewBox="0 0 24 24" className="h-3.5 w-3.5" fill="none" stroke="currentColor" strokeWidth="2" aria-hidden="true">
+              <path d="M12 3 5 6v6c0 5 3.4 8.8 7 10 3.6-1.2 7-5 7-10V6l-7-3Z" />
+              <path d="m9.4 12.1 1.8 1.8 3.8-4.1" />
+            </svg>
+            <span>Verified Seller</span>
+          </span>
+        ) : null}
         {item.image ? (
           <img
             src={item.image}
@@ -59,28 +71,28 @@ export default function ListingCard({
           <ImagePlaceholder className="rounded-[14px] sm:rounded-[18px]" />
         )}
       </div>
-      <div className="px-0 pb-1 pt-3 sm:pt-4">
+      <div className="px-0 pb-1 pt-4 sm:pt-5">
         <div className="flex items-center justify-between gap-2">
-          <h3 className="m-0 whitespace-nowrap text-[16px] font-semibold leading-none sm:text-[20px]">{item.price}</h3>
+          <h3 className="m-0 whitespace-nowrap text-[18px] font-semibold leading-none text-[#1f1d27] sm:text-[20px]">{item.price}</h3>
           {showBadge && (
-            <span className="rounded-[10px] bg-badge-bg px-2 py-1 text-[12px] text-[#ff9715] sm:rounded-[12px] sm:px-3 sm:py-1.5 sm:text-[15px]">
+            <span className="rounded-[10px] bg-badge-bg px-2 py-1 text-[12px] text-[#ff9715] sm:rounded-[12px] sm:px-3 sm:py-1.5 sm:text-[14px]">
               {badgeLabel}
             </span>
           )}
         </div>
         <h4
-          className="mb-1.5 mt-3 text-[15px] font-medium leading-[1.25] sm:mt-4 sm:text-[18px]"
+          className="mb-2 mt-4 text-[15px] font-medium leading-[1.32] text-[#1f1d27] sm:text-[18px]"
           style={clampStyle(clampTitleLines)}
         >
           {item.title}
         </h4>
         <p
-          className={`mb-2 text-[13px] leading-[1.35] sm:mb-3 sm:text-[15px] sm:leading-[1.4] ${descriptionClassName}`}
+          className={`mb-3 text-[13px] leading-[1.45] sm:mb-4 sm:text-[15px] ${descriptionClassName}`}
           style={clampStyle(clampDescriptionLines)}
         >
           {item.description}
         </p>
-        <small className="flex items-center gap-1 text-[13px] text-[#4b4a54] sm:text-[15px]">
+        <small className="flex items-center gap-1 text-[13px] text-[#5f5d6c] sm:text-[15px]">
           <LocationPin className="h-4 w-4" />
           <span style={clampStyle(clampLocationLines)}>{item.location}</span>
         </small>

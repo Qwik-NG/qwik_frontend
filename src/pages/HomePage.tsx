@@ -2,6 +2,7 @@ import type { ComponentType } from "react";
 import { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { SiteFooter, SiteHeader } from "../components/AppShell";
+import { buildSearchResultsRoute } from "../constants/routes";
 import {
   AgricultureIcon,
   BeautyIcon,
@@ -83,7 +84,13 @@ export default function HomePage() {
           <button
             key={item.name}
             className="text-center"
-            onClick={() => navigate(item.name === "More" ? "/search-results-list" : "/search-results")}
+            onClick={() =>
+              navigate(
+                item.name === "More"
+                  ? "/search-results-list"
+                  : buildSearchResultsRoute(item.name === "Properties" ? "Home" : item.name),
+              )
+            }
             type="button"
           >
             <div className="mx-auto mb-1.5 grid h-[68px] w-[68px] place-items-center overflow-hidden rounded-full" style={{ background: item.tone }}>
