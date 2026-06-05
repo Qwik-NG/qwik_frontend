@@ -1,6 +1,7 @@
 import { useEffect, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import AdminLayout from '../components/admin/AdminLayout';
+import { useToast } from '../context/ToastContext';
 
 interface Report {
   id: string;
@@ -20,6 +21,7 @@ interface Report {
 
 export default function AdminReports() {
   const navigate = useNavigate();
+  const { error: showError, success } = useToast();
   const [reports, setReports] = useState<Report[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState('');
@@ -61,11 +63,11 @@ export default function AdminReports() {
       });
 
       if (response.ok) {
-        alert('Report status updated');
+        success('Report status updated');
         fetchReports();
       }
     } catch (err) {
-      alert('Error updating report');
+      showError('Error updating report');
     }
   };
 
@@ -123,13 +125,15 @@ export default function AdminReports() {
                       <>
                         <button
                           onClick={() => handleUpdateStatus(report.id, 'RESOLVED')}
-                          className="text-green-600 hover:text-green-800 font-medium"
+                          className="font-medium text-green-600 transition-colors duration-200 hover:text-green-800 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#ffb357] focus-visible:ring-offset-2 focus-visible:ring-offset-white"
+                          type="button"
                         >
                           Resolve
                         </button>
                         <button
                           onClick={() => handleUpdateStatus(report.id, 'DISMISSED')}
-                          className="text-gray-600 hover:text-gray-800 font-medium"
+                          className="font-medium text-gray-600 transition-colors duration-200 hover:text-gray-800 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#ffb357] focus-visible:ring-offset-2 focus-visible:ring-offset-white"
+                          type="button"
                         >
                           Dismiss
                         </button>

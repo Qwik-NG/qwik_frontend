@@ -20,11 +20,11 @@ export default function FormButton({
   const isDisabledState = disabled || isLoading;
 
   const baseButtonClass =
-    "h-[48px] w-full rounded-btn text-[14px] font-medium transition-colors";
+    "h-[48px] w-full rounded-btn text-[14px] font-medium transition-all duration-200 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#ffb357] focus-visible:ring-offset-2 focus-visible:ring-offset-white";
 
   const stateClass = isDisabledState
     ? "bg-[#d8d8dc] text-[#b5b4be] cursor-not-allowed"
-    : "bg-[#3f5db2] text-white hover:bg-[#354aa3]";
+    : "bg-[#3f5db2] text-white hover:bg-[#354aa3] active:scale-[0.99]";
 
   return (
     <div className={containerClassName}>

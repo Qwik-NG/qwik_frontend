@@ -2,9 +2,11 @@ import { useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { FacebookIcon, GoogleIcon } from "../components/icons/SocialIcons";
 import AuthLayout from "../components/layout/AuthLayout";
+import { useToast } from "../context/ToastContext";
 
 export default function SignInPage() {
   const navigate = useNavigate();
+  const { info } = useToast();
   const [email, setEmail] = useState("");
   const [acceptedTerms, setAcceptedTerms] = useState(false);
   const isEmailValid = /\S+@\S+\.\S+/.test(email);
@@ -20,16 +22,18 @@ export default function SignInPage() {
       headerClassName="px-[68px] pt-[46px]"
     >
           <button
-            className="mb-[10px] flex h-[48px] w-full items-center justify-center gap-2 rounded-[10px] bg-[#d9d9dc] text-[14px] text-[#20212a]"
-            onClick={() => window.alert("Google auth UI clicked")}
+            className="mb-[10px] flex h-[48px] w-full items-center justify-center gap-2 rounded-[10px] bg-[#d9d9dc] text-[14px] text-[#20212a] transition-all duration-200 hover:bg-[#cfcfd3] active:scale-[0.99] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#ffb357] focus-visible:ring-offset-2 focus-visible:ring-offset-white"
+            onClick={() => info("Google auth UI clicked")}
+            type="button"
           >
             <GoogleIcon />
             <span>Continue with Google</span>
           </button>
 
           <button
-            className="mb-[16px] flex h-[48px] w-full items-center justify-center gap-2 rounded-[10px] bg-[#3f5db2] text-[14px] text-white"
-            onClick={() => window.alert("Facebook auth UI clicked")}
+            className="mb-[16px] flex h-[48px] w-full items-center justify-center gap-2 rounded-[10px] bg-[#3f5db2] text-[14px] text-white transition-all duration-200 hover:bg-[#354aa3] active:scale-[0.99] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#ffb357] focus-visible:ring-offset-2 focus-visible:ring-offset-white"
+            onClick={() => info("Facebook auth UI clicked")}
+            type="button"
           >
             <FacebookIcon />
             <span>Continue with Facebook</span>
@@ -62,9 +66,10 @@ export default function SignInPage() {
           <button
             disabled={!canContinue}
             onClick={() => navigate("/")}
-            className={`h-[48px] w-full rounded-[10px] text-[14px] ${
-              canContinue ? "bg-[#3f5db2] text-white" : "bg-[#d8d8dc] text-[#b5b4be]"
+            className={`h-[48px] w-full rounded-[10px] text-[14px] transition-all duration-200 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#ffb357] focus-visible:ring-offset-2 focus-visible:ring-offset-white ${
+              canContinue ? "bg-[#3f5db2] text-white hover:bg-[#354aa3] active:scale-[0.99]" : "bg-[#d8d8dc] text-[#b5b4be]"
             }`}
+            type="button"
           >
             Next
           </button>

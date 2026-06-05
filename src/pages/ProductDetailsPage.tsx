@@ -1,6 +1,7 @@
 import { useState, useEffect } from "react";
 import { useNavigate, useParams } from "react-router-dom";
 import { SiteFooter, SiteHeader } from "../components/AppShell";
+import { useToast } from "../context/ToastContext";
 import { getToken } from "../services/auth";
 
 function LocationPin({ className = "h-5 w-5" }: { className?: string }) {
@@ -43,6 +44,7 @@ function ProductCard({ item, onClick }: { item: SimilarAd; onClick: () => void }
 
 export default function ProductDetailsPage() {
   const navigate = useNavigate();
+  const { error: showError, info, success } = useToast();
   const { id } = useParams<{ id: string }>();
   const [ad, setAd] = useState<any>(null);
   const [similarAds, setSimilarAds] = useState<SimilarAd[]>([]);
@@ -98,7 +100,7 @@ export default function ProductDetailsPage() {
       setLoadingReviews(true);
       const token = getToken();
       if (!token) {
-        alert("Please log in to post a review");
+        showError("Please log in to post a review");
         return;
       }
       const response = await fetch(`http://localhost:4000/api/ads/${id}/reviews`, {
@@ -115,10 +117,11 @@ export default function ProductDetailsPage() {
         setReviewText("");
         setReviewRating(5);
       } else {
-        alert("Failed to post review");
+        showError("Failed to post review");
       }
     } catch (err) {
       console.error("Error posting review:", err);
+      showError("Unable to post your review right now");
     } finally {
       setLoadingReviews(false);
     }
@@ -128,7 +131,7 @@ export default function ProductDetailsPage() {
     try {
       const token = getToken();
       if (!token) {
-        alert("Please log in to save products");
+        showError("Please log in to save products");
         return;
       }
       const method = isSaved ? "DELETE" : "POST";
@@ -138,9 +141,11 @@ export default function ProductDetailsPage() {
       });
       if (response.ok) {
         setIsSaved(!isSaved);
+        success(isSaved ? "Product removed from saved items" : "Product saved");
       }
     } catch (err) {
       console.error("Error saving product:", err);
+      showError("Unable to update saved products right now");
     }
   };
 
@@ -151,10 +156,11 @@ export default function ProductDetailsPage() {
         headers: { "Content-Type": "application/json" },
       });
       if (response.ok) {
-        alert("Ad marked as unavailable");
+        info("Ad marked as unavailable");
       }
     } catch (err) {
       console.error("Error marking unavailable:", err);
+      showError("Unable to update this ad right now");
     }
   };
 
@@ -164,7 +170,7 @@ export default function ProductDetailsPage() {
     try {
       const token = getToken();
       if (!token) {
-        alert("Please log in to report ads");
+        showError("Please log in to report ads");
         return;
       }
       const response = await fetch(`http://localhost:4000/api/ads/${id}/report`, {
@@ -176,10 +182,11 @@ export default function ProductDetailsPage() {
         body: JSON.stringify({ reason }),
       });
       if (response.ok) {
-        alert("Thank you for your report. We'll review it shortly.");
+        success("Thank you for your report. We'll review it shortly.");
       }
     } catch (err) {
       console.error("Error reporting ad:", err);
+      showError("Unable to send your report right now");
     }
   };
 
@@ -236,14 +243,15 @@ export default function ProductDetailsPage() {
               <p className="mb-6 text-[18px] text-[#57b77a]">Check market price</p>
               <div className="flex items-center gap-3">
                 <button 
-                  className="h-[44px] rounded-[8px] bg-gradient-to-r from-amber to-orange px-4 text-[16px] text-white shadow-glow"
+                  className="h-[44px] rounded-[8px] bg-gradient-to-r from-amber to-orange px-4 text-[16px] text-white shadow-glow transition-all duration-200 hover:opacity-95 active:scale-[0.99] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#ffb357] focus-visible:ring-offset-2 focus-visible:ring-offset-white"
                   onClick={() => navigate("/make-offer")} 
                   type="button"
                 >
                   Chat Seller
                 </button>
                 <button 
-                  className="h-[44px] w-[44px] rounded-[8px] bg-white flex items-center justify-center border border-[#d9d7de]" 
+                  aria-label={isSaved ? "Remove product from saved items" : "Save product"}
+                  className="flex h-[44px] w-[44px] items-center justify-center rounded-[8px] border border-[#d9d7de] bg-white transition-all duration-200 hover:border-[#b9b6c2] hover:bg-[#f8f8fa] active:scale-[0.97] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#ffb357] focus-visible:ring-offset-2 focus-visible:ring-offset-white" 
                   onClick={handleSave}
                   type="button"
                 >
@@ -303,7 +311,7 @@ export default function ProductDetailsPage() {
                       <button
                         key={star}
                         onClick={() => setReviewRating(star)}
-                        className="text-[18px]"
+                        className="rounded-full px-1 text-[18px] transition-transform duration-150 hover:scale-110 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#ffb357] focus-visible:ring-offset-2 focus-visible:ring-offset-white"
                         type="button"
                       >
                         {star <= reviewRating ? "★" : "☆"}
@@ -311,7 +319,7 @@ export default function ProductDetailsPage() {
                     ))}
                   </div>
                   <button 
-                    className="h-7 w-7 rounded-full bg-[#ff9a00] text-white disabled:opacity-50"
+                    className="h-7 w-7 rounded-full bg-[#ff9a00] text-white transition-all duration-200 hover:bg-[#eb8e00] active:scale-[0.96] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#ffb357] focus-visible:ring-offset-2 focus-visible:ring-offset-white disabled:opacity-50"
                     onClick={handlePostReview}
                     disabled={loadingReviews || !reviewText.trim()}
                     type="button"
@@ -351,8 +359,8 @@ export default function ProductDetailsPage() {
               </div>
             </div>
             <div className="mt-4 flex gap-2">
-              <button className="h-10 rounded-[8px] bg-gradient-to-r from-amber to-orange px-4 text-white shadow-glow" onClick={() => navigate("/make-offer")} type="button">Make an offer</button>
-              <button className="h-10 rounded-[8px] bg-badge-bg px-4 text-[#ff9715]" type="button">Call</button>
+              <button className="h-10 rounded-[8px] bg-gradient-to-r from-amber to-orange px-4 text-white shadow-glow transition-all duration-200 hover:opacity-95 active:scale-[0.99] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#ffb357] focus-visible:ring-offset-2 focus-visible:ring-offset-white" onClick={() => navigate("/make-offer")} type="button">Make an offer</button>
+              <button className="h-10 rounded-[8px] bg-badge-bg px-4 text-[#ff9715] transition-colors duration-200 hover:bg-[#ffe2c5] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#ffb357] focus-visible:ring-offset-2 focus-visible:ring-offset-white" type="button">Call</button>
             </div>
           </div>
 
@@ -367,14 +375,14 @@ export default function ProductDetailsPage() {
             </ul>
             <div className="mt-4 flex gap-2">
               <button 
-                className="rounded-[8px] bg-badge-bg px-3 py-2 text-[#ff9715]" 
+                className="rounded-[8px] bg-badge-bg px-3 py-2 text-[#ff9715] transition-colors duration-200 hover:bg-[#ffe2c5] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#ffb357] focus-visible:ring-offset-2 focus-visible:ring-offset-white" 
                 onClick={handleMarkUnavailable}
                 type="button"
               >
                 Mark Unavailable
               </button>
               <button 
-                className="rounded-[8px] bg-[#ffe7e7] px-3 py-2 text-[#ff4e4e]" 
+                className="rounded-[8px] bg-[#ffe7e7] px-3 py-2 text-[#ff4e4e] transition-colors duration-200 hover:bg-[#ffdada] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#ffb357] focus-visible:ring-offset-2 focus-visible:ring-offset-white" 
                 onClick={handleReport}
                 type="button"
               >

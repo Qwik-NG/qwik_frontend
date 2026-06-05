@@ -2,12 +2,14 @@ import { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { SiteFooter, SiteHeader } from "../components/AppShell";
 import SettingsSidebar, { MobileSettingsMenu } from "../components/settings/SettingsSidebar";
+import { useToast } from "../context/ToastContext";
 import { api } from "../services/api";
 import { clearToken } from "../services/auth";
 import { getSettingsNavItems } from "../lib/settings-nav-config";
 
 export default function ProfileSettingsPage() {
   const navigate = useNavigate();
+  const { success, error: showError } = useToast();
   const [fullName, setFullName] = useState("");
   const [email, setEmail] = useState("");
   const [bio, setBio] = useState("");
@@ -87,13 +89,13 @@ export default function ProfileSettingsPage() {
               <label className="mb-2 block text-[15px] text-[#94919d]">Description</label>
               <textarea value={bio} onChange={(e) => setBio(e.target.value)} className="mb-5 h-[120px] w-full rounded-[10px] border border-[#dedde4] bg-transparent px-3 py-3 text-[15px] outline-none" placeholder="What does your company do?" />
 
-              <button className="h-[50px] w-full rounded-[10px] bg-gradient-to-r from-amber to-orange text-[16px] text-white shadow-glow" type="button" onClick={async () => {
+              <button className="h-[50px] w-full rounded-[10px] bg-gradient-to-r from-amber to-orange text-[16px] text-white shadow-glow transition-all duration-200 hover:opacity-95 active:scale-[0.99] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#ffb357] focus-visible:ring-offset-2 focus-visible:ring-offset-white" type="button" onClick={async () => {
                 try {
                   setLoading(true);
                   await api.updateMe({ fullName, bio });
-                  window.alert("Profile updated");
+                  success("Profile updated");
                 } catch (error) {
-                  window.alert(error instanceof Error ? error.message : "Failed to update profile");
+                  showError(error instanceof Error ? error.message : "Failed to update profile");
                 } finally {
                   setLoading(false);
                 }

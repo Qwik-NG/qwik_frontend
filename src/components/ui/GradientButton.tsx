@@ -13,7 +13,7 @@ export function GradientButton({
   children,
   ...props
 }: GradientButtonProps) {
-  const baseClasses = "bg-gradient-to-r from-amber to-orange text-white shadow-glow rounded-[8px] transition-opacity hover:opacity-90 disabled:opacity-50 disabled:cursor-not-allowed";
+  const baseClasses = "bg-gradient-to-r from-amber to-orange text-white shadow-glow rounded-[8px] transition-all duration-200 hover:opacity-95 active:scale-[0.99] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#ffb357] focus-visible:ring-offset-2 focus-visible:ring-offset-white disabled:opacity-50 disabled:cursor-not-allowed";
   
   const sizeClasses = variant === "compact" 
     ? "h-[48px] px-4 text-[14px]"

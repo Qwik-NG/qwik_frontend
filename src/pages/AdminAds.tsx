@@ -1,6 +1,7 @@
 import { useEffect, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import AdminLayout from '../components/admin/AdminLayout';
+import { useToast } from '../context/ToastContext';
 
 interface Ad {
   id: string;
@@ -26,6 +27,7 @@ interface Ad {
 
 export default function AdminAds() {
   const navigate = useNavigate();
+  const { error: showError, success } = useToast();
   const [ads, setAds] = useState<Ad[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState('');
@@ -67,11 +69,11 @@ export default function AdminAds() {
       });
 
       if (response.ok) {
-        alert('Ad deleted successfully');
+        success('Ad deleted successfully');
         fetchAds();
       }
     } catch (err) {
-      alert('Error deleting ad');
+      showError('Error deleting ad');
     }
   };
 
@@ -133,7 +135,8 @@ export default function AdminAds() {
                   <td className="px-6 py-4 text-sm">
                     <button
                       onClick={() => handleDeleteAd(ad.id)}
-                      className="text-red-600 hover:text-red-800 font-medium"
+                      className="font-medium text-red-600 transition-colors duration-200 hover:text-red-800 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#ffb357] focus-visible:ring-offset-2 focus-visible:ring-offset-white"
+                      type="button"
                     >
                       Delete
                     </button>

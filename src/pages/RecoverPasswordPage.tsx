@@ -1,12 +1,14 @@
 import { useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { api } from "../services/api";
+import { useToast } from "../context/ToastContext";
 import { setResetToken } from "../services/auth";
 import FormInput from "../components/ui/FormInput";
 import FormButton from "../components/ui/FormButton";
 
 export default function RecoverPasswordPage() {
   const navigate = useNavigate();
+  const { error: showError, info } = useToast();
   const [email, setEmail] = useState("");
   const [isSubmitting, setIsSubmitting] = useState(false);
   const canSend = /\S+@\S+\.\S+/.test(email);
@@ -14,12 +16,12 @@ export default function RecoverPasswordPage() {
   return (
     <div className="min-h-screen overflow-hidden bg-[#f3f3f5] font-outfit text-[#1f1f29]">
       <header className="flex items-center justify-between px-[60px] pt-[48px]">
-        <button onClick={() => navigate("/")} className="text-[36px] font-normal leading-none text-[#ff8300] sm:text-[40px]">
+        <button onClick={() => navigate("/")} className="text-[36px] font-normal leading-none text-[#ff8300] transition-opacity duration-200 hover:opacity-80 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#ffb357] focus-visible:ring-offset-2 focus-visible:ring-offset-[#f3f3f5] sm:text-[40px]" type="button">
           qwik
         </button>
         <p className="text-[16px] text-[#9a99a6]">
           New here?{" "}
-          <button className="text-[#ff8f00]" onClick={() => navigate("/signup")}>
+          <button className="text-[#ff8f00] transition-colors duration-200 hover:text-[#e67f00] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#ffb357] focus-visible:ring-offset-2 focus-visible:ring-offset-[#f3f3f5]" onClick={() => navigate("/signup")} type="button">
             Create an account
           </button>
         </p>
@@ -49,9 +51,10 @@ export default function RecoverPasswordPage() {
                 if (res.data?.resetToken) {
                   setResetToken(res.data.resetToken);
                 }
+                info("Reset instructions are ready. Continue to create a new password.");
                 navigate("/create-password");
               } catch (error) {
-                window.alert(error instanceof Error ? error.message : "Unable to send reset request");
+                showError(error instanceof Error ? error.message : "Unable to send reset request");
               } finally {
                 setIsSubmitting(false);
               }

@@ -1,6 +1,7 @@
 import { useEffect, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import AdminLayout from '../components/admin/AdminLayout';
+import { useToast } from '../context/ToastContext';
 
 interface User {
   id: string;
@@ -18,6 +19,7 @@ interface User {
 
 export default function AdminUsers() {
   const navigate = useNavigate();
+  const { error: showError, success } = useToast();
   const [users, setUsers] = useState<User[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState('');
@@ -59,11 +61,11 @@ export default function AdminUsers() {
       });
 
       if (response.ok) {
-        alert('User banned successfully');
+        success('User banned successfully');
         fetchUsers();
       }
     } catch (err) {
-      alert('Error banning user');
+      showError('Error banning user');
     }
   };
 
@@ -118,7 +120,8 @@ export default function AdminUsers() {
                     {user.role !== 'ADMIN' && (
                       <button
                         onClick={() => handleBanUser(user.id)}
-                        className="text-red-600 hover:text-red-800 font-medium"
+                        className="font-medium text-red-600 transition-colors duration-200 hover:text-red-800 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#ffb357] focus-visible:ring-offset-2 focus-visible:ring-offset-white"
+                        type="button"
                       >
                         Ban
                       </button>
