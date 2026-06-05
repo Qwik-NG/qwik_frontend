@@ -8,6 +8,11 @@ export const ROUTES = {
   // Home
   HOME: "/",
   ABOUT: "/about",
+  CAREER: "/career",
+  TERMS: "/terms",
+  BLOG: "/blog",
+  SUPPORT: "/support",
+  FAQS: "/faqs",
   
   // Authentication
   SIGNIN: "/signin",

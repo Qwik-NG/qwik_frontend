@@ -4,6 +4,11 @@ import { ProtectedRoute } from "./components/auth/ProtectedRoute";
 import SignInPage from "./pages/SignInPage";
 import HomePage from "./pages/HomePage";
 import AboutPage from "./pages/AboutPage";
+import CareerPage from "./pages/CareerPage";
+import TermsPage from "./pages/TermsPage";
+import BlogPage from "./pages/BlogPage";
+import SupportPage from "./pages/SupportPage";
+import FaqsPage from "./pages/FaqsPage";
 import SignUpPage from "./pages/SignUpPage";
 import WelcomePage from "./pages/WelcomePage";
 import LoginPage from "./pages/LoginPage";
@@ -49,6 +54,11 @@ export default function App() {
       {/* Home & Welcome */}
       <Route path={ROUTES.HOME} element={<HomePage />} />
       <Route path={ROUTES.ABOUT} element={<AboutPage />} />
+      <Route path={ROUTES.CAREER} element={<CareerPage />} />
+      <Route path={ROUTES.TERMS} element={<TermsPage />} />
+      <Route path={ROUTES.BLOG} element={<BlogPage />} />
+      <Route path={ROUTES.SUPPORT} element={<SupportPage />} />
+      <Route path={ROUTES.FAQS} element={<FaqsPage />} />
       <Route path={ROUTES.WELCOME} element={<WelcomePage />} />
 
       {/* Authentication & Access Control */}

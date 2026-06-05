@@ -6,6 +6,19 @@ import { ROUTES } from "../constants/routes";
 type NavigateTo = (to: string) => void;
 type HeaderIcon = "bell" | "bookmark" | "mail";
 
+function FooterDisabledButton({ children }: { children: ReactNode }) {
+  return (
+    <button
+      type="button"
+      disabled
+      aria-disabled="true"
+      className="mb-2.5 block cursor-not-allowed text-[14px] text-[#5f6071]/70"
+    >
+      {children}
+    </button>
+  );
+}
+
 function IconBox({
   children,
   onClick,
@@ -183,31 +196,31 @@ export function SiteFooter({ navigate }: { navigate: NavigateTo }) {
         >
           About Qwik
         </button>
-        <button onClick={() => navigate("/messages")} className="mb-2.5 block text-[14px] text-[#5f6071]">Career</button>
-        <button onClick={() => navigate("/signin")} className="mb-2.5 block text-[14px] text-[#5f6071]">Terms</button>
+        <button onClick={() => navigate(ROUTES.CAREER)} className="mb-2.5 block text-[14px] text-[#5f6071]">Career</button>
+        <button onClick={() => navigate(ROUTES.TERMS)} className="mb-2.5 block text-[14px] text-[#5f6071]">Terms</button>
       </div>
       <div className="col-span-1">
         <h5 className="mb-3.5 text-[18px] font-medium text-[#efeff5]">
           Resources
         </h5>
-        <button onClick={() => navigate("/search-results")} className="mb-2.5 block text-[14px] text-[#5f6071]">Blog</button>
-        <button onClick={() => navigate("/profile-settings")} className="mb-2.5 block text-[14px] text-[#5f6071]">Instagram</button>
-        <button onClick={() => navigate("/messages")} className="mb-2.5 block text-[14px] text-[#5f6071]">Youtube</button>
-        <button onClick={() => navigate("/notifications")} className="mb-2.5 block text-[14px] text-[#5f6071]">Twitter</button>
+        <button onClick={() => navigate(ROUTES.BLOG)} className="mb-2.5 block text-[14px] text-[#5f6071]">Blog</button>
+        <FooterDisabledButton>Instagram</FooterDisabledButton>
+        <FooterDisabledButton>Youtube</FooterDisabledButton>
+        <FooterDisabledButton>Twitter</FooterDisabledButton>
       </div>
       <div className="col-span-1">
         <h5 className="mb-3.5 text-[18px] font-medium text-[#efeff5]">
           Support
         </h5>
-        <button onClick={() => navigate("/messages")} className="mb-2.5 block text-[14px] text-[#5f6071]">help@qwik.ng</button>
-        <button onClick={() => navigate("/notifications")} className="mb-2.5 block text-[14px] text-[#5f6071]">FAQs</button>
+        <button onClick={() => navigate(ROUTES.SUPPORT)} className="mb-2.5 block text-[14px] text-[#5f6071]">help@qwik.ng</button>
+        <button onClick={() => navigate(ROUTES.FAQS)} className="mb-2.5 block text-[14px] text-[#5f6071]">FAQs</button>
       </div>
       <div className="col-span-2 sm:col-span-1">
         <h5 className="mb-3.5 text-[18px] font-medium text-[#efeff5]">
           Download
         </h5>
         <div className="flex gap-2.5 sm:flex-col sm:gap-2.5">
-          <button className="flex h-12 flex-1 items-center justify-center gap-2 rounded-[10px] bg-[#1b1a2f] px-2 text-[13px] text-[#76798d] sm:w-[160px] sm:flex-none sm:justify-start sm:px-4 sm:text-[14px]">
+          <button disabled aria-disabled="true" type="button" className="flex h-12 flex-1 cursor-not-allowed items-center justify-center gap-2 rounded-[10px] bg-[#1b1a2f] px-2 text-[13px] text-[#76798d]/80 sm:w-[160px] sm:flex-none sm:justify-start sm:px-4 sm:text-[14px]">
             <svg
               viewBox="0 0 24 24"
               className="h-5 w-5 fill-current text-[#666877]"
@@ -217,7 +230,7 @@ export function SiteFooter({ navigate }: { navigate: NavigateTo }) {
             </svg>
             <span>App Store</span>
           </button>
-          <button className="flex h-12 flex-1 items-center justify-center gap-2 rounded-[10px] bg-[#1b1a2f] px-2 text-[13px] text-[#76798d] sm:w-[160px] sm:flex-none sm:justify-start sm:px-4 sm:text-[14px]">
+          <button disabled aria-disabled="true" type="button" className="flex h-12 flex-1 cursor-not-allowed items-center justify-center gap-2 rounded-[10px] bg-[#1b1a2f] px-2 text-[13px] text-[#76798d]/80 sm:w-[160px] sm:flex-none sm:justify-start sm:px-4 sm:text-[14px]">
             <svg
               viewBox="0 0 24 24"
               className="h-5 w-5 fill-current text-[#666877]"
