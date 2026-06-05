@@ -23,14 +23,14 @@ export default function ChatSettingsPage() {
     <div className="min-h-screen bg-page text-ink">
       <SiteHeader navigate={navigate} />
 
-      <main className="mx-auto w-full max-w-[1728px] px-12 pb-20 pt-8">
+      <main className="mx-auto w-full max-w-[1728px] px-4 pb-20 pt-8 sm:px-6 lg:px-12">
         <div className="grid grid-cols-1 gap-6 xl:grid-cols-[310px_1fr]">
           <SettingsSidebar
             className="hidden md:block"
             items={getSettingsNavItems(navigate, "chat")}
           />
 
-          <section>
+          <section className="min-w-0">
             <div className="mb-4">
               <MobileSettingsMenu items={getSettingsNavItems(navigate, "chat")} label="Settings" />
             </div>
@@ -61,8 +61,8 @@ export default function ChatSettingsPage() {
               </div>
             </div>
 
-            <div className="mt-6 max-w-[760px]">
-              <div className="mb-10 flex flex-nowrap gap-5 text-[15px] sm:text-[17px]">
+            <div className="mt-6 max-w-[760px] max-w-full">
+              <div className="mb-10 flex flex-wrap gap-5 text-[15px] sm:text-[17px]">
                 <button className="whitespace-nowrap text-[#9794a1]" onClick={() => navigate("/profile-settings")} type="button">
                   Edit Profile
                 </button>

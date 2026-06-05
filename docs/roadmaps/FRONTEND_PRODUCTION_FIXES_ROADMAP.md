@@ -37,7 +37,9 @@ Status: Complete
 
 ## Phase 5 — Layout & Polish
 
+Status: Complete
+
 - Introduce a reusable global `PageLayout` wrapper where safe
 - Add CSS-only page transition polish
 - Clean up responsive inconsistencies
-- Clean up unused public design/reference assets
+

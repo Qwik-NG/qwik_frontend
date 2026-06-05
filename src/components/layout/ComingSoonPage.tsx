@@ -1,6 +1,6 @@
 import { useNavigate } from "react-router-dom";
-import { SiteFooter, SiteHeader } from "../AppShell";
 import { ROUTES } from "../../constants/routes";
+import PageLayout from "./PageLayout";
 
 function ArrowRightIcon() {
   return (
@@ -21,10 +21,7 @@ export default function ComingSoonPage({
   const navigate = useNavigate();
 
   return (
-    <div className="min-h-screen bg-page text-ink">
-      <SiteHeader navigate={navigate} />
-
-      <main className="mx-auto flex w-full max-w-[1728px] items-center justify-center px-4 py-12 sm:px-6 lg:min-h-[calc(100vh-360px)] lg:px-12 lg:py-20">
+    <PageLayout contentClassName="mx-auto flex w-full max-w-[1728px] items-center justify-center px-4 py-12 sm:px-6 lg:min-h-[calc(100vh-360px)] lg:px-12 lg:py-20">
         <section className="w-full max-w-[760px] rounded-[28px] border border-[#e7e4ec] bg-white px-6 py-10 text-center shadow-[0_18px_45px_rgba(17,12,46,0.05)] sm:px-10 sm:py-14">
           <div className="mx-auto flex h-[62px] w-[62px] items-center justify-center rounded-full bg-[#fff1db] text-[#ff7f1f]">
             <span className="text-[24px] font-semibold">Q</span>
@@ -41,9 +38,6 @@ export default function ComingSoonPage({
             <ArrowRightIcon />
           </button>
         </section>
-      </main>
-
-      <SiteFooter navigate={navigate} />
-    </div>
+    </PageLayout>
   );
 }

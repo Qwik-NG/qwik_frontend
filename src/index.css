@@ -8,6 +8,30 @@
   }
 }
 
+@layer utilities {
+  .page-layout-transition {
+    animation: page-layout-enter 220ms ease-out both;
+  }
+}
+
+@keyframes page-layout-enter {
+  from {
+    opacity: 0;
+    transform: translateY(8px);
+  }
+
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .page-layout-transition {
+    animation: none;
+  }
+}
+
 @media (max-width: 640px) {
   [class*="max-w-[1728px]"] {
     width: 100%;

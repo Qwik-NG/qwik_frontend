@@ -1,6 +1,6 @@
 import type { ReactNode } from "react";
 import { useNavigate } from "react-router-dom";
-import { SiteFooter, SiteHeader } from "../components/AppShell";
+import PageLayout from "../components/layout/PageLayout";
 import { ROUTES } from "../constants/routes";
 
 function ShieldIcon() {
@@ -211,10 +211,7 @@ export default function AboutPage() {
   const navigate = useNavigate();
 
   return (
-    <div className="min-h-screen bg-page text-ink">
-      <SiteHeader navigate={navigate} />
-
-      <main className="mx-auto w-full max-w-[1728px] px-4 pb-16 pt-8 sm:px-6 lg:px-12 lg:pb-24 lg:pt-10">
+    <PageLayout contentClassName="mx-auto w-full max-w-[1728px] px-4 pb-16 pt-8 sm:px-6 lg:px-12 lg:pb-24 lg:pt-10">
         <section className="grid items-center gap-8 lg:grid-cols-[minmax(0,1fr)_minmax(320px,520px)] lg:gap-12">
           <div className="min-w-0">
             <p className="text-[18px] font-medium text-[#ff7f1f]">ABOUT QWIK.NG</p>
@@ -404,9 +401,6 @@ export default function AboutPage() {
             </p>
           </div>
         </section>
-      </main>
-
-      <SiteFooter navigate={navigate} />
-    </div>
+    </PageLayout>
   );
 }

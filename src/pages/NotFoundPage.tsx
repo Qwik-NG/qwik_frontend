@@ -1,15 +1,12 @@
 import { useNavigate } from "react-router-dom";
-import { SiteFooter, SiteHeader } from "../components/AppShell";
+import PageLayout from "../components/layout/PageLayout";
 import { ROUTES } from "../constants/routes";
 
 export default function NotFoundPage() {
   const navigate = useNavigate();
 
   return (
-    <div className="min-h-screen flex flex-col bg-page font-outfit text-ink">
-      <SiteHeader navigate={navigate} />
-      
-      <main className="flex-1 mx-auto w-full max-w-[1512px] px-[24px] py-[80px] sm:px-[60px] flex flex-col items-center justify-center">
+    <PageLayout className="font-outfit" contentClassName="mx-auto flex w-full max-w-[1512px] flex-1 flex-col items-center justify-center px-[24px] py-[80px] sm:px-[60px]">
         <div className="text-center">
           <h1 className="text-[52px] sm:text-[64px] font-bold text-[#ff4e4e] mb-4">404</h1>
           <h2 className="text-[24px] sm:text-[32px] font-semibold text-ink mb-4">Page Not Found</h2>
@@ -32,9 +29,6 @@ export default function NotFoundPage() {
             </button>
           </div>
         </div>
-      </main>
-      
-      <SiteFooter navigate={navigate} />
-    </div>
+    </PageLayout>
   );
 }
