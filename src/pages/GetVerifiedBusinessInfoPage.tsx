@@ -102,12 +102,14 @@ export default function GetVerifiedBusinessInfoPage() {
               <div className="mt-4 grid grid-cols-1 gap-x-8 md:grid-cols-2">
                 <FormInput
                   label="Business Name"
+                  type="text"
                   placeholder="Enter your business name"
                   labelClassName="text-[14px] font-medium text-[#1f1d27]"
                   inputClassName="bg-white border-[#c9c7d2]"
                 />
                 <FormInput
                   label="Store Name"
+                  type="text"
                   placeholder="Enter your store name"
                   labelClassName="text-[14px] font-medium text-[#1f1d27]"
                   inputClassName="bg-white border-[#c9c7d2]"
@@ -142,18 +144,21 @@ export default function GetVerifiedBusinessInfoPage() {
               <div className="mt-4 grid grid-cols-1 gap-x-8 md:grid-cols-2">
                 <FormInput
                   label="Email Address"
+                  type="email"
                   placeholder="Enter email address"
                   labelClassName="text-[14px] font-medium text-[#1f1d27]"
                   inputClassName="bg-white border-[#c9c7d2]"
                 />
                 <FormInput
                   label="Phone Number"
+                  type="tel"
                   placeholder="Enter phone number"
                   labelClassName="text-[14px] font-medium text-[#1f1d27]"
                   inputClassName="bg-white border-[#c9c7d2]"
                 />
                 <FormInput
                   label="Business Address"
+                  type="text"
                   placeholder="Enter your business address"
                   labelClassName="text-[14px] font-medium text-[#1f1d27]"
                   inputClassName="bg-white border-[#c9c7d2]"
@@ -187,6 +192,7 @@ export default function GetVerifiedBusinessInfoPage() {
               <div className="mt-4 grid grid-cols-1 gap-x-8 md:grid-cols-2">
                 <FormInput
                   label="NIN Number"
+                  type="text"
                   placeholder="Enter your NIN number"
                   labelClassName="text-[14px] font-medium text-[#1f1d27]"
                   inputClassName="bg-white border-[#c9c7d2]"
@@ -195,7 +201,7 @@ export default function GetVerifiedBusinessInfoPage() {
                   <label className="mb-2 block text-[14px] font-medium text-[#1f1d27]">Date of Birth</label>
                   <div className="relative">
                     <input
-                      type="text"
+                      type="date"
                       placeholder="Select date of birth"
                       className="h-[48px] w-full rounded-btn border border-[#c9c7d2] bg-white px-3 pr-10 text-[14px] text-[#20212a] placeholder:text-[#a3a2ad] focus:outline-none"
                     />

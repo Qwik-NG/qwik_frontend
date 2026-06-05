@@ -54,6 +54,8 @@ export default function NewAdvertDetailsPage() {
             <label className="block">
               <span className="mb-2 block text-[16px] text-[#9c98a5]">Price</span>
               <input
+                type="number"
+                inputMode="numeric"
                 className="h-[50px] w-full rounded-[10px] border border-[#e1e0e6] bg-transparent px-3 text-[16px] text-[#afacb8] outline-none sm:h-[52px] sm:text-[16px]"
                 placeholder="₦ 0.0"
               />
@@ -75,6 +77,7 @@ export default function NewAdvertDetailsPage() {
             </div>
 
             <button
+              type="button"
               className="mt-4 h-[48px] w-full rounded-[10px] bg-[#e1e1e6] text-[16px] text-[#c3c1cb]"
               disabled
             >

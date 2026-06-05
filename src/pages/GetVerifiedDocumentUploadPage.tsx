@@ -1,3 +1,4 @@
+import { useRef, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { SiteFooter, SiteHeader } from "../components/AppShell";
 import SettingsSidebar, { MobileSettingsMenu } from "../components/settings/SettingsSidebar";
@@ -41,7 +42,16 @@ function StepDot({ label, status }: { label: string; status: "completed" | "acti
   );
 }
 
+function formatFileSize(size: number) {
+  if (size < 1024) return `${size}B`;
+  if (size < 1024 * 1024) return `${(size / 1024).toFixed(1)}KB`;
+  return `${(size / (1024 * 1024)).toFixed(1)}MB`;
+}
+
 function UploadCard({ title, description }: { title: string; description: string }) {
+  const inputRef = useRef<HTMLInputElement | null>(null);
+  const [selectedFile, setSelectedFile] = useState<{ name: string; size: string } | null>(null);
+
   return (
     <div className="rounded-[14px] border border-dashed border-[#c9c7d2] bg-[#f8f8fa] px-5 py-6 text-center">
       <div className="mx-auto mb-3 flex h-[48px] w-[48px] items-center justify-center rounded-full bg-white">
@@ -53,9 +63,34 @@ function UploadCard({ title, description }: { title: string; description: string
       <button
         className="mt-4 h-[36px] rounded-[8px] border border-[#ff8b2c] px-4 text-[13px] font-medium text-[#ff8b2c]"
         type="button"
+        aria-label={`Choose file for ${title}`}
+        onClick={() => inputRef.current?.click()}
       >
         Choose File
       </button>
+      <input
+        ref={inputRef}
+        type="file"
+        accept=".pdf,.jpg,.jpeg,.png"
+        className="hidden"
+        onChange={(event) => {
+          const file = event.target.files?.[0];
+          if (!file) {
+            setSelectedFile(null);
+            return;
+          }
+
+          setSelectedFile({
+            name: file.name,
+            size: formatFileSize(file.size),
+          });
+        }}
+      />
+      {selectedFile ? (
+        <p className="mt-3 text-[12px] text-[#1f1d27]">
+          {selectedFile.name} ({selectedFile.size})
+        </p>
+      ) : null}
     </div>
   );
 }

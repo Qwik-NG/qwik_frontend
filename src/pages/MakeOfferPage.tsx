@@ -1,6 +1,11 @@
 import { useState } from "react";
 
-const quickPrices = ["₦15,000,000", "₦13,000,000", "₦10,000,000", "₦8,000,000"];
+const quickPrices = [
+  { label: "₦15,000,000", value: "15000000" },
+  { label: "₦13,000,000", value: "13000000" },
+  { label: "₦10,000,000", value: "10000000" },
+  { label: "₦8,000,000", value: "8000000" },
+];
 
 export default function MakeOfferPage() {
   const [selected, setSelected] = useState<string | null>(null);
@@ -12,28 +17,30 @@ export default function MakeOfferPage() {
         <h1 className="mb-6 text-center text-[36px] font-medium text-[#23222b]">Make an offer</h1>
 
         <div className="mb-6 grid grid-cols-2 gap-3">
-          {quickPrices.map((p) => (
+          {quickPrices.map((priceOption) => (
             <button
-              key={p}
+              key={priceOption.label}
               type="button"
               onClick={() => {
-                setSelected(p);
-                setPrice(p);
+                setSelected(priceOption.label);
+                setPrice(priceOption.value);
               }}
               className={`h-[48px] rounded-[10px] text-[18px] ${
-                selected === p ? "bg-[#ffe6bf] text-[#ff970f]" : "bg-[#f6efe4] text-[#ff970f]"
+                selected === priceOption.label ? "bg-[#ffe6bf] text-[#ff970f]" : "bg-[#f6efe4] text-[#ff970f]"
               }`}
             >
-              {p}
+              {priceOption.label}
             </button>
           ))}
         </div>
 
         <label className="mb-2 block text-[33px] text-[#9b98a4]">Enter Price</label>
         <input
+          type="number"
+          inputMode="numeric"
           value={price}
           onChange={(e) => setPrice(e.target.value)}
-          placeholder="What are you selling?"
+          placeholder="Enter your offer amount"
           className="mb-6 h-[48px] w-full rounded-[10px] border border-[#e2e0e8] bg-[#f7f7f9] px-3 text-[17px] text-[#85828e] outline-none"
         />
 

@@ -130,6 +130,7 @@ function TextField({ label, placeholder }: { label: string; placeholder: string 
     <label className="block">
       <span className="mb-[10px] block text-[16px] leading-none text-[#9c98a5]">{label}</span>
       <input
+        type="text"
         className="h-[54px] w-full rounded-[9px] border-2 border-card bg-white px-[16px] text-[17px] text-ink outline-none placeholder:text-[#a4a0aa] focus:border-orange"
         placeholder={placeholder}
       />
@@ -155,7 +156,7 @@ export default function PostPage() {
             Add a minimum of 6 pictures - your first picture will be used as the cover
           </p>
 
-          <button className="mt-[18px] grid h-[104px] w-[104px] place-items-center rounded-[12px] border-2 border-card text-[#b9b6be]">
+          <button type="button" className="mt-[18px] grid h-[104px] w-[104px] place-items-center rounded-[12px] border-2 border-card text-[#b9b6be]" aria-label="Add picture">
             <PlusIcon />
           </button>
 
@@ -172,7 +173,7 @@ export default function PostPage() {
             </label>
           </div>
 
-          <button className="mt-[26px] h-[56px] w-full rounded-[9px] bg-card text-[18px] text-[#b9b6be]" disabled>
+          <button type="button" className="mt-[26px] h-[56px] w-full rounded-[9px] bg-card text-[18px] text-[#b9b6be]" disabled>
             Next
           </button>
         </section>

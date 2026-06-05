@@ -11,6 +11,7 @@ type FormInputProps = InputHTMLAttributes<HTMLInputElement> & {
 export default function FormInput({
   label,
   error,
+  type = "text",
   containerClassName = "",
   labelClassName = "",
   inputClassName = "",
@@ -23,7 +24,7 @@ export default function FormInput({
   return (
     <div className={`mb-[14px] ${containerClassName}`}>
       {label && <label className={`mb-2 block text-[14px] text-[#94919d] ${labelClassName}`}>{label}</label>}
-      <input {...props} className={`${baseInputClass} ${inputClassName} ${className}`} />
+      <input type={type} {...props} className={`${baseInputClass} ${inputClassName} ${className}`} />
       {error && <p className="mt-1 text-[12px] text-red-500">{error}</p>}
     </div>
   );

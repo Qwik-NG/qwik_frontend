@@ -82,7 +82,7 @@ export default function ProfileSettingsPage() {
               </div>
 
               <label className="mb-2 block text-[15px] text-[#94919d]">Business Name</label>
-              <input value={fullName} onChange={(e) => setFullName(e.target.value)} className="mb-5 h-12 w-full rounded-[10px] border border-[#dedde4] bg-transparent px-3 text-[15px] outline-none" placeholder="Enter your full name" />
+              <input type="text" value={fullName} onChange={(e) => setFullName(e.target.value)} className="mb-5 h-12 w-full rounded-[10px] border border-[#dedde4] bg-transparent px-3 text-[15px] outline-none" placeholder="Enter your full name" />
 
               <label className="mb-2 block text-[15px] text-[#94919d]">Description</label>
               <textarea value={bio} onChange={(e) => setBio(e.target.value)} className="mb-5 h-[120px] w-full rounded-[10px] border border-[#dedde4] bg-transparent px-3 py-3 text-[15px] outline-none" placeholder="What does your company do?" />

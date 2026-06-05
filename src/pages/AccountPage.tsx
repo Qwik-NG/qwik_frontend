@@ -164,7 +164,7 @@ function Field({ label, placeholder, type = "text", icon }: { label: string; pla
 
 function SaveButton({ className = "" }: { className?: string }) {
   return (
-    <button className={`h-[49px] w-full max-w-[322px] rounded-[8px] bg-gradient-to-r from-amber to-orange text-[16px] text-white shadow-glow ${className}`}>
+    <button type="button" className={`h-[49px] w-full max-w-[322px] rounded-[8px] bg-gradient-to-r from-amber to-orange text-[16px] text-white shadow-glow ${className}`}>
       Save
     </button>
   );
@@ -175,8 +175,10 @@ function Toggle() {
 
   return (
     <button
+      type="button"
       className={`flex h-[42px] w-[78px] items-center rounded-full p-[4px] transition ${enabled ? "justify-end bg-gradient-to-r from-amber/30 to-orange/20" : "justify-start bg-card"}`}
       onClick={() => setEnabled((value) => !value)}
+      aria-label={enabled ? "Disable receive messages" : "Enable receive messages"}
     >
       <span className={`h-[34px] w-[34px] rounded-full ${enabled ? "bg-gradient-to-r from-amber to-orange" : "bg-muted"}`} />
     </button>
@@ -189,7 +191,7 @@ function ProfileSummary() {
       <div className="flex min-w-0 flex-col items-start gap-[16px] sm:flex-row sm:items-center">
         <div className="relative shrink-0">
           <img src={avatarUrl} alt="Sherry James" className="h-[84px] w-[84px] rounded-full bg-[#df8ca2] object-cover" />
-          <button className="absolute bottom-0 right-[-2px] grid h-[28px] w-[28px] place-items-center rounded-full border border-card bg-white text-ink">
+          <button type="button" className="absolute bottom-0 right-[-2px] grid h-[28px] w-[28px] place-items-center rounded-full border border-card bg-white text-ink" aria-label="Edit profile picture">
             <PencilIcon />
           </button>
         </div>
@@ -226,6 +228,7 @@ function Tabs({ activeTab, onChange }: { activeTab: TabKey; onChange: (tab: TabK
     <div className="-mx-1 flex gap-[28px] overflow-x-auto px-1 pb-1">
       {tabs.map((tab) => (
         <button
+          type="button"
           key={tab.key}
           className={`shrink-0 text-[16px] leading-none sm:text-[18px] ${activeTab === tab.key ? "text-ink" : "text-[#9c98a5]"}`}
           onClick={() => onChange(tab.key)}
@@ -244,10 +247,10 @@ function EditProfileForm() {
         <Field label="Full Name" placeholder="Enter your full name" />
         <Field label="Email" placeholder="@mail" type="email" />
         <Field label="Password" placeholder="*********" type="password" icon={<EyeIcon />} />
-        <Field label="Phone Number" placeholder="0800 000 0000" />
+        <Field label="Phone Number" placeholder="0800 000 0000" type="tel" />
         <Field label="Address" placeholder="Where do you live?" />
       </div>
-      <button className="mt-[24px] flex w-full items-center justify-between text-left text-[16px] text-red-600 underline">
+      <button type="button" className="mt-[24px] flex w-full items-center justify-between text-left text-[16px] text-red-600 underline">
         Delete my account
         <ArrowRightIcon />
       </button>
@@ -385,6 +388,7 @@ export default function AccountPage() {
             {menuItems.map((item) => (
               <button
                 key={item.label}
+                type="button"
                 onClick={() => (item.to ? navigate(item.to) : undefined)}
                 className={`flex h-[72px] items-center gap-[18px] rounded-[14px] px-[18px] text-[16px] ${
                   item.active ? "bg-page text-ink" : "text-[#9c98a5]"

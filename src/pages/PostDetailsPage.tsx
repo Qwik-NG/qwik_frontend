@@ -225,6 +225,7 @@ function TextField({
         {label}
       </span>
       <input
+        type="text"
         className="h-[54px] w-full rounded-[9px] border-2 border-card bg-white px-[16px] text-[17px] text-ink outline-none placeholder:text-[#a4a0aa] focus:border-orange"
         placeholder={placeholder}
       />
@@ -237,8 +238,10 @@ function Toggle() {
 
   return (
     <button
+      type="button"
       className={`flex h-[24px] w-[44px] items-center rounded-full p-[2px] transition ${enabled ? "justify-end bg-gradient-to-r from-amber/30 to-orange/20" : "justify-start bg-card"}`}
       onClick={() => setEnabled((value) => !value)}
+      aria-label={enabled ? "Disable exchange availability" : "Enable exchange availability"}
     >
       <span
         className={`h-[20px] w-[20px] rounded-full ${enabled ? "bg-gradient-to-r from-amber to-orange" : "bg-muted"}`}
@@ -257,6 +260,7 @@ export default function PostDetailsPage() {
       <main className="mx-auto flex w-full max-w-[1512px] flex-col items-center px-[20px] pb-[80px] pt-[36px] sm:px-[40px] lg:pb-[100px]">
         <div className="relative mb-[18px] grid h-[54px] w-full max-w-[420px] place-items-center rounded-[28px] bg-white px-6">
           <button
+            type="button"
             className="absolute left-[22px] flex items-center gap-1 text-[15px] text-[#9c98a5]"
             onClick={() => navigate("/post")}
           >
@@ -286,6 +290,7 @@ export default function PostDetailsPage() {
           </div>
 
           <button
+            type="button"
             className="mt-[26px] h-[56px] w-full rounded-[9px] bg-card text-[18px] text-[#b9b6be]"
             disabled
           >
