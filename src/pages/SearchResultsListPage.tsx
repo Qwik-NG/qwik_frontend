@@ -4,6 +4,7 @@ import { buildProductDetailsRoute } from "../constants/routes";
 import { SiteFooter, SiteHeader } from "../components/AppShell";
 import { LocationPin } from "../components/icons/LocationPin";
 import { FilterCard } from "../components/ui/FilterCard";
+import { ImagePlaceholder } from "../components/ui/ImagePlaceholder";
 import { api } from "../services/api";
 import type { Ad } from "../types";
 
@@ -18,7 +19,7 @@ type Listing = {
   title: string;
   description: string;
   location: string;
-  image: string;
+  image?: string;
 };
 
 function toListing(ad: Ad): Listing {
@@ -28,7 +29,7 @@ function toListing(ad: Ad): Listing {
     title: ad.title,
     description: ad.description,
     location: ad.location,
-    image: ad.images?.[0]?.url || "https://via.placeholder.com/220",
+    image: ad.images?.[0]?.url,
   };
 }
 
@@ -36,7 +37,13 @@ function ListCard({ item, onClick }: { item: Listing; onClick: () => void }) {
   return (
     <article className="cursor-pointer rounded-[18px] bg-white p-3" onClick={onClick}>
       <div className="grid grid-cols-1 items-center gap-3 md:grid-cols-[220px_1fr]">
-        <img src={item.image} alt={item.title} className="h-[220px] w-full rounded-[12px] object-cover" />
+        <div className="h-[220px] w-full overflow-hidden rounded-[12px] bg-white">
+          {item.image ? (
+            <img src={item.image} alt={item.title} className="h-full w-full object-cover" />
+          ) : (
+            <ImagePlaceholder className="rounded-[12px]" />
+          )}
+        </div>
         <div>
           <div className="mb-2 flex items-center gap-3">
             <h4 className="text-[24px] font-semibold leading-none sm:text-[28px]">{item.price}</h4>

@@ -1,9 +1,9 @@
 import type { ReactNode } from "react";
-import { useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { SiteFooter, SiteHeader } from "../components/AppShell";
 import { QwikLogo } from "../components/ui/QwikLogo";
 import { IconButton } from "../components/ui/IconButton";
+import Toggle from "../components/ui/Toggle";
 
 function SearchIcon() {
   return (
@@ -233,23 +233,6 @@ function TextField({
   );
 }
 
-function Toggle() {
-  const [enabled, setEnabled] = useState(true);
-
-  return (
-    <button
-      type="button"
-      className={`flex h-[24px] w-[44px] items-center rounded-full p-[2px] transition ${enabled ? "justify-end bg-gradient-to-r from-amber/30 to-orange/20" : "justify-start bg-card"}`}
-      onClick={() => setEnabled((value) => !value)}
-      aria-label={enabled ? "Disable exchange availability" : "Enable exchange availability"}
-    >
-      <span
-        className={`h-[20px] w-[20px] rounded-full ${enabled ? "bg-gradient-to-r from-amber to-orange" : "bg-muted"}`}
-      />
-    </button>
-  );
-}
-
 export default function PostDetailsPage() {
   const navigate = useNavigate();
 
@@ -286,7 +269,7 @@ export default function PostDetailsPage() {
             <span className="text-[16px] text-[#9c98a5]">
               Exchange available
             </span>
-            <Toggle />
+            <Toggle size="sm" defaultChecked ariaLabelChecked="Disable exchange availability" ariaLabelUnchecked="Enable exchange availability" className="bg-card" />
           </div>
 
           <button

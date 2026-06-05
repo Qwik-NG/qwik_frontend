@@ -1,6 +1,7 @@
 import { useState, useEffect } from "react";
 import { useNavigate, useParams } from "react-router-dom";
 import { SiteFooter, SiteHeader } from "../components/AppShell";
+import { ImagePlaceholder } from "../components/ui/ImagePlaceholder";
 import { UserAvatar } from "../components/ui/UserAvatar";
 import { useToast } from "../context/ToastContext";
 import { formatMemberSince } from "../lib/currentUser";
@@ -27,7 +28,13 @@ type SimilarAd = {
 function ProductCard({ item, onClick }: { item: SimilarAd; onClick: () => void }) {
   return (
     <article className="cursor-pointer rounded-[18px] bg-white p-3" onClick={onClick}>
-      <img src={item.images?.[0]?.url || "https://via.placeholder.com/260"} alt={item.title} className="h-[180px] w-full rounded-[12px] object-cover" />
+      <div className="h-[180px] w-full overflow-hidden rounded-[12px] bg-white">
+        {item.images?.[0]?.url ? (
+          <img src={item.images[0].url} alt={item.title} className="h-full w-full object-cover" />
+        ) : (
+          <ImagePlaceholder className="rounded-[12px]" />
+        )}
+      </div>
       <div className="pt-3">
         <div className="mb-2 flex items-center justify-between">
           <h4 className="text-[20px] font-semibold">₦ {item.price.toLocaleString()}</h4>
@@ -195,8 +202,8 @@ export default function ProductDetailsPage() {
   if (loading) return <div className="min-h-screen bg-page text-ink flex items-center justify-center"><p>Loading...</p></div>;
   if (error || !ad) return <div className="min-h-screen bg-page text-ink flex items-center justify-center"><p>Error: {error || "Product not found"}</p></div>;
 
-  const gallery = ad.images?.map((img: any) => img.url) || ["https://via.placeholder.com/430"];
-  const selected = gallery[activeImage] || "https://via.placeholder.com/430";
+  const gallery = ad.images?.map((img: any) => img.url).filter(Boolean) || [];
+  const selected = gallery[activeImage];
   const specs = ad.specifications || {};
 
   // Convert specs to array for display
@@ -218,19 +225,27 @@ export default function ProductDetailsPage() {
           <div className="grid grid-cols-1 gap-8 xl:grid-cols-[430px_1fr]">
             {/* Image Gallery */}
             <div>
-              <img src={selected} alt={ad.title} className="h-[430px] w-full rounded-[14px] object-cover" />
-              <div className="mt-3 grid grid-cols-10 gap-1.5">
-                {gallery.map((src: string, idx: number) => (
-                  <button
-                    key={src}
-                    className={`overflow-hidden rounded-[4px] border ${idx === activeImage ? "border-orange" : "border-transparent"}`}
-                    onClick={() => setActiveImage(idx)}
-                    type="button"
-                  >
-                    <img src={src} alt={`thumb-${idx + 1}`} className="h-[54px] w-full object-cover" />
-                  </button>
-                ))}
+              <div className="h-[430px] w-full overflow-hidden rounded-[14px] bg-white">
+                {selected ? (
+                  <img src={selected} alt={ad.title} className="h-full w-full object-cover" />
+                ) : (
+                  <ImagePlaceholder className="rounded-[14px]" />
+                )}
               </div>
+              {gallery.length > 0 ? (
+                <div className="mt-3 grid grid-cols-10 gap-1.5">
+                  {gallery.map((src: string, idx: number) => (
+                    <button
+                      key={src}
+                      className={`overflow-hidden rounded-[4px] border ${idx === activeImage ? "border-orange" : "border-transparent"}`}
+                      onClick={() => setActiveImage(idx)}
+                      type="button"
+                    >
+                      <img src={src} alt={`thumb-${idx + 1}`} className="h-[54px] w-full object-cover" />
+                    </button>
+                  ))}
+                </div>
+              ) : null}
             </div>
             
             {/* Product Info */}

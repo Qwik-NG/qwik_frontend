@@ -23,7 +23,7 @@ function toListing(ad: Ad): SearchListing {
     title: ad.title,
     description: ad.description,
     location: ad.location,
-    image: ad.images?.[0]?.url || "https://via.placeholder.com/260",
+    image: ad.images?.[0]?.url,
   };
 }
 

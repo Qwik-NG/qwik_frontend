@@ -1,6 +1,7 @@
 import { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { SiteFooter, SiteHeader } from "../components/AppShell";
+import { ImagePlaceholder } from "../components/ui/ImagePlaceholder";
 import { api } from "../services/api";
 import type { Ad } from "../types";
 
@@ -10,7 +11,7 @@ type SavedCardAd = {
   title: string;
   description: string;
   location: string;
-  image: string;
+  image?: string;
   fit?: "cover" | "contain";
 };
 
@@ -21,7 +22,7 @@ function toSavedCardAd(ad: Ad): SavedCardAd {
     title: ad.title,
     description: ad.description,
     location: ad.location,
-    image: ad.images?.[0]?.url || "https://via.placeholder.com/1200x900?text=No+Image",
+    image: ad.images?.[0]?.url,
     fit: "cover",
   };
 }
@@ -62,11 +63,15 @@ function SavedCard({ ad }: { ad: SavedCardAd }) {
   return (
     <article className="rounded-[22px] bg-white p-2.5 sm:rounded-[26px] sm:p-4">
       <div className="h-[170px] w-full overflow-hidden rounded-[14px] bg-white sm:h-[260px] sm:rounded-[18px]">
-        <img
-          src={ad.image}
-          alt={ad.title}
-          className={`h-full w-full ${ad.fit === "contain" ? "object-contain p-4" : "object-cover"}`}
-        />
+        {ad.image ? (
+          <img
+            src={ad.image}
+            alt={ad.title}
+            className={`h-full w-full ${ad.fit === "contain" ? "object-contain p-4" : "object-cover"}`}
+          />
+        ) : (
+          <ImagePlaceholder className="rounded-[14px] sm:rounded-[18px]" />
+        )}
       </div>
       <div className="px-0 pb-1 pt-3 sm:pt-4">
         <div className="mb-2 flex items-center justify-between gap-2">

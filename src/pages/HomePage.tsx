@@ -1,23 +1,43 @@
+import type { ComponentType } from "react";
 import { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { SiteFooter, SiteHeader } from "../components/AppShell";
+import {
+  AgricultureIcon,
+  BeautyIcon,
+  CarsIcon,
+  ElectronicsIcon,
+  FashionIcon,
+  FurnitureIcon,
+  JobsIcon,
+  LaptopIcon,
+  MoreIcon,
+  PhonesIcon,
+  PropertiesIcon,
+  SportsIcon,
+} from "../components/icons/CategoryIcons";
+import { ImagePlaceholder } from "../components/ui/ImagePlaceholder";
 
-type Category = { name: string; image: string; tone: string };
+type Category = {
+  name: string;
+  tone: string;
+  icon: ComponentType<{ className?: string }>;
+};
 type Product = { id: string; price: number; title: string; description: string; location: string; images: Array<{ url: string }> };
 
 const categories: Category[] = [
-  { name: "Cars", image: "https://cdnjs.cloudflare.com/ajax/libs/twemoji/14.0.2/72x72/1f697.png", tone: "#f5e8e2" },
-  { name: "Phones", image: "https://cdnjs.cloudflare.com/ajax/libs/twemoji/14.0.2/72x72/1f4f1.png", tone: "#e7ebfa" },
-  { name: "Jobs", image: "https://cdnjs.cloudflare.com/ajax/libs/twemoji/14.0.2/72x72/1f4bc.png", tone: "#ece8e8" },
-  { name: "Agriculture", image: "https://cdnjs.cloudflare.com/ajax/libs/twemoji/14.0.2/72x72/1f955.png", tone: "#dff1e6" },
-  { name: "Sports", image: "https://cdnjs.cloudflare.com/ajax/libs/twemoji/14.0.2/72x72/26bd.png", tone: "#ececec" },
-  { name: "Fashion", image: "https://cdnjs.cloudflare.com/ajax/libs/twemoji/14.0.2/72x72/1f457.png", tone: "#f3ebdd" },
-  { name: "Electronics", image: "https://cdnjs.cloudflare.com/ajax/libs/twemoji/14.0.2/72x72/1f5a5.png", tone: "#e8e8e8" },
-  { name: "Properties", image: "https://cdnjs.cloudflare.com/ajax/libs/twemoji/14.0.2/72x72/1f3e2.png", tone: "#deede5" },
-  { name: "Furniture", image: "https://cdnjs.cloudflare.com/ajax/libs/twemoji/14.0.2/72x72/1fa91.png", tone: "#f2dff0" },
-  { name: "Laptop", image: "https://cdnjs.cloudflare.com/ajax/libs/twemoji/14.0.2/72x72/1f4bb.png", tone: "#e6e2f0" },
-  { name: "Beauty", image: "https://cdnjs.cloudflare.com/ajax/libs/twemoji/14.0.2/72x72/1f9f4.png", tone: "#e8dfeb" },
-  { name: "More", image: "", tone: "#f0f0f0" }
+  { name: "Cars", icon: CarsIcon, tone: "#f5e8e2" },
+  { name: "Phones", icon: PhonesIcon, tone: "#e7ebfa" },
+  { name: "Jobs", icon: JobsIcon, tone: "#ece8e8" },
+  { name: "Agriculture", icon: AgricultureIcon, tone: "#dff1e6" },
+  { name: "Sports", icon: SportsIcon, tone: "#ececec" },
+  { name: "Fashion", icon: FashionIcon, tone: "#f3ebdd" },
+  { name: "Electronics", icon: ElectronicsIcon, tone: "#e8e8e8" },
+  { name: "Properties", icon: PropertiesIcon, tone: "#deede5" },
+  { name: "Furniture", icon: FurnitureIcon, tone: "#f2dff0" },
+  { name: "Laptop", icon: LaptopIcon, tone: "#e6e2f0" },
+  { name: "Beauty", icon: BeautyIcon, tone: "#e8dfeb" },
+  { name: "More", icon: MoreIcon, tone: "#f0f0f0" }
 ];
 
 function LocationPin({ className = "h-4 w-4" }: { className?: string }) {
@@ -66,7 +86,7 @@ export default function HomePage() {
             type="button"
           >
             <div className="mx-auto mb-1.5 grid h-[68px] w-[68px] place-items-center overflow-hidden rounded-full" style={{ background: item.tone }}>
-              {item.image ? (<img src={item.image} alt={item.name} className="h-[46px] w-[46px] object-contain" />) : (<span className="flex items-center gap-1"><span className="h-1.5 w-1.5 rounded-full bg-black" /><span className="h-1.5 w-1.5 rounded-full bg-black" /></span>)}
+              <item.icon />
             </div>
             <p className="m-0 text-[13px]">{item.name}</p>
           </button>
@@ -89,7 +109,13 @@ export default function HomePage() {
                 className="cursor-pointer rounded-[22px] bg-white p-2.5 transition hover:scale-[1.01] sm:rounded-[26px] sm:p-4"
                 onClick={() => navigate(`/product-details/${item.id}`)}
               >
-                <img src={item.images?.[0]?.url || "https://via.placeholder.com/260"} alt={item.title} className="h-[170px] w-full rounded-[14px] object-cover sm:h-[260px] sm:rounded-[18px]" />
+                <div className="h-[170px] w-full overflow-hidden rounded-[14px] bg-white sm:h-[260px] sm:rounded-[18px]">
+                  {item.images?.[0]?.url ? (
+                    <img src={item.images[0].url} alt={item.title} className="h-full w-full object-cover" />
+                  ) : (
+                    <ImagePlaceholder className="rounded-[14px] sm:rounded-[18px]" />
+                  )}
+                </div>
                 <div className="px-0 pb-1 pt-3 sm:pt-4">
                   <div className="flex items-center justify-between gap-2">
                     <h3 className="m-0 whitespace-nowrap text-[16px] font-semibold leading-none sm:text-[20px]">₦ {item.price.toLocaleString()}</h3>

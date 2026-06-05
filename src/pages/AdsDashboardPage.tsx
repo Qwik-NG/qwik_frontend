@@ -3,6 +3,7 @@ import { useNavigate } from "react-router-dom";
 import { SiteFooter, SiteHeader } from "../components/AppShell";
 import { LocationPin } from "../components/icons/LocationPin";
 import SettingsSidebar, { MobileSettingsMenu } from "../components/settings/SettingsSidebar";
+import { ImagePlaceholder } from "../components/ui/ImagePlaceholder";
 import { getSettingsNavItems } from "../lib/settings-nav-config";
 import { api } from "../services/api";
 import type { Ad } from "../types";
@@ -14,7 +15,7 @@ type DashboardAd = {
   title: string;
   description: string;
   location: string;
-  image: string;
+  image?: string;
   fit?: "cover" | "contain";
 };
 
@@ -34,7 +35,7 @@ function toDashboardAd(ad: Ad): DashboardAd {
     title: ad.title,
     description: ad.description,
     location: ad.location,
-    image: ad.images?.[0]?.url || "https://via.placeholder.com/1200x900?text=No+Image",
+    image: ad.images?.[0]?.url,
     fit: "cover",
   };
 }
@@ -58,7 +59,11 @@ function AdCard({ ad }: { ad: DashboardAd }) {
   return (
     <article className="rounded-card bg-white p-3.5">
       <div className="h-[300px] w-full overflow-hidden rounded-[16px] bg-white">
-        <img src={ad.image} alt={ad.title} className={`h-full w-full ${ad.fit === "contain" ? "object-contain p-4" : "object-cover"}`} />
+        {ad.image ? (
+          <img src={ad.image} alt={ad.title} className={`h-full w-full ${ad.fit === "contain" ? "object-contain p-4" : "object-cover"}`} />
+        ) : (
+          <ImagePlaceholder className="rounded-[16px]" />
+        )}
       </div>
       <div className="pt-3.5">
         <div className="mb-2 flex items-center justify-between">

@@ -1,12 +1,13 @@
 import type { CSSProperties } from "react";
 import { LocationPin } from "../icons/LocationPin";
+import { ImagePlaceholder } from "../ui/ImagePlaceholder";
 
 export type ListingCardItem = {
   price: string;
   title: string;
   description: string;
   location: string;
-  image: string;
+  image?: string;
   imageFit?: "cover" | "contain";
 };
 
@@ -48,11 +49,15 @@ export default function ListingCard({
       onClick={onClick}
     >
       <div className="h-[170px] w-full overflow-hidden rounded-[14px] bg-white sm:h-[260px] sm:rounded-[18px]">
-        <img
-          src={item.image}
-          alt={item.title}
-          className={`h-full w-full ${item.imageFit === "contain" ? "object-contain p-4" : "object-cover"}`}
-        />
+        {item.image ? (
+          <img
+            src={item.image}
+            alt={item.title}
+            className={`h-full w-full ${item.imageFit === "contain" ? "object-contain p-4" : "object-cover"}`}
+          />
+        ) : (
+          <ImagePlaceholder className="rounded-[14px] sm:rounded-[18px]" />
+        )}
       </div>
       <div className="px-0 pb-1 pt-3 sm:pt-4">
         <div className="flex items-center justify-between gap-2">

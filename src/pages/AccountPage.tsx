@@ -8,6 +8,7 @@ import type { CurrentUserDisplay } from "../lib/currentUser";
 import { clearAllAuthData } from "../services/auth";
 import { QwikLogo } from "../components/ui/QwikLogo";
 import { IconButton } from "../components/ui/IconButton";
+import Toggle from "../components/ui/Toggle";
 import { UserAvatar } from "../components/ui/UserAvatar";
 import { getSettingsNavItems } from "../lib/settings-nav-config";
 
@@ -172,21 +173,6 @@ function SaveButton({ className = "" }: { className?: string }) {
   );
 }
 
-function Toggle() {
-  const [enabled, setEnabled] = useState(true);
-
-  return (
-    <button
-      type="button"
-      className={`flex h-[42px] w-[78px] items-center rounded-full p-[4px] transition ${enabled ? "justify-end bg-gradient-to-r from-amber/30 to-orange/20" : "justify-start bg-card"}`}
-      onClick={() => setEnabled((value) => !value)}
-      aria-label={enabled ? "Disable receive messages" : "Enable receive messages"}
-    >
-      <span className={`h-[34px] w-[34px] rounded-full ${enabled ? "bg-gradient-to-r from-amber to-orange" : "bg-muted"}`} />
-    </button>
-  );
-}
-
 function ProfileSummary({ display }: { display: CurrentUserDisplay }) {
   return (
     <section className="flex min-w-0 flex-col gap-7 rounded-[24px] bg-white px-[28px] py-[34px] sm:px-[40px] lg:h-[164px] lg:flex-row lg:items-center lg:justify-between lg:px-[40px]">
@@ -287,11 +273,11 @@ function ChatSettingsForm() {
       <div className="space-y-[34px]">
         <div className="flex max-w-[584px] items-center justify-between gap-6">
           <span className="text-[16px] text-[#9c98a5]">Receive messages</span>
-          <Toggle />
+          <Toggle size="lg" defaultChecked ariaLabelChecked="Disable receive messages" ariaLabelUnchecked="Enable receive messages" className="bg-card" />
         </div>
         <div className="flex max-w-[584px] items-center justify-between gap-6">
           <span className="text-[16px] text-[#9c98a5]">Receive messages</span>
-          <Toggle />
+          <Toggle size="lg" defaultChecked ariaLabelChecked="Disable receive messages" ariaLabelUnchecked="Enable receive messages" className="bg-card" />
         </div>
       </div>
       <SaveButton className="mt-[44px] max-w-[584px]" />

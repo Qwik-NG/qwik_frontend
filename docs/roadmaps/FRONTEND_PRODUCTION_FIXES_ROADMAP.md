@@ -1,6 +1,6 @@
 # Frontend Production Fixes Roadmap
 
-Current phase: Phase 3 — Data Cleanup
+Current phase: Phase 5 — Layout & Polish
 
 ## Phase 1 — Correctness Fixes
 
@@ -21,13 +21,15 @@ Status: Complete
 
 ## Phase 3 — Data Cleanup
 
-Status: In progress
+Status: Complete
 
 - Reduce hardcoded fake user data
 - Prepare mock/static data for future real integration
 - Add token expiry readiness in frontend auth handling
 
 ## Phase 4 — Code Quality
+
+Status: Complete
 
 - Consolidate duplicate Toggle implementations
 - Replace emoji/CDN category icons with local SVG or lucide-style icons
