@@ -1,6 +1,6 @@
 # Frontend Production Fixes Roadmap
 
-Current phase: Phase 2 — Feedback & Interactivity
+Current phase: Phase 3 — Data Cleanup
 
 ## Phase 1 — Correctness Fixes
 
@@ -13,13 +13,15 @@ Status: Complete
 
 ## Phase 2 — Feedback & Interactivity
 
-Status: In progress
+Status: Complete
 
 - Add a lightweight toast system
 - Add consistent hover, focus, and active states
 - Replace `window.alert` usage with non-blocking UI feedback
 
 ## Phase 3 — Data Cleanup
+
+Status: In progress
 
 - Reduce hardcoded fake user data
 - Prepare mock/static data for future real integration

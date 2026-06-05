@@ -1,4 +1,4 @@
-import { getToken } from "./auth";
+import { clearAllAuthData, getToken, isTokenExpired } from "./auth";
 import type {
   User,
   AuthResponse,
@@ -40,10 +40,16 @@ type ApiResponse<T> = {
 
 async function request<T>(path: string, init?: RequestInit): Promise<ApiResponse<T>> {
   const token = getToken();
+  const authToken = token && !isTokenExpired(token) ? token : null;
+
+  if (token && !authToken) {
+    clearAllAuthData();
+  }
+
   const headers: HeadersInit = {
     "Content-Type": "application/json",
     ...(init?.headers ?? {}),
-    ...(token ? { Authorization: `Bearer ${token}` } : {})
+    ...(authToken ? { Authorization: `Bearer ${authToken}` } : {})
   };
 
   const res = await fetch(`${API_BASE_URL}${path}`, { ...init, headers });

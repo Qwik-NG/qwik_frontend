@@ -1,0 +1,31 @@
+import { getUserInitials } from "../../lib/currentUser";
+
+type UserAvatarProps = {
+  name: string;
+  imageUrl?: string;
+  alt?: string;
+  className?: string;
+  fallbackClassName?: string;
+};
+
+export function UserAvatar({
+  name,
+  imageUrl,
+  alt,
+  className = "",
+  fallbackClassName = "",
+}: UserAvatarProps) {
+  if (imageUrl) {
+    return <img src={imageUrl} alt={alt ?? name} className={className} />;
+  }
+
+  return (
+    <div
+      aria-label={alt ?? name}
+      className={`grid place-items-center rounded-full bg-[#ececee] text-[15px] font-semibold uppercase tracking-[0.08em] text-[#6d6a74] ${className} ${fallbackClassName}`.trim()}
+      role="img"
+    >
+      <span aria-hidden="true">{getUserInitials(name)}</span>
+    </div>
+  );
+}

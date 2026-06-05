@@ -2,28 +2,26 @@ import { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { SiteFooter, SiteHeader } from "../components/AppShell";
 import SettingsSidebar, { MobileSettingsMenu } from "../components/settings/SettingsSidebar";
+import { UserAvatar } from "../components/ui/UserAvatar";
 import { useToast } from "../context/ToastContext";
+import { useCurrentUser } from "../hooks/useCurrentUser";
 import { api } from "../services/api";
-import { clearToken } from "../services/auth";
 import { getSettingsNavItems } from "../lib/settings-nav-config";
 
 export default function ProfileSettingsPage() {
   const navigate = useNavigate();
   const { success, error: showError } = useToast();
+  const { user, display } = useCurrentUser();
   const [fullName, setFullName] = useState("");
   const [email, setEmail] = useState("");
   const [bio, setBio] = useState("");
   const [loading, setLoading] = useState(false);
 
   useEffect(() => {
-    void api.me()
-      .then((res) => {
-        setFullName(res.data.fullName ?? "");
-        setEmail(res.data.email ?? "");
-        setBio(res.data.profile?.bio ?? "");
-      })
-      .catch((error) => console.error(error));
-  }, []);
+    setFullName(user?.fullName ?? display.fullName);
+    setEmail(user?.email ?? display.email);
+    setBio(user?.profile?.bio ?? display.bio);
+  }, [display.bio, display.email, display.fullName, user]);
 
   return (
     <div className="min-h-screen bg-page text-ink">
@@ -46,26 +44,25 @@ export default function ProfileSettingsPage() {
               <div className="flex flex-wrap items-center justify-between gap-6">
                 <div className="flex items-center gap-4">
                   <div className="relative">
-                    <img className="h-[84px] w-[84px] rounded-full object-cover" src="https://images.unsplash.com/photo-1521572267360-ee0c2909d518?w=120" alt="profile" />
+                    <UserAvatar
+                      name={fullName || display.fullName}
+                      imageUrl={user?.profile?.avatarUrl || display.avatarUrl}
+                      alt={`${fullName || display.fullName} profile`}
+                      className="h-[84px] w-[84px] rounded-full object-cover"
+                    />
                   </div>
                   <div>
-                    <h1 className="text-[28px] font-medium leading-tight sm:text-[32px]">{fullName || "Profile"}</h1>
-                    <p className="text-[16px] text-[#8c8996]">{email || "-"}</p>
+                    <h1 className="text-[28px] font-medium leading-tight sm:text-[32px]">{fullName || display.fullName}</h1>
+                    <p className="text-[16px] text-[#8c8996]">{email || ""}</p>
                   </div>
                 </div>
                 <div className="flex gap-10 text-center">
-                  <div>
-                    <p className="text-[24px] sm:text-[28px]">12</p>
-                    <p className="text-[14px] text-[#8c8996] sm:text-[15px]">Following</p>
-                  </div>
-                  <div>
-                    <p className="text-[24px] sm:text-[28px]">23</p>
-                    <p className="text-[14px] text-[#8c8996] sm:text-[15px]">Followers</p>
-                  </div>
-                  <div>
-                    <p className="text-[24px] sm:text-[28px]">17</p>
-                    <p className="text-[14px] text-[#8c8996] sm:text-[15px]">adverts</p>
-                  </div>
+                  {display.stats.map((stat) => (
+                    <div key={stat.label}>
+                      <p className="text-[24px] sm:text-[28px]">{stat.value}</p>
+                      <p className="text-[14px] text-[#8c8996] sm:text-[15px]">{stat.label}</p>
+                    </div>
+                  ))}
                 </div>
               </div>
             </div>

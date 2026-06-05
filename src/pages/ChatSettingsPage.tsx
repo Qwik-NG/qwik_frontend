@@ -2,6 +2,8 @@ import { useNavigate } from "react-router-dom";
 import { SiteFooter, SiteHeader } from "../components/AppShell";
 import SettingsSidebar, { MobileSettingsMenu } from "../components/settings/SettingsSidebar";
 import Toggle from "../components/ui/Toggle";
+import { UserAvatar } from "../components/ui/UserAvatar";
+import { useCurrentUser } from "../hooks/useCurrentUser";
 import { getSettingsNavItems } from "../lib/settings-nav-config";
 
 function ToggleRow({ label }: { label: string }) {
@@ -15,6 +17,7 @@ function ToggleRow({ label }: { label: string }) {
 
 export default function ChatSettingsPage() {
   const navigate = useNavigate();
+  const { user, display } = useCurrentUser();
 
   return (
     <div className="min-h-screen bg-page text-ink">
@@ -35,30 +38,25 @@ export default function ChatSettingsPage() {
               <div className="flex flex-wrap items-center justify-between gap-6">
                 <div className="flex items-center gap-4">
                   <div className="relative">
-                    <img
+                    <UserAvatar
+                      name={display.fullName}
+                      imageUrl={user?.profile?.avatarUrl || display.avatarUrl}
+                      alt={`${display.fullName} profile`}
                       className="h-[84px] w-[84px] rounded-full object-cover"
-                      src="https://images.unsplash.com/photo-1544005313-94ddf0286df2?w=120"
-                      alt="profile"
                     />
                   </div>
                   <div>
-                    <h1 className="text-[24px] font-medium leading-tight sm:text-[28px]">Sherry James</h1>
-                    <p className="text-[15px] text-[#8c8996] sm:text-[16px]">Imshuvo97@gmail.com</p>
+                    <h1 className="text-[24px] font-medium leading-tight sm:text-[28px]">{display.fullName}</h1>
+                    <p className="text-[15px] text-[#8c8996] sm:text-[16px]">{display.email}</p>
                   </div>
                 </div>
                 <div className="flex gap-10 text-center">
-                  <div>
-                    <p className="text-[20px] sm:text-[22px]">12</p>
-                    <p className="text-[14px] text-[#8c8996]">Following</p>
-                  </div>
-                  <div>
-                    <p className="text-[20px] sm:text-[22px]">23</p>
-                    <p className="text-[14px] text-[#8c8996]">Followers</p>
-                  </div>
-                  <div>
-                    <p className="text-[20px] sm:text-[22px]">17</p>
-                    <p className="text-[14px] text-[#8c8996]">adverts</p>
-                  </div>
+                  {display.stats.map((stat) => (
+                    <div key={stat.label}>
+                      <p className="text-[20px] sm:text-[22px]">{stat.value}</p>
+                      <p className="text-[14px] text-[#8c8996]">{stat.label}</p>
+                    </div>
+                  ))}
                 </div>
               </div>
             </div>

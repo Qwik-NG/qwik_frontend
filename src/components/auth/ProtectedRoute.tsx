@@ -1,6 +1,6 @@
 import { ReactNode } from "react";
 import { Navigate } from "react-router-dom";
-import { getToken } from "../../services/auth";
+import { hasValidToken } from "../../services/auth";
 import { ROUTES } from "../../constants/routes";
 
 export interface ProtectedRouteProps {
@@ -18,8 +18,7 @@ export interface ProtectedRouteProps {
  * <Route path="/account" element={<ProtectedRoute><AccountPage /></ProtectedRoute>} />
  */
 export function ProtectedRoute({ children, redirectTo = ROUTES.LOGIN }: ProtectedRouteProps) {
-  const token = getToken();
-  const isAuthenticated = !!token;
+  const isAuthenticated = hasValidToken();
 
   if (!isAuthenticated) {
     return <Navigate to={redirectTo} replace />;

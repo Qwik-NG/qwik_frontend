@@ -8,13 +8,13 @@
  */
 
 import { useNavigate } from "react-router-dom";
-import { getToken, clearAllAuthData } from "../services/auth";
+import { getToken, clearAllAuthData, hasValidToken } from "../services/auth";
 import { ROUTES } from "../constants/routes";
 
 export function useAuth() {
   const navigate = useNavigate();
   const token = getToken();
-  const isAuthenticated = !!token;
+  const isAuthenticated = hasValidToken();
 
   const logout = () => {
     // TODO: Call api.logout() when backend implements logout endpoint

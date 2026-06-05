@@ -7,10 +7,62 @@
 const TOKEN_KEY = "qwik_token";
 const LOGIN_EMAIL_KEY = "qwik_login_email";
 const RESET_TOKEN_KEY = "qwik_reset_token";
+const DEV_TEST_TOKENS = new Set(["test-token", "dev-test-token"]);
+
+function decodeJwtPayload(token: string): Record<string, unknown> | null {
+  const parts = token.split(".");
+
+  if (parts.length !== 3 || !parts[1]) {
+    return null;
+  }
+
+  try {
+    const base64 = parts[1].replace(/-/g, "+").replace(/_/g, "/");
+    const padded = base64.padEnd(Math.ceil(base64.length / 4) * 4, "=");
+    const payloadJson = atob(padded);
+    return JSON.parse(payloadJson) as Record<string, unknown>;
+  } catch {
+    return null;
+  }
+}
 
 // ===== Token Management =====
 export function getToken() {
   return localStorage.getItem(TOKEN_KEY);
+}
+
+export function isTokenExpired(token: string | null | undefined) {
+  if (!token) {
+    return true;
+  }
+
+  if (DEV_TEST_TOKENS.has(token)) {
+    return false;
+  }
+
+  const payload = decodeJwtPayload(token);
+  const exp = payload?.exp;
+
+  if (typeof exp !== "number") {
+    return false;
+  }
+
+  return exp * 1000 <= Date.now();
+}
+
+export function hasValidToken() {
+  const token = getToken();
+
+  if (!token) {
+    return false;
+  }
+
+  if (isTokenExpired(token)) {
+    clearAllAuthData();
+    return false;
+  }
+
+  return true;
 }
 
 export function setToken(token: string) {

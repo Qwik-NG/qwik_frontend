@@ -2,6 +2,15 @@ import type { ReactNode } from "react";
 import { useNavigate } from "react-router-dom";
 import { SiteFooter, SiteHeader } from "../components/AppShell";
 
+const MOCK_NOTIFICATIONS = [
+  {
+    id: "welcome",
+    title: "Welcome",
+    timestamp: "1 hour ago",
+    message: "We\'re glad to have you join us. Stay up to date by following us on Instagram, Twitter, and YouTube.",
+  },
+];
+
 function BellIcon({ small = false }: { small?: boolean }) {
   return (
     <svg width={small ? 22 : 20} height={small ? 22 : 20} viewBox="0 0 24 24" fill="none" aria-hidden="true">
@@ -50,24 +59,24 @@ export default function NotificationPage() {
           <h1 className="text-[28px] font-medium">Notification</h1>
         </div>
 
-        <article className="flex items-start justify-between gap-4 rounded-[14px] p-2">
-          <div className="flex items-start gap-4">
-            <div className="grid h-[72px] w-[72px] place-items-center rounded-full bg-[#1877eb] text-[38px] leading-none text-white">✓</div>
-            <div>
-              <div className="mb-1 flex items-center gap-2">
-                <h2 className="text-[28px] font-semibold leading-none">Welcome</h2>
-                <span className="text-[20px] text-[#57535f]">1 hour ago</span>
+        {MOCK_NOTIFICATIONS.map((notification) => (
+          <article key={notification.id} className="flex items-start justify-between gap-4 rounded-[14px] p-2">
+            <div className="flex items-start gap-4">
+              <div className="grid h-[72px] w-[72px] place-items-center rounded-full bg-[#1877eb] text-[38px] leading-none text-white">✓</div>
+              <div>
+                <div className="mb-1 flex items-center gap-2">
+                  <h2 className="text-[28px] font-semibold leading-none">{notification.title}</h2>
+                  <span className="text-[20px] text-[#57535f]">{notification.timestamp}</span>
+                </div>
+                <p className="max-w-[900px] text-[22px] leading-[1.35]">{notification.message}</p>
               </div>
-              <p className="max-w-[900px] text-[22px] leading-[1.35]">
-                We&apos;re glad to have you join us, Stay up to date with by following us on instagram, twitter & youtube.
-              </p>
             </div>
-          </div>
 
-          <button className="px-2 text-[30px] text-[#22202a]" type="button">
-            ⋮
-          </button>
-        </article>
+            <button className="px-2 text-[30px] text-[#22202a]" type="button">
+              ⋮
+            </button>
+          </article>
+        ))}
       </main>
 
       <SiteFooter navigate={navigate} />

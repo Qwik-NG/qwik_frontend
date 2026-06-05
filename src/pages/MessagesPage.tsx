@@ -1,6 +1,7 @@
 import type { ReactNode } from "react";
 import { useNavigate } from "react-router-dom";
 import { SiteFooter, SiteHeader } from "../components/AppShell";
+import { UserAvatar } from "../components/ui/UserAvatar";
 import { QwikLogo } from "../components/ui/QwikLogo";
 import { IconButton } from "../components/ui/IconButton";
 
@@ -8,7 +9,7 @@ type Conversation = {
   name: string;
   date: string;
   preview: string;
-  avatar: string;
+  avatarUrl?: string;
   active?: boolean;
 };
 
@@ -17,41 +18,38 @@ type ChatMessage = {
   mine?: boolean;
 };
 
-const conversations: Conversation[] = [
+// TODO: replace mock conversation data with API conversation records when messaging endpoints are ready.
+const MOCK_CONVERSATIONS: Conversation[] = [
   {
     name: "Olivia Rhye",
     date: "Jun 14,2022",
     preview: "Sure, I can come check it...",
-    avatar: "https://images.unsplash.com/photo-1494790108377-be9c29b29330?w=120&auto=format&fit=crop",
     active: true
   },
   {
     name: "Phoenix Baker",
     date: "Jun 14,2022",
-    preview: "Is the MacBook still available?",
-    avatar: "https://images.unsplash.com/photo-1500648767791-00dcc994a43e?w=120&auto=format&fit=crop"
+    preview: "Is the MacBook still available?"
   },
   {
     name: "Lana Steiner",
     date: "Jun 14,2022",
-    preview: "Please send the location.",
-    avatar: "https://images.unsplash.com/photo-1517841905240-472988babdf9?w=120&auto=format&fit=crop"
+    preview: "Please send the location."
   },
   {
     name: "Demi Wilkinson",
     date: "Jun 14,2022",
-    preview: "The price works for me.",
-    avatar: "https://images.unsplash.com/photo-1534528741775-53994a69daeb?w=120&auto=format&fit=crop"
+    preview: "The price works for me."
   },
   {
     name: "Candice Wu",
     date: "Jun 14,2022",
-    preview: "Can you deliver tomorrow?",
-    avatar: "https://images.unsplash.com/photo-1524504388940-b1c1722653e1?w=120&auto=format&fit=crop"
+    preview: "Can you deliver tomorrow?"
   }
 ];
 
-const chatMessages: ChatMessage[] = [
+// TODO: replace mock message history with API conversation messages when messaging endpoints are ready.
+const MOCK_CHAT_MESSAGES: ChatMessage[] = [
   { text: "Hi, is the Mercedes-Benz GLA 250 still available?" },
   { text: "Yes, it is available. You can come for inspection today.", mine: true },
   { text: "Great. Is the custom duty fully paid?" },
@@ -162,7 +160,7 @@ function ConversationItem({ item }: { item: Conversation }) {
         item.active ? "bg-white shadow-[0_18px_38px_rgba(10,10,24,0.08)]" : "bg-transparent"
       }`}
     >
-      <img src={item.avatar} alt={item.name} className="h-[52px] w-[52px] shrink-0 rounded-full object-cover" />
+      <UserAvatar name={item.name} imageUrl={item.avatarUrl} alt={item.name} className="h-[52px] w-[52px] shrink-0 rounded-full object-cover" />
       <span className="min-w-0 flex-1">
         <span className="block truncate text-[16px] font-semibold text-ink">{item.name}</span>
         <span className="mt-1 block text-[13px] text-muted">{item.date}</span>
@@ -187,6 +185,7 @@ function ChatBubble({ message }: { message: ChatMessage }) {
 
 export default function MessagesPage() {
   const navigate = useNavigate();
+  const activeConversation = MOCK_CONVERSATIONS.find((conversation) => conversation.active) ?? MOCK_CONVERSATIONS[0];
 
   // TODO: INTEGRATION READY
   // When backend is connected:
@@ -197,7 +196,7 @@ export default function MessagesPage() {
   // 5. Use RequestStateWrapper for loading/error states
   // 6. Show EmptyState when no conversations: title="No Messages", description="Start a conversation to begin"
   // Types ready: Conversation[], Message[], ConversationCreatePayload from src/types/index.ts
-  // Mock data available: mockConversations, mockMessages from src/lib/mockData.ts
+  // For now, keep MOCK_CONVERSATIONS and MOCK_CHAT_MESSAGES local to this page.
 
   return (
     <div className="min-h-screen bg-page font-outfit text-ink">
@@ -213,10 +212,10 @@ export default function MessagesPage() {
           <aside className="min-w-0 border-b border-card px-[4px] py-[6px] lg:border-b-0 lg:border-r lg:pr-[18px]">
             <div className="mb-[14px] flex items-center justify-between px-[12px]">
               <h2 className="text-[20px] font-semibold text-ink">Chats</h2>
-              <span className="rounded-full bg-amber/10 px-3 py-1 text-[13px] text-orange">5</span>
+              <span className="rounded-full bg-amber/10 px-3 py-1 text-[13px] text-orange">{MOCK_CONVERSATIONS.length}</span>
             </div>
             <div className="flex max-h-[350px] flex-col gap-[8px] overflow-auto pr-1 lg:max-h-[590px]">
-              {conversations.map((item) => (
+              {MOCK_CONVERSATIONS.map((item) => (
                 <ConversationItem key={item.name} item={item} />
               ))}
             </div>
@@ -224,15 +223,15 @@ export default function MessagesPage() {
 
           <section className="flex min-h-[560px] min-w-0 flex-col bg-white lg:min-h-[650px]">
             <div className="flex items-center gap-[14px] border-b border-card px-[14px] py-[18px] lg:px-[28px]">
-              <img src={conversations[0].avatar} alt={conversations[0].name} className="h-[54px] w-[54px] rounded-full object-cover" />
+              <UserAvatar name={activeConversation.name} imageUrl={activeConversation.avatarUrl} alt={activeConversation.name} className="h-[54px] w-[54px] rounded-full object-cover" />
               <div className="min-w-0">
-                <h2 className="truncate text-[18px] font-semibold text-ink">{conversations[0].name}</h2>
+                <h2 className="truncate text-[18px] font-semibold text-ink">{activeConversation.name}</h2>
                 <p className="text-[14px] text-muted">Online</p>
               </div>
             </div>
 
             <div className="flex flex-1 flex-col gap-[16px] overflow-auto px-[14px] py-[24px] lg:px-[34px]">
-              {chatMessages.map((message, index) => (
+              {MOCK_CHAT_MESSAGES.map((message, index) => (
                 <ChatBubble key={`${message.text}-${index}`} message={message} />
               ))}
             </div>

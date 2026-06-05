@@ -1,5 +1,5 @@
 import { useNavigate, useLocation } from 'react-router-dom';
-import { clearToken } from '../../services/auth';
+import { clearAllAuthData } from '../../services/auth';
 import { 
   BarChart3, 
   Users, 
@@ -29,7 +29,7 @@ export default function AdminSidebar() {
 
   const handleLogout = () => {
     if (confirm('Are you sure you want to logout?')) {
-      clearToken();
+      clearAllAuthData();
       navigate('/admin/login');
     }
   };

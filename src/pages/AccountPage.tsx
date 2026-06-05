@@ -3,14 +3,16 @@ import { useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { SiteFooter, SiteHeader } from "../components/AppShell";
 import { MobileSettingsMenu } from "../components/settings/SettingsSidebar";
+import { useCurrentUser } from "../hooks/useCurrentUser";
+import type { CurrentUserDisplay } from "../lib/currentUser";
+import { clearAllAuthData } from "../services/auth";
 import { QwikLogo } from "../components/ui/QwikLogo";
 import { IconButton } from "../components/ui/IconButton";
+import { UserAvatar } from "../components/ui/UserAvatar";
 import { getSettingsNavItems } from "../lib/settings-nav-config";
 
 type TabKey = "profile" | "company" | "chat";
 type MenuItem = { label: string; icon: ReactNode; active?: boolean; to?: string };
-
-const avatarUrl = "https://images.unsplash.com/photo-1580489944761-15a19d654956?w=180&auto=format&fit=crop";
 
 function SearchIcon() {
   return (
@@ -150,12 +152,12 @@ function PlayIcon() {
   );
 }
 
-function Field({ label, placeholder, type = "text", icon }: { label: string; placeholder: string; type?: string; icon?: ReactNode }) {
+function Field({ label, placeholder, type = "text", icon, defaultValue = "" }: { label: string; placeholder: string; type?: string; icon?: ReactNode; defaultValue?: string }) {
   return (
     <label className="block">
       <span className="mb-[10px] block text-[16px] text-[#9c98a5]">{label}</span>
       <span className="flex h-[49px] w-full max-w-[322px] items-center rounded-[8px] border border-card bg-page px-[12px] focus-within:border-orange md:max-w-[322px]">
-        <input className="min-w-0 flex-1 bg-transparent text-[17px] text-ink outline-none placeholder:text-[#a4a0aa]" type={type} placeholder={placeholder} />
+        <input className="min-w-0 flex-1 bg-transparent text-[17px] text-ink outline-none placeholder:text-[#a4a0aa]" type={type} placeholder={placeholder} defaultValue={defaultValue} />
         {icon ? <span className="ml-3 shrink-0 text-ink">{icon}</span> : null}
       </span>
     </label>
@@ -185,31 +187,32 @@ function Toggle() {
   );
 }
 
-function ProfileSummary() {
+function ProfileSummary({ display }: { display: CurrentUserDisplay }) {
   return (
     <section className="flex min-w-0 flex-col gap-7 rounded-[24px] bg-white px-[28px] py-[34px] sm:px-[40px] lg:h-[164px] lg:flex-row lg:items-center lg:justify-between lg:px-[40px]">
       <div className="flex min-w-0 flex-col items-start gap-[16px] sm:flex-row sm:items-center">
         <div className="relative shrink-0">
-          <img src={avatarUrl} alt="Sherry James" className="h-[84px] w-[84px] rounded-full bg-[#df8ca2] object-cover" />
+          <UserAvatar
+            name={display.fullName}
+            imageUrl={display.avatarUrl}
+            alt={`${display.fullName} profile`}
+            className="h-[84px] w-[84px] rounded-full bg-[#df8ca2] object-cover"
+          />
           <button type="button" className="absolute bottom-0 right-[-2px] grid h-[28px] w-[28px] place-items-center rounded-full border border-card bg-white text-ink" aria-label="Edit profile picture">
             <PencilIcon />
           </button>
         </div>
         <div className="min-w-0">
-          <h1 className="truncate text-[22px] font-normal leading-tight text-ink sm:text-[26px]">Sherry James</h1>
-          <p className="truncate text-[14px] text-muted sm:text-[16px]">lmshuvo97@gmail.com</p>
+          <h1 className="truncate text-[22px] font-normal leading-tight text-ink sm:text-[26px]">{display.fullName}</h1>
+          <p className="truncate text-[14px] text-muted sm:text-[16px]">{display.email}</p>
         </div>
       </div>
 
       <div className="grid w-full max-w-[300px] grid-cols-3 gap-4 text-center lg:max-w-[330px]">
-        {[
-          ["12", "Following"],
-          ["23", "Followers"],
-          ["17", "adverts"]
-        ].map(([value, label]) => (
-          <div key={label}>
-            <p className="text-[22px] leading-tight text-ink sm:text-[24px]">{value}</p>
-            <p className="text-[14px] text-muted sm:text-[16px]">{label}</p>
+        {display.stats.map((stat) => (
+          <div key={stat.label}>
+            <p className="text-[22px] leading-tight text-ink sm:text-[24px]">{stat.value}</p>
+            <p className="text-[14px] text-muted sm:text-[16px]">{stat.label}</p>
           </div>
         ))}
       </div>
@@ -240,15 +243,15 @@ function Tabs({ activeTab, onChange }: { activeTab: TabKey; onChange: (tab: TabK
   );
 }
 
-function EditProfileForm() {
+function EditProfileForm({ display }: { display: CurrentUserDisplay }) {
   return (
     <div className="mt-[44px] w-full max-w-[322px]">
       <div className="space-y-[24px]">
-        <Field label="Full Name" placeholder="Enter your full name" />
-        <Field label="Email" placeholder="@mail" type="email" />
+        <Field label="Full Name" placeholder="Enter your full name" defaultValue={display.fullName === "Qwik User" ? "" : display.fullName} />
+        <Field label="Email" placeholder="@mail" type="email" defaultValue={display.email} />
         <Field label="Password" placeholder="*********" type="password" icon={<EyeIcon />} />
-        <Field label="Phone Number" placeholder="0800 000 0000" type="tel" />
-        <Field label="Address" placeholder="Where do you live?" />
+        <Field label="Phone Number" placeholder="0800 000 0000" type="tel" defaultValue={display.phone} />
+        <Field label="Address" placeholder="Where do you live?" defaultValue={display.location} />
       </div>
       <button type="button" className="mt-[24px] flex w-full items-center justify-between text-left text-[16px] text-red-600 underline">
         Delete my account
@@ -259,16 +262,17 @@ function EditProfileForm() {
   );
 }
 
-function CompanyDetailsForm() {
+function CompanyDetailsForm({ display }: { display: CurrentUserDisplay }) {
   return (
     <div className="mt-[48px] w-full max-w-[584px]">
       <div className="space-y-[34px]">
-        <Field label="Business Name" placeholder="Enter your full name" />
+        <Field label="Business Name" placeholder="Enter your full name" defaultValue={display.fullName === "Qwik User" ? "" : display.fullName} />
         <label className="block">
           <span className="mb-[10px] block text-[16px] text-[#9c98a5]">Description</span>
           <textarea
             className="h-[210px] w-full max-w-[584px] resize-none rounded-[8px] border border-card bg-page px-[20px] py-[22px] text-[17px] text-ink outline-none placeholder:text-[#a4a0aa] focus:border-orange"
             placeholder="What does your company do?"
+            defaultValue={display.bio}
           />
         </label>
       </div>
@@ -356,6 +360,7 @@ function Footer() {
 export default function AccountPage() {
   const navigate = useNavigate();
   const [activeTab, setActiveTab] = useState<TabKey>("profile");
+  const { display } = useCurrentUser();
 
   const menuItems: MenuItem[] = [
     { label: "Profile", icon: <UserIcon />, active: true, to: "/profile-settings" },
@@ -373,6 +378,9 @@ export default function AccountPage() {
     active: item.active,
     onClick: () => {
       if (item.to) {
+        if (item.label === "Log out") {
+          clearAllAuthData();
+        }
         navigate(item.to);
       }
     },
@@ -389,7 +397,17 @@ export default function AccountPage() {
               <button
                 key={item.label}
                 type="button"
-                onClick={() => (item.to ? navigate(item.to) : undefined)}
+                onClick={() => {
+                  if (!item.to) {
+                    return;
+                  }
+
+                  if (item.label === "Log out") {
+                    clearAllAuthData();
+                  }
+
+                  navigate(item.to);
+                }}
                 className={`flex h-[72px] items-center gap-[18px] rounded-[14px] px-[18px] text-[16px] ${
                   item.active ? "bg-page text-ink" : "text-[#9c98a5]"
                 } w-full`}
@@ -405,11 +423,11 @@ export default function AccountPage() {
           <div className="mb-4">
             <MobileSettingsMenu items={mobileItems} label="Menu" title="Account" />
           </div>
-          <ProfileSummary />
+          <ProfileSummary display={display} />
           <div className="mt-[42px]">
             <Tabs activeTab={activeTab} onChange={setActiveTab} />
-            {activeTab === "profile" ? <EditProfileForm /> : null}
-            {activeTab === "company" ? <CompanyDetailsForm /> : null}
+            {activeTab === "profile" ? <EditProfileForm display={display} /> : null}
+            {activeTab === "company" ? <CompanyDetailsForm display={display} /> : null}
             {activeTab === "chat" ? <ChatSettingsForm /> : null}
           </div>
         </section>

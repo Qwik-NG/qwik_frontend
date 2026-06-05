@@ -1,7 +1,9 @@
 import { useState, useEffect } from "react";
 import { useNavigate, useParams } from "react-router-dom";
 import { SiteFooter, SiteHeader } from "../components/AppShell";
+import { UserAvatar } from "../components/ui/UserAvatar";
 import { useToast } from "../context/ToastContext";
+import { formatMemberSince } from "../lib/currentUser";
 import { getToken } from "../services/auth";
 
 function LocationPin({ className = "h-5 w-5" }: { className?: string }) {
@@ -202,6 +204,9 @@ export default function ProductDetailsPage() {
     k.replace(/([A-Z])/g, " $1").replace(/^./, (str: string) => str.toUpperCase()).trim(),
     v
   ]) as Array<[string, unknown]>;
+  const sellerName = ad.user?.fullName || "Seller";
+  const sellerAvatarUrl = ad.user?.profile?.avatarUrl || "";
+  const sellerMeta = formatMemberSince(ad.user?.createdAt);
 
   return (
     <div className="min-h-screen bg-page text-ink">
@@ -297,7 +302,7 @@ export default function ProductDetailsPage() {
           <div>
             <h3 className="mb-5 text-[40px] font-medium">Reviews</h3>
             <div className="mb-4 flex gap-2">
-              <img src="https://images.unsplash.com/photo-1542204625-de293a53e17a?w=64" alt="user" className="h-7 w-7 rounded-full object-cover" />
+              <UserAvatar name="You" className="h-7 w-7 rounded-full object-cover text-[10px]" />
               <div className="flex-1 rounded-panel border border-[#d9d7df] bg-white p-3">
                 <input 
                   className="w-full border-none bg-transparent text-[14px] outline-none"
@@ -332,7 +337,12 @@ export default function ProductDetailsPage() {
             <div className="space-y-4">
               {reviews.map((review, idx) => (
                 <div key={idx} className="flex gap-2.5">
-                  <img src="https://images.unsplash.com/photo-1531123897727-8f129e1688ce?w=64" alt="reviewer" className="h-7 w-7 rounded-full object-cover" />
+                  <UserAvatar
+                    name={review.user?.fullName || "User"}
+                    imageUrl={review.user?.profile?.avatarUrl}
+                    alt={review.user?.fullName || "User"}
+                    className="h-7 w-7 rounded-full object-cover text-[10px]"
+                  />
                   <div>
                     <p className="text-[14px]">
                       {review.user?.fullName || "Anonymous"} <span className="text-[#8f8b98]">{new Date(review.createdAt).toLocaleDateString()}</span> <span className="text-[#ff9a00]">{"★".repeat(review.rating)}</span>
@@ -351,10 +361,10 @@ export default function ProductDetailsPage() {
           {/* Seller Card */}
           <div className="rounded-[18px] bg-[#efefef] p-6">
             <div className="flex items-center gap-3">
-              <img src="https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?w=80" className="h-12 w-12 rounded-full object-cover" alt="seller" />
+              <UserAvatar name={sellerName} imageUrl={sellerAvatarUrl} alt={sellerName} className="h-12 w-12 rounded-full object-cover text-[12px]" />
               <div>
-                <p className="text-[14px] text-[#8f8b98]">Digi x Enterprise</p>
-                <p className="text-[18px]">Registered 4 years ago</p>
+                <p className="text-[14px] text-[#8f8b98]">{sellerName}</p>
+                <p className="text-[18px]">{sellerMeta}</p>
                 <button className="text-[14px] text-[#ff9715]" type="button">See all ads</button>
               </div>
             </div>

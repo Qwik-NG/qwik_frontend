@@ -7,6 +7,11 @@ import { FilterCard } from "../components/ui/FilterCard";
 import { api } from "../services/api";
 import type { Ad } from "../types";
 
+// TODO: replace static filter options with API-backed categories and search facets.
+const MOCK_CATEGORY_FILTERS = ["Apartment", "Bungalow", "Mansion", "Duplex"];
+const MOCK_HOME_FILTERS = ["4 Bedroom", "3 Bedrooms", "2 Bedrooms"];
+const MOCK_PRICE_RANGE = { min: "₦ 200,000", max: "₦ 100,200,000" };
+
 type Listing = ListingCardItem;
 
 type SearchListing = Listing & { id: string };
@@ -72,23 +77,22 @@ export default function SearchResultsPage() {
             </FilterCard>
             <FilterCard title="Categories">
               <div className="space-y-2 text-[15px]">
-                <label className="flex items-center gap-2"><input checked readOnly type="checkbox" /> Apartment</label>
-                <label className="flex items-center gap-2"><input type="checkbox" /> Bungalow</label>
-                <label className="flex items-center gap-2"><input type="checkbox" /> Mansion</label>
-                <label className="flex items-center gap-2"><input type="checkbox" /> Duplex</label>
+                {MOCK_CATEGORY_FILTERS.map((option, index) => (
+                  <label key={option} className="flex items-center gap-2"><input checked={index === 0} readOnly={index === 0} type="checkbox" /> {option}</label>
+                ))}
               </div>
             </FilterCard>
             <FilterCard title="Home">
               <div className="space-y-2 text-[15px]">
-                <label className="flex items-center gap-2"><input checked readOnly type="checkbox" /> 4 Bedroom</label>
-                <label className="flex items-center gap-2"><input type="checkbox" /> 3 Bedrooms</label>
-                <label className="flex items-center gap-2"><input type="checkbox" /> 2 Bedrooms</label>
+                {MOCK_HOME_FILTERS.map((option, index) => (
+                  <label key={option} className="flex items-center gap-2"><input checked={index === 0} readOnly={index === 0} type="checkbox" /> {option}</label>
+                ))}
               </div>
             </FilterCard>
             <FilterCard title="Price">
               <div className="mb-3 flex items-center justify-between text-[14px] text-[#5f5c68]">
-                <span>₦ 200,000</span>
-                <span>₦ 100,200,000</span>
+                <span>{MOCK_PRICE_RANGE.min}</span>
+                <span>{MOCK_PRICE_RANGE.max}</span>
               </div>
               <input type="range" className="w-full accent-[#ff9715]" />
             </FilterCard>

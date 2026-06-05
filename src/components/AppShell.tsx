@@ -2,6 +2,8 @@ import { useState, type ReactNode } from "react";
 import { LocationPin } from "./icons/LocationPin";
 import { buildSearchResultsRoute } from "../constants/routes";
 import { ROUTES } from "../constants/routes";
+import { useCurrentUser } from "../hooks/useCurrentUser";
+import { UserAvatar } from "./ui/UserAvatar";
 
 type NavigateTo = (to: string) => void;
 type HeaderIcon = "bell" | "bookmark" | "mail";
@@ -62,6 +64,7 @@ export function SiteHeader({
   activeIcon?: HeaderIcon;
 }) {
   const [searchQuery, setSearchQuery] = useState("");
+  const { display: currentUser } = useCurrentUser();
 
   const handleSearchSubmit = (event: React.FormEvent<HTMLFormElement>) => {
     event.preventDefault();
@@ -162,10 +165,11 @@ export function SiteHeader({
           className="cursor-pointer rounded-full"
           type="button"
         >
-          <img
+          <UserAvatar
+            name={currentUser.fullName}
+            imageUrl={currentUser.avatarUrl}
+            alt={`${currentUser.fullName} profile`}
             className="h-10 w-10 rounded-full object-cover lg:h-[42px] lg:w-[42px]"
-            src="https://images.unsplash.com/photo-1521572267360-ee0c2909d518?w=80"
-            alt="avatar"
           />
         </button>
         <button
