@@ -1,4 +1,5 @@
 import type { ReactNode } from "react";
+import { useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { SiteFooter, SiteHeader } from "../components/AppShell";
 import { UserAvatar } from "../components/ui/UserAvatar";
@@ -6,6 +7,7 @@ import { QwikLogo } from "../components/ui/QwikLogo";
 import { IconButton } from "../components/ui/IconButton";
 
 type Conversation = {
+  id: string;
   name: string;
   date: string;
   preview: string;
@@ -21,27 +23,32 @@ type ChatMessage = {
 // TODO: replace mock conversation data with API conversation records when messaging endpoints are ready.
 const MOCK_CONVERSATIONS: Conversation[] = [
   {
+    id: "olivia-rhye",
     name: "Olivia Rhye",
     date: "Jun 14,2022",
     preview: "Sure, I can come check it...",
     active: true
   },
   {
+    id: "phoenix-baker",
     name: "Phoenix Baker",
     date: "Jun 14,2022",
     preview: "Is the MacBook still available?"
   },
   {
+    id: "lana-steiner",
     name: "Lana Steiner",
     date: "Jun 14,2022",
     preview: "Please send the location."
   },
   {
+    id: "demi-wilkinson",
     name: "Demi Wilkinson",
     date: "Jun 14,2022",
     preview: "The price works for me."
   },
   {
+    id: "candice-wu",
     name: "Candice Wu",
     date: "Jun 14,2022",
     preview: "Can you deliver tomorrow?"
@@ -88,6 +95,14 @@ function MessageIcon({ className = "h-[21px] w-[21px]" }: { className?: string }
     <svg viewBox="0 0 24 24" className={className} fill="none" stroke="currentColor" strokeLinecap="round" strokeLinejoin="round" strokeWidth="2">
       <rect x="4" y="6" width="16" height="12" rx="3" />
       <path d="m7.5 9.5 4.5 3.3 4.5-3.3" />
+    </svg>
+  );
+}
+
+function BackIcon() {
+  return (
+    <svg viewBox="0 0 24 24" className="h-4 w-4" fill="none" stroke="currentColor" strokeLinecap="round" strokeLinejoin="round" strokeWidth="2">
+      <path d="m15 18-6-6 6-6" />
     </svg>
   );
 }
@@ -153,17 +168,20 @@ function PlayIcon() {
   );
 }
 
-function ConversationItem({ item }: { item: Conversation }) {
+function ConversationItem({ item, selected, onClick }: { item: Conversation; selected: boolean; onClick: () => void }) {
   return (
     <button
+      type="button"
+      onClick={onClick}
       className={`flex w-full min-w-0 items-center gap-[14px] rounded-[18px] px-[16px] py-[14px] text-left ${
-        item.active ? "bg-white shadow-[0_18px_38px_rgba(10,10,24,0.08)]" : "bg-transparent"
+        selected ? "bg-white shadow-[0_18px_38px_rgba(10,10,24,0.08)]" : "bg-transparent"
       }`}
     >
       <UserAvatar name={item.name} imageUrl={item.avatarUrl} alt={item.name} className="h-[52px] w-[52px] shrink-0 rounded-full object-cover" />
       <span className="min-w-0 flex-1">
         <span className="block truncate text-[16px] font-semibold text-ink">{item.name}</span>
         <span className="mt-1 block text-[13px] text-muted">{item.date}</span>
+        <span className="mt-1 block truncate text-[13px] text-[#8c8996]">{item.preview}</span>
       </span>
     </button>
   );
@@ -173,7 +191,7 @@ function ChatBubble({ message }: { message: ChatMessage }) {
   return (
     <div className={`flex ${message.mine ? "justify-end" : "justify-start"}`}>
       <div
-        className={`max-w-[78%] rounded-card px-[18px] py-[13px] text-[15px] leading-[1.45] ${
+        className={`max-w-[85%] break-words rounded-card px-[18px] py-[13px] text-[15px] leading-[1.45] sm:max-w-[78%] ${
           message.mine ? "rounded-br-[6px] bg-gradient-to-r from-amber to-orange text-white" : "rounded-bl-[6px] bg-card text-ink"
         }`}
       >
@@ -185,7 +203,15 @@ function ChatBubble({ message }: { message: ChatMessage }) {
 
 export default function MessagesPage() {
   const navigate = useNavigate();
-  const activeConversation = MOCK_CONVERSATIONS.find((conversation) => conversation.active) ?? MOCK_CONVERSATIONS[0];
+  const defaultConversation = MOCK_CONVERSATIONS.find((conversation) => conversation.active) ?? MOCK_CONVERSATIONS[0];
+  const [selectedChatId, setSelectedChatId] = useState(defaultConversation.id);
+  const [isMobileChatOpen, setIsMobileChatOpen] = useState(false);
+  const activeConversation = MOCK_CONVERSATIONS.find((conversation) => conversation.id === selectedChatId) ?? defaultConversation;
+
+  const handleConversationSelect = (conversationId: string) => {
+    setSelectedChatId(conversationId);
+    setIsMobileChatOpen(true);
+  };
 
   // TODO: INTEGRATION READY
   // When backend is connected:
@@ -208,20 +234,35 @@ export default function MessagesPage() {
           <h1 className="text-[30px] font-normal leading-none tracking-normal">Messages</h1>
         </div>
 
-        <section className="grid w-full max-w-[1120px] grid-cols-1 overflow-hidden rounded-[28px] bg-white p-[14px] shadow-[0_24px_60px_rgba(10,10,24,0.04)] lg:grid-cols-[340px_1fr] lg:p-[18px]">
-          <aside className="min-w-0 border-b border-card px-[4px] py-[6px] lg:border-b-0 lg:border-r lg:pr-[18px]">
+        <section className="mx-auto grid w-full max-w-[980px] grid-cols-1 overflow-hidden rounded-[28px] bg-white p-[14px] shadow-[0_24px_60px_rgba(10,10,24,0.04)] lg:grid-cols-[300px_minmax(0,1fr)] lg:p-[18px] xl:max-w-[1040px]">
+          <aside className={`min-w-0 border-card px-[4px] py-[6px] ${isMobileChatOpen ? "hidden" : "block border-b"} lg:block lg:border-b-0 lg:border-r lg:pr-[18px]`}>
             <div className="mb-[14px] flex items-center justify-between px-[12px]">
               <h2 className="text-[20px] font-semibold text-ink">Chats</h2>
               <span className="rounded-full bg-amber/10 px-3 py-1 text-[13px] text-orange">{MOCK_CONVERSATIONS.length}</span>
             </div>
             <div className="flex max-h-[350px] flex-col gap-[8px] overflow-auto pr-1 lg:max-h-[590px]">
               {MOCK_CONVERSATIONS.map((item) => (
-                <ConversationItem key={item.name} item={item} />
+                <ConversationItem
+                  key={item.id}
+                  item={item}
+                  selected={item.id === activeConversation.id}
+                  onClick={() => handleConversationSelect(item.id)}
+                />
               ))}
             </div>
           </aside>
 
-          <section className="flex min-h-[560px] min-w-0 flex-col bg-white lg:min-h-[650px]">
+          <section className={`${isMobileChatOpen ? "flex" : "hidden"} min-h-[560px] min-w-0 flex-col bg-white lg:flex lg:min-h-[650px]`}>
+            <div className="border-b border-card px-[14px] py-[12px] lg:hidden">
+              <button
+                type="button"
+                onClick={() => setIsMobileChatOpen(false)}
+                className="inline-flex items-center gap-2 text-[14px] font-medium text-[#6c6a74]"
+              >
+                <BackIcon />
+                <span>Back</span>
+              </button>
+            </div>
             <div className="flex items-center gap-[14px] border-b border-card px-[14px] py-[18px] lg:px-[28px]">
               <UserAvatar name={activeConversation.name} imageUrl={activeConversation.avatarUrl} alt={activeConversation.name} className="h-[54px] w-[54px] rounded-full object-cover" />
               <div className="min-w-0">
@@ -230,7 +271,7 @@ export default function MessagesPage() {
               </div>
             </div>
 
-            <div className="flex flex-1 flex-col gap-[16px] overflow-auto px-[14px] py-[24px] lg:px-[34px]">
+            <div className="flex flex-1 flex-col gap-[16px] overflow-auto px-[12px] py-[20px] sm:px-[14px] lg:px-[34px]">
               {MOCK_CHAT_MESSAGES.map((message, index) => (
                 <ChatBubble key={`${message.text}-${index}`} message={message} />
               ))}
