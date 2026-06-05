@@ -7,6 +7,7 @@
 export const ROUTES = {
   // Home
   HOME: "/",
+  ABOUT: "/about",
   
   // Authentication
   SIGNIN: "/signin",

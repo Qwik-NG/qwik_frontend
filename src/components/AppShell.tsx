@@ -1,6 +1,7 @@
 import { useState, type ReactNode } from "react";
 import { LocationPin } from "./icons/LocationPin";
 import { buildSearchResultsRoute } from "../constants/routes";
+import { ROUTES } from "../constants/routes";
 
 type NavigateTo = (to: string) => void;
 type HeaderIcon = "bell" | "bookmark" | "mail";
@@ -178,7 +179,7 @@ export function SiteFooter({ navigate }: { navigate: NavigateTo }) {
         <h5 className="mb-3.5 text-[18px] font-medium text-[#efeff5]">About</h5>
         <button
           className="mb-2.5 block text-[14px] text-[#5f6071]"
-          onClick={() => navigate("/signup")}
+          onClick={() => navigate(ROUTES.ABOUT)}
         >
           About Qwik
         </button>

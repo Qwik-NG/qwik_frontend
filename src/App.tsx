@@ -3,6 +3,7 @@ import { ROUTES } from "./constants/routes";
 import { ProtectedRoute } from "./components/auth/ProtectedRoute";
 import SignInPage from "./pages/SignInPage";
 import HomePage from "./pages/HomePage";
+import AboutPage from "./pages/AboutPage";
 import SignUpPage from "./pages/SignUpPage";
 import WelcomePage from "./pages/WelcomePage";
 import LoginPage from "./pages/LoginPage";
@@ -47,6 +48,7 @@ export default function App() {
     <Routes>
       {/* Home & Welcome */}
       <Route path={ROUTES.HOME} element={<HomePage />} />
+      <Route path={ROUTES.ABOUT} element={<AboutPage />} />
       <Route path={ROUTES.WELCOME} element={<WelcomePage />} />
 
       {/* Authentication & Access Control */}
