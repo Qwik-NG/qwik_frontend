@@ -52,6 +52,24 @@ export const mockUser: User = {
   updatedAt: new Date().toISOString()
 };
 
+export const mockUnverifiedUser: User = {
+  id: "user-2",
+  email: "seller@example.com",
+  fullName: "Ada Seller",
+  phone: "+234 987 654 3210",
+  location: "Lagos, Nigeria",
+  profile: {
+    bio: "Trusted marketplace seller",
+    avatarUrl: "https://i.pravatar.cc/150?img=5",
+    verified: false,
+    verificationStatus: "pending",
+    rating: 4.2,
+    reviewCount: 37
+  },
+  createdAt: new Date().toISOString(),
+  updatedAt: new Date().toISOString()
+};
+
 /**
  * Factory function to create mock ads with consistent typing
  */
@@ -125,6 +143,56 @@ export const mockAds: Ad[] = [
     "Rivers, Port-Harcourt",
     "https://images.unsplash.com/photo-1564013799919-ab600027ffc6?w=1200",
     mockCategories[7]
+  ),
+  createMockAd(
+    "ad-5",
+    "iPhone 15 Pro Max 256GB",
+    1850000,
+    "Factory unlocked iPhone with battery health at 100 percent and complete accessories.",
+    "Lagos, Ikeja",
+    "https://images.unsplash.com/photo-1511707171634-5f897ff02aa9?w=1200",
+    mockCategories[1],
+    mockUser
+  ),
+  createMockAd(
+    "ad-6",
+    "Samsung Galaxy S24 Ultra",
+    1420000,
+    "Premium Android phone with S Pen support, clean screen and original box.",
+    "Abuja, Wuse",
+    "https://images.unsplash.com/photo-1510557880182-3d4d3cba35a5?w=1200",
+    mockCategories[1],
+    mockUnverifiedUser
+  ),
+  createMockAd(
+    "ad-7",
+    "Women Fashion Two Piece Set",
+    95000,
+    "Elegant fashion set for outings, made with premium fabric and neat finishing.",
+    "Lagos, Yaba",
+    "https://images.unsplash.com/photo-1483985988355-763728e1935b?w=1200",
+    mockCategories[5],
+    mockUnverifiedUser
+  ),
+  createMockAd(
+    "ad-8",
+    "Men Fashion Senator Wear",
+    120000,
+    "Tailored senator wear available in multiple colors for events and office use.",
+    "Abuja, Gwarinpa",
+    "https://images.unsplash.com/photo-1515886657613-9f3515b0c78f?w=1200",
+    mockCategories[5],
+    mockUser
+  ),
+  createMockAd(
+    "ad-9",
+    "3 Bedroom Apartment in Home Estate",
+    42000000,
+    "Modern home apartment with fitted kitchen, wardrobes, and steady power supply.",
+    "Lagos, Ajah",
+    "https://images.unsplash.com/photo-1505693416388-ac5ce068fe85?w=1200",
+    mockCategories[7],
+    mockUser
   )
 ];
 
@@ -230,11 +298,17 @@ export function getMockSearchResults(query?: string, category?: string): Ad[] {
 
   if (query) {
     const queryLower = query.toLowerCase();
-    results = results.filter(ad => ad.title.toLowerCase().includes(queryLower) || ad.description.toLowerCase().includes(queryLower));
+    results = results.filter((ad) => {
+      const searchableFields = [ad.title, ad.description, ad.category.name, ad.category.slug];
+      return searchableFields.some((field) => field.toLowerCase().includes(queryLower));
+    });
   }
 
   if (category) {
-    results = results.filter(ad => ad.category.slug === category);
+    const categoryLower = category.toLowerCase();
+    results = results.filter(
+      (ad) => ad.category.slug.toLowerCase() === categoryLower || ad.category.name.toLowerCase() === categoryLower,
+    );
   }
 
   return results;

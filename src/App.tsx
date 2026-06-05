@@ -82,6 +82,7 @@ export default function App() {
       <Route path={ROUTES.MAKE_OFFER} element={<MakeOfferPage />} />
 
       {/* Search & Discovery */}
+      <Route path={ROUTES.SEARCH} element={<SearchResultsListPage />} />
       <Route path={ROUTES.SEARCH_RESULTS} element={<SearchResultsPage />} />
       <Route path={ROUTES.SEARCH_RESULTS_LIST} element={<SearchResultsListPage />} />
 

@@ -36,6 +36,7 @@ export const ROUTES = {
   MAKE_OFFER: "/make-offer",
   
   // Search
+  SEARCH: "/search",
   SEARCH_RESULTS: "/search-results",
   SEARCH_RESULTS_LIST: "/search-results-list",
   
@@ -85,6 +86,14 @@ export const buildProductDetailsRoute = (id: string | number) => {
  */
 export const buildProductRoute = (id: string | number) => {
   return `/products/${id}`;
+};
+
+/**
+ * Helper function to build search route with query params
+ */
+export const buildSearchRoute = (query?: string) => {
+  if (!query) return ROUTES.SEARCH;
+  return `${ROUTES.SEARCH}?q=${encodeURIComponent(query)}`;
 };
 
 /**

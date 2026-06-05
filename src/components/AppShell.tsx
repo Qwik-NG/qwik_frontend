@@ -1,6 +1,6 @@
 import { useState, type ReactNode } from "react";
 import { LocationPin } from "./icons/LocationPin";
-import { buildSearchResultsRoute } from "../constants/routes";
+import { buildSearchRoute } from "../constants/routes";
 import { ROUTES } from "../constants/routes";
 import { useCurrentUser } from "../hooks/useCurrentUser";
 import { UserAvatar } from "./ui/UserAvatar";
@@ -68,7 +68,7 @@ export function SiteHeader({
 
   const handleSearchSubmit = (event: React.FormEvent<HTMLFormElement>) => {
     event.preventDefault();
-    navigate(buildSearchResultsRoute(searchQuery.trim() || undefined));
+    navigate(buildSearchRoute(searchQuery.trim() || undefined));
   };
 
   return (
