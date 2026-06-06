@@ -42,4 +42,3 @@ Status: Complete
 - Introduce a reusable global `PageLayout` wrapper where safe
 - Add CSS-only page transition polish
 - Clean up responsive inconsistencies
-
