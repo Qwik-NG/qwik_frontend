@@ -11,7 +11,6 @@ import {
   FashionIcon,
   FurnitureIcon,
   JobsIcon,
-  LaptopIcon,
   MoreIcon,
   PhonesIcon,
   PropertiesIcon,
@@ -37,7 +36,6 @@ const categories: Category[] = [
   { name: "Electronics", icon: ElectronicsIcon, tone: "#e8e8e8" },
   { name: "Properties", icon: PropertiesIcon, tone: "#deede5" },
   { name: "Furniture", icon: FurnitureIcon, tone: "#f2dff0" },
-  { name: "Laptop", icon: LaptopIcon, tone: "#e6e2f0" },
   { name: "Beauty", icon: BeautyIcon, tone: "#e8dfeb" },
   { name: "More", icon: MoreIcon, tone: "#f0f0f0" }
 ];
