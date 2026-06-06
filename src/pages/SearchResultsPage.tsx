@@ -6,9 +6,10 @@ import {
   buildSearchRoute,
 } from "../constants/routes";
 import { SiteFooter, SiteHeader } from "../components/AppShell";
+import ElectronicsSearchResultsView from "../components/search/ElectronicsSearchResultsView";
 import ListingCard, { type ListingCardItem } from "../components/listings/ListingCard";
 import VehicleSearchResultsView from "../components/search/VehicleSearchResultsView";
-import { getMockSearchResults, isVehicleSearchQuery, mockAds, mockCategories } from "../lib/mockData";
+import { getMockSearchResults, isElectronicsSearchQuery, isVehicleSearchQuery, mockAds, mockCategories } from "../lib/mockData";
 import type { Ad } from "../types";
 
 type SortValue = "newest" | "price-low" | "price-high";
@@ -208,6 +209,16 @@ export default function SearchResultsPage() {
       <div className="min-h-screen bg-page text-ink">
         <SiteHeader navigate={navigate} />
         <VehicleSearchResultsView query={query} navigate={navigate} view="grid" />
+        <SiteFooter navigate={navigate} />
+      </div>
+    );
+  }
+
+  if (isElectronicsSearchQuery(query)) {
+    return (
+      <div className="min-h-screen bg-page text-ink">
+        <SiteHeader navigate={navigate} />
+        <ElectronicsSearchResultsView query={query} navigate={navigate} view="grid" />
         <SiteFooter navigate={navigate} />
       </div>
     );

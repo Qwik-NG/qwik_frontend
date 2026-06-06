@@ -90,6 +90,8 @@ export default function HomePage() {
                   ? "/search-results-list"
                   : item.name === "Cars"
                     ? buildSearchRoute("Vehicles")
+                  : item.name === "Electronics"
+                    ? buildSearchRoute("Electronics")
                   : buildSearchResultsRoute(item.name === "Properties" ? "Home" : item.name),
               )
             }

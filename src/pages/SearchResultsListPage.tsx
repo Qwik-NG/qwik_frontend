@@ -6,10 +6,11 @@ import {
   buildSearchRoute,
 } from "../constants/routes";
 import { SiteFooter, SiteHeader } from "../components/AppShell";
+import ElectronicsSearchResultsView from "../components/search/ElectronicsSearchResultsView";
 import VehicleSearchResultsView from "../components/search/VehicleSearchResultsView";
 import { LocationPin } from "../components/icons/LocationPin";
 import { ImagePlaceholder } from "../components/ui/ImagePlaceholder";
-import { getMockSearchResults, isVehicleSearchQuery, mockAds, mockCategories } from "../lib/mockData";
+import { getMockSearchResults, isElectronicsSearchQuery, isVehicleSearchQuery, mockAds, mockCategories } from "../lib/mockData";
 import type { Ad } from "../types";
 
 type SortValue = "newest" | "price-low" | "price-high";
@@ -255,6 +256,20 @@ export default function SearchResultsListPage() {
       <div className="min-h-screen bg-page text-ink">
         <SiteHeader navigate={navigate} />
         <VehicleSearchResultsView
+          query={query}
+          navigate={navigate}
+          view={location.pathname === "/search-results-list" ? "list" : "grid"}
+        />
+        <SiteFooter navigate={navigate} />
+      </div>
+    );
+  }
+
+  if (isElectronicsSearchQuery(query)) {
+    return (
+      <div className="min-h-screen bg-page text-ink">
+        <SiteHeader navigate={navigate} />
+        <ElectronicsSearchResultsView
           query={query}
           navigate={navigate}
           view={location.pathname === "/search-results-list" ? "list" : "grid"}

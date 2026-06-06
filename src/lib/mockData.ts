@@ -17,12 +17,24 @@ import type {
 export type VehicleType = "Car" | "Buses" | "Motorcycle & Scooters" | "Buses & Microbuses";
 export type VehicleCondition = "Brand New" | "Foreign Used" | "Local Used";
 
+export type ElectronicsType = "Laptops & Computers" | "Audio & Music Equipment" | "Computer Hardware" | "Monitors";
+export type ElectronicsCondition = "Brand New" | "Refurbished" | "Used";
+
 export type MockVehicleListing = {
   id: string;
   ad: Ad;
   brand: "Benz" | "Toyota" | "Honda" | "Ford" | "Lexus" | "Nissan" | "BMW" | "Audi";
   vehicleType: VehicleType;
   condition: VehicleCondition;
+};
+
+export type MockElectronicsListing = {
+  id: string;
+  ad: Ad;
+  brand: "Asus" | "Apple" | "HP" | "Dell" | "Lenovo";
+  electronicsType: ElectronicsType;
+  stripCategory: "Laptops" | "Desktop" | "Server";
+  condition: ElectronicsCondition;
 };
 
 /**
@@ -403,6 +415,198 @@ export const mockVehicleListings: MockVehicleListing[] = [
   },
 ];
 
+// TODO: Replace electronics mock listings with backend API data.
+// TODO: Replace electronics filters with backend categories.
+export const mockElectronicsListings: MockElectronicsListing[] = [
+  {
+    id: "electronics-1",
+    brand: "Apple",
+    electronicsType: "Laptops & Computers",
+    stripCategory: "Laptops",
+    condition: "Brand New",
+    ad: createMockAd(
+      "electronics-ad-1",
+      "Apple MacBook Pro",
+      1900000,
+      "New Laptop Apple MacBook Pro 32GB Apple M1 SSD 1T",
+      "Lagos, Ikeja",
+      "https://images.unsplash.com/photo-1517336714739-489689fd1ca8?w=1200",
+      mockCategories[6],
+      mockUser,
+    ),
+  },
+  {
+    id: "electronics-2",
+    brand: "Apple",
+    electronicsType: "Laptops & Computers",
+    stripCategory: "Laptops",
+    condition: "Brand New",
+    ad: createMockAd(
+      "electronics-ad-2",
+      "Apple MacBook Pro",
+      1900000,
+      "New Laptop Apple MacBook Pro 32GB Apple M1 SSD 1T",
+      "Lagos, Ikeja",
+      "https://images.unsplash.com/photo-1517336714739-489689fd1ca8?w=1200",
+      mockCategories[6],
+      mockUnverifiedUser,
+    ),
+  },
+  {
+    id: "electronics-3",
+    brand: "Apple",
+    electronicsType: "Laptops & Computers",
+    stripCategory: "Laptops",
+    condition: "Brand New",
+    ad: createMockAd(
+      "electronics-ad-3",
+      "Apple MacBook Pro",
+      1900000,
+      "New Laptop Apple MacBook Pro 32GB Apple M1 SSD 1T",
+      "Lagos, Ikeja",
+      "https://images.unsplash.com/photo-1517336714739-489689fd1ca8?w=1200",
+      mockCategories[6],
+      mockUnverifiedUser,
+    ),
+  },
+  {
+    id: "electronics-4",
+    brand: "Apple",
+    electronicsType: "Laptops & Computers",
+    stripCategory: "Laptops",
+    condition: "Brand New",
+    ad: createMockAd(
+      "electronics-ad-4",
+      "Apple MacBook Pro",
+      1900000,
+      "New Laptop Apple MacBook Pro 32GB Apple M1 SSD 1T",
+      "Lagos, Ikeja",
+      "https://images.unsplash.com/photo-1517336714739-489689fd1ca8?w=1200",
+      mockCategories[6],
+      mockUser,
+    ),
+  },
+  {
+    id: "electronics-5",
+    brand: "Apple",
+    electronicsType: "Laptops & Computers",
+    stripCategory: "Laptops",
+    condition: "Brand New",
+    ad: createMockAd(
+      "electronics-ad-5",
+      "Apple MacBook Pro",
+      1900000,
+      "New Laptop Apple MacBook Pro 32GB Apple M1 SSD 1T",
+      "Lagos, Ikeja",
+      "https://images.unsplash.com/photo-1517336714739-489689fd1ca8?w=1200",
+      mockCategories[6],
+      mockUnverifiedUser,
+    ),
+  },
+  {
+    id: "electronics-6",
+    brand: "Apple",
+    electronicsType: "Laptops & Computers",
+    stripCategory: "Laptops",
+    condition: "Brand New",
+    ad: createMockAd(
+      "electronics-ad-6",
+      "Apple MacBook Pro",
+      1900000,
+      "New Laptop Apple MacBook Pro 32GB Apple M1 SSD 1T",
+      "Lagos, Ikeja",
+      "https://images.unsplash.com/photo-1517336714739-489689fd1ca8?w=1200",
+      mockCategories[6],
+      mockUser,
+    ),
+  },
+  {
+    id: "electronics-7",
+    brand: "Apple",
+    electronicsType: "Laptops & Computers",
+    stripCategory: "Laptops",
+    condition: "Brand New",
+    ad: createMockAd(
+      "electronics-ad-7",
+      "Apple MacBook Pro",
+      1900000,
+      "New Laptop Apple MacBook Pro 32GB Apple M1 SSD 1T",
+      "Lagos, Ikeja",
+      "https://images.unsplash.com/photo-1517336714739-489689fd1ca8?w=1200",
+      mockCategories[6],
+      mockUser,
+    ),
+  },
+  {
+    id: "electronics-8",
+    brand: "Asus",
+    electronicsType: "Laptops & Computers",
+    stripCategory: "Laptops",
+    condition: "Brand New",
+    ad: createMockAd(
+      "electronics-ad-8",
+      "Asus ROG Laptop",
+      1750000,
+      "Gaming laptop Asus ROG with powerful graphics, 16GB RAM, and fast SSD storage.",
+      "Abuja, Wuse",
+      "https://images.unsplash.com/photo-1593642702821-c8da6771f0c6?w=1200",
+      mockCategories[6],
+      mockUnverifiedUser,
+    ),
+  },
+  {
+    id: "electronics-9",
+    brand: "HP",
+    electronicsType: "Laptops & Computers",
+    stripCategory: "Laptops",
+    condition: "Refurbished",
+    ad: createMockAd(
+      "electronics-ad-9",
+      "HP EliteBook",
+      890000,
+      "HP EliteBook business laptop with clean body, strong battery life, and SSD performance.",
+      "Port Harcourt, GRA",
+      "https://images.unsplash.com/photo-1496181133206-80ce9b88a853?w=1200",
+      mockCategories[6],
+      mockUser,
+    ),
+  },
+  {
+    id: "electronics-10",
+    brand: "Dell",
+    electronicsType: "Monitors",
+    stripCategory: "Desktop",
+    condition: "Used",
+    ad: createMockAd(
+      "electronics-ad-10",
+      "Dell XPS Desktop",
+      1250000,
+      "Dell XPS desktop setup with monitor, keyboard, and strong processor for office work.",
+      "Lagos, Yaba",
+      "https://images.unsplash.com/photo-1547082299-de196ea013d6?w=1200",
+      mockCategories[6],
+      mockUnverifiedUser,
+    ),
+  },
+  {
+    id: "electronics-11",
+    brand: "Lenovo",
+    electronicsType: "Computer Hardware",
+    stripCategory: "Server",
+    condition: "Refurbished",
+    ad: createMockAd(
+      "electronics-ad-11",
+      "Lenovo ThinkPad",
+      980000,
+      "Reliable Lenovo ThinkPad with clean keyboard, solid build quality, and fast startup speed.",
+      "Ibadan, Ring Road",
+      "https://images.unsplash.com/photo-1498050108023-c5249f4df085?w=1200",
+      mockCategories[6],
+      mockUser,
+    ),
+  },
+];
+
 /**
  * Mock Saved Ads
  */
@@ -527,6 +731,12 @@ export function isVehicleSearchQuery(query?: string): boolean {
   return ["vehicle", "vehicles", "car", "cars"].includes(queryLower);
 }
 
+export function isElectronicsSearchQuery(query?: string): boolean {
+  const queryLower = query?.trim().toLowerCase();
+  if (!queryLower) return false;
+  return ["electronics", "electronic", "laptop", "laptops", "computer", "computers"].includes(queryLower);
+}
+
 export function getMockVehicleSearchResults(query?: string): MockVehicleListing[] {
   if (!query || isVehicleSearchQuery(query)) {
     return mockVehicleListings;
@@ -540,6 +750,28 @@ export function getMockVehicleSearchResults(query?: string): MockVehicleListing[
       ad.location,
       brand,
       vehicleType,
+      condition,
+      ad.category.name,
+      ad.category.slug,
+    ];
+    return searchableFields.some((field) => field.toLowerCase().includes(queryLower));
+  });
+}
+
+export function getMockElectronicsSearchResults(query?: string): MockElectronicsListing[] {
+  if (!query || isElectronicsSearchQuery(query)) {
+    return mockElectronicsListings;
+  }
+
+  const queryLower = query.trim().toLowerCase();
+  return mockElectronicsListings.filter(({ ad, brand, electronicsType, stripCategory, condition }) => {
+    const searchableFields = [
+      ad.title,
+      ad.description,
+      ad.location,
+      brand,
+      electronicsType,
+      stripCategory,
       condition,
       ad.category.name,
       ad.category.slug,
