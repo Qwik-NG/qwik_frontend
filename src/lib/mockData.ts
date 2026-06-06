@@ -25,6 +25,29 @@ export type BeautyType = "Body Lotion" | "Body Wash & Soap" | "Body Oils" | "Bod
 export type BeautyCondition = "Brand New" | "Refurbished" | "Used";
 export type FurnitureType = "Chairs" | "Tables" | "Bed & Frames" | "Sofas" | "TV Stand & Mount" | "Mattresses" | "Wardrobes";
 export type FurnitureCondition = "Brand New" | "Used";
+export type FashionSearchState = "general" | "men" | "women" | "baby-kids";
+export type FashionCategory = "Men's Fashion" | "Women's Fashion" | "Baby & Kids Fashion";
+export type FashionType = "Clothings" | "Bags" | "Jewelry" | "Shoe";
+export type FashionBrand = "Nike" | "Louis vitton" | "Adidas";
+export type FashionStyle = "Casual" | "Formal" | "Vintage";
+export type FashionColor = "Black" | "Multi" | "White";
+export type FashionCondition = "Brand New" | "Used";
+export type FashionStripItem =
+  | "Men's Fashion"
+  | "Women's Fashion"
+  | "Baby & Kids Fashion"
+  | "Shirt"
+  | "Suits"
+  | "T-shirt & Tanks"
+  | "Jeans"
+  | "Active Wear"
+  | "Bags"
+  | "Jewelry"
+  | "Dresses"
+  | "Clothing set"
+  | "Ball Gowns"
+  | "Shoes"
+  | "Caps";
 
 export type MockVehicleListing = {
   id: string;
@@ -70,6 +93,19 @@ export type MockFurnitureListing = {
   room: "Bedroom" | "Kitchen" | "Home Office / Study";
   stripCategory: FurnitureType;
   condition: FurnitureCondition;
+};
+
+export type MockFashionListing = {
+  id: string;
+  ad: Ad;
+  audience: FashionSearchState;
+  categoryType: FashionCategory;
+  fashionType: FashionType;
+  brand: FashionBrand;
+  style: FashionStyle;
+  color: FashionColor;
+  stripCategory: FashionStripItem;
+  condition: FashionCondition;
 };
 
 /**
@@ -1169,6 +1205,263 @@ export const mockFurnitureListings: MockFurnitureListing[] = [
   },
 ];
 
+// TODO: Replace fashion mock listings with backend API data
+// TODO: Replace fashion subcategories with backend-driven category data
+export const mockFashionListings: MockFashionListing[] = [
+  {
+    id: "fashion-1",
+    audience: "men",
+    categoryType: "Men's Fashion",
+    fashionType: "Clothings",
+    brand: "Nike",
+    style: "Formal",
+    color: "Black",
+    stripCategory: "Suits",
+    condition: "Brand New",
+    ad: createMockAd(
+      "fashion-ad-1",
+      "Classic Men's Suit",
+      1900000,
+      "Structured two-piece suit with a tailored fit, premium fabric, and clean formal finish for events and office wear.",
+      "Lagos, Ikeja",
+      "https://images.unsplash.com/photo-1593032465171-8bd6d6f0a27c?w=1200",
+      mockCategories[5],
+      mockUser,
+    ),
+  },
+  {
+    id: "fashion-2",
+    audience: "men",
+    categoryType: "Men's Fashion",
+    fashionType: "Clothings",
+    brand: "Adidas",
+    style: "Casual",
+    color: "White",
+    stripCategory: "T-shirt & Tanks",
+    condition: "Brand New",
+    ad: createMockAd(
+      "fashion-ad-2",
+      "Men's Street Tee",
+      780000,
+      "Relaxed streetwear tee with soft cotton feel, crisp neckline, and versatile everyday styling.",
+      "Abuja, Wuse",
+      "https://images.unsplash.com/photo-1521572163474-6864f9cf17ab?w=1200",
+      mockCategories[5],
+      mockUnverifiedUser,
+    ),
+  },
+  {
+    id: "fashion-3",
+    audience: "men",
+    categoryType: "Men's Fashion",
+    fashionType: "Clothings",
+    brand: "Nike",
+    style: "Vintage",
+    color: "Multi",
+    stripCategory: "Jeans",
+    condition: "Used",
+    ad: createMockAd(
+      "fashion-ad-3",
+      "Vintage Denim Jeans",
+      620000,
+      "Aged wash denim jeans with straight-leg fit, durable finish, and a broken-in vintage look.",
+      "Lagos, Yaba",
+      "https://images.unsplash.com/photo-1541099649105-f69ad21f3246?w=1200",
+      mockCategories[5],
+      mockUser,
+    ),
+  },
+  {
+    id: "fashion-4",
+    audience: "men",
+    categoryType: "Men's Fashion",
+    fashionType: "Bags",
+    brand: "Louis vitton",
+    style: "Formal",
+    color: "Black",
+    stripCategory: "Bags",
+    condition: "Brand New",
+    ad: createMockAd(
+      "fashion-ad-4",
+      "Executive Leather Bag",
+      1450000,
+      "Minimal leather bag with structured form, polished hardware, and room for daily office essentials.",
+      "Lagos, Victoria Island",
+      "https://images.unsplash.com/photo-1548036328-c9fa89d128fa?w=1200",
+      mockCategories[5],
+      mockUser,
+    ),
+  },
+  {
+    id: "fashion-5",
+    audience: "women",
+    categoryType: "Women's Fashion",
+    fashionType: "Clothings",
+    brand: "Adidas",
+    style: "Casual",
+    color: "White",
+    stripCategory: "Shirt",
+    condition: "Brand New",
+    ad: createMockAd(
+      "fashion-ad-5",
+      "Women's Cotton Shirt",
+      690000,
+      "Soft cotton shirt with clean buttons, easy drape, and versatile styling for work or casual wear.",
+      "Lagos, Lekki",
+      "https://images.unsplash.com/photo-1551232864-3f0890e580d9?w=1200",
+      mockCategories[5],
+      mockUnverifiedUser,
+    ),
+  },
+  {
+    id: "fashion-6",
+    audience: "women",
+    categoryType: "Women's Fashion",
+    fashionType: "Clothings",
+    brand: "Nike",
+    style: "Formal",
+    color: "Black",
+    stripCategory: "Dresses",
+    condition: "Brand New",
+    ad: createMockAd(
+      "fashion-ad-6",
+      "Evening Dress",
+      1650000,
+      "Refined evening dress with a sculpted waist, fluid fabric, and elegant silhouette for occasions.",
+      "Abuja, Maitama",
+      "https://images.unsplash.com/photo-1496747611176-843222e1e57c?w=1200",
+      mockCategories[5],
+      mockUser,
+    ),
+  },
+  {
+    id: "fashion-7",
+    audience: "women",
+    categoryType: "Women's Fashion",
+    fashionType: "Jewelry",
+    brand: "Louis vitton",
+    style: "Vintage",
+    color: "Multi",
+    stripCategory: "Jewelry",
+    condition: "Brand New",
+    ad: createMockAd(
+      "fashion-ad-7",
+      "Statement Jewelry Set",
+      950000,
+      "Layered jewelry set with bold detailing, polished finish, and coordinated pieces for elevated styling.",
+      "Port Harcourt, GRA",
+      "https://images.unsplash.com/photo-1617038260897-41a1f14a8ca0?w=1200",
+      mockCategories[5],
+      mockUser,
+    ),
+  },
+  {
+    id: "fashion-8",
+    audience: "women",
+    categoryType: "Women's Fashion",
+    fashionType: "Bags",
+    brand: "Louis vitton",
+    style: "Formal",
+    color: "Black",
+    stripCategory: "Bags",
+    condition: "Used",
+    ad: createMockAd(
+      "fashion-ad-8",
+      "Structured Handbag",
+      1200000,
+      "Structured handbag with top handle, compact frame, and polished texture for dressy daily looks.",
+      "Lagos, Surulere",
+      "https://images.unsplash.com/photo-1584917865442-de89df76afd3?w=1200",
+      mockCategories[5],
+      mockUnverifiedUser,
+    ),
+  },
+  {
+    id: "fashion-9",
+    audience: "baby-kids",
+    categoryType: "Baby & Kids Fashion",
+    fashionType: "Clothings",
+    brand: "Adidas",
+    style: "Casual",
+    color: "Multi",
+    stripCategory: "Clothing set",
+    condition: "Brand New",
+    ad: createMockAd(
+      "fashion-ad-9",
+      "Kids Clothing Set",
+      540000,
+      "Coordinated kids clothing set with soft fabric, cheerful tones, and easy all-day comfort.",
+      "Lagos, Ajah",
+      "https://images.unsplash.com/photo-1519238359922-989348752efb?w=1200",
+      mockCategories[5],
+      mockUser,
+    ),
+  },
+  {
+    id: "fashion-10",
+    audience: "baby-kids",
+    categoryType: "Baby & Kids Fashion",
+    fashionType: "Clothings",
+    brand: "Nike",
+    style: "Formal",
+    color: "White",
+    stripCategory: "Ball Gowns",
+    condition: "Brand New",
+    ad: createMockAd(
+      "fashion-ad-10",
+      "Kids Ball Gown",
+      1320000,
+      "Layered kids ball gown with soft volume, detailed trim, and a dressy finish for celebrations.",
+      "Abuja, Gwarinpa",
+      "https://images.unsplash.com/photo-1515886657613-9f3515b0c78f?w=1200",
+      mockCategories[5],
+      mockUnverifiedUser,
+    ),
+  },
+  {
+    id: "fashion-11",
+    audience: "baby-kids",
+    categoryType: "Baby & Kids Fashion",
+    fashionType: "Shoe",
+    brand: "Adidas",
+    style: "Casual",
+    color: "Black",
+    stripCategory: "Shoes",
+    condition: "Brand New",
+    ad: createMockAd(
+      "fashion-ad-11",
+      "Kids Sneakers",
+      610000,
+      "Comfort-focused kids sneakers with lightweight sole, easy closure, and durable upper for active days.",
+      "Lagos, Festac",
+      "https://images.unsplash.com/photo-1542291026-7eec264c27ff?w=1200",
+      mockCategories[5],
+      mockUser,
+    ),
+  },
+  {
+    id: "fashion-12",
+    audience: "baby-kids",
+    categoryType: "Baby & Kids Fashion",
+    fashionType: "Clothings",
+    brand: "Nike",
+    style: "Vintage",
+    color: "White",
+    stripCategory: "Caps",
+    condition: "Used",
+    ad: createMockAd(
+      "fashion-ad-12",
+      "Kids Branded Cap",
+      340000,
+      "Lightweight kids cap with curved brim, playful branding, and breathable construction for sunny outings.",
+      "Ibadan, Ring Road",
+      "https://images.unsplash.com/photo-1521369909029-2afed882baee?w=1200",
+      mockCategories[5],
+      mockUnverifiedUser,
+    ),
+  },
+];
+
 /**
  * Mock Saved Ads
  */
@@ -1319,6 +1612,29 @@ export function isBeautySearchQuery(query?: string): boolean {
   return ["beauty", "body care", "skincare"].includes(queryLower);
 }
 
+function normalizeFashionQuery(query?: string): string {
+  return (query ?? "")
+    .toLowerCase()
+    .replace(/[’']/g, "")
+    .replace(/&/g, " and ")
+    .replace(/[^a-z0-9]+/g, " ")
+    .trim();
+}
+
+export function getFashionSearchState(query?: string): FashionSearchState | null {
+  const normalizedQuery = normalizeFashionQuery(query);
+  if (!normalizedQuery) return null;
+  if (["fashion"].includes(normalizedQuery)) return "general";
+  if (["mens fashion", "men fashion"].includes(normalizedQuery)) return "men";
+  if (["womens fashion", "women fashion"].includes(normalizedQuery)) return "women";
+  if (["baby fashion", "kids fashion", "baby and kids fashion", "baby kids fashion"].includes(normalizedQuery)) return "baby-kids";
+  return null;
+}
+
+export function isFashionSearchQuery(query?: string): boolean {
+  return getFashionSearchState(query) !== null;
+}
+
 export function isFurnitureSearchQuery(query?: string): boolean {
   const queryLower = query?.trim().toLowerCase();
   if (!queryLower) return false;
@@ -1439,6 +1755,37 @@ export function getMockFurnitureSearchResults(query?: string): MockFurnitureList
       categoryType,
       furnitureType,
       room,
+      stripCategory,
+      condition,
+      ad.category.name,
+      ad.category.slug,
+    ];
+    return searchableFields.some((field) => field.toLowerCase().includes(queryLower));
+  });
+}
+
+export function getMockFashionSearchResults(query?: string): MockFashionListing[] {
+  const state = getFashionSearchState(query);
+  if (!query || state === "general") {
+    return mockFashionListings;
+  }
+
+  if (state) {
+    return mockFashionListings.filter((item) => item.audience === state);
+  }
+
+  const queryLower = query.trim().toLowerCase();
+  return mockFashionListings.filter(({ ad, audience, categoryType, fashionType, brand, style, color, stripCategory, condition }) => {
+    const searchableFields = [
+      ad.title,
+      ad.description,
+      ad.location,
+      audience,
+      categoryType,
+      fashionType,
+      brand,
+      style,
+      color,
       stripCategory,
       condition,
       ad.category.name,
