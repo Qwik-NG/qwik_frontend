@@ -4,43 +4,38 @@ import {
   buildSearchResultsListRoute,
   buildSearchResultsRoute,
 } from "../../constants/routes";
-import ListingCard from "../listings/ListingCard";
 import {
-  getMockElectronicsSearchResults,
-  type ElectronicsCondition,
-  type ElectronicsType,
-  type MockElectronicsListing,
+  getMockPhonesSearchResults,
+  type MockPhonesListing,
+  type PhonesCondition,
+  type PhonesType,
 } from "../../lib/mockData";
+import ListingCard from "../listings/ListingCard";
 import BackButton from "../ui/BackButton";
 
 type NavigateTo = (to: string) => void;
 type SortValue = "newest" | "price-low" | "price-high";
 type VerifiedValue = "all" | "verified" | "unverified";
-type ElectronicsView = "grid" | "list";
-type ElectronicsBrand = MockElectronicsListing["brand"];
-type StripCategory = MockElectronicsListing["stripCategory"];
+type PhonesView = "grid" | "list";
+type PhonesBrand = MockPhonesListing["brand"];
+type StripBrand = MockPhonesListing["stripBrand"];
 
-type ElectronicsSearchResultsViewProps = {
+type PhonesSearchResultsViewProps = {
   query: string;
   navigate: NavigateTo;
-  view: ElectronicsView;
+  view: PhonesView;
 };
 
-const ELECTRONICS_COUNT_LABEL = "23,029";
-const ELECTRONICS_FILTER_TYPES: Array<"all" | ElectronicsType> = [
+const PHONES_COUNT_LABEL = "23,029";
+const PHONES_FILTER_TYPES: Array<"all" | PhonesType> = [
   "all",
-  "Laptops & Computers",
-  "Audio & Music Equipment",
-  "Computer Hardware",
-  "Monitors",
+  "Mobile Phones",
+  "Tablet",
+  "Accessories for Phones and Tab",
+  "Smart watch",
 ];
-const ELECTRONICS_FILTER_BRANDS: Array<"all" | ElectronicsBrand> = ["all", "Asus", "Apple", "HP"];
-const ELECTRONICS_FILTER_CONDITIONS: Array<"all" | ElectronicsCondition> = [
-  "all",
-  "Brand New",
-  "Refurbished",
-  "Used",
-];
+const PHONES_FILTER_BRANDS: Array<"all" | PhonesBrand> = ["all", "Tecno", "Apple", "Samsung"];
+const PHONES_FILTER_CONDITIONS: Array<"all" | PhonesCondition> = ["all", "Brand New", "Refurbished", "Used"];
 const VERIFIED_OPTIONS: Array<{ label: string; value: VerifiedValue }> = [
   { label: "Show All", value: "all" },
   { label: "Verified Seller", value: "verified" },
@@ -51,10 +46,12 @@ const SORT_OPTIONS: Array<{ label: string; value: SortValue }> = [
   { label: "Price: Low to High", value: "price-low" },
   { label: "Price: High to Low", value: "price-high" },
 ];
-const STRIP_CATEGORIES: Array<{ name: StripCategory; image: string }> = [
-  { name: "Laptops", image: "https://images.unsplash.com/photo-1517336714739-489689fd1ca8?w=240" },
-  { name: "Desktop", image: "https://images.unsplash.com/photo-1547082299-de196ea013d6?w=240" },
-  { name: "Server", image: "https://images.unsplash.com/photo-1558494949-ef010cbdcc31?w=240" },
+const STRIP_BRANDS: Array<{ name: StripBrand; label: string; image: string }> = [
+  { name: "Apple", label: "Apple", image: "https://images.unsplash.com/photo-1592899677977-9c10ca588bbd?w=240" },
+  { name: "Tecno", label: "Tecno", image: "https://images.unsplash.com/photo-1511707171634-5f897ff02aa9?w=240" },
+  { name: "Samsung", label: "Samsung", image: "https://images.unsplash.com/photo-1610945265064-0e34e5519bbf?w=240" },
+  { name: "Xiaomi", label: "Xiaomi", image: "https://images.unsplash.com/photo-1598327105666-5b89351aff97?w=240" },
+  { name: "Redmi", label: "Redmi", image: "https://images.unsplash.com/photo-1574944985070-8f3ebc6b79d2?w=240" },
 ];
 
 function formatNaira(value: number) {
@@ -109,27 +106,27 @@ function ListIcon({ active = false }: { active?: boolean }) {
 }
 
 function StripBubble({
-  name,
+  label,
   image,
   active,
   onClick,
 }: {
-  name: StripCategory;
+  label: string;
   image: string;
   active: boolean;
   onClick: () => void;
 }) {
   return (
-    <button type="button" onClick={onClick} className="flex min-w-[120px] flex-col items-center gap-2 text-center">
+    <button type="button" onClick={onClick} className="flex min-w-[104px] flex-col items-center gap-2 text-center">
       <span className={`grid h-[72px] w-[72px] place-items-center overflow-hidden rounded-full border ${active ? "border-[#1f1d27]" : "border-[#ddd9d2]"}`}>
-        <img src={image} alt={name} className="h-full w-full object-cover" />
+        <img src={image} alt={label} className="h-full w-full object-cover" />
       </span>
-      <span className="text-[15px] font-medium text-[#1f1d27]">{name}</span>
+      <span className="text-[15px] font-medium text-[#1f1d27]">{label}</span>
     </button>
   );
 }
 
-function sortElectronicsResults(results: MockElectronicsListing[], sortBy: SortValue) {
+function sortPhonesResults(results: MockPhonesListing[], sortBy: SortValue) {
   return [...results].sort((left, right) => {
     if (sortBy === "price-low") return left.ad.price - right.ad.price;
     if (sortBy === "price-high") return right.ad.price - left.ad.price;
@@ -139,7 +136,7 @@ function sortElectronicsResults(results: MockElectronicsListing[], sortBy: SortV
   });
 }
 
-function ElectronicsFilters({
+function PhonesFilters({
   selectedType,
   onSelectedTypeChange,
   sortBy,
@@ -154,19 +151,19 @@ function ElectronicsFilters({
   selectedCondition,
   onSelectedConditionChange,
 }: {
-  selectedType: "all" | ElectronicsType;
-  onSelectedTypeChange: (value: "all" | ElectronicsType) => void;
+  selectedType: "all" | PhonesType;
+  onSelectedTypeChange: (value: "all" | PhonesType) => void;
   sortBy: SortValue;
   onSortByChange: (value: SortValue) => void;
-  selectedBrand: "all" | ElectronicsBrand;
-  onSelectedBrandChange: (value: "all" | ElectronicsBrand) => void;
+  selectedBrand: "all" | PhonesBrand;
+  onSelectedBrandChange: (value: "all" | PhonesBrand) => void;
   verifiedFilter: VerifiedValue;
   onVerifiedFilterChange: (value: VerifiedValue) => void;
   selectedMaxPrice: number;
   onSelectedMaxPriceChange: (value: number) => void;
   maxPrice: number;
-  selectedCondition: "all" | ElectronicsCondition;
-  onSelectedConditionChange: (value: "all" | ElectronicsCondition) => void;
+  selectedCondition: "all" | PhonesCondition;
+  onSelectedConditionChange: (value: "all" | PhonesCondition) => void;
 }) {
   return (
     <div className="space-y-4">
@@ -183,7 +180,7 @@ function ElectronicsFilters({
             value={sortBy}
             onChange={(event) => onSortByChange(event.target.value as SortValue)}
             className="w-full appearance-none bg-transparent pr-7 text-[15px] text-[#ff9715] outline-none"
-            aria-label="Sort electronics results"
+            aria-label="Sort phone results"
           >
             {SORT_OPTIONS.map((option) => (
               <option key={option.value} value={option.value}>
@@ -197,7 +194,7 @@ function ElectronicsFilters({
 
       <FilterPanel title="Categories">
         <div className="space-y-3">
-          {ELECTRONICS_FILTER_TYPES.map((option) => (
+          {PHONES_FILTER_TYPES.map((option) => (
             <FilterOption
               key={option}
               label={option === "all" ? "Show All" : option}
@@ -211,7 +208,7 @@ function ElectronicsFilters({
 
       <FilterPanel title="Brand">
         <div className="space-y-3">
-          {ELECTRONICS_FILTER_BRANDS.map((option) => (
+          {PHONES_FILTER_BRANDS.map((option) => (
             <FilterOption
               key={option}
               label={option === "all" ? "Show All" : option}
@@ -249,13 +246,13 @@ function ElectronicsFilters({
           value={selectedMaxPrice}
           onChange={(event) => onSelectedMaxPriceChange(Number(event.target.value))}
           className="w-full accent-[#ff9715]"
-          aria-label="Maximum electronics price"
+          aria-label="Maximum phones price"
         />
       </FilterPanel>
 
       <FilterPanel title="Condition">
         <div className="space-y-3">
-          {ELECTRONICS_FILTER_CONDITIONS.map((option) => (
+          {PHONES_FILTER_CONDITIONS.map((option) => (
             <FilterOption
               key={option}
               label={option === "all" ? "Show All" : option}
@@ -269,27 +266,24 @@ function ElectronicsFilters({
   );
 }
 
-export default function ElectronicsSearchResultsView({ query, navigate, view }: ElectronicsSearchResultsViewProps) {
-  const [selectedType, setSelectedType] = useState<"all" | ElectronicsType>("Laptops & Computers");
+export default function PhonesSearchResultsView({ query, navigate, view }: PhonesSearchResultsViewProps) {
+  const [selectedType, setSelectedType] = useState<"all" | PhonesType>("Mobile Phones");
   const [sortBy, setSortBy] = useState<SortValue>("newest");
-  const [selectedBrand, setSelectedBrand] = useState<"all" | ElectronicsBrand>("all");
+  const [selectedBrand, setSelectedBrand] = useState<"all" | PhonesBrand>("all");
   const [verifiedFilter, setVerifiedFilter] = useState<VerifiedValue>("all");
-  const [selectedStripCategory, setSelectedStripCategory] = useState<StripCategory>("Laptops");
-  const electronicsResults = useMemo(() => getMockElectronicsSearchResults(query), [query]);
-  const maxPrice = useMemo(
-    () => Math.max(...electronicsResults.map((item) => item.ad.price), 100200000),
-    [electronicsResults],
-  );
+  const [selectedStripBrand, setSelectedStripBrand] = useState<StripBrand>("Apple");
+  const phonesResults = useMemo(() => getMockPhonesSearchResults(query), [query]);
+  const maxPrice = useMemo(() => Math.max(...phonesResults.map((item) => item.ad.price), 100200000), [phonesResults]);
   const [selectedMaxPrice, setSelectedMaxPrice] = useState(100200000);
-  const [selectedCondition, setSelectedCondition] = useState<"all" | ElectronicsCondition>("all");
+  const [selectedCondition, setSelectedCondition] = useState<"all" | PhonesCondition>("all");
   const [mobileFiltersOpen, setMobileFiltersOpen] = useState(false);
 
   useEffect(() => {
-    setSelectedType("Laptops & Computers");
+    setSelectedType("Mobile Phones");
     setSortBy("newest");
     setSelectedBrand("all");
     setVerifiedFilter("all");
-    setSelectedStripCategory("Laptops");
+    setSelectedStripBrand("Apple");
     setSelectedCondition("all");
     setSelectedMaxPrice(100200000);
     setMobileFiltersOpen(false);
@@ -297,25 +291,23 @@ export default function ElectronicsSearchResultsView({ query, navigate, view }: 
 
   const filteredResults = useMemo(
     () =>
-      sortElectronicsResults(
-        electronicsResults.filter((item) => {
-          const verified = Boolean(
-            item.ad.user?.profile?.verified || item.ad.user?.profile?.verificationStatus === "verified",
-          );
-          const typeMatches = selectedType === "all" || item.electronicsType === selectedType;
-          const stripMatches = item.stripCategory === selectedStripCategory;
+      sortPhonesResults(
+        phonesResults.filter((item) => {
+          const verified = Boolean(item.ad.user?.profile?.verified || item.ad.user?.profile?.verificationStatus === "verified");
+          const typeMatches = selectedType === "all" || item.phonesType === selectedType;
           const brandMatches = selectedBrand === "all" || item.brand === selectedBrand;
+          const stripMatches = item.stripBrand === selectedStripBrand;
           const verifiedMatches =
             verifiedFilter === "all" ||
             (verifiedFilter === "verified" && verified) ||
             (verifiedFilter === "unverified" && !verified);
           const priceMatches = item.ad.price <= selectedMaxPrice;
           const conditionMatches = selectedCondition === "all" || item.condition === selectedCondition;
-          return typeMatches && stripMatches && brandMatches && verifiedMatches && priceMatches && conditionMatches;
+          return typeMatches && brandMatches && stripMatches && verifiedMatches && priceMatches && conditionMatches;
         }),
         sortBy,
       ),
-    [electronicsResults, selectedBrand, selectedCondition, selectedMaxPrice, selectedStripCategory, selectedType, sortBy, verifiedFilter],
+    [phonesResults, selectedBrand, selectedCondition, selectedMaxPrice, selectedStripBrand, selectedType, sortBy, verifiedFilter],
   );
 
   return (
@@ -332,7 +324,7 @@ export default function ElectronicsSearchResultsView({ query, navigate, view }: 
                 Close
               </button>
             </div>
-            <ElectronicsFilters
+            <PhonesFilters
               selectedType={selectedType}
               onSelectedTypeChange={setSelectedType}
               sortBy={sortBy}
@@ -353,7 +345,7 @@ export default function ElectronicsSearchResultsView({ query, navigate, view }: 
 
       <div className="grid grid-cols-1 gap-6 xl:grid-cols-[256px_minmax(0,1fr)] xl:items-start">
         <aside className="hidden space-y-4 xl:sticky xl:top-[98px] xl:block">
-          <ElectronicsFilters
+          <PhonesFilters
             selectedType={selectedType}
             onSelectedTypeChange={setSelectedType}
             sortBy={sortBy}
@@ -385,15 +377,15 @@ export default function ElectronicsSearchResultsView({ query, navigate, view }: 
               </button>
               <div>
                 <h1 className="text-[28px] font-medium tracking-[-0.02em] text-[#1f1d27] sm:text-[36px]">
-                  Found <span className="text-[#ff9715]">{ELECTRONICS_COUNT_LABEL}</span> results for “Electronics”
+                  Found <span className="text-[#ff9715]">{PHONES_COUNT_LABEL}</span> results for “Phones & Tablet”
                 </h1>
-                <p className="mt-3 text-[24px] font-medium text-[#1f1d27]">Laptops and Computer In Nigeria</p>
+                <p className="mt-3 text-[24px] font-medium text-[#1f1d27]">Phones In Nigeria</p>
               </div>
             </div>
             <div className="flex items-center gap-2 self-start pt-1">
               <button
                 type="button"
-                onClick={() => navigate(buildSearchResultsRoute("Electronics"))}
+                onClick={() => navigate(buildSearchResultsRoute("Phones"))}
                 className={`grid h-10 w-10 place-items-center rounded-[10px] ${view === "grid" ? "bg-[#fff3e5]" : "bg-transparent hover:bg-[#f4f1eb]"}`}
                 aria-label="Grid view"
                 title="Grid view"
@@ -402,7 +394,7 @@ export default function ElectronicsSearchResultsView({ query, navigate, view }: 
               </button>
               <button
                 type="button"
-                onClick={() => navigate(buildSearchResultsListRoute("Electronics"))}
+                onClick={() => navigate(buildSearchResultsListRoute("Phones"))}
                 className={`grid h-10 w-10 place-items-center rounded-[10px] ${view === "list" ? "bg-[#fff3e5]" : "bg-transparent hover:bg-[#f4f1eb]"}`}
                 aria-label="List view"
                 title="List view"
@@ -414,74 +406,39 @@ export default function ElectronicsSearchResultsView({ query, navigate, view }: 
 
           <div className="mb-8 overflow-x-auto rounded-[28px] border border-[#ddd9d2] bg-white px-4 py-5 shadow-[0_8px_24px_rgba(31,29,39,0.05)] sm:px-6">
             <div className="flex min-w-max items-start justify-between gap-8 sm:gap-12">
-              {STRIP_CATEGORIES.map((category) => (
+              {STRIP_BRANDS.map((brand) => (
                 <StripBubble
-                  key={category.name}
-                  name={category.name}
-                  image={category.image}
-                  active={selectedStripCategory === category.name}
-                  onClick={() => setSelectedStripCategory(category.name)}
+                  key={brand.name}
+                  label={brand.label}
+                  image={brand.image}
+                  active={selectedStripBrand === brand.name}
+                  onClick={() => setSelectedStripBrand(brand.name)}
                 />
               ))}
             </div>
           </div>
 
-          {filteredResults.length === 0 ? (
-            <div className="rounded-[24px] border border-[#ddd9d2] bg-white px-6 py-12 text-center shadow-[0_8px_24px_rgba(31,29,39,0.05)]">
-              <h2 className="text-[22px] font-medium text-[#1f1d27]">No results found</h2>
-              <p className="mt-3 text-[15px] leading-[1.6] text-[#6d6a74]">
-                Try another electronics keyword or adjust the filters to widen your search.
-              </p>
-            </div>
-          ) : view === "list" ? (
-            <div className="grid grid-cols-1 gap-5 lg:grid-cols-2 xl:grid-cols-3">
-              {filteredResults.map((item) => (
-                <ListingCard
-                  key={item.id}
-                  item={{
-                    price: formatNaira(item.ad.price),
-                    title: item.ad.title,
-                    description: item.ad.description,
-                    location: item.ad.location,
-                    image: item.ad.images?.[0]?.url,
-                    verifiedSeller: Boolean(
-                      item.ad.user?.profile?.verified || item.ad.user?.profile?.verificationStatus === "verified",
-                    ),
-                  }}
-                  interactive
-                  clampTitleLines={2}
-                  clampDescriptionLines={3}
-                  clampLocationLines={1}
-                  imageHeightClassName="h-[230px] sm:h-[260px]"
-                  onClick={() => navigate(buildProductDetailsRoute(item.ad.id))}
-                />
-              ))}
-            </div>
-          ) : (
-            <div className="grid grid-cols-1 gap-5 sm:grid-cols-2 xl:grid-cols-3">
-              {filteredResults.map((item) => (
-                <ListingCard
-                  key={item.id}
-                  item={{
-                    price: formatNaira(item.ad.price),
-                    title: item.ad.title,
-                    description: item.ad.description,
-                    location: item.ad.location,
-                    image: item.ad.images?.[0]?.url,
-                    verifiedSeller: Boolean(
-                      item.ad.user?.profile?.verified || item.ad.user?.profile?.verificationStatus === "verified",
-                    ),
-                  }}
-                  interactive
-                  clampTitleLines={2}
-                  clampDescriptionLines={3}
-                  clampLocationLines={1}
-                  imageHeightClassName="h-[230px] sm:h-[260px]"
-                  onClick={() => navigate(buildProductDetailsRoute(item.ad.id))}
-                />
-              ))}
-            </div>
-          )}
+          <div className="grid grid-cols-1 gap-5 sm:grid-cols-2 xl:grid-cols-3">
+            {filteredResults.map((item) => (
+              <ListingCard
+                key={item.id}
+                item={{
+                  price: formatNaira(item.ad.price),
+                  title: item.ad.title,
+                  description: item.ad.description,
+                  location: item.ad.location,
+                  image: item.ad.images?.[0]?.url,
+                  verifiedSeller: Boolean(item.ad.user?.profile?.verified || item.ad.user?.profile?.verificationStatus === "verified"),
+                }}
+                interactive
+                clampTitleLines={2}
+                clampDescriptionLines={3}
+                clampLocationLines={1}
+                imageHeightClassName="h-[230px] sm:h-[260px]"
+                onClick={() => navigate(buildProductDetailsRoute(item.ad.id))}
+              />
+            ))}
+          </div>
         </section>
       </div>
     </main>

@@ -19,6 +19,8 @@ export type VehicleCondition = "Brand New" | "Foreign Used" | "Local Used";
 
 export type ElectronicsType = "Laptops & Computers" | "Audio & Music Equipment" | "Computer Hardware" | "Monitors";
 export type ElectronicsCondition = "Brand New" | "Refurbished" | "Used";
+export type PhonesType = "Mobile Phones" | "Tablet" | "Accessories for Phones and Tab" | "Smart watch";
+export type PhonesCondition = "Brand New" | "Refurbished" | "Used";
 
 export type MockVehicleListing = {
   id: string;
@@ -35,6 +37,15 @@ export type MockElectronicsListing = {
   electronicsType: ElectronicsType;
   stripCategory: "Laptops" | "Desktop" | "Server";
   condition: ElectronicsCondition;
+};
+
+export type MockPhonesListing = {
+  id: string;
+  ad: Ad;
+  brand: "Apple" | "Tecno" | "Samsung" | "Xiaomi" | "Redmi";
+  phonesType: PhonesType;
+  stripBrand: "Apple" | "Tecno" | "Samsung" | "Xiaomi" | "Redmi";
+  condition: PhonesCondition;
 };
 
 /**
@@ -607,6 +618,181 @@ export const mockElectronicsListings: MockElectronicsListing[] = [
   },
 ];
 
+// TODO: Replace phones/tablets mock listings with backend API data.
+// TODO: Replace phones/tablets filters with backend categories.
+export const mockPhonesListings: MockPhonesListing[] = [
+  {
+    id: "phones-1",
+    brand: "Samsung",
+    stripBrand: "Samsung",
+    phonesType: "Mobile Phones",
+    condition: "Brand New",
+    ad: createMockAd(
+      "phones-ad-1",
+      "Samsung Galaxy S24 Ultra",
+      1900000,
+      "New Samsung Galaxy flagship with 256GB storage, vibrant display, and clean accessories.",
+      "Lagos, Ikeja",
+      "https://images.unsplash.com/photo-1610945265064-0e34e5519bbf?w=1200",
+      mockCategories[1],
+      mockUser,
+    ),
+  },
+  {
+    id: "phones-2",
+    brand: "Samsung",
+    stripBrand: "Samsung",
+    phonesType: "Mobile Phones",
+    condition: "Brand New",
+    ad: createMockAd(
+      "phones-ad-2",
+      "Samsung Galaxy A55",
+      820000,
+      "Brand new Samsung phone with premium camera, long battery life, and strong performance.",
+      "Abuja, Wuse",
+      "https://images.unsplash.com/photo-1610792516307-ea5acd9c3b00?w=1200",
+      mockCategories[1],
+      mockUnverifiedUser,
+    ),
+  },
+  {
+    id: "phones-3",
+    brand: "Apple",
+    stripBrand: "Apple",
+    phonesType: "Mobile Phones",
+    condition: "Brand New",
+    ad: createMockAd(
+      "phones-ad-3",
+      "Apple iPhone 15 Pro Max",
+      1900000,
+      "Factory sealed iPhone 15 Pro Max with 256GB storage, Face ID, and original charger.",
+      "Lagos, Ikeja",
+      "https://images.unsplash.com/photo-1695048133142-1a20484d2569?w=1200",
+      mockCategories[1],
+      mockUser,
+    ),
+  },
+  {
+    id: "phones-4",
+    brand: "Apple",
+    stripBrand: "Apple",
+    phonesType: "Mobile Phones",
+    condition: "Used",
+    ad: createMockAd(
+      "phones-ad-4",
+      "Apple iPhone 14 Pro",
+      1250000,
+      "Neatly used iPhone 14 Pro with strong battery health and flawless screen condition.",
+      "Port Harcourt, GRA",
+      "https://images.unsplash.com/photo-1678911820864-e4c567c655d7?w=1200",
+      mockCategories[1],
+      mockUnverifiedUser,
+    ),
+  },
+  {
+    id: "phones-5",
+    brand: "Tecno",
+    stripBrand: "Tecno",
+    phonesType: "Mobile Phones",
+    condition: "Brand New",
+    ad: createMockAd(
+      "phones-ad-5",
+      "Tecno Camon 30",
+      420000,
+      "Latest Tecno phone with sharp camera, bright display, and all accessories included.",
+      "Benin, GRA",
+      "https://images.unsplash.com/photo-1565849904461-04a58ad377e0?w=1200",
+      mockCategories[1],
+      mockUser,
+    ),
+  },
+  {
+    id: "phones-6",
+    brand: "Xiaomi",
+    stripBrand: "Xiaomi",
+    phonesType: "Mobile Phones",
+    condition: "Refurbished",
+    ad: createMockAd(
+      "phones-ad-6",
+      "Xiaomi 13 Pro",
+      760000,
+      "Refurbished Xiaomi phone with Leica camera system, smooth screen, and clean body.",
+      "Ibadan, Ring Road",
+      "https://images.unsplash.com/photo-1598327105666-5b89351aff97?w=1200",
+      mockCategories[1],
+      mockUnverifiedUser,
+    ),
+  },
+  {
+    id: "phones-7",
+    brand: "Redmi",
+    stripBrand: "Redmi",
+    phonesType: "Mobile Phones",
+    condition: "Brand New",
+    ad: createMockAd(
+      "phones-ad-7",
+      "Redmi Note 13 Pro",
+      510000,
+      "Brand new Redmi device with clean design, fast charging, and boxed accessories.",
+      "Enugu, Independence Layout",
+      "https://images.unsplash.com/photo-1574944985070-8f3ebc6b79d2?w=1200",
+      mockCategories[1],
+      mockUser,
+    ),
+  },
+  {
+    id: "phones-8",
+    brand: "Samsung",
+    stripBrand: "Samsung",
+    phonesType: "Tablet",
+    condition: "Brand New",
+    ad: createMockAd(
+      "phones-ad-8",
+      "Samsung Galaxy Tab S9",
+      980000,
+      "Premium Samsung tablet with stylus, AMOLED display, and strong multitasking performance.",
+      "Abuja, Jabi",
+      "https://images.unsplash.com/photo-1589739900243-4b52cd9dd4a2?w=1200",
+      mockCategories[1],
+      mockUser,
+    ),
+  },
+  {
+    id: "phones-9",
+    brand: "Apple",
+    stripBrand: "Apple",
+    phonesType: "Accessories for Phones and Tab",
+    condition: "Brand New",
+    ad: createMockAd(
+      "phones-ad-9",
+      "Apple MagSafe Charger",
+      85000,
+      "Original MagSafe wireless charger for iPhone with fast and secure magnetic snap.",
+      "Lagos, Lekki",
+      "https://images.unsplash.com/photo-1580910051074-3eb694886505?w=1200",
+      mockCategories[1],
+      mockUnverifiedUser,
+    ),
+  },
+  {
+    id: "phones-10",
+    brand: "Tecno",
+    stripBrand: "Tecno",
+    phonesType: "Smart watch",
+    condition: "Brand New",
+    ad: createMockAd(
+      "phones-ad-10",
+      "Tecno Smart Watch Pro",
+      120000,
+      "Brand new Tecno smart watch with fitness tracking, long battery, and colorful display.",
+      "Lagos, Surulere",
+      "https://images.unsplash.com/photo-1546868871-7041f2a55e12?w=1200",
+      mockCategories[1],
+      mockUser,
+    ),
+  },
+];
+
 /**
  * Mock Saved Ads
  */
@@ -737,6 +923,20 @@ export function isElectronicsSearchQuery(query?: string): boolean {
   return ["electronics", "electronic", "laptop", "laptops", "computer", "computers"].includes(queryLower);
 }
 
+export function isPhonesSearchQuery(query?: string): boolean {
+  const queryLower = query?.trim().toLowerCase();
+  if (!queryLower) return false;
+  return [
+    "phone",
+    "phones",
+    "phones & tablets",
+    "phones & tablet",
+    "phones and tablets",
+    "tablet",
+    "tablets",
+  ].includes(queryLower);
+}
+
 export function getMockVehicleSearchResults(query?: string): MockVehicleListing[] {
   if (!query || isVehicleSearchQuery(query)) {
     return mockVehicleListings;
@@ -772,6 +972,28 @@ export function getMockElectronicsSearchResults(query?: string): MockElectronics
       brand,
       electronicsType,
       stripCategory,
+      condition,
+      ad.category.name,
+      ad.category.slug,
+    ];
+    return searchableFields.some((field) => field.toLowerCase().includes(queryLower));
+  });
+}
+
+export function getMockPhonesSearchResults(query?: string): MockPhonesListing[] {
+  if (!query || isPhonesSearchQuery(query)) {
+    return mockPhonesListings;
+  }
+
+  const queryLower = query.trim().toLowerCase();
+  return mockPhonesListings.filter(({ ad, brand, phonesType, stripBrand, condition }) => {
+    const searchableFields = [
+      ad.title,
+      ad.description,
+      ad.location,
+      brand,
+      phonesType,
+      stripBrand,
       condition,
       ad.category.name,
       ad.category.slug,

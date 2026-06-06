@@ -7,9 +7,11 @@ import {
 } from "../constants/routes";
 import { SiteFooter, SiteHeader } from "../components/AppShell";
 import ElectronicsSearchResultsView from "../components/search/ElectronicsSearchResultsView";
+import PhonesSearchResultsView from "../components/search/PhonesSearchResultsView";
 import ListingCard, { type ListingCardItem } from "../components/listings/ListingCard";
 import VehicleSearchResultsView from "../components/search/VehicleSearchResultsView";
-import { getMockSearchResults, isElectronicsSearchQuery, isVehicleSearchQuery, mockAds, mockCategories } from "../lib/mockData";
+import BackButton from "../components/ui/BackButton";
+import { getMockSearchResults, isElectronicsSearchQuery, isPhonesSearchQuery, isVehicleSearchQuery, mockAds, mockCategories } from "../lib/mockData";
 import type { Ad } from "../types";
 
 type SortValue = "newest" | "price-low" | "price-high";
@@ -224,6 +226,16 @@ export default function SearchResultsPage() {
     );
   }
 
+  if (isPhonesSearchQuery(query)) {
+    return (
+      <div className="min-h-screen bg-page text-ink">
+        <SiteHeader navigate={navigate} />
+        <PhonesSearchResultsView query={query} navigate={navigate} view="grid" />
+        <SiteFooter navigate={navigate} />
+      </div>
+    );
+  }
+
   const resultsLabel = query || "All Ads";
   const [selectedCategory, setSelectedCategory] = useState("all");
   const [sortBy, setSortBy] = useState<SortValue>("newest");
@@ -307,6 +319,9 @@ export default function SearchResultsPage() {
           </aside>
 
           <section className="min-w-0">
+            <div className="mb-5 flex flex-wrap items-center gap-3">
+              <BackButton />
+            </div>
             <div className="mb-6 flex flex-wrap items-center justify-between gap-4">
               <div className="flex flex-wrap items-center gap-3">
                 <button

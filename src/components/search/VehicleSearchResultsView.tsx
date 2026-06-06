@@ -5,6 +5,7 @@ import {
   buildSearchResultsRoute,
 } from "../../constants/routes";
 import ListingCard from "../listings/ListingCard";
+import BackButton from "../ui/BackButton";
 import { LocationPin } from "../icons/LocationPin";
 import { ImagePlaceholder } from "../ui/ImagePlaceholder";
 import {
@@ -420,6 +421,9 @@ export default function VehicleSearchResultsView({ query, navigate, view }: Vehi
           </aside>
 
           <section className="min-w-0">
+            <div className="mb-5 flex flex-wrap items-center gap-3">
+              <BackButton />
+            </div>
             <div className="mb-6 flex flex-wrap items-start justify-between gap-4">
               <div className="flex flex-wrap items-center gap-3">
                 <button
