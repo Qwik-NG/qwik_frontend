@@ -94,6 +94,10 @@ export default function HomePage() {
                     ? buildSearchRoute("Phones")
                   : item.name === "Electronics"
                     ? buildSearchRoute("Electronics")
+                  : item.name === "Beauty"
+                    ? buildSearchRoute("Beauty")
+                  : item.name === "Furniture"
+                    ? buildSearchRoute("Furniture")
                   : buildSearchResultsRoute(item.name === "Properties" ? "Home" : item.name),
               )
             }

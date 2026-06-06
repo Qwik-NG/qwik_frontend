@@ -21,6 +21,10 @@ export type ElectronicsType = "Laptops & Computers" | "Audio & Music Equipment" 
 export type ElectronicsCondition = "Brand New" | "Refurbished" | "Used";
 export type PhonesType = "Mobile Phones" | "Tablet" | "Accessories for Phones and Tab" | "Smart watch";
 export type PhonesCondition = "Brand New" | "Refurbished" | "Used";
+export type BeautyType = "Body Lotion" | "Body Wash & Soap" | "Body Oils" | "Body Creams & Milks" | "Body Scrubs" | "Shower Gel";
+export type BeautyCondition = "Brand New" | "Refurbished" | "Used";
+export type FurnitureType = "Chairs" | "Tables" | "Bed & Frames" | "Sofas" | "TV Stand & Mount" | "Mattresses" | "Wardrobes";
+export type FurnitureCondition = "Brand New" | "Used";
 
 export type MockVehicleListing = {
   id: string;
@@ -46,6 +50,26 @@ export type MockPhonesListing = {
   phonesType: PhonesType;
   stripBrand: "Apple" | "Tecno" | "Samsung" | "Xiaomi" | "Redmi";
   condition: PhonesCondition;
+};
+
+export type MockBeautyListing = {
+  id: string;
+  ad: Ad;
+  categoryType: "Body Care" | "Face Care" | "Vitamin and Supplement" | "Fragrance";
+  beautyType: BeautyType;
+  brand: "Fresh" | "Zoya" | "Clean";
+  stripCategory: BeautyType;
+  condition: BeautyCondition;
+};
+
+export type MockFurnitureListing = {
+  id: string;
+  ad: Ad;
+  categoryType: "Furnitures" | "Home Appliances" | "Kitchen Appliances" | "Lighting";
+  furnitureType: FurnitureType;
+  room: "Bedroom" | "Kitchen" | "Home Office / Study";
+  stripCategory: FurnitureType;
+  condition: FurnitureCondition;
 };
 
 /**
@@ -793,6 +817,358 @@ export const mockPhonesListings: MockPhonesListing[] = [
   },
 ];
 
+// TODO: Replace beauty mock listings with backend API data.
+// TODO: Replace beauty filters with backend categories.
+export const mockBeautyListings: MockBeautyListing[] = [
+  {
+    id: "beauty-1",
+    categoryType: "Body Care",
+    beautyType: "Body Lotion",
+    stripCategory: "Body Lotion",
+    brand: "Fresh",
+    condition: "Brand New",
+    ad: createMockAd(
+      "beauty-ad-1",
+      "Dreamz Body Care",
+      1900000,
+      "Rich body lotion set with smooth finish, long moisture retention, and gentle daily use.",
+      "Lagos, Ikeja",
+      "https://images.unsplash.com/photo-1620916566398-39f1143ab7be?w=1200",
+      mockCategories[10],
+      mockUser,
+    ),
+  },
+  {
+    id: "beauty-2",
+    categoryType: "Body Care",
+    beautyType: "Body Wash & Soap",
+    stripCategory: "Body Wash & Soap",
+    brand: "Zoya",
+    condition: "Brand New",
+    ad: createMockAd(
+      "beauty-ad-2",
+      "Body Wash & Soap",
+      260000,
+      "Refreshing body wash bundle with soft fragrance, foamy texture, and skin-friendly formula.",
+      "Abuja, Wuse",
+      "https://images.unsplash.com/photo-1556228578-8c89e6adf883?w=1200",
+      mockCategories[10],
+      mockUnverifiedUser,
+    ),
+  },
+  {
+    id: "beauty-3",
+    categoryType: "Body Care",
+    beautyType: "Body Oils",
+    stripCategory: "Body Oils",
+    brand: "Clean",
+    condition: "Brand New",
+    ad: createMockAd(
+      "beauty-ad-3",
+      "Body Oil",
+      180000,
+      "Lightweight body oil for deep nourishment, glow enhancement, and everyday skin care.",
+      "Lagos, Lekki",
+      "https://images.unsplash.com/photo-1626784215021-2e39ccf971cd?w=1200",
+      mockCategories[10],
+      mockUser,
+    ),
+  },
+  {
+    id: "beauty-4",
+    categoryType: "Body Care",
+    beautyType: "Body Creams & Milks",
+    stripCategory: "Body Creams & Milks",
+    brand: "Fresh",
+    condition: "Brand New",
+    ad: createMockAd(
+      "beauty-ad-4",
+      "Body Cream",
+      230000,
+      "Softening body cream with rich texture, all-day hydration, and non-greasy finish.",
+      "Port Harcourt, GRA",
+      "https://images.unsplash.com/photo-1619451334792-150fd785ee74?w=1200",
+      mockCategories[10],
+      mockUser,
+    ),
+  },
+  {
+    id: "beauty-5",
+    categoryType: "Body Care",
+    beautyType: "Body Scrubs",
+    stripCategory: "Body Scrubs",
+    brand: "Zoya",
+    condition: "Refurbished",
+    ad: createMockAd(
+      "beauty-ad-5",
+      "Body Scrub",
+      150000,
+      "Exfoliating body scrub with fresh scent and gentle granules for smoother skin tone.",
+      "Benin, GRA",
+      "https://images.unsplash.com/photo-1515377905703-c4788e51af15?w=1200",
+      mockCategories[10],
+      mockUnverifiedUser,
+    ),
+  },
+  {
+    id: "beauty-6",
+    categoryType: "Body Care",
+    beautyType: "Shower Gel",
+    stripCategory: "Shower Gel",
+    brand: "Clean",
+    condition: "Brand New",
+    ad: createMockAd(
+      "beauty-ad-6",
+      "Shower Gel",
+      125000,
+      "Cleansing shower gel with bright scent, balanced moisture, and smooth after-feel.",
+      "Ibadan, Ring Road",
+      "https://images.unsplash.com/photo-1596755389378-c31d21fd1273?w=1200",
+      mockCategories[10],
+      mockUser,
+    ),
+  },
+  {
+    id: "beauty-7",
+    categoryType: "Face Care",
+    beautyType: "Body Lotion",
+    stripCategory: "Body Lotion",
+    brand: "Fresh",
+    condition: "Brand New",
+    ad: createMockAd(
+      "beauty-ad-7",
+      "Skincare Set",
+      320000,
+      "Complete skincare set with toner, serum, and moisturizer for a clean daily routine.",
+      "Lagos, Yaba",
+      "https://images.unsplash.com/photo-1571781926291-c477ebfd024b?w=1200",
+      mockCategories[10],
+      mockUser,
+    ),
+  },
+  {
+    id: "beauty-8",
+    categoryType: "Vitamin and Supplement",
+    beautyType: "Body Oils",
+    stripCategory: "Body Oils",
+    brand: "Clean",
+    condition: "Used",
+    ad: createMockAd(
+      "beauty-ad-8",
+      "Body Care Vitamins",
+      90000,
+      "Supplement bundle curated for wellness support, skin glow, and daily body care routine.",
+      "Abuja, Garki",
+      "https://images.unsplash.com/photo-1587854692152-cbe660dbde88?w=1200",
+      mockCategories[10],
+      mockUnverifiedUser,
+    ),
+  },
+  {
+    id: "beauty-9",
+    categoryType: "Fragrance",
+    beautyType: "Shower Gel",
+    stripCategory: "Shower Gel",
+    brand: "Zoya",
+    condition: "Brand New",
+    ad: createMockAd(
+      "beauty-ad-9",
+      "Body Mist Combo",
+      140000,
+      "Layered fragrance combo with shower gel and mist for a lasting clean scent.",
+      "Enugu, Independence Layout",
+      "https://images.unsplash.com/photo-1541643600914-78b084683601?w=1200",
+      mockCategories[10],
+      mockUser,
+    ),
+  },
+];
+
+// TODO: Replace furniture listings with backend API data
+// TODO: Replace furniture categories with backend-driven data
+export const mockFurnitureListings: MockFurnitureListing[] = [
+  {
+    id: "furniture-1",
+    categoryType: "Furnitures",
+    furnitureType: "Bed & Frames",
+    room: "Bedroom",
+    stripCategory: "Bed & Frames",
+    condition: "Brand New",
+    ad: createMockAd(
+      "furniture-ad-1",
+      "Luxury Bedroom Set",
+      1900000,
+      "Long lasting materials and soft mattress with padded headboard, matching stool, and warm bedside lighting.",
+      "Lagos, Ikeja",
+      "https://images.unsplash.com/photo-1505693416388-ac5ce068fe85?w=1200",
+      mockCategories[8],
+      mockUser,
+    ),
+  },
+  {
+    id: "furniture-2",
+    categoryType: "Furnitures",
+    furnitureType: "Sofas",
+    room: "Home Office / Study",
+    stripCategory: "Sofas",
+    condition: "Brand New",
+    ad: createMockAd(
+      "furniture-ad-2",
+      "Modern Sofa",
+      1900000,
+      "Modern sofa with soft neutral upholstery, compact profile, and clean contemporary lines for elegant living rooms.",
+      "Lagos, Ikeja",
+      "https://images.unsplash.com/photo-1505693416388-ac5ce068fe85?auto=format&fit=crop&w=1200&q=80",
+      mockCategories[8],
+      mockUser,
+    ),
+  },
+  {
+    id: "furniture-3",
+    categoryType: "Furnitures",
+    furnitureType: "Tables",
+    room: "Kitchen",
+    stripCategory: "Tables",
+    condition: "Brand New",
+    ad: createMockAd(
+      "furniture-ad-3",
+      "Dining Table Set",
+      1900000,
+      "Long lasting wood dining table set with refined finish, balanced proportions, and easy-clean top surface.",
+      "Lagos, Ikeja",
+      "https://images.unsplash.com/photo-1505693416388-ac5ce068fe85?auto=format&fit=crop&w=1200&q=80",
+      mockCategories[8],
+      mockUnverifiedUser,
+    ),
+  },
+  {
+    id: "furniture-4",
+    categoryType: "Furnitures",
+    furnitureType: "Chairs",
+    room: "Home Office / Study",
+    stripCategory: "Chairs",
+    condition: "Brand New",
+    ad: createMockAd(
+      "furniture-ad-4",
+      "Office Chair",
+      1900000,
+      "Ergonomic office chair with supportive seat, durable frame, and smooth rolling base for daily work use.",
+      "Lagos, Ikeja",
+      "https://images.unsplash.com/photo-1505843513577-22bb7d21e455?w=1200",
+      mockCategories[8],
+      mockUser,
+    ),
+  },
+  {
+    id: "furniture-5",
+    categoryType: "Furnitures",
+    furnitureType: "TV Stand & Mount",
+    room: "Home Office / Study",
+    stripCategory: "TV Stand & Mount",
+    condition: "Used",
+    ad: createMockAd(
+      "furniture-ad-5",
+      "TV Stand",
+      1900000,
+      "Minimal TV stand with layered storage, sturdy base, and muted finish for a clean entertainment setup.",
+      "Lagos, Ikeja",
+      "https://images.unsplash.com/photo-1582582429416-f2ef8f0f5bce?w=1200",
+      mockCategories[8],
+      mockUnverifiedUser,
+    ),
+  },
+  {
+    id: "furniture-6",
+    categoryType: "Furnitures",
+    furnitureType: "Wardrobes",
+    room: "Bedroom",
+    stripCategory: "Wardrobes",
+    condition: "Brand New",
+    ad: createMockAd(
+      "furniture-ad-6",
+      "Wardrobe",
+      1900000,
+      "Spacious wardrobe with full-height doors, organized shelving, and polished finish for modern bedrooms.",
+      "Lagos, Ikeja",
+      "https://images.unsplash.com/photo-1595526114035-0d45ed16cfbf?w=1200",
+      mockCategories[8],
+      mockUser,
+    ),
+  },
+  {
+    id: "furniture-7",
+    categoryType: "Kitchen Appliances",
+    furnitureType: "Tables",
+    room: "Kitchen",
+    stripCategory: "Tables",
+    condition: "Brand New",
+    ad: createMockAd(
+      "furniture-ad-7",
+      "Kitchen Cabinet",
+      1900000,
+      "Kitchen cabinet system with integrated worktop, high-gloss finish, and practical storage for modern spaces.",
+      "Lagos, Ikeja",
+      "https://images.unsplash.com/photo-1484154218962-a197022b5858?w=1200",
+      mockCategories[8],
+      mockUnverifiedUser,
+    ),
+  },
+  {
+    id: "furniture-8",
+    categoryType: "Home Appliances",
+    furnitureType: "Mattresses",
+    room: "Bedroom",
+    stripCategory: "Mattresses",
+    condition: "Brand New",
+    ad: createMockAd(
+      "furniture-ad-8",
+      "Orthopedic Mattress",
+      1900000,
+      "Deep comfort mattress with layered support, breathable cover, and premium finish for restful sleep.",
+      "Lagos, Ikeja",
+      "https://images.unsplash.com/photo-1631049307264-da0ec9d70304?w=1200",
+      mockCategories[8],
+      mockUser,
+    ),
+  },
+  {
+    id: "furniture-9",
+    categoryType: "Lighting",
+    furnitureType: "Tables",
+    room: "Bedroom",
+    stripCategory: "Tables",
+    condition: "Brand New",
+    ad: createMockAd(
+      "furniture-ad-9",
+      "Designer Pendant Lights",
+      1900000,
+      "Architectural pendant lights with soft ambient glow and sculpted silhouette for stylish interiors.",
+      "Lagos, Ikeja",
+      "https://images.unsplash.com/photo-1513694203232-719a280e022f?w=1200",
+      mockCategories[8],
+      mockUnverifiedUser,
+    ),
+  },
+  {
+    id: "furniture-10",
+    categoryType: "Furnitures",
+    furnitureType: "Chairs",
+    room: "Home Office / Study",
+    stripCategory: "Chairs",
+    condition: "Used",
+    ad: createMockAd(
+      "furniture-ad-10",
+      "Accent Chair",
+      1900000,
+      "Statement accent chair with sculpted shell, wooden legs, and compact footprint for styled corners.",
+      "Lagos, Ikeja",
+      "https://images.unsplash.com/photo-1519947486511-46149fa0a254?w=1200",
+      mockCategories[8],
+      mockUser,
+    ),
+  },
+];
+
 /**
  * Mock Saved Ads
  */
@@ -937,6 +1313,30 @@ export function isPhonesSearchQuery(query?: string): boolean {
   ].includes(queryLower);
 }
 
+export function isBeautySearchQuery(query?: string): boolean {
+  const queryLower = query?.trim().toLowerCase();
+  if (!queryLower) return false;
+  return ["beauty", "body care", "skincare"].includes(queryLower);
+}
+
+export function isFurnitureSearchQuery(query?: string): boolean {
+  const queryLower = query?.trim().toLowerCase();
+  if (!queryLower) return false;
+  return [
+    "furniture",
+    "furnitures",
+    "furniture and appliances",
+    "bedroom",
+    "sofa",
+    "sofas",
+    "wardrobe",
+    "wardrobes",
+    "dining table",
+    "table",
+    "tables",
+  ].includes(queryLower);
+}
+
 export function getMockVehicleSearchResults(query?: string): MockVehicleListing[] {
   if (!query || isVehicleSearchQuery(query)) {
     return mockVehicleListings;
@@ -994,6 +1394,52 @@ export function getMockPhonesSearchResults(query?: string): MockPhonesListing[] 
       brand,
       phonesType,
       stripBrand,
+      condition,
+      ad.category.name,
+      ad.category.slug,
+    ];
+    return searchableFields.some((field) => field.toLowerCase().includes(queryLower));
+  });
+}
+
+export function getMockBeautySearchResults(query?: string): MockBeautyListing[] {
+  if (!query || isBeautySearchQuery(query)) {
+    return mockBeautyListings;
+  }
+
+  const queryLower = query.trim().toLowerCase();
+  return mockBeautyListings.filter(({ ad, categoryType, beautyType, brand, stripCategory, condition }) => {
+    const searchableFields = [
+      ad.title,
+      ad.description,
+      ad.location,
+      categoryType,
+      beautyType,
+      brand,
+      stripCategory,
+      condition,
+      ad.category.name,
+      ad.category.slug,
+    ];
+    return searchableFields.some((field) => field.toLowerCase().includes(queryLower));
+  });
+}
+
+export function getMockFurnitureSearchResults(query?: string): MockFurnitureListing[] {
+  if (!query || isFurnitureSearchQuery(query)) {
+    return mockFurnitureListings;
+  }
+
+  const queryLower = query.trim().toLowerCase();
+  return mockFurnitureListings.filter(({ ad, categoryType, furnitureType, room, stripCategory, condition }) => {
+    const searchableFields = [
+      ad.title,
+      ad.description,
+      ad.location,
+      categoryType,
+      furnitureType,
+      room,
+      stripCategory,
       condition,
       ad.category.name,
       ad.category.slug,
