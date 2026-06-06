@@ -2,7 +2,7 @@ import type { ComponentType } from "react";
 import { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { SiteFooter, SiteHeader } from "../components/AppShell";
-import { buildSearchResultsRoute } from "../constants/routes";
+import { buildSearchResultsRoute, buildSearchRoute } from "../constants/routes";
 import {
   AgricultureIcon,
   BeautyIcon,
@@ -88,6 +88,8 @@ export default function HomePage() {
               navigate(
                 item.name === "More"
                   ? "/search-results-list"
+                  : item.name === "Cars"
+                    ? buildSearchRoute("Vehicles")
                   : buildSearchResultsRoute(item.name === "Properties" ? "Home" : item.name),
               )
             }

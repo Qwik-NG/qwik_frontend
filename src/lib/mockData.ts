@@ -14,6 +14,17 @@ import type {
   Notification
 } from "../types/index";
 
+export type VehicleType = "Car" | "Buses" | "Motorcycle & Scooters" | "Buses & Microbuses";
+export type VehicleCondition = "Brand New" | "Foreign Used" | "Local Used";
+
+export type MockVehicleListing = {
+  id: string;
+  ad: Ad;
+  brand: "Benz" | "Toyota" | "Honda" | "Ford" | "Lexus" | "Nissan" | "BMW" | "Audi";
+  vehicleType: VehicleType;
+  condition: VehicleCondition;
+};
+
 /**
  * Mock Categories
  */
@@ -196,6 +207,202 @@ export const mockAds: Ad[] = [
   )
 ];
 
+// TODO: Replace this frontend-only vehicle search data with backend search facets once category filters are API-backed.
+export const mockVehicleListings: MockVehicleListing[] = [
+  {
+    id: "vehicle-1",
+    brand: "Benz",
+    vehicleType: "Car",
+    condition: "Foreign Used",
+    ad: createMockAd(
+      "vehicle-ad-1",
+      "Mercedes-Benz GLA 250 2015 Blue",
+      11000000,
+      "Keyless entry panoramic roof LED intelligent light custom duty fully paid. This is a very sharp ride.",
+      "Abuja, Apo",
+      "https://images.unsplash.com/photo-1553440569-bcc63803a83d?w=1200",
+      mockCategories[0],
+      mockUnverifiedUser,
+    ),
+  },
+  {
+    id: "vehicle-2",
+    brand: "Toyota",
+    vehicleType: "Car",
+    condition: "Foreign Used",
+    ad: createMockAd(
+      "vehicle-ad-2",
+      "Toyota Camry 2015 White",
+      11000000,
+      "Keyless entry panoramic roof LED intelligent light custom duty fully paid. This is a very sharp ride.",
+      "Abuja, Apo",
+      "https://images.unsplash.com/photo-1621007947382-bb3c3994e3fb?w=1200",
+      mockCategories[0],
+      mockUser,
+    ),
+  },
+  {
+    id: "vehicle-3",
+    brand: "BMW",
+    vehicleType: "Car",
+    condition: "Brand New",
+    ad: createMockAd(
+      "vehicle-ad-3",
+      "BMW 2024 Model White",
+      11000000,
+      "Keyless entry panoramic roof LED intelligent light custom duty fully paid. This is a very sharp ride.",
+      "Abuja, Apo",
+      "https://images.unsplash.com/photo-1555215695-3004980ad54e?w=1200",
+      mockCategories[0],
+      mockUnverifiedUser,
+    ),
+  },
+  {
+    id: "vehicle-4",
+    brand: "Nissan",
+    vehicleType: "Car",
+    condition: "Brand New",
+    ad: createMockAd(
+      "vehicle-ad-4",
+      "Nissan 2025 Model Black",
+      11000000,
+      "Keyless entry panoramic roof LED intelligent light custom duty fully paid. This is a very sharp ride.",
+      "Abuja, Apo",
+      "https://images.unsplash.com/photo-1494976388531-d1058494cdd8?w=1200",
+      mockCategories[0],
+      mockUnverifiedUser,
+    ),
+  },
+  {
+    id: "vehicle-5",
+    brand: "Benz",
+    vehicleType: "Car",
+    condition: "Foreign Used",
+    ad: createMockAd(
+      "vehicle-ad-5",
+      "Mercedes-Benz GLA 250 2015 Blue",
+      11000000,
+      "Keyless entry panoramic roof LED intelligent light custom duty fully paid. This is a very sharp ride.",
+      "Abuja, Apo",
+      "https://images.unsplash.com/photo-1553440569-bcc63803a83d?w=1200",
+      mockCategories[0],
+      mockUnverifiedUser,
+    ),
+  },
+  {
+    id: "vehicle-6",
+    brand: "Honda",
+    vehicleType: "Car",
+    condition: "Local Used",
+    ad: createMockAd(
+      "vehicle-ad-6",
+      "Honda 2016 Red",
+      11000000,
+      "Keyless entry panoramic roof LED intelligent light custom duty fully paid. This is a very sharp ride.",
+      "Abuja, Apo",
+      "https://images.unsplash.com/photo-1503376780353-7e6692767b70?w=1200",
+      mockCategories[0],
+      mockUser,
+    ),
+  },
+  {
+    id: "vehicle-7",
+    brand: "Benz",
+    vehicleType: "Car",
+    condition: "Foreign Used",
+    ad: createMockAd(
+      "vehicle-ad-7",
+      "Mercedes-Benz GLA 250 2015 Blue",
+      11000000,
+      "Keyless entry panoramic roof LED intelligent light custom duty fully paid. This is a very sharp ride.",
+      "Abuja, Apo",
+      "https://images.unsplash.com/photo-1553440569-bcc63803a83d?w=1200",
+      mockCategories[0],
+      mockUnverifiedUser,
+    ),
+  },
+  {
+    id: "vehicle-8",
+    brand: "Lexus",
+    vehicleType: "Car",
+    condition: "Foreign Used",
+    ad: createMockAd(
+      "vehicle-ad-8",
+      "Lexus RX350 Jeep Black",
+      11000000,
+      "Keyless entry panoramic roof LED intelligent light custom duty fully paid. This is a very sharp ride.",
+      "Abuja, Apo",
+      "https://images.unsplash.com/photo-1511919884226-fd3cad34687c?w=1200",
+      mockCategories[0],
+      mockUser,
+    ),
+  },
+  {
+    id: "vehicle-9",
+    brand: "Benz",
+    vehicleType: "Car",
+    condition: "Foreign Used",
+    ad: createMockAd(
+      "vehicle-ad-9",
+      "Mercedes-Benz GLA 250 2015 Blue",
+      11000000,
+      "Keyless entry panoramic roof LED intelligent light custom duty fully paid. This is a very sharp ride.",
+      "Abuja, Apo",
+      "https://images.unsplash.com/photo-1553440569-bcc63803a83d?w=1200",
+      mockCategories[0],
+      mockUnverifiedUser,
+    ),
+  },
+  {
+    id: "vehicle-10",
+    brand: "Toyota",
+    vehicleType: "Buses",
+    condition: "Local Used",
+    ad: createMockAd(
+      "vehicle-ad-10",
+      "Toyota Coaster Bus Silver",
+      14500000,
+      "Reliable transport bus with clean interior, cold AC, and strong engine performance.",
+      "Lagos, Mile 2",
+      "https://images.unsplash.com/photo-1549399542-7e3f8b79c341?w=1200",
+      mockCategories[0],
+      mockUnverifiedUser,
+    ),
+  },
+  {
+    id: "vehicle-11",
+    brand: "Honda",
+    vehicleType: "Motorcycle & Scooters",
+    condition: "Brand New",
+    ad: createMockAd(
+      "vehicle-ad-11",
+      "Honda Scooter 2024 Blue",
+      3800000,
+      "Fuel-efficient scooter with modern dashboard, low mileage, and smooth handling.",
+      "Lagos, Surulere",
+      "https://images.unsplash.com/photo-1558981806-ec527fa84c39?w=1200",
+      mockCategories[0],
+      mockUser,
+    ),
+  },
+  {
+    id: "vehicle-12",
+    brand: "Ford",
+    vehicleType: "Buses & Microbuses",
+    condition: "Foreign Used",
+    ad: createMockAd(
+      "vehicle-ad-12",
+      "Ford Transit 2020 White",
+      9800000,
+      "Clean microbus with spacious cabin, strong suspension, and long-distance comfort.",
+      "Abuja, Kubwa",
+      "https://images.unsplash.com/photo-1519641471654-76ce0107ad1b?w=1200",
+      mockCategories[0],
+      mockUser,
+    ),
+  },
+];
+
 /**
  * Mock Saved Ads
  */
@@ -312,4 +519,31 @@ export function getMockSearchResults(query?: string, category?: string): Ad[] {
   }
 
   return results;
+}
+
+export function isVehicleSearchQuery(query?: string): boolean {
+  const queryLower = query?.trim().toLowerCase();
+  if (!queryLower) return false;
+  return ["vehicle", "vehicles", "car", "cars"].includes(queryLower);
+}
+
+export function getMockVehicleSearchResults(query?: string): MockVehicleListing[] {
+  if (!query || isVehicleSearchQuery(query)) {
+    return mockVehicleListings;
+  }
+
+  const queryLower = query.trim().toLowerCase();
+  return mockVehicleListings.filter(({ ad, brand, vehicleType, condition }) => {
+    const searchableFields = [
+      ad.title,
+      ad.description,
+      ad.location,
+      brand,
+      vehicleType,
+      condition,
+      ad.category.name,
+      ad.category.slug,
+    ];
+    return searchableFields.some((field) => field.toLowerCase().includes(queryLower));
+  });
 }

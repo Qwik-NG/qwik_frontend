@@ -7,7 +7,8 @@ import {
 } from "../constants/routes";
 import { SiteFooter, SiteHeader } from "../components/AppShell";
 import ListingCard, { type ListingCardItem } from "../components/listings/ListingCard";
-import { getMockSearchResults, mockAds, mockCategories } from "../lib/mockData";
+import VehicleSearchResultsView from "../components/search/VehicleSearchResultsView";
+import { getMockSearchResults, isVehicleSearchQuery, mockAds, mockCategories } from "../lib/mockData";
 import type { Ad } from "../types";
 
 type SortValue = "newest" | "price-low" | "price-high";
@@ -201,6 +202,17 @@ export default function SearchResultsPage() {
   const navigate = useNavigate();
   const [searchParams] = useSearchParams();
   const query = searchParams.get("q")?.trim() || "";
+
+  if (isVehicleSearchQuery(query)) {
+    return (
+      <div className="min-h-screen bg-page text-ink">
+        <SiteHeader navigate={navigate} />
+        <VehicleSearchResultsView query={query} navigate={navigate} view="grid" />
+        <SiteFooter navigate={navigate} />
+      </div>
+    );
+  }
+
   const resultsLabel = query || "All Ads";
   const [selectedCategory, setSelectedCategory] = useState("all");
   const [sortBy, setSortBy] = useState<SortValue>("newest");

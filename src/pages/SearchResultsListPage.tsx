@@ -6,9 +6,10 @@ import {
   buildSearchRoute,
 } from "../constants/routes";
 import { SiteFooter, SiteHeader } from "../components/AppShell";
+import VehicleSearchResultsView from "../components/search/VehicleSearchResultsView";
 import { LocationPin } from "../components/icons/LocationPin";
 import { ImagePlaceholder } from "../components/ui/ImagePlaceholder";
-import { getMockSearchResults, mockAds, mockCategories } from "../lib/mockData";
+import { getMockSearchResults, isVehicleSearchQuery, mockAds, mockCategories } from "../lib/mockData";
 import type { Ad } from "../types";
 
 type SortValue = "newest" | "price-low" | "price-high";
@@ -248,6 +249,21 @@ export default function SearchResultsListPage() {
   const navigate = useNavigate();
   const [searchParams] = useSearchParams();
   const query = searchParams.get("q")?.trim() || "";
+
+  if (isVehicleSearchQuery(query)) {
+    return (
+      <div className="min-h-screen bg-page text-ink">
+        <SiteHeader navigate={navigate} />
+        <VehicleSearchResultsView
+          query={query}
+          navigate={navigate}
+          view={location.pathname === "/search-results-list" ? "list" : "grid"}
+        />
+        <SiteFooter navigate={navigate} />
+      </div>
+    );
+  }
+
   const resultsLabel = query || "All Ads";
   const [selectedCategory, setSelectedCategory] = useState("all");
   const [sortBy, setSortBy] = useState<SortValue>("newest");
@@ -282,8 +298,6 @@ export default function SearchResultsListPage() {
   );
 
   const results = filteredAds.map(toListing);
-  const isSearchRoute = location.pathname === "/search";
-
   return (
     <div className="min-h-screen bg-page text-ink">
       <SiteHeader navigate={navigate} />
@@ -357,7 +371,7 @@ export default function SearchResultsListPage() {
                 </button>
                 <button
                   type="button"
-                  onClick={() => navigate(isSearchRoute ? buildSearchRoute(query || undefined) : buildSearchRoute(query || undefined))}
+                  onClick={() => navigate(buildSearchRoute(query || undefined))}
                   className="grid h-10 w-10 place-items-center rounded-[10px] bg-[#fff3e5]"
                   aria-label="List view"
                   title="List view"
