@@ -108,6 +108,16 @@ export type MockFashionListing = {
   condition: FashionCondition;
 };
 
+export type JobCategoryType = "Full Time" | "Part Time" | "Internship";
+export type JobStripType = JobCategoryType | "Contract" | "Remote" | "Temporary";
+
+export type MockJobListing = {
+  id: string;
+  ad: Ad;
+  categoryType: JobCategoryType;
+  stripCategory: JobStripType;
+};
+
 /**
  * Mock Categories
  */
@@ -1462,6 +1472,146 @@ export const mockFashionListings: MockFashionListing[] = [
   },
 ];
 
+// TODO: Replace job mock listings with backend API data
+// TODO: Replace job filters with backend-driven job categories
+export const mockJobListings: MockJobListing[] = [
+  {
+    id: "job-1",
+    categoryType: "Full Time",
+    stripCategory: "Full Time",
+    ad: createMockAd(
+      "job-ad-1",
+      "UI/UX Designer",
+      100000,
+      "Long Lastin materials and Soft mattres.",
+      "Lagos, Ikeja",
+      "https://images.unsplash.com/photo-1516321318423-f06f85e504b3?w=1200",
+      mockCategories[2],
+      mockUser,
+    ),
+  },
+  {
+    id: "job-2",
+    categoryType: "Part Time",
+    stripCategory: "Part Time",
+    ad: createMockAd(
+      "job-ad-2",
+      "Secretary",
+      100000,
+      "Long Lastin materials and Soft mattres.",
+      "Lagos, Ikeja",
+      "https://images.unsplash.com/photo-1454165804606-c3d57bc86b40?w=1200",
+      mockCategories[2],
+      mockUnverifiedUser,
+    ),
+  },
+  {
+    id: "job-3",
+    categoryType: "Full Time",
+    stripCategory: "Remote",
+    ad: createMockAd(
+      "job-ad-3",
+      "Web Developer",
+      100000,
+      "Long Lastin materials and Soft mattres.",
+      "Lagos, Ikeja",
+      "https://images.unsplash.com/photo-1522202176988-66273c2fd55f?w=1200",
+      mockCategories[2],
+      mockUnverifiedUser,
+    ),
+  },
+  {
+    id: "job-4",
+    categoryType: "Full Time",
+    stripCategory: "Contract",
+    ad: createMockAd(
+      "job-ad-4",
+      "Driver",
+      100000,
+      "Long Lastin materials and Soft mattres.",
+      "Lagos, Ikeja",
+      "https://images.unsplash.com/photo-1517048676732-d65bc937f952?w=1200",
+      mockCategories[2],
+      mockUser,
+    ),
+  },
+  {
+    id: "job-5",
+    categoryType: "Full Time",
+    stripCategory: "Full Time",
+    ad: createMockAd(
+      "job-ad-5",
+      "Executive Director",
+      100000,
+      "Long Lastin materials and Soft mattres.",
+      "Lagos, Ikeja",
+      "https://images.unsplash.com/photo-1573496359142-b8d87734a5a2?w=1200",
+      mockCategories[2],
+      mockUser,
+    ),
+  },
+  {
+    id: "job-6",
+    categoryType: "Part Time",
+    stripCategory: "Temporary",
+    ad: createMockAd(
+      "job-ad-6",
+      "Dispatch Rider",
+      100000,
+      "Long Lastin materials and Soft mattres.",
+      "Lagos, Ikeja",
+      "https://images.unsplash.com/photo-1520607162513-77705c0f0d4a?w=1200",
+      mockCategories[2],
+      mockUnverifiedUser,
+    ),
+  },
+  {
+    id: "job-7",
+    categoryType: "Internship",
+    stripCategory: "Internship",
+    ad: createMockAd(
+      "job-ad-7",
+      "Technical Assistant",
+      100000,
+      "Long Lastin materials and Soft mattres.",
+      "Lagos, Ikeja",
+      "https://images.unsplash.com/photo-1552664730-d307ca884978?w=1200",
+      mockCategories[2],
+      mockUser,
+    ),
+  },
+  {
+    id: "job-8",
+    categoryType: "Part Time",
+    stripCategory: "Contract",
+    ad: createMockAd(
+      "job-ad-8",
+      "Store Keeper",
+      100000,
+      "Long Lastin materials and Soft mattres.",
+      "Lagos, Ikeja",
+      "https://images.unsplash.com/photo-1450101499163-c8848c66ca85?w=1200",
+      mockCategories[2],
+      mockUnverifiedUser,
+    ),
+  },
+  {
+    id: "job-9",
+    categoryType: "Full Time",
+    stripCategory: "Remote",
+    ad: createMockAd(
+      "job-ad-9",
+      "Sales Rep",
+      100000,
+      "Long Lastin materials and Soft mattres.",
+      "Lagos, Ikeja",
+      "https://images.unsplash.com/photo-1552664730-d307ca884978?w=1200",
+      mockCategories[2],
+      mockUnverifiedUser,
+    ),
+  },
+];
+
 /**
  * Mock Saved Ads
  */
@@ -1621,6 +1771,14 @@ function normalizeFashionQuery(query?: string): string {
     .trim();
 }
 
+function normalizeJobQuery(query?: string): string {
+  return (query ?? "")
+    .toLowerCase()
+    .replace(/[-_]/g, " ")
+    .replace(/[^a-z0-9]+/g, " ")
+    .trim();
+}
+
 export function getFashionSearchState(query?: string): FashionSearchState | null {
   const normalizedQuery = normalizeFashionQuery(query);
   if (!normalizedQuery) return null;
@@ -1633,6 +1791,26 @@ export function getFashionSearchState(query?: string): FashionSearchState | null
 
 export function isFashionSearchQuery(query?: string): boolean {
   return getFashionSearchState(query) !== null;
+}
+
+export function getJobSearchStrip(query?: string): JobStripType | null {
+  const queryLower = normalizeJobQuery(query);
+  if (!queryLower) return null;
+
+  if (["job", "jobs"].includes(queryLower)) return null;
+  if (queryLower === "full time") return "Full Time";
+  if (queryLower === "part time") return "Part Time";
+  if (queryLower === "internship") return "Internship";
+  if (queryLower === "contract") return "Contract";
+  if (queryLower === "remote") return "Remote";
+  if (queryLower === "temporary") return "Temporary";
+  return null;
+}
+
+export function isJobSearchQuery(query?: string): boolean {
+  const queryLower = normalizeJobQuery(query);
+  if (!queryLower) return false;
+  return ["job", "jobs", "full time", "part time", "internship", "contract", "remote", "temporary"].includes(queryLower);
 }
 
 export function isFurnitureSearchQuery(query?: string): boolean {
@@ -1792,5 +1970,27 @@ export function getMockFashionSearchResults(query?: string): MockFashionListing[
       ad.category.slug,
     ];
     return searchableFields.some((field) => field.toLowerCase().includes(queryLower));
+  });
+}
+
+export function getMockJobSearchResults(query?: string): MockJobListing[] {
+  if (!query || isJobSearchQuery(query)) {
+    const strip = getJobSearchStrip(query);
+    if (!strip) return mockJobListings;
+    return mockJobListings.filter((listing) => listing.stripCategory === strip);
+  }
+
+  const queryLower = normalizeJobQuery(query);
+  return mockJobListings.filter(({ ad, categoryType, stripCategory }) => {
+    const searchableFields = [
+      ad.title,
+      ad.description,
+      ad.location,
+      categoryType,
+      stripCategory,
+      ad.category.name,
+      ad.category.slug,
+    ];
+    return searchableFields.some((field) => normalizeJobQuery(field).includes(queryLower));
   });
 }

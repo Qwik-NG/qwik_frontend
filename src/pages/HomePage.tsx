@@ -92,6 +92,8 @@ export default function HomePage() {
                     ? buildSearchRoute("Vehicles")
                   : item.name === "Phones"
                     ? buildSearchRoute("Phones")
+                  : item.name === "Jobs"
+                    ? buildSearchRoute("Job")
                   : item.name === "Electronics"
                     ? buildSearchRoute("Electronics")
                   : item.name === "Fashion"

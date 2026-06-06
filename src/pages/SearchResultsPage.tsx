@@ -10,11 +10,12 @@ import BeautySearchResultsView from "../components/search/BeautySearchResultsVie
 import ElectronicsSearchResultsView from "../components/search/ElectronicsSearchResultsView";
 import FashionSearchResultsView from "../components/search/FashionSearchResultsView";
 import FurnituresSearchResultsView from "../components/search/FurnituresSearchResultsView";
+import JobSearchResultsView from "../components/search/JobSearchResultsView";
 import PhonesSearchResultsView from "../components/search/PhonesSearchResultsView";
 import ListingCard, { type ListingCardItem } from "../components/listings/ListingCard";
 import VehicleSearchResultsView from "../components/search/VehicleSearchResultsView";
 import BackButton from "../components/ui/BackButton";
-import { getMockSearchResults, isBeautySearchQuery, isElectronicsSearchQuery, isFashionSearchQuery, isFurnitureSearchQuery, isPhonesSearchQuery, isVehicleSearchQuery, mockAds, mockCategories } from "../lib/mockData";
+import { getMockSearchResults, isBeautySearchQuery, isElectronicsSearchQuery, isFashionSearchQuery, isFurnitureSearchQuery, isJobSearchQuery, isPhonesSearchQuery, isVehicleSearchQuery, mockAds, mockCategories } from "../lib/mockData";
 import type { Ad } from "../types";
 
 type SortValue = "newest" | "price-low" | "price-high";
@@ -254,6 +255,16 @@ export default function SearchResultsPage() {
       <div className="min-h-screen bg-page text-ink">
         <SiteHeader navigate={navigate} />
         <FashionSearchResultsView query={query} navigate={navigate} view="grid" />
+        <SiteFooter navigate={navigate} />
+      </div>
+    );
+  }
+
+  if (isJobSearchQuery(query)) {
+    return (
+      <div className="min-h-screen bg-page text-ink">
+        <SiteHeader navigate={navigate} />
+        <JobSearchResultsView query={query} navigate={navigate} view="grid" />
         <SiteFooter navigate={navigate} />
       </div>
     );
