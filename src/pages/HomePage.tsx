@@ -4,7 +4,6 @@ import { useNavigate } from "react-router-dom";
 import { SiteFooter, SiteHeader } from "../components/AppShell";
 import { buildSearchResultsRoute, buildSearchRoute } from "../constants/routes";
 import {
-  AgricultureIcon,
   BeautyIcon,
   CarsIcon,
   ElectronicsIcon,
@@ -14,30 +13,30 @@ import {
   MoreIcon,
   PhonesIcon,
   PropertiesIcon,
-  SportsIcon,
 } from "../components/icons/CategoryIcons";
 import { ImagePlaceholder } from "../components/ui/ImagePlaceholder";
 import { api } from "../services/api";
 
 type Category = {
   name: string;
+  shortName: string;
   tone: string;
+  accent: string;
   icon: ComponentType<{ className?: string }>;
+  route: string;
 };
 type Product = { id: string; price: number; title: string; description: string; location: string; images: Array<{ url: string }> };
 
 const categories: Category[] = [
-  { name: "Cars", icon: CarsIcon, tone: "#f5e8e2" },
-  { name: "Phones", icon: PhonesIcon, tone: "#e7ebfa" },
-  { name: "Jobs", icon: JobsIcon, tone: "#ece8e8" },
-  { name: "Agriculture", icon: AgricultureIcon, tone: "#dff1e6" },
-  { name: "Sports", icon: SportsIcon, tone: "#ececec" },
-  { name: "Fashion", icon: FashionIcon, tone: "#f3ebdd" },
-  { name: "Electronics", icon: ElectronicsIcon, tone: "#e8e8e8" },
-  { name: "Properties", icon: PropertiesIcon, tone: "#deede5" },
-  { name: "Furniture", icon: FurnitureIcon, tone: "#f2dff0" },
-  { name: "Beauty", icon: BeautyIcon, tone: "#e8dfeb" },
-  { name: "More", icon: MoreIcon, tone: "#f0f0f0" }
+  { name: "Vehicles", shortName: "Cars", icon: CarsIcon, tone: "#f8ebe4", accent: "#f28c28", route: buildSearchRoute("Vehicles") },
+  { name: "Phones & Tablets", shortName: "Phones", icon: PhonesIcon, tone: "#e9edff", accent: "#5b7be3", route: buildSearchRoute("Phones") },
+  { name: "Jobs", shortName: "Jobs", icon: JobsIcon, tone: "#ecebed", accent: "#6d6a74", route: buildSearchRoute("Job") },
+  { name: "Fashion", shortName: "Fashion", icon: FashionIcon, tone: "#f6eadc", accent: "#c67a3e", route: buildSearchRoute("Fashion") },
+  { name: "Electronics", shortName: "Electronics", icon: ElectronicsIcon, tone: "#ebeef3", accent: "#5f6071", route: buildSearchRoute("Electronics") },
+  { name: "Properties", shortName: "Properties", icon: PropertiesIcon, tone: "#e2f1e9", accent: "#58a785", route: buildSearchResultsRoute("Home") },
+  { name: "Furniture & Appliances", shortName: "Furniture", icon: FurnitureIcon, tone: "#f4e3f4", accent: "#a56db2", route: buildSearchRoute("Furniture") },
+  { name: "Beauty", shortName: "Beauty", icon: BeautyIcon, tone: "#f1e4ee", accent: "#b17aa0", route: buildSearchRoute("Beauty") },
+  { name: "More", shortName: "More", icon: MoreIcon, tone: "#f2f1ef", accent: "#1f1d27", route: "/search-results-list" }
 ];
 
 function LocationPin({ className = "h-4 w-4" }: { className?: string }) {
@@ -63,6 +62,40 @@ function ProductCardSkeleton() {
         <div className="h-4 w-2/3 animate-pulse rounded bg-[#f2f2f4]" />
       </div>
     </article>
+  );
+}
+
+function CategoryCard({ item, onClick }: { item: Category; onClick: () => void }) {
+  return (
+    <button
+      type="button"
+      onClick={onClick}
+      className="group relative flex h-[124px] w-[136px] shrink-0 flex-col justify-between overflow-hidden rounded-[18px] border border-white/70 bg-white p-3 text-left shadow-[0_12px_30px_rgba(31,29,39,0.06)] transition duration-200 hover:-translate-y-1 hover:shadow-[0_18px_38px_rgba(31,29,39,0.1)] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#ff9715] focus-visible:ring-offset-2 focus-visible:ring-offset-page active:scale-[0.98] sm:h-[138px] sm:w-auto sm:min-w-0 sm:p-3.5"
+      aria-label={`Browse ${item.name}`}
+    >
+      <span
+        className="absolute right-[-24px] top-[-28px] h-[76px] w-[76px] rounded-full opacity-50 transition duration-200 group-hover:scale-110"
+        style={{ background: item.tone }}
+        aria-hidden="true"
+      />
+      <span
+        className="relative grid h-[64px] w-full place-items-center overflow-hidden rounded-[14px] transition duration-200 group-hover:scale-[1.02]"
+        style={{ background: item.tone }}
+      >
+        <span
+          className="absolute bottom-[-16px] left-[-10px] h-[46px] w-[46px] rounded-full opacity-20"
+          style={{ background: item.accent }}
+          aria-hidden="true"
+        />
+        <item.icon className="relative h-[48px] w-[48px]" />
+      </span>
+      <span className="relative flex min-h-[38px] items-end">
+        <span className="text-[14px] font-medium leading-[1.15] text-[#1f1d27] sm:text-[15px]">
+          <span className="sm:hidden">{item.shortName}</span>
+          <span className="hidden sm:inline">{item.name}</span>
+        </span>
+      </span>
+    </button>
   );
 }
 
@@ -93,40 +126,12 @@ export default function HomePage() {
     <div className="min-h-screen bg-page text-ink">
       <SiteHeader navigate={navigate} />
 
-      <section className="mx-auto grid w-full max-w-[1728px] grid-cols-4 gap-3 px-4 pb-1 pt-8 sm:px-6 sm:pt-[50px] md:grid-cols-6 lg:px-12 xl:grid-cols-12 xl:pt-[70px]">
-        {categories.map((item) => (
-          <button
-            key={item.name}
-            className="text-center"
-            onClick={() =>
-              navigate(
-                item.name === "More"
-                  ? "/search-results-list"
-                  : item.name === "Cars"
-                    ? buildSearchRoute("Vehicles")
-                  : item.name === "Phones"
-                    ? buildSearchRoute("Phones")
-                  : item.name === "Jobs"
-                    ? buildSearchRoute("Job")
-                  : item.name === "Electronics"
-                    ? buildSearchRoute("Electronics")
-                  : item.name === "Fashion"
-                    ? buildSearchRoute("Fashion")
-                  : item.name === "Beauty"
-                    ? buildSearchRoute("Beauty")
-                  : item.name === "Furniture"
-                    ? buildSearchRoute("Furniture")
-                  : buildSearchResultsRoute(item.name === "Properties" ? "Home" : item.name),
-              )
-            }
-            type="button"
-          >
-            <div className="mx-auto mb-1.5 grid h-[68px] w-[68px] place-items-center overflow-hidden rounded-full" style={{ background: item.tone }}>
-              <item.icon />
-            </div>
-            <p className="m-0 text-[13px]">{item.name}</p>
-          </button>
-        ))}
+      <section className="mx-auto w-full max-w-[1728px] px-4 pb-1 pt-8 sm:px-6 sm:pt-[50px] lg:px-12 xl:pt-[70px]">
+        <div className="-mx-4 flex gap-3 overflow-x-auto px-4 pb-3 sm:mx-0 sm:grid sm:grid-cols-3 sm:overflow-visible sm:px-0 sm:pb-0 md:grid-cols-4 lg:grid-cols-6 xl:grid-cols-9">
+          {categories.map((item) => (
+            <CategoryCard key={item.name} item={item} onClick={() => navigate(item.route)} />
+          ))}
+        </div>
       </section>
 
       <main className="mx-auto w-full max-w-[1728px] px-4 pb-16 pt-8 sm:px-6 lg:px-12 lg:pb-24 lg:pt-14">
