@@ -1,4 +1,4 @@
-import { useEffect, useMemo, useState } from "react";
+import { useCallback, useEffect, useMemo, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { SiteFooter, SiteHeader } from "../components/AppShell";
 import { LocationPin } from "../components/icons/LocationPin";
@@ -82,6 +82,23 @@ function AdCard({ ad, onClick }: { ad: DashboardAd; onClick: () => void }) {
   );
 }
 
+function DashboardAdSkeleton() {
+  return (
+    <article className="rounded-card bg-white p-3.5">
+      <div className="h-[300px] w-full animate-pulse rounded-[16px] bg-[#f2f2f4]" />
+      <div className="space-y-3 pt-3.5">
+        <div className="flex items-center justify-between">
+          <div className="h-6 w-28 animate-pulse rounded bg-[#f2f2f4]" />
+          <div className="h-7 w-12 animate-pulse rounded-[10px] bg-[#f2f2f4]" />
+        </div>
+        <div className="h-4 w-4/5 animate-pulse rounded bg-[#f2f2f4]" />
+        <div className="h-4 w-full animate-pulse rounded bg-[#f2f2f4]" />
+        <div className="h-4 w-2/3 animate-pulse rounded bg-[#f2f2f4]" />
+      </div>
+    </article>
+  );
+}
+
 export default function AdsDashboardPage() {
   const navigate = useNavigate();
   const [activeFilter, setActiveFilter] = useState<FilterState>("ACTIVE");
@@ -89,22 +106,22 @@ export default function AdsDashboardPage() {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
 
-  useEffect(() => {
-    const loadUserAds = async () => {
-      try {
-        setLoading(true);
-        setError(null);
-        const response = await api.getUserAds(activeFilter);
-        setAds(response.data.map(toDashboardAd));
-      } catch (err) {
-        setError(err instanceof Error ? err.message : "Failed to load ads");
-      } finally {
-        setLoading(false);
-      }
-    };
-
-    void loadUserAds();
+  const loadUserAds = useCallback(async () => {
+    try {
+      setLoading(true);
+      setError(null);
+      const response = await api.getUserAds(activeFilter);
+      setAds(response.data.map(toDashboardAd));
+    } catch (err) {
+      setError(err instanceof Error ? err.message : "Failed to load ads");
+    } finally {
+      setLoading(false);
+    }
   }, [activeFilter]);
+
+  useEffect(() => {
+    void loadUserAds();
+  }, [loadUserAds]);
 
   const emptyMessage = useMemo(() => {
     if (activeFilter === "ACTIVE") return "No active ads yet.";
@@ -140,9 +157,24 @@ export default function AdsDashboardPage() {
             </div>
 
             {loading ? (
-              <p className="text-[15px] text-[#6d6a74]">Loading ads...</p>
+              <div className="grid grid-cols-1 gap-5 md:grid-cols-2 xl:max-w-[620px]">
+                {Array.from({ length: 2 }).map((_, index) => (
+                  <div key={index} className="max-w-[300px]">
+                    <DashboardAdSkeleton />
+                  </div>
+                ))}
+              </div>
             ) : error ? (
-              <p className="text-[15px] text-[#d14343]">Error: {error}</p>
+              <div className="rounded-[18px] border border-[#f0d1d1] bg-white px-6 py-8">
+                <p className="text-[15px] text-[#d14343]">{error}</p>
+                <button
+                  type="button"
+                  onClick={loadUserAds}
+                  className="mt-4 rounded-[8px] bg-gradient-to-r from-amber to-orange px-4 py-2 text-[15px] text-white"
+                >
+                  Retry
+                </button>
+              </div>
             ) : ads.length === 0 ? (
               <p className="text-[15px] text-[#6d6a74]">{emptyMessage}</p>
             ) : (

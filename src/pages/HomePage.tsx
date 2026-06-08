@@ -1,5 +1,5 @@
 import type { ComponentType } from "react";
-import { useEffect, useState } from "react";
+import { useCallback, useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { SiteFooter, SiteHeader } from "../components/AppShell";
 import { buildSearchResultsRoute, buildSearchRoute } from "../constants/routes";
@@ -17,7 +17,7 @@ import {
   SportsIcon,
 } from "../components/icons/CategoryIcons";
 import { ImagePlaceholder } from "../components/ui/ImagePlaceholder";
-import { apiUrl } from "../services/api";
+import { api } from "../services/api";
 
 type Category = {
   name: string;
@@ -49,30 +49,46 @@ function LocationPin({ className = "h-4 w-4" }: { className?: string }) {
   );
 }
 
+function ProductCardSkeleton() {
+  return (
+    <article className="rounded-[22px] bg-white p-2.5 sm:rounded-[26px] sm:p-4">
+      <div className="h-[170px] w-full animate-pulse rounded-[14px] bg-[#f2f2f4] sm:h-[260px] sm:rounded-[18px]" />
+      <div className="space-y-3 px-0 pb-1 pt-3 sm:pt-4">
+        <div className="flex items-center justify-between gap-2">
+          <div className="h-5 w-24 animate-pulse rounded bg-[#f2f2f4]" />
+          <div className="h-7 w-12 animate-pulse rounded-[10px] bg-[#f2f2f4]" />
+        </div>
+        <div className="h-4 w-4/5 animate-pulse rounded bg-[#f2f2f4]" />
+        <div className="h-4 w-full animate-pulse rounded bg-[#f2f2f4]" />
+        <div className="h-4 w-2/3 animate-pulse rounded bg-[#f2f2f4]" />
+      </div>
+    </article>
+  );
+}
+
 export default function HomePage() {
   const navigate = useNavigate();
   const [products, setProducts] = useState<Product[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
 
-  useEffect(() => {
-    const fetchAds = async () => {
-      try {
-        setLoading(true);
-        const response = await fetch(apiUrl("/ads?pageSize=12"));
-        if (!response.ok) throw new Error("Failed to fetch ads");
-        const result = await response.json();
-        setProducts(result.data || []);
-      } catch (err) {
-        setError(err instanceof Error ? err.message : "Unknown error");
-        console.error("Error fetching ads:", err);
-      } finally {
-        setLoading(false);
-      }
-    };
-
-    fetchAds();
+  const fetchAds = useCallback(async () => {
+    try {
+      setLoading(true);
+      setError(null);
+      const result = await api.ads("?pageSize=12&imagesLimit=1");
+      setProducts(result.data || []);
+    } catch (err) {
+      setError(err instanceof Error ? err.message : "Failed to load ads");
+      console.error("Error fetching ads:", err);
+    } finally {
+      setLoading(false);
+    }
   }, []);
+
+  useEffect(() => {
+    fetchAds();
+  }, [fetchAds]);
   return (
     <div className="min-h-screen bg-page text-ink">
       <SiteHeader navigate={navigate} />
@@ -116,8 +132,25 @@ export default function HomePage() {
       <main className="mx-auto w-full max-w-[1728px] px-4 pb-16 pt-8 sm:px-6 lg:px-12 lg:pb-24 lg:pt-14">
         <h2 className="mb-5 text-[26px] font-medium sm:text-[32px]">Top Ads</h2>
         
-        {loading && <p className="text-center text-lg text-gray-500">Loading ads...</p>}
-        {error && <p className="text-center text-lg text-red-500">Error: {error}</p>}
+        {loading && (
+          <div className="grid grid-cols-2 gap-4 xl:grid-cols-4">
+            {Array.from({ length: 8 }).map((_, index) => (
+              <ProductCardSkeleton key={index} />
+            ))}
+          </div>
+        )}
+        {error && (
+          <div className="rounded-[18px] border border-[#f0d1d1] bg-white px-6 py-8 text-center">
+            <p className="text-[16px] text-[#d14343]">{error}</p>
+            <button
+              type="button"
+              onClick={fetchAds}
+              className="mt-4 rounded-[8px] bg-gradient-to-r from-amber to-orange px-4 py-2 text-[15px] text-white"
+            >
+              Retry
+            </button>
+          </div>
+        )}
         
         {!loading && !error && products.length === 0 && <p className="text-center text-lg text-gray-500">No ads available</p>}
 

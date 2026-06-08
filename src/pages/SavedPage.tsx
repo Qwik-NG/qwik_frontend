@@ -1,4 +1,4 @@
-import { useEffect, useState } from "react";
+import { useCallback, useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { SiteFooter, SiteHeader } from "../components/AppShell";
 import { ImagePlaceholder } from "../components/ui/ImagePlaceholder";
@@ -89,28 +89,42 @@ function SavedCard({ ad, onClick }: { ad: SavedCardAd; onClick: () => void }) {
   );
 }
 
+function SavedCardSkeleton() {
+  return (
+    <article className="rounded-[22px] bg-white p-2.5 sm:rounded-[26px] sm:p-4">
+      <div className="h-[170px] w-full animate-pulse rounded-[14px] bg-[#f2f2f4] sm:h-[260px] sm:rounded-[18px]" />
+      <div className="space-y-3 px-0 pb-1 pt-3 sm:pt-4">
+        <div className="h-5 w-28 animate-pulse rounded bg-[#f2f2f4]" />
+        <div className="h-4 w-3/4 animate-pulse rounded bg-[#f2f2f4]" />
+        <div className="h-4 w-full animate-pulse rounded bg-[#f2f2f4]" />
+        <div className="h-4 w-2/3 animate-pulse rounded bg-[#f2f2f4]" />
+      </div>
+    </article>
+  );
+}
+
 export default function SavedPage() {
   const navigate = useNavigate();
   const [savedAds, setSavedAds] = useState<SavedCardAd[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
 
-  useEffect(() => {
-    const loadSavedAds = async () => {
-      try {
-        setLoading(true);
-        setError(null);
-        const response = await api.savedAds();
-        setSavedAds(response.data.map(toSavedCardAd));
-      } catch (err) {
-        setError(err instanceof Error ? err.message : "Failed to load saved ads");
-      } finally {
-        setLoading(false);
-      }
-    };
-
-    void loadSavedAds();
+  const loadSavedAds = useCallback(async () => {
+    try {
+      setLoading(true);
+      setError(null);
+      const response = await api.savedAds();
+      setSavedAds(response.data.map(toSavedCardAd));
+    } catch (err) {
+      setError(err instanceof Error ? err.message : "Failed to load saved ads");
+    } finally {
+      setLoading(false);
+    }
   }, []);
+
+  useEffect(() => {
+    void loadSavedAds();
+  }, [loadSavedAds]);
 
   return (
     <div className="min-h-screen bg-page text-ink">
@@ -124,19 +138,21 @@ export default function SavedPage() {
 
         {loading ? (
           <section className="grid grid-cols-2 gap-4 xl:grid-cols-4">
-            {Array.from({ length: 2 }).map((_, index) => (
-              <article key={index} className="rounded-[22px] bg-white p-2.5 sm:rounded-[26px] sm:p-4">
-                <div className="h-[170px] w-full animate-pulse rounded-[14px] bg-[#f2f2f4] sm:h-[260px] sm:rounded-[18px]" />
-                <div className="space-y-3 px-0 pb-1 pt-3 sm:pt-4">
-                  <div className="h-5 w-28 animate-pulse rounded bg-[#f2f2f4]" />
-                  <div className="h-4 w-3/4 animate-pulse rounded bg-[#f2f2f4]" />
-                  <div className="h-4 w-full animate-pulse rounded bg-[#f2f2f4]" />
-                </div>
-              </article>
+            {Array.from({ length: 4 }).map((_, index) => (
+              <SavedCardSkeleton key={index} />
             ))}
           </section>
         ) : error ? (
-          <p className="text-[15px] text-[#d14343]">Error: {error}</p>
+          <div className="rounded-[18px] border border-[#f0d1d1] bg-white px-6 py-8">
+            <p className="text-[15px] text-[#d14343]">{error}</p>
+            <button
+              type="button"
+              onClick={loadSavedAds}
+              className="mt-4 rounded-[8px] bg-gradient-to-r from-amber to-orange px-4 py-2 text-[15px] text-white"
+            >
+              Retry
+            </button>
+          </div>
         ) : savedAds.length === 0 ? (
           <p className="text-[15px] text-[#6d6a74]">You have no saved ads yet.</p>
         ) : (

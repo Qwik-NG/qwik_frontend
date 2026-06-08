@@ -1,4 +1,4 @@
-import { useEffect, useState, type ReactNode } from "react";
+import { useCallback, useEffect, useState, type ReactNode } from "react";
 import { useNavigate, useSearchParams } from "react-router-dom";
 import {
   buildProductDetailsRoute,
@@ -37,6 +37,20 @@ const VERIFIED_OPTIONS: Array<{ label: string; value: VerifiedValue }> = [
   { label: "Verified Seller", value: "verified" },
   { label: "Unverified Seller", value: "unverified" },
 ];
+
+function GridResultSkeleton() {
+  return (
+    <article className="rounded-[22px] bg-white p-3 shadow-[0_10px_26px_rgba(31,29,39,0.04)]">
+      <div className="h-[230px] animate-pulse rounded-[16px] bg-[#f2f2f4] sm:h-[260px]" />
+      <div className="space-y-3 pt-4">
+        <div className="h-5 w-28 animate-pulse rounded bg-[#f2f2f4]" />
+        <div className="h-4 w-4/5 animate-pulse rounded bg-[#f2f2f4]" />
+        <div className="h-4 w-full animate-pulse rounded bg-[#f2f2f4]" />
+        <div className="h-4 w-2/3 animate-pulse rounded bg-[#f2f2f4]" />
+      </div>
+    </article>
+  );
+}
 
 function formatNaira(value: number) {
   return `₦ ${value.toLocaleString()}`;
@@ -286,19 +300,31 @@ export default function SearchResultsPage() {
   const [sortBy, setSortBy] = useState<SortValue>("newest");
   const [verifiedFilter, setVerifiedFilter] = useState<VerifiedValue>("all");
   const [matchedAds, setMatchedAds] = useState<Ad[]>([]);
+  const [loadingAds, setLoadingAds] = useState(true);
+  const [adsError, setAdsError] = useState<string | null>(null);
   const maxPrice = Math.max(...matchedAds.map((ad) => ad.price), 100200000);
   const [selectedMaxPrice, setSelectedMaxPrice] = useState(maxPrice);
   const [mobileFiltersOpen, setMobileFiltersOpen] = useState(false);
 
-  useEffect(() => {
-    const loadAds = async () => {
+  const loadAds = useCallback(async () => {
+    try {
+      setLoadingAds(true);
+      setAdsError(null);
       const params = new URLSearchParams({ pageSize: "24" });
       if (query) params.set("q", query);
       const response = await api.ads(`?${params.toString()}`);
       setMatchedAds(response.data);
-    };
-    void loadAds();
+    } catch (err) {
+      setAdsError(err instanceof Error ? err.message : "Failed to load ads");
+      setMatchedAds([]);
+    } finally {
+      setLoadingAds(false);
+    }
   }, [query]);
+
+  useEffect(() => {
+    void loadAds();
+  }, [loadAds]);
 
   useEffect(() => {
     setSelectedCategory("all");
@@ -410,7 +436,25 @@ export default function SearchResultsPage() {
                 </button>
               </div>
             </div>
-            {results.length === 0 ? (
+            {loadingAds ? (
+              <div className="grid grid-cols-1 gap-5 sm:grid-cols-2 xl:grid-cols-3">
+                {Array.from({ length: 6 }).map((_, index) => (
+                  <GridResultSkeleton key={index} />
+                ))}
+              </div>
+            ) : adsError ? (
+              <div className="rounded-[24px] border border-[#f0d1d1] bg-white px-6 py-12 text-center shadow-[0_8px_24px_rgba(31,29,39,0.05)]">
+                <h2 className="text-[22px] font-medium text-[#1f1d27]">Failed to load ads</h2>
+                <p className="mt-3 text-[15px] leading-[1.6] text-[#6d6a74]">{adsError}</p>
+                <button
+                  type="button"
+                  onClick={loadAds}
+                  className="mt-5 rounded-[8px] bg-gradient-to-r from-amber to-orange px-4 py-2 text-[15px] text-white"
+                >
+                  Retry
+                </button>
+              </div>
+            ) : results.length === 0 ? (
               <div className="rounded-[24px] border border-[#ddd9d2] bg-white px-6 py-12 text-center shadow-[0_8px_24px_rgba(31,29,39,0.05)]">
                 <h2 className="text-[22px] font-medium text-[#1f1d27]">No results found</h2>
                 <p className="mt-3 text-[15px] leading-[1.6] text-[#6d6a74]">
