@@ -84,8 +84,8 @@ async function request<T>(path: string, init?: ApiRequestInit): Promise<ApiRespo
   }
 
   const headers: HeadersInit = {
-    "Content-Type": "application/json",
-    ...(init?.headers ?? {}),
+    ...(fetchInit.body instanceof FormData ? {} : { "Content-Type": "application/json" }),
+    ...(fetchInit.headers ?? {}),
     ...(authToken ? { Authorization: `Bearer ${authToken}` } : {})
   };
 
@@ -208,10 +208,16 @@ export const api = {
     request<Ad>("/ads", {
       method: "POST",
       body: JSON.stringify(payload)
+    }).then((response) => {
+      GET_CACHE.clear();
+      return response;
     }),
 
   updateAd: (id: string, payload: AdUpdatePayload) =>
-    request<Ad>(`/ads/${id}`, { method: "PATCH", body: JSON.stringify(payload) }),
+    request<Ad>(`/ads/${id}`, { method: "PATCH", body: JSON.stringify(payload) }).then((response) => {
+      GET_CACHE.clear();
+      return response;
+    }),
 
   deleteAd: (id: string) => request<null>(`/ads/${id}`, { method: "DELETE" }),
 
@@ -274,12 +280,14 @@ export const api = {
   // updateNotificationSettings: (payload: NotificationSettings) => request<NotificationSettings>("/users/me/notification-settings", { method: "PATCH", body: JSON.stringify(payload) }),
 
   // ===== Upload Endpoints =====
-  // TODO: uploadImage - upload image and return URL
-  // uploadImage: (file: File) => {
-  //   const formData = new FormData();
-  //   formData.append("file", file);
-  //   return request<UploadResponse>("/uploads/images", { method: "POST", body: formData });
-  // },
+  uploadImages: (files: File[]) => {
+    const formData = new FormData();
+    files.forEach((file) => formData.append("images", file));
+    return request<UploadResponse>("/uploads/images", {
+      method: "POST",
+      body: formData,
+    });
+  },
 
   // ===== Offer Endpoints (Future) =====
   // TODO: createOffer - make offer on ad

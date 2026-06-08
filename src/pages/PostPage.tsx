@@ -2,7 +2,8 @@ import { useEffect, useRef, useState, type ReactNode } from "react";
 import { useNavigate } from "react-router-dom";
 import { SiteFooter, SiteHeader } from "../components/AppShell";
 import { PlusIcon } from "../components/icons/CoreIcons";
-import { API_BASE_URL, apiUrl } from "../services/api";
+import { useToast } from "../context/ToastContext";
+import { API_BASE_URL, api } from "../services/api";
 
 const POST_DRAFT_KEY = "qwik_post_draft";
 
@@ -20,6 +21,10 @@ type PostDraft = {
   location?: string;
   exchangeAvailable?: boolean;
 };
+
+const MAX_IMAGE_COUNT = 10;
+const MAX_IMAGE_SIZE = 5 * 1024 * 1024;
+const ALLOWED_IMAGE_TYPES = new Set(["image/jpeg", "image/png", "image/webp", "image/gif"]);
 
 function readDraft(): PostDraft {
   if (typeof window === "undefined") return {};
@@ -180,14 +185,20 @@ function TextField({
   );
 }
 
+function Spinner() {
+  return <span className="inline-block h-5 w-5 animate-spin rounded-full border-2 border-current border-t-transparent" aria-hidden="true" />;
+}
+
 export default function PostPage() {
   const navigate = useNavigate();
+  const { success } = useToast();
   const fileInputRef = useRef<HTMLInputElement>(null);
   const [title, setTitle] = useState("");
   const [description, setDescription] = useState("");
   const [imageUrls, setImageUrls] = useState<string[]>([]);
   const [uploading, setUploading] = useState(false);
   const [error, setError] = useState<string | null>(null);
+  const [uploadMessage, setUploadMessage] = useState<string | null>(null);
 
   useEffect(() => {
     const draft = readDraft();
@@ -200,27 +211,40 @@ export default function PostPage() {
     if (!files || files.length === 0) return;
 
     try {
-      setUploading(true);
-      setError(null);
-      const formData = new FormData();
-      Array.from(files).forEach((file) => formData.append("images", file));
-
-      const response = await fetch(apiUrl("/uploads/images"), {
-        method: "POST",
-        body: formData,
-      });
-      const payload = await response.json();
-
-      if (!response.ok || !payload.success) {
-        throw new Error(payload.message || "Failed to upload images");
+      const selectedFiles = Array.from(files);
+      const remainingSlots = MAX_IMAGE_COUNT - imageUrls.length;
+      if (remainingSlots <= 0) {
+        throw new Error("You can upload up to 10 images");
       }
 
-      const uploadedUrls = ((payload.data?.urls || []) as string[]).map((url) => new URL(url, API_BASE_URL).toString());
-      const nextImageUrls = [...imageUrls, ...uploadedUrls].slice(0, 10);
+      if (selectedFiles.length > remainingSlots) {
+        throw new Error(`You can add ${remainingSlots} more image${remainingSlots === 1 ? "" : "s"}`);
+      }
+
+      const invalidType = selectedFiles.find((file) => !ALLOWED_IMAGE_TYPES.has(file.type));
+      if (invalidType) {
+        throw new Error(`${invalidType.name} must be jpeg, png, webp, or gif`);
+      }
+
+      const oversized = selectedFiles.find((file) => file.size > MAX_IMAGE_SIZE);
+      if (oversized) {
+        throw new Error(`${oversized.name} must be 5MB or smaller`);
+      }
+
+      setUploading(true);
+      setError(null);
+      setUploadMessage(null);
+
+      const payload = await api.uploadImages(selectedFiles);
+      const uploadedUrls = payload.data.urls.map((url) => new URL(url, API_BASE_URL).toString());
+      const nextImageUrls = [...imageUrls, ...uploadedUrls].slice(0, MAX_IMAGE_COUNT);
       setImageUrls(nextImageUrls);
       writeDraft({ ...readDraft(), title, description, imageUrls: nextImageUrls });
+      setUploadMessage(`${uploadedUrls.length} image${uploadedUrls.length === 1 ? "" : "s"} uploaded`);
+      success("Images uploaded");
     } catch (err) {
       setError(err instanceof Error ? err.message : "Failed to upload images");
+      setUploadMessage(null);
     } finally {
       setUploading(false);
       if (fileInputRef.current) {
@@ -264,9 +288,10 @@ export default function PostPage() {
           <button
             type="button"
             onClick={() => fileInputRef.current?.click()}
-            className="mt-[18px] grid h-[104px] w-[104px] place-items-center rounded-[12px] border-2 border-card text-[#b9b6be]"
+            className="mt-[18px] grid h-[104px] w-[104px] place-items-center rounded-[12px] border-2 border-card text-[#b9b6be] disabled:cursor-not-allowed disabled:opacity-60"
+            disabled={uploading || imageUrls.length >= MAX_IMAGE_COUNT}
           >
-            <PlusIcon />
+            {uploading ? <Spinner /> : <PlusIcon />}
           </button>
 
           {imageUrls.length > 0 && (
@@ -278,8 +303,9 @@ export default function PostPage() {
           )}
 
           <p className="mt-[20px] text-[17px] leading-none text-[#b9b6be]">
-            {uploading ? "Uploading images..." : "jpg, gif & png, 5MB max"}
+            {uploading ? "Uploading images..." : `${imageUrls.length}/${MAX_IMAGE_COUNT} images - jpg, gif, png & webp, 5MB max`}
           </p>
+          {uploadMessage && <p className="mt-[12px] text-[15px] text-[#57b77a]">{uploadMessage}</p>}
           {error && <p className="mt-[12px] text-[15px] text-[#d14343]">{error}</p>}
 
           <div className="mt-[34px] space-y-[28px]">
@@ -298,7 +324,7 @@ export default function PostPage() {
           <button
             type="button"
             onClick={handleNext}
-            className="mt-[26px] h-[56px] w-full rounded-[9px] bg-card text-[18px] text-[#b9b6be] disabled:cursor-not-allowed"
+            className="mt-[26px] h-[56px] w-full rounded-[9px] bg-card text-[18px] text-[#b9b6be] disabled:cursor-not-allowed disabled:opacity-70"
             disabled={!canProceed}
           >
             Next

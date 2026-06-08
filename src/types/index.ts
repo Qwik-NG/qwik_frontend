@@ -246,11 +246,17 @@ export interface SearchResults {
 /**
  * Upload Types
  */
-export interface UploadResponse {
+export interface UploadAsset {
   url: string;
   id: string;
+  name?: string;
   size: number;
   type: string;
+}
+
+export interface UploadResponse {
+  urls: string[];
+  assets: UploadAsset[];
 }
 
 /**
