@@ -1,19 +1,7 @@
-import type { ComponentType } from "react";
 import { useCallback, useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { SiteFooter, SiteHeader } from "../components/AppShell";
 import { buildSearchResultsRoute, buildSearchRoute } from "../constants/routes";
-import {
-  BeautyIcon,
-  CarsIcon,
-  ElectronicsIcon,
-  FashionIcon,
-  FurnitureIcon,
-  JobsIcon,
-  MoreIcon,
-  PhonesIcon,
-  PropertiesIcon,
-} from "../components/icons/CategoryIcons";
 import { ImagePlaceholder } from "../components/ui/ImagePlaceholder";
 import { api } from "../services/api";
 
@@ -21,22 +9,21 @@ type Category = {
   name: string;
   shortName: string;
   tone: string;
-  accent: string;
-  icon: ComponentType<{ className?: string }>;
+  image: string;
   route: string;
 };
 type Product = { id: string; price: number; title: string; description: string; location: string; images: Array<{ url: string }> };
 
 const categories: Category[] = [
-  { name: "Vehicles", shortName: "Cars", icon: CarsIcon, tone: "#f8ebe4", accent: "#f28c28", route: buildSearchRoute("Vehicles") },
-  { name: "Phones & Tablets", shortName: "Phones", icon: PhonesIcon, tone: "#e9edff", accent: "#5b7be3", route: buildSearchRoute("Phones") },
-  { name: "Jobs", shortName: "Jobs", icon: JobsIcon, tone: "#ecebed", accent: "#6d6a74", route: buildSearchRoute("Job") },
-  { name: "Fashion", shortName: "Fashion", icon: FashionIcon, tone: "#f6eadc", accent: "#c67a3e", route: buildSearchRoute("Fashion") },
-  { name: "Electronics", shortName: "Electronics", icon: ElectronicsIcon, tone: "#ebeef3", accent: "#5f6071", route: buildSearchRoute("Electronics") },
-  { name: "Properties", shortName: "Properties", icon: PropertiesIcon, tone: "#e2f1e9", accent: "#58a785", route: buildSearchResultsRoute("Home") },
-  { name: "Furniture & Appliances", shortName: "Furniture", icon: FurnitureIcon, tone: "#f4e3f4", accent: "#a56db2", route: buildSearchRoute("Furniture") },
-  { name: "Beauty", shortName: "Beauty", icon: BeautyIcon, tone: "#f1e4ee", accent: "#b17aa0", route: buildSearchRoute("Beauty") },
-  { name: "More", shortName: "More", icon: MoreIcon, tone: "#f2f1ef", accent: "#1f1d27", route: "/search-results-list" }
+  { name: "Vehicles", shortName: "Cars", image: "/category-images/vehicles.png", tone: "#f8ebe4", route: buildSearchRoute("Vehicles") },
+  { name: "Phones & Tablets", shortName: "Phones", image: "/category-images/phones-tablets.png", tone: "#e9edff", route: buildSearchRoute("Phones") },
+  { name: "Jobs", shortName: "Jobs", image: "/category-images/jobs.png", tone: "#ecebed", route: buildSearchRoute("Job") },
+  { name: "Fashion", shortName: "Fashion", image: "/category-images/fashion.png", tone: "#f6eadc", route: buildSearchRoute("Fashion") },
+  { name: "Electronics", shortName: "Electronics", image: "/category-images/electronics.png", tone: "#ebeef3", route: buildSearchRoute("Electronics") },
+  { name: "Properties", shortName: "Properties", image: "/category-images/properties.png", tone: "#e2f1e9", route: buildSearchResultsRoute("Home") },
+  { name: "Furniture & Appliances", shortName: "Furniture", image: "/category-images/furniture-appliances.png", tone: "#f4e3f4", route: buildSearchRoute("Furniture") },
+  { name: "Beauty", shortName: "Beauty", image: "/category-images/beauty.png", tone: "#f1e4ee", route: buildSearchRoute("Beauty") },
+  { name: "More", shortName: "More", image: "/category-images/more.png", tone: "#f2f1ef", route: "/search-results-list" }
 ];
 
 function LocationPin({ className = "h-4 w-4" }: { className?: string }) {
@@ -79,15 +66,20 @@ function CategoryCard({ item, onClick }: { item: Category; onClick: () => void }
         aria-hidden="true"
       />
       <span
-        className="relative grid h-[64px] w-full place-items-center overflow-hidden rounded-[14px] transition duration-200 group-hover:scale-[1.02]"
+        className="relative block h-[64px] w-full overflow-hidden rounded-[14px]"
         style={{ background: item.tone }}
       >
+        <img
+          src={item.image}
+          alt=""
+          className="h-full w-full object-cover transition duration-300 group-hover:scale-[1.08]"
+          loading="eager"
+          decoding="async"
+        />
         <span
-          className="absolute bottom-[-16px] left-[-10px] h-[46px] w-[46px] rounded-full opacity-20"
-          style={{ background: item.accent }}
+          className="absolute inset-0 bg-gradient-to-t from-[#1f1d27]/10 to-transparent opacity-70"
           aria-hidden="true"
         />
-        <item.icon className="relative h-[48px] w-[48px]" />
       </span>
       <span className="relative flex min-h-[38px] items-end">
         <span className="text-[14px] font-medium leading-[1.15] text-[#1f1d27] sm:text-[15px]">
