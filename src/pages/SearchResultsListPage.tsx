@@ -16,7 +16,8 @@ import VehicleSearchResultsView from "../components/search/VehicleSearchResultsV
 import { LocationPin } from "../components/icons/LocationPin";
 import BackButton from "../components/ui/BackButton";
 import { ImagePlaceholder } from "../components/ui/ImagePlaceholder";
-import { getMockSearchResults, isBeautySearchQuery, isElectronicsSearchQuery, isFashionSearchQuery, isFurnitureSearchQuery, isJobSearchQuery, isPhonesSearchQuery, isVehicleSearchQuery, mockAds, mockCategories } from "../lib/mockData";
+import { isBeautySearchQuery, isElectronicsSearchQuery, isFashionSearchQuery, isFurnitureSearchQuery, isJobSearchQuery, isPhonesSearchQuery, isVehicleSearchQuery, mockCategories } from "../lib/mockData";
+import { api } from "../services/api";
 import type { Ad } from "../types";
 
 type SortValue = "newest" | "price-low" | "price-high";
@@ -359,11 +360,20 @@ export default function SearchResultsListPage() {
   const [selectedCategory, setSelectedCategory] = useState("all");
   const [sortBy, setSortBy] = useState<SortValue>("newest");
   const [verifiedFilter, setVerifiedFilter] = useState<VerifiedValue>("all");
-  const fallbackMaxPrice = Math.max(...mockAds.map((ad) => ad.price));
-  const matchedAds = getMockSearchResults(query);
-  const maxPrice = Math.max(...matchedAds.map((ad) => ad.price), fallbackMaxPrice);
+  const [matchedAds, setMatchedAds] = useState<Ad[]>([]);
+  const maxPrice = Math.max(...matchedAds.map((ad) => ad.price), 100200000);
   const [selectedMaxPrice, setSelectedMaxPrice] = useState(maxPrice);
   const [mobileFiltersOpen, setMobileFiltersOpen] = useState(false);
+
+  useEffect(() => {
+    const loadAds = async () => {
+      const params = new URLSearchParams({ pageSize: "24" });
+      if (query) params.set("q", query);
+      const response = await api.ads(`?${params.toString()}`);
+      setMatchedAds(response.data);
+    };
+    void loadAds();
+  }, [query]);
 
   useEffect(() => {
     setSelectedCategory("all");

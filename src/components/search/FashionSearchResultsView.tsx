@@ -7,7 +7,6 @@ import {
 } from "../../constants/routes";
 import {
   getFashionSearchState,
-  getMockFashionSearchResults,
   type FashionBrand,
   type FashionCategory,
   type FashionColor,
@@ -18,6 +17,8 @@ import {
   type FashionType,
   type MockFashionListing,
 } from "../../lib/mockData";
+import { api } from "../../services/api";
+import type { Ad } from "../../types";
 import ListingCard from "../listings/ListingCard";
 import BackButton from "../ui/BackButton";
 
@@ -194,6 +195,22 @@ function sortFashionResults(results: MockFashionListing[], sortBy: SortValue) {
     const leftCreatedAt = left.ad.createdAt ? new Date(left.ad.createdAt).getTime() : 0;
     return rightCreatedAt - leftCreatedAt;
   });
+}
+
+function toFashionResult(ad: Ad): MockFashionListing {
+  const brand = FASHION_BRAND_OPTIONS.includes(ad.brand as FashionBrand) ? (ad.brand as FashionBrand) : "Nike";
+  const condition = FASHION_CONDITION_OPTIONS.includes(ad.condition as FashionCondition) ? (ad.condition as FashionCondition) : "Used";
+  return {
+    id: ad.id,
+    ad,
+    categoryType: "Men's Fashion",
+    fashionType: "Clothings",
+    stripCategory: "Shirt",
+    brand,
+    style: "Casual",
+    color: "Black",
+    condition,
+  } as MockFashionListing;
 }
 
 function FashionFilters({
@@ -380,10 +397,19 @@ export default function FashionSearchResultsView({ query, navigate, view }: Fash
   const [selectedCondition, setSelectedCondition] = useState<"all" | FashionCondition>("all");
   const [sortBy, setSortBy] = useState<SortValue>("newest");
   const [selectedStripCategory, setSelectedStripCategory] = useState<FashionStripItem | "all">(stateConfig.defaultStrip);
-  const fashionResults = useMemo(() => getMockFashionSearchResults(query), [query]);
+  const [fashionResults, setFashionResults] = useState<MockFashionListing[]>([]);
   const maxPrice = useMemo(() => Math.max(...fashionResults.map((item) => item.ad.price), 100200000), [fashionResults]);
   const [selectedMaxPrice, setSelectedMaxPrice] = useState(100200000);
   const [mobileFiltersOpen, setMobileFiltersOpen] = useState(false);
+
+  useEffect(() => {
+    const loadAds = async () => {
+      const params = new URLSearchParams({ category: "fashion", pageSize: "24" });
+      const response = await api.ads(`?${params.toString()}`);
+      setFashionResults(response.data.map(toFashionResult));
+    };
+    void loadAds();
+  }, [query]);
 
   useEffect(() => {
     setSelectedCategory(stateConfig.defaultCategory);

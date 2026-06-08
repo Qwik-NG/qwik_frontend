@@ -9,11 +9,12 @@ import BackButton from "../ui/BackButton";
 import { LocationPin } from "../icons/LocationPin";
 import { ImagePlaceholder } from "../ui/ImagePlaceholder";
 import {
-  getMockVehicleSearchResults,
   type MockVehicleListing,
   type VehicleCondition,
   type VehicleType,
 } from "../../lib/mockData";
+import { api } from "../../services/api";
+import type { Ad } from "../../types";
 
 type NavigateTo = (to: string) => void;
 type SortValue = "newest" | "price-low" | "price-high";
@@ -191,6 +192,12 @@ function sortVehicleResults(results: MockVehicleListing[], sortBy: SortValue) {
   });
 }
 
+function toVehicleResult(ad: Ad): MockVehicleListing {
+  const brand = VEHICLE_FILTER_BRANDS.includes(ad.brand as VehicleBrand) ? (ad.brand as VehicleBrand) : "Toyota";
+  const condition = VEHICLE_FILTER_CONDITIONS.includes(ad.condition as VehicleCondition) ? (ad.condition as VehicleCondition) : "Local Used";
+  return { id: ad.id, ad, vehicleType: "Car", brand, condition } as MockVehicleListing;
+}
+
 function VehicleFilters({
   selectedType,
   onSelectedTypeChange,
@@ -326,7 +333,7 @@ export default function VehicleSearchResultsView({ query, navigate, view }: Vehi
   const [sortBy, setSortBy] = useState<SortValue>("newest");
   const [selectedBrand, setSelectedBrand] = useState<"all" | VehicleBrand>("all");
   const [verifiedFilter, setVerifiedFilter] = useState<VerifiedValue>("all");
-  const vehicleResults = useMemo(() => getMockVehicleSearchResults(query), [query]);
+  const [vehicleResults, setVehicleResults] = useState<MockVehicleListing[]>([]);
   const maxPrice = useMemo(
     () => Math.max(...vehicleResults.map((item) => item.ad.price), 100200000),
     [vehicleResults],
@@ -334,6 +341,15 @@ export default function VehicleSearchResultsView({ query, navigate, view }: Vehi
   const [selectedMaxPrice, setSelectedMaxPrice] = useState(100200000);
   const [selectedCondition, setSelectedCondition] = useState<"all" | VehicleCondition>("all");
   const [mobileFiltersOpen, setMobileFiltersOpen] = useState(false);
+
+  useEffect(() => {
+    const loadAds = async () => {
+      const params = new URLSearchParams({ category: "vehicles", pageSize: "24" });
+      const response = await api.ads(`?${params.toString()}`);
+      setVehicleResults(response.data.map(toVehicleResult));
+    };
+    void loadAds();
+  }, [query]);
 
   useEffect(() => {
     setSelectedType("Car");

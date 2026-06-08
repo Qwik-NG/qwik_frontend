@@ -196,7 +196,7 @@ export function createMockAd(
     category,
     user,
     images: [{ id: "img-1", url: imageUrl, order: 1 }],
-    status: "active",
+    status: "ACTIVE",
     featured: false,
     viewCount: Math.floor(Math.random() * 500),
     savedCount: Math.floor(Math.random() * 50),

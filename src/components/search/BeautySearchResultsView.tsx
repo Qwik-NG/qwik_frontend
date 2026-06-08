@@ -5,11 +5,12 @@ import {
   buildSearchResultsRoute,
 } from "../../constants/routes";
 import {
-  getMockBeautySearchResults,
   type BeautyCondition,
   type BeautyType,
   type MockBeautyListing,
 } from "../../lib/mockData";
+import { api } from "../../services/api";
+import type { Ad } from "../../types";
 import ListingCard from "../listings/ListingCard";
 import BackButton from "../ui/BackButton";
 
@@ -132,6 +133,11 @@ function sortBeautyResults(results: MockBeautyListing[], sortBy: SortValue) {
     const leftCreatedAt = left.ad.createdAt ? new Date(left.ad.createdAt).getTime() : 0;
     return rightCreatedAt - leftCreatedAt;
   });
+}
+
+function toBeautyResult(ad: Ad): MockBeautyListing {
+  const brand = BEAUTY_BRAND_OPTIONS.includes(ad.brand as BeautyBrand) ? (ad.brand as BeautyBrand) : "Fresh";
+  return { id: ad.id, ad, categoryType: "Body Care", beautyType: "Body Lotion", stripCategory: "Body Lotion", brand, condition: "Brand New" } as MockBeautyListing;
 }
 
 function BeautyFilters({
@@ -269,10 +275,19 @@ export default function BeautySearchResultsView({ query, navigate, view }: Beaut
   const [selectedBrand, setSelectedBrand] = useState<"all" | BeautyBrand>("all");
   const [verifiedFilter, setVerifiedFilter] = useState<VerifiedValue>("all");
   const [selectedStripCategory, setSelectedStripCategory] = useState<BeautyType>("Body Lotion");
-  const beautyResults = useMemo(() => getMockBeautySearchResults(query), [query]);
+  const [beautyResults, setBeautyResults] = useState<MockBeautyListing[]>([]);
   const maxPrice = useMemo(() => Math.max(...beautyResults.map((item) => item.ad.price), 100200000), [beautyResults]);
   const [selectedMaxPrice, setSelectedMaxPrice] = useState(100200000);
   const [mobileFiltersOpen, setMobileFiltersOpen] = useState(false);
+
+  useEffect(() => {
+    const loadAds = async () => {
+      const params = new URLSearchParams({ category: "beauty", pageSize: "24" });
+      const response = await api.ads(`?${params.toString()}`);
+      setBeautyResults(response.data.map(toBeautyResult));
+    };
+    void loadAds();
+  }, [query]);
 
   useEffect(() => {
     setSelectedCategory("Body Care");

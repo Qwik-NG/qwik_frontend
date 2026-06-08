@@ -6,11 +6,12 @@ import {
 } from "../../constants/routes";
 import {
   getJobSearchStrip,
-  getMockJobSearchResults,
   type JobCategoryType,
   type JobStripType,
   type MockJobListing,
 } from "../../lib/mockData";
+import { api } from "../../services/api";
+import type { Ad } from "../../types";
 import ListingCard from "../listings/ListingCard";
 import BackButton from "../ui/BackButton";
 
@@ -52,6 +53,10 @@ function formatNaira(value: number) {
 
 function formatSalary(item: MockJobListing) {
   return `₦ ${Math.round(item.ad.price * 0.89).toLocaleString()} - ${item.ad.price.toLocaleString()}`;
+}
+
+function toJobResult(ad: Ad): MockJobListing {
+  return { id: ad.id, ad, categoryType: "Full Time", stripCategory: "Full Time" } as MockJobListing;
 }
 
 function FilterPanel({ title, children }: { title: string; children: ReactNode }) {
@@ -227,10 +232,19 @@ export default function JobSearchResultsView({ query, navigate, view }: JobSearc
   const [sortBy, setSortBy] = useState<SortValue>("newest");
   const [verifiedFilter, setVerifiedFilter] = useState<VerifiedValue>("all");
   const [selectedStripCategory, setSelectedStripCategory] = useState<JobStripType | "all">(initialStrip ?? "all");
-  const jobResults = useMemo(() => getMockJobSearchResults(query), [query]);
+  const [jobResults, setJobResults] = useState<MockJobListing[]>([]);
   const maxSalary = useMemo(() => Math.max(...jobResults.map((item) => item.ad.price), 100200000), [jobResults]);
   const [selectedMaxSalary, setSelectedMaxSalary] = useState(100200000);
   const [mobileFiltersOpen, setMobileFiltersOpen] = useState(false);
+
+  useEffect(() => {
+    const loadAds = async () => {
+      const params = new URLSearchParams({ category: "jobs", pageSize: "24" });
+      const response = await api.ads(`?${params.toString()}`);
+      setJobResults(response.data.map(toJobResult));
+    };
+    void loadAds();
+  }, [query]);
 
   useEffect(() => {
     setSelectedCategory("all");

@@ -126,11 +126,13 @@ export const api = {
       body: JSON.stringify(payload)
     }),
 
-  // TODO: updateAd - update existing ad
-  // updateAd: (id: string, payload: AdUpdatePayload) => request<Ad>(`/ads/${id}`, { method: "PATCH", body: JSON.stringify(payload) }),
+  updateAd: (id: string, payload: AdUpdatePayload) =>
+    request<Ad>(`/ads/${id}`, { method: "PATCH", body: JSON.stringify(payload) }),
 
-  // TODO: deleteAd - delete an ad
-  // deleteAd: (id: string) => request<null>(`/ads/${id}`, { method: "DELETE" }),
+  deleteAd: (id: string) => request<null>(`/ads/${id}`, { method: "DELETE" }),
+
+  markAdUnavailable: (id: string) =>
+    request<Ad>(`/ads/${id}/mark-unavailable`, { method: "PATCH" }),
 
   getUserAds: (status?: string) => request<Ad[]>(`/users/me/ads${status ? `?status=${status}` : ""}`),
 
@@ -147,8 +149,7 @@ export const api = {
       method: "DELETE"
     }),
 
-  // TODO: isSaved - check if ad is saved by user
-  // isSaved: (id: string) => request<{ saved: boolean }>(`/ads/${id}/saved`),
+  isSaved: (id: string) => request<{ saved: boolean }>(`/ads/${id}/saved`),
 
   // ===== Messaging Endpoints =====
   getConversations: () => request<Conversation[]>("/conversations"),

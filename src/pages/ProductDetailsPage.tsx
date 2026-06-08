@@ -6,7 +6,8 @@ import { UserAvatar } from "../components/ui/UserAvatar";
 import { useToast } from "../context/ToastContext";
 import { formatMemberSince } from "../lib/currentUser";
 import { getToken } from "../services/auth";
-import { apiUrl } from "../services/api";
+import { api, apiUrl } from "../services/api";
+import type { Ad, User } from "../types";
 
 function LocationPin({ className = "h-5 w-5" }: { className?: string }) {
   return (
@@ -56,8 +57,9 @@ export default function ProductDetailsPage() {
   const navigate = useNavigate();
   const { error: showError, info, success } = useToast();
   const { id } = useParams<{ id: string }>();
-  const [ad, setAd] = useState<any>(null);
+  const [ad, setAd] = useState<Ad | null>(null);
   const [similarAds, setSimilarAds] = useState<SimilarAd[]>([]);
+  const [currentUser, setCurrentUser] = useState<User | null>(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const [activeImage, setActiveImage] = useState(0);
@@ -73,11 +75,23 @@ export default function ProductDetailsPage() {
         setLoading(true);
         if (!id) throw new Error("No product ID provided");
         
-        // Fetch main ad
-        const response = await fetch(apiUrl(`/ads/${id}`));
-        if (!response.ok) throw new Error("Failed to fetch product");
-        const result = await response.json();
+        const result = await api.adById(id);
         setAd(result.data);
+
+        const token = getToken();
+        if (token) {
+          try {
+            const [savedResponse, meResponse] = await Promise.all([api.isSaved(id), api.me()]);
+            setIsSaved(savedResponse.data.saved);
+            setCurrentUser(meResponse.data);
+          } catch {
+            setIsSaved(false);
+            setCurrentUser(null);
+          }
+        } else {
+          setIsSaved(false);
+          setCurrentUser(null);
+        }
 
         // Fetch similar ads
         const categoryId = result.data.categoryId;
@@ -144,15 +158,11 @@ export default function ProductDetailsPage() {
         showError("Please log in to save products");
         return;
       }
-      const method = isSaved ? "DELETE" : "POST";
-      const response = await fetch(apiUrl(`/ads/${id}/save`), { 
-        method,
-        headers: { "Authorization": `Bearer ${token}` }
-      });
-      if (response.ok) {
-        setIsSaved(!isSaved);
-        success(isSaved ? "Product removed from saved items" : "Product saved");
-      }
+      if (!id) return;
+      if (isSaved) await api.unsaveAd(id);
+      else await api.saveAd(id);
+      setIsSaved(!isSaved);
+      success(isSaved ? "Product removed from saved items" : "Product saved");
     } catch (err) {
       console.error("Error saving product:", err);
       showError("Unable to update saved products right now");
@@ -161,13 +171,10 @@ export default function ProductDetailsPage() {
 
   const handleMarkUnavailable = async () => {
     try {
-      const response = await fetch(apiUrl(`/ads/${id}/mark-unavailable`), {
-        method: "PATCH",
-        headers: { "Content-Type": "application/json" },
-      });
-      if (response.ok) {
-        info("Ad marked as unavailable");
-      }
+      if (!id) return;
+      const response = await api.markAdUnavailable(id);
+      setAd(response.data);
+      info("Ad marked as unavailable");
     } catch (err) {
       console.error("Error marking unavailable:", err);
       showError("Unable to update this ad right now");
@@ -237,6 +244,7 @@ export default function ProductDetailsPage() {
   const sellerName = ad.user?.fullName || "Seller";
   const sellerAvatarUrl = ad.user?.profile?.avatarUrl || "";
   const sellerMeta = formatMemberSince(ad.user?.createdAt);
+  const isOwner = Boolean(currentUser?.id && ad.user?.id === currentUser.id);
 
   return (
     <div className="min-h-screen bg-page text-ink">
@@ -422,13 +430,15 @@ export default function ProductDetailsPage() {
               <li>Check all documentation and only pay if you're satisfied</li>
             </ul>
             <div className="mt-4 flex gap-2">
-              <button 
-                className="rounded-[8px] bg-badge-bg px-3 py-2 text-[#ff9715] transition-colors duration-200 hover:bg-[#ffe2c5] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#ffb357] focus-visible:ring-offset-2 focus-visible:ring-offset-white" 
-                onClick={handleMarkUnavailable}
-                type="button"
-              >
-                Mark Unavailable
-              </button>
+              {isOwner ? (
+                <button 
+                  className="rounded-[8px] bg-badge-bg px-3 py-2 text-[#ff9715] transition-colors duration-200 hover:bg-[#ffe2c5] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#ffb357] focus-visible:ring-offset-2 focus-visible:ring-offset-white" 
+                  onClick={handleMarkUnavailable}
+                  type="button"
+                >
+                  Mark Unavailable
+                </button>
+              ) : null}
               <button 
                 className="rounded-[8px] bg-[#ffe7e7] px-3 py-2 text-[#ff4e4e] transition-colors duration-200 hover:bg-[#ffdada] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#ffb357] focus-visible:ring-offset-2 focus-visible:ring-offset-white" 
                 onClick={handleReport}

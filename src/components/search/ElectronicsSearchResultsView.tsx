@@ -6,11 +6,12 @@ import {
 } from "../../constants/routes";
 import ListingCard from "../listings/ListingCard";
 import {
-  getMockElectronicsSearchResults,
   type ElectronicsCondition,
   type ElectronicsType,
   type MockElectronicsListing,
 } from "../../lib/mockData";
+import { api } from "../../services/api";
+import type { Ad } from "../../types";
 import BackButton from "../ui/BackButton";
 
 type NavigateTo = (to: string) => void;
@@ -137,6 +138,13 @@ function sortElectronicsResults(results: MockElectronicsListing[], sortBy: SortV
     const leftCreatedAt = left.ad.createdAt ? new Date(left.ad.createdAt).getTime() : 0;
     return rightCreatedAt - leftCreatedAt;
   });
+}
+
+function toElectronicsResult(ad: Ad): MockElectronicsListing {
+  const brand = ELECTRONICS_FILTER_BRANDS.includes(ad.brand as ElectronicsBrand) ? (ad.brand as ElectronicsBrand) : "Apple";
+  const condition = ELECTRONICS_FILTER_CONDITIONS.includes(ad.condition as ElectronicsCondition) ? (ad.condition as ElectronicsCondition) : "Used";
+  const stripCategory = ad.category?.slug === "desktop-computers" ? "Desktop" : ad.category?.slug === "servers" ? "Server" : "Laptops";
+  return { id: ad.id, ad, electronicsType: "Laptops & Computers", stripCategory, brand, condition } as MockElectronicsListing;
 }
 
 function ElectronicsFilters({
@@ -275,7 +283,7 @@ export default function ElectronicsSearchResultsView({ query, navigate, view }: 
   const [selectedBrand, setSelectedBrand] = useState<"all" | ElectronicsBrand>("all");
   const [verifiedFilter, setVerifiedFilter] = useState<VerifiedValue>("all");
   const [selectedStripCategory, setSelectedStripCategory] = useState<StripCategory>("Laptops");
-  const electronicsResults = useMemo(() => getMockElectronicsSearchResults(query), [query]);
+  const [electronicsResults, setElectronicsResults] = useState<MockElectronicsListing[]>([]);
   const maxPrice = useMemo(
     () => Math.max(...electronicsResults.map((item) => item.ad.price), 100200000),
     [electronicsResults],
@@ -283,6 +291,15 @@ export default function ElectronicsSearchResultsView({ query, navigate, view }: 
   const [selectedMaxPrice, setSelectedMaxPrice] = useState(100200000);
   const [selectedCondition, setSelectedCondition] = useState<"all" | ElectronicsCondition>("all");
   const [mobileFiltersOpen, setMobileFiltersOpen] = useState(false);
+
+  useEffect(() => {
+    const loadAds = async () => {
+      const params = new URLSearchParams({ category: "electronics", pageSize: "24" });
+      const response = await api.ads(`?${params.toString()}`);
+      setElectronicsResults(response.data.map(toElectronicsResult));
+    };
+    void loadAds();
+  }, [query]);
 
   useEffect(() => {
     setSelectedType("Laptops & Computers");

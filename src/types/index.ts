@@ -8,10 +8,11 @@
  */
 export interface User {
   id: string;
-  email: string;
+  email?: string;
   fullName: string;
   phone?: string;
   location?: string;
+  role?: "USER" | "ADMIN";
   profile?: UserProfile;
   createdAt?: string;
   updatedAt?: string;
@@ -80,10 +81,17 @@ export interface Ad {
   description: string;
   price: number;
   location: string;
+  userId?: string;
+  categoryId?: string;
+  brand?: string;
+  model?: string;
+  condition?: string;
+  specifications?: Record<string, unknown>;
   category: Category;
   user: User;
   images: AdImage[];
-  status?: "active" | "sold" | "pending" | "inactive";
+  status?: "ACTIVE" | "SOLD" | "DRAFT" | "ARCHIVED";
+  isPromoted?: boolean;
   featured?: boolean;
   viewCount?: number;
   savedCount?: number;
@@ -106,7 +114,7 @@ export interface AdCreatePayload {
 }
 
 export interface AdUpdatePayload extends Partial<AdCreatePayload> {
-  status?: "active" | "sold" | "pending" | "inactive";
+  status?: "ACTIVE" | "SOLD" | "DRAFT" | "ARCHIVED";
 }
 
 /**

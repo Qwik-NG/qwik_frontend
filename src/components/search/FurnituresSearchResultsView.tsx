@@ -5,11 +5,12 @@ import {
   buildSearchResultsRoute,
 } from "../../constants/routes";
 import {
-  getMockFurnitureSearchResults,
   type FurnitureCondition,
   type FurnitureType,
   type MockFurnitureListing,
 } from "../../lib/mockData";
+import { api } from "../../services/api";
+import type { Ad } from "../../types";
 import ListingCard from "../listings/ListingCard";
 import BackButton from "../ui/BackButton";
 
@@ -127,6 +128,19 @@ function sortFurnitureResults(results: MockFurnitureListing[], sortBy: SortValue
     const leftCreatedAt = left.ad.createdAt ? new Date(left.ad.createdAt).getTime() : 0;
     return rightCreatedAt - leftCreatedAt;
   });
+}
+
+function toFurnitureResult(ad: Ad): MockFurnitureListing {
+  const condition = FURNITURE_CONDITION_OPTIONS.includes(ad.condition as FurnitureCondition) ? (ad.condition as FurnitureCondition) : "Used";
+  return {
+    id: ad.id,
+    ad,
+    categoryType: "Furnitures",
+    furnitureType: "Sofas",
+    stripCategory: "Sofas",
+    room: "Bedroom",
+    condition,
+  } as MockFurnitureListing;
 }
 
 function FurnitureFilters({
@@ -282,10 +296,19 @@ export default function FurnituresSearchResultsView({ query, navigate, view }: F
   const [verifiedFilter, setVerifiedFilter] = useState<VerifiedValue>("all");
   const [selectedStripCategory, setSelectedStripCategory] = useState<"all" | FurnitureType>("all");
   const [selectedCondition, setSelectedCondition] = useState<"all" | FurnitureCondition>("all");
-  const furnitureResults = useMemo(() => getMockFurnitureSearchResults(query), [query]);
+  const [furnitureResults, setFurnitureResults] = useState<MockFurnitureListing[]>([]);
   const maxPrice = useMemo(() => Math.max(...furnitureResults.map((item) => item.ad.price), 100200000), [furnitureResults]);
   const [selectedMaxPrice, setSelectedMaxPrice] = useState(100200000);
   const [mobileFiltersOpen, setMobileFiltersOpen] = useState(false);
+
+  useEffect(() => {
+    const loadAds = async () => {
+      const params = new URLSearchParams({ category: "furniture-appliances", pageSize: "24" });
+      const response = await api.ads(`?${params.toString()}`);
+      setFurnitureResults(response.data.map(toFurnitureResult));
+    };
+    void loadAds();
+  }, [query]);
 
   useEffect(() => {
     setSelectedCategory("Furnitures");

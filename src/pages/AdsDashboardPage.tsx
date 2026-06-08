@@ -19,11 +19,12 @@ type DashboardAd = {
   fit?: "cover" | "contain";
 };
 
-type FilterState = "ACTIVE" | "DRAFT" | "ARCHIVED";
+type FilterState = "ACTIVE" | "DRAFT" | "SOLD" | "ARCHIVED";
 
 const stateOptions: Array<{ label: string; value: FilterState }> = [
   { label: "Active", value: "ACTIVE" },
   { label: "Reviewing", value: "DRAFT" },
+  { label: "Sold", value: "SOLD" },
   { label: "Declined", value: "ARCHIVED" },
 ];
 
@@ -55,9 +56,9 @@ function StateChip({ label, active = false, onClick }: { label: string; active?:
   );
 }
 
-function AdCard({ ad }: { ad: DashboardAd }) {
+function AdCard({ ad, onClick }: { ad: DashboardAd; onClick: () => void }) {
   return (
-    <article className="rounded-card bg-white p-3.5">
+    <article className="cursor-pointer rounded-card bg-white p-3.5 transition hover:scale-[1.01]" onClick={onClick}>
       <div className="h-[300px] w-full overflow-hidden rounded-[16px] bg-white">
         {ad.image ? (
           <img src={ad.image} alt={ad.title} className={`h-full w-full ${ad.fit === "contain" ? "object-contain p-4" : "object-cover"}`} />
@@ -108,6 +109,7 @@ export default function AdsDashboardPage() {
   const emptyMessage = useMemo(() => {
     if (activeFilter === "ACTIVE") return "No active ads yet.";
     if (activeFilter === "DRAFT") return "No ads are under review.";
+    if (activeFilter === "SOLD") return "No sold ads yet.";
     return "No declined ads found.";
   }, [activeFilter]);
 
@@ -147,7 +149,7 @@ export default function AdsDashboardPage() {
               <div className="grid grid-cols-1 gap-5 md:grid-cols-2 xl:max-w-[620px]">
                 {ads.map((ad) => (
                   <div key={ad.id} className="max-w-[300px]">
-                    <AdCard ad={ad} />
+                    <AdCard ad={ad} onClick={() => navigate(`/product-details/${ad.id}`)} />
                   </div>
                 ))}
               </div>

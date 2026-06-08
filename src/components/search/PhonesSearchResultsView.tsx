@@ -5,11 +5,12 @@ import {
   buildSearchResultsRoute,
 } from "../../constants/routes";
 import {
-  getMockPhonesSearchResults,
   type MockPhonesListing,
   type PhonesCondition,
   type PhonesType,
 } from "../../lib/mockData";
+import { api } from "../../services/api";
+import type { Ad } from "../../types";
 import ListingCard from "../listings/ListingCard";
 import BackButton from "../ui/BackButton";
 
@@ -134,6 +135,12 @@ function sortPhonesResults(results: MockPhonesListing[], sortBy: SortValue) {
     const leftCreatedAt = left.ad.createdAt ? new Date(left.ad.createdAt).getTime() : 0;
     return rightCreatedAt - leftCreatedAt;
   });
+}
+
+function toPhonesResult(ad: Ad): MockPhonesListing {
+  const brand = PHONES_FILTER_BRANDS.includes(ad.brand as PhonesBrand) ? (ad.brand as PhonesBrand) : "Apple";
+  const condition = PHONES_FILTER_CONDITIONS.includes(ad.condition as PhonesCondition) ? (ad.condition as PhonesCondition) : "Used";
+  return { id: ad.id, ad, phonesType: "Mobile Phones", brand, stripBrand: brand, condition } as MockPhonesListing;
 }
 
 function PhonesFilters({
@@ -272,11 +279,20 @@ export default function PhonesSearchResultsView({ query, navigate, view }: Phone
   const [selectedBrand, setSelectedBrand] = useState<"all" | PhonesBrand>("all");
   const [verifiedFilter, setVerifiedFilter] = useState<VerifiedValue>("all");
   const [selectedStripBrand, setSelectedStripBrand] = useState<StripBrand>("Apple");
-  const phonesResults = useMemo(() => getMockPhonesSearchResults(query), [query]);
+  const [phonesResults, setPhonesResults] = useState<MockPhonesListing[]>([]);
   const maxPrice = useMemo(() => Math.max(...phonesResults.map((item) => item.ad.price), 100200000), [phonesResults]);
   const [selectedMaxPrice, setSelectedMaxPrice] = useState(100200000);
   const [selectedCondition, setSelectedCondition] = useState<"all" | PhonesCondition>("all");
   const [mobileFiltersOpen, setMobileFiltersOpen] = useState(false);
+
+  useEffect(() => {
+    const loadAds = async () => {
+      const params = new URLSearchParams({ category: "phones-tablets", pageSize: "24" });
+      const response = await api.ads(`?${params.toString()}`);
+      setPhonesResults(response.data.map(toPhonesResult));
+    };
+    void loadAds();
+  }, [query]);
 
   useEffect(() => {
     setSelectedType("Mobile Phones");

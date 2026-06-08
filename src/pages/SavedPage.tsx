@@ -59,9 +59,9 @@ function LocationPin() {
   );
 }
 
-function SavedCard({ ad }: { ad: SavedCardAd }) {
+function SavedCard({ ad, onClick }: { ad: SavedCardAd; onClick: () => void }) {
   return (
-    <article className="rounded-[22px] bg-white p-2.5 sm:rounded-[26px] sm:p-4">
+    <article className="cursor-pointer rounded-[22px] bg-white p-2.5 transition hover:scale-[1.01] sm:rounded-[26px] sm:p-4" onClick={onClick}>
       <div className="h-[170px] w-full overflow-hidden rounded-[14px] bg-white sm:h-[260px] sm:rounded-[18px]">
         {ad.image ? (
           <img
@@ -142,7 +142,7 @@ export default function SavedPage() {
         ) : (
           <section className="grid grid-cols-2 gap-4 xl:grid-cols-4">
             {savedAds.map((ad) => (
-              <SavedCard key={ad.id} ad={ad} />
+              <SavedCard key={ad.id} ad={ad} onClick={() => navigate(`/product-details/${ad.id}`)} />
             ))}
           </section>
         )}
