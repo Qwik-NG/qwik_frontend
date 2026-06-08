@@ -57,16 +57,16 @@ function CategoryCard({ item, onClick }: { item: Category; onClick: () => void }
     <button
       type="button"
       onClick={onClick}
-      className="group relative flex h-[124px] w-[136px] shrink-0 flex-col justify-between overflow-hidden rounded-[18px] border border-white/70 bg-white p-3 text-left shadow-[0_12px_30px_rgba(31,29,39,0.06)] transition duration-200 hover:-translate-y-1 hover:shadow-[0_18px_38px_rgba(31,29,39,0.1)] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#ff9715] focus-visible:ring-offset-2 focus-visible:ring-offset-page active:scale-[0.98] sm:h-[138px] sm:w-auto sm:min-w-0 sm:p-3.5"
+      className="group relative flex h-[96px] w-[104px] shrink-0 flex-col justify-between overflow-hidden rounded-[14px] border border-white/70 bg-white p-2.5 text-left shadow-[0_8px_22px_rgba(31,29,39,0.06)] transition duration-200 hover:-translate-y-0.5 hover:shadow-[0_12px_28px_rgba(31,29,39,0.1)] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#ff9715] focus-visible:ring-offset-2 focus-visible:ring-offset-page active:scale-[0.98] sm:h-[104px] sm:w-[112px] sm:min-w-0"
       aria-label={`Browse ${item.name}`}
     >
       <span
-        className="absolute right-[-24px] top-[-28px] h-[76px] w-[76px] rounded-full opacity-50 transition duration-200 group-hover:scale-110"
+        className="absolute right-[-22px] top-[-26px] h-[64px] w-[64px] rounded-full opacity-50 transition duration-200 group-hover:scale-110"
         style={{ background: item.tone }}
         aria-hidden="true"
       />
       <span
-        className="relative block h-[64px] w-full overflow-hidden rounded-[14px]"
+        className="relative block h-[46px] w-full overflow-hidden rounded-[11px] sm:h-[50px]"
         style={{ background: item.tone }}
       >
         <img
@@ -81,8 +81,8 @@ function CategoryCard({ item, onClick }: { item: Category; onClick: () => void }
           aria-hidden="true"
         />
       </span>
-      <span className="relative flex min-h-[38px] items-end">
-        <span className="text-[14px] font-medium leading-[1.15] text-[#1f1d27] sm:text-[15px]">
+      <span className="relative flex min-h-[30px] items-end">
+        <span className="text-[13px] font-medium leading-[1.12] text-[#1f1d27] sm:text-[13.5px]">
           <span className="sm:hidden">{item.shortName}</span>
           <span className="hidden sm:inline">{item.name}</span>
         </span>
@@ -118,8 +118,8 @@ export default function HomePage() {
     <div className="min-h-screen bg-page text-ink">
       <SiteHeader navigate={navigate} />
 
-      <section className="mx-auto w-full max-w-[1728px] px-4 pb-1 pt-8 sm:px-6 sm:pt-[50px] lg:px-12 xl:pt-[70px]">
-        <div className="-mx-4 flex gap-3 overflow-x-auto px-4 pb-3 sm:mx-0 sm:grid sm:grid-cols-3 sm:overflow-visible sm:px-0 sm:pb-0 md:grid-cols-4 lg:grid-cols-6 xl:grid-cols-9">
+      <section className="mx-auto w-full max-w-[1728px] px-4 pb-1 pt-6 sm:px-6 sm:pt-9 lg:px-12 xl:pt-12">
+        <div className="-mx-4 flex gap-2.5 overflow-x-auto px-4 pb-3 sm:mx-0 sm:grid sm:grid-cols-5 sm:gap-2 sm:overflow-visible sm:px-0 sm:pb-0 lg:grid-cols-9">
           {categories.map((item) => (
             <CategoryCard key={item.name} item={item} onClick={() => navigate(item.route)} />
           ))}
