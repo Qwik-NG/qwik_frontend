@@ -1,7 +1,19 @@
+import type { ComponentType } from "react";
 import { useCallback, useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { SiteFooter, SiteHeader } from "../components/AppShell";
 import { buildSearchResultsRoute, buildSearchRoute } from "../constants/routes";
+import {
+  BeautyIcon,
+  CarsIcon,
+  ElectronicsIcon,
+  FashionIcon,
+  FurnitureIcon,
+  JobsIcon,
+  MoreIcon,
+  PhonesIcon,
+  PropertiesIcon,
+} from "../components/icons/CategoryIcons";
 import { ImagePlaceholder } from "../components/ui/ImagePlaceholder";
 import { api } from "../services/api";
 
@@ -9,21 +21,21 @@ type Category = {
   name: string;
   shortName: string;
   tone: string;
-  image: string;
+  icon: ComponentType<{ className?: string }>;
   route: string;
 };
 type Product = { id: string; price: number; title: string; description: string; location: string; images: Array<{ url: string }> };
 
 const categories: Category[] = [
-  { name: "Vehicles", shortName: "Cars", image: "/category-images/vehicles.png", tone: "#f8ebe4", route: buildSearchRoute("Vehicles") },
-  { name: "Phones & Tablets", shortName: "Phones", image: "/category-images/phones-tablets.png", tone: "#e9edff", route: buildSearchRoute("Phones") },
-  { name: "Jobs", shortName: "Jobs", image: "/category-images/jobs.png", tone: "#ecebed", route: buildSearchRoute("Job") },
-  { name: "Fashion", shortName: "Fashion", image: "/category-images/fashion.png", tone: "#f6eadc", route: buildSearchRoute("Fashion") },
-  { name: "Electronics", shortName: "Electronics", image: "/category-images/electronics.png", tone: "#ebeef3", route: buildSearchRoute("Electronics") },
-  { name: "Properties", shortName: "Properties", image: "/category-images/properties.png", tone: "#e2f1e9", route: buildSearchResultsRoute("Home") },
-  { name: "Furniture & Appliances", shortName: "Furniture", image: "/category-images/furniture-appliances.png", tone: "#f4e3f4", route: buildSearchRoute("Furniture") },
-  { name: "Beauty", shortName: "Beauty", image: "/category-images/beauty.png", tone: "#f1e4ee", route: buildSearchRoute("Beauty") },
-  { name: "More", shortName: "More", image: "/category-images/more.png", tone: "#f2f1ef", route: "/search-results-list" }
+  { name: "Vehicles", shortName: "Cars", icon: CarsIcon, tone: "#f8ebe4", route: buildSearchRoute("Vehicles") },
+  { name: "Phones & Tablets", shortName: "Phones", icon: PhonesIcon, tone: "#e9edff", route: buildSearchRoute("Phones") },
+  { name: "Jobs", shortName: "Jobs", icon: JobsIcon, tone: "#f2e8dd", route: buildSearchRoute("Job") },
+  { name: "Fashion", shortName: "Fashion", icon: FashionIcon, tone: "#f6eadc", route: buildSearchRoute("Fashion") },
+  { name: "Electronics", shortName: "Electronics", icon: ElectronicsIcon, tone: "#ebeef3", route: buildSearchRoute("Electronics") },
+  { name: "Properties", shortName: "Properties", icon: PropertiesIcon, tone: "#e2f1e9", route: buildSearchResultsRoute("Home") },
+  { name: "Furniture & Appliances", shortName: "Furniture", icon: FurnitureIcon, tone: "#f4e3f4", route: buildSearchRoute("Furniture") },
+  { name: "Beauty", shortName: "Beauty", icon: BeautyIcon, tone: "#f1e4ee", route: buildSearchRoute("Beauty") },
+  { name: "More", shortName: "More", icon: MoreIcon, tone: "#f2f1ef", route: "/search-results-list" }
 ];
 
 function LocationPin({ className = "h-4 w-4" }: { className?: string }) {
@@ -57,35 +69,18 @@ function CategoryCard({ item, onClick }: { item: Category; onClick: () => void }
     <button
       type="button"
       onClick={onClick}
-      className="group relative flex h-[96px] w-[104px] shrink-0 flex-col justify-between overflow-hidden rounded-[14px] border border-white/70 bg-white p-2.5 text-left shadow-[0_8px_22px_rgba(31,29,39,0.06)] transition duration-200 hover:-translate-y-0.5 hover:shadow-[0_12px_28px_rgba(31,29,39,0.1)] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#ff9715] focus-visible:ring-offset-2 focus-visible:ring-offset-page active:scale-[0.98] sm:h-[104px] sm:w-[112px] sm:min-w-0"
+      className="group flex min-w-0 flex-col items-center gap-2 text-center transition duration-200 hover:-translate-y-0.5 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#ff9715] focus-visible:ring-offset-4 focus-visible:ring-offset-page active:scale-[0.96]"
       aria-label={`Browse ${item.name}`}
     >
       <span
-        className="absolute right-[-22px] top-[-26px] h-[64px] w-[64px] rounded-full opacity-50 transition duration-200 group-hover:scale-110"
-        style={{ background: item.tone }}
-        aria-hidden="true"
-      />
-      <span
-        className="relative block h-[46px] w-full overflow-hidden rounded-[11px] sm:h-[50px]"
-        style={{ background: item.tone }}
+        className="grid h-[62px] w-[62px] place-items-center rounded-full shadow-[0_8px_18px_rgba(31,29,39,0.05)] transition duration-200 group-hover:scale-105 group-hover:shadow-[0_12px_24px_rgba(31,29,39,0.09)] sm:h-[76px] sm:w-[76px] lg:h-[82px] lg:w-[82px]"
+        style={{ background: item.tone, borderRadius: "50%" }}
       >
-        <img
-          src={item.image}
-          alt=""
-          className="h-full w-full object-cover transition duration-300 group-hover:scale-[1.08]"
-          loading="eager"
-          decoding="async"
-        />
-        <span
-          className="absolute inset-0 bg-gradient-to-t from-[#1f1d27]/10 to-transparent opacity-70"
-          aria-hidden="true"
-        />
+        <item.icon className="h-[38px] w-[38px] sm:h-[46px] sm:w-[46px] lg:h-[50px] lg:w-[50px]" />
       </span>
-      <span className="relative flex min-h-[30px] items-end">
-        <span className="text-[13px] font-medium leading-[1.12] text-[#1f1d27] sm:text-[13.5px]">
-          <span className="sm:hidden">{item.shortName}</span>
-          <span className="hidden sm:inline">{item.name}</span>
-        </span>
+      <span className="max-w-[88px] text-[13px] font-medium leading-[1.15] text-[#1f1d27] sm:max-w-[112px] sm:text-[14px]">
+        <span className="sm:hidden">{item.shortName}</span>
+        <span className="hidden sm:inline">{item.name}</span>
       </span>
     </button>
   );
@@ -119,7 +114,7 @@ export default function HomePage() {
       <SiteHeader navigate={navigate} />
 
       <section className="mx-auto w-full max-w-[1728px] px-4 pb-1 pt-6 sm:px-6 sm:pt-9 lg:px-12 xl:pt-12">
-        <div className="-mx-4 flex gap-2.5 overflow-x-auto px-4 pb-3 sm:mx-0 sm:grid sm:grid-cols-5 sm:gap-2 sm:overflow-visible sm:px-0 sm:pb-0 lg:grid-cols-9">
+        <div className="grid grid-cols-3 justify-items-center gap-x-4 gap-y-4 min-[420px]:grid-cols-4 sm:grid-cols-5 sm:gap-x-5 sm:gap-y-5 lg:grid-cols-9 lg:gap-x-4">
           {categories.map((item) => (
             <CategoryCard key={item.name} item={item} onClick={() => navigate(item.route)} />
           ))}
