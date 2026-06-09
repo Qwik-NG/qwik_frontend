@@ -13,6 +13,9 @@ export interface User {
   phone?: string;
   location?: string;
   role?: "USER" | "ADMIN";
+  status?: "ACTIVE" | "BANNED";
+  bannedAt?: string | null;
+  banReason?: string | null;
   termsAcceptedAt?: string | null;
   privacyAcceptedAt?: string | null;
   termsVersion?: string | null;
@@ -68,6 +71,43 @@ export interface PaymentCheckoutResponse {
   currency: string;
   status: "PENDING" | "PAID" | "FAILED" | "CANCELLED";
   providerReady?: boolean;
+}
+
+export interface AdminStats {
+  totalUsers: number;
+  bannedUsers?: number;
+  totalAds: number;
+  totalReports: number;
+  pendingReports: number;
+  pendingVerifications?: number;
+}
+
+export interface AdminReport {
+  id: string;
+  reason: string;
+  status: "PENDING" | "RESOLVED" | "DISMISSED";
+  createdAt: string;
+  ad: {
+    id: string;
+    title: string;
+  };
+  user: {
+    id: string;
+    fullName: string;
+    email?: string;
+  };
+}
+
+export interface AdminAd extends Ad {
+  user: User & {
+    email?: string;
+    status?: "ACTIVE" | "BANNED";
+  };
+  _count: {
+    images: number;
+    reviews: number;
+    reports: number;
+  };
 }
 
 export interface UserProfile {

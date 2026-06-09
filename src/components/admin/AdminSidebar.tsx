@@ -11,7 +11,11 @@ import {
   LogOut 
 } from 'lucide-react';
 
-export default function AdminSidebar() {
+interface AdminSidebarProps {
+  className?: string;
+}
+
+export default function AdminSidebar({ className = '' }: AdminSidebarProps) {
   const navigate = useNavigate();
   const location = useLocation();
 
@@ -35,7 +39,7 @@ export default function AdminSidebar() {
   };
 
   return (
-    <aside className="fixed left-0 top-0 h-screen w-[240px] bg-white border-r border-[#e8e8ea] overflow-y-auto">
+    <aside className={`fixed left-0 top-0 h-screen w-[240px] bg-white border-r border-[#e8e8ea] overflow-y-auto ${className}`}>
       {/* Logo */}
       <div className="px-6 py-8 border-b border-[#e8e8ea]">
         <button

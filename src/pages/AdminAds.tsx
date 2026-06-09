@@ -1,35 +1,12 @@
 import { useEffect, useState } from 'react';
-import { useNavigate } from 'react-router-dom';
 import AdminLayout from '../components/admin/AdminLayout';
 import { useToast } from '../context/ToastContext';
-import { apiUrl } from '../services/api';
-
-interface Ad {
-  id: string;
-  title: string;
-  price: number;
-  status: string;
-  user: {
-    id: string;
-    fullName: string;
-    email: string;
-  };
-  category: {
-    id: string;
-    name: string;
-  };
-  createdAt: string;
-  _count: {
-    images: number;
-    reviews: number;
-    reports: number;
-  };
-}
+import { api } from '../services/api';
+import type { AdminAd } from '../types';
 
 export default function AdminAds() {
-  const navigate = useNavigate();
   const { error: showError, success } = useToast();
-  const [ads, setAds] = useState<Ad[]>([]);
+  const [ads, setAds] = useState<AdminAd[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState('');
 
@@ -39,20 +16,12 @@ export default function AdminAds() {
 
   const fetchAds = async () => {
     try {
-      const response = await fetch(apiUrl('/admin/ads'), {
-        headers: {
-          'Authorization': `Bearer ${localStorage.getItem('qwik_token')}`,
-        },
-      });
-
-      if (!response.ok) {
-        throw new Error('Failed to fetch ads');
-      }
-
-      const data = await response.json();
-      setAds(data.data);
+      setLoading(true);
+      setError('');
+      const response = await api.adminAds();
+      setAds(response.data);
     } catch (err) {
-      setError(err instanceof Error ? err.message : 'Error loading ads');
+      setError(err instanceof Error ? err.message : 'Unable to load ads');
     } finally {
       setLoading(false);
     }
@@ -62,19 +31,11 @@ export default function AdminAds() {
     if (!confirm('Are you sure you want to delete this ad?')) return;
 
     try {
-      const response = await fetch(apiUrl(`/admin/ads/${adId}`), {
-        method: 'DELETE',
-        headers: {
-          'Authorization': `Bearer ${localStorage.getItem('qwik_token')}`,
-        },
-      });
-
-      if (response.ok) {
-        success('Ad deleted successfully');
-        fetchAds();
-      }
+      await api.deleteAdminAd(adId);
+      success('Ad deleted successfully');
+      fetchAds();
     } catch (err) {
-      showError('Error deleting ad');
+      showError(err instanceof Error ? err.message : 'Error deleting ad');
     }
   };
 
@@ -87,15 +48,27 @@ export default function AdminAds() {
   );
   if (error) return (
     <AdminLayout title="Moderate Ads">
-      <div className="flex items-center justify-center h-64">
+      <div className="flex h-64 flex-col items-center justify-center gap-4">
         <div className="text-lg text-red-600">Error: {error}</div>
+        <button
+          type="button"
+          onClick={fetchAds}
+          className="rounded-lg bg-[#ff9715] px-4 py-2 text-sm font-medium text-white"
+        >
+          Retry
+        </button>
       </div>
     </AdminLayout>
   );
 
   return (
     <AdminLayout title="Moderate Ads" description={`Total: ${ads.length} ad${ads.length !== 1 ? 's' : ''}`}>
-      <div className="bg-white rounded-[16px] shadow-sm border border-[#e8e8ea] overflow-hidden">
+      {ads.length === 0 ? (
+        <div className="rounded-[16px] border border-[#e8e8ea] bg-white p-10 text-center text-[#7f7e88]">
+          No ads found.
+        </div>
+      ) : (
+      <div className="bg-white rounded-[16px] shadow-sm border border-[#e8e8ea] overflow-x-auto">
         <table className="min-w-full divide-y divide-gray-200">
           <thead className="bg-gray-50">
             <tr>
@@ -131,7 +104,7 @@ export default function AdminAds() {
                     )}
                   </td>
                   <td className="px-6 py-4 text-sm text-gray-600">
-                    {new Date(ad.createdAt).toLocaleDateString()}
+                    {ad.createdAt ? new Date(ad.createdAt).toLocaleDateString() : '-'}
                   </td>
                   <td className="px-6 py-4 text-sm">
                     <button
@@ -147,6 +120,7 @@ export default function AdminAds() {
             </tbody>
           </table>
       </div>
+      )}
     </AdminLayout>
   );
 }

@@ -1,7 +1,8 @@
 import { useEffect, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import AdminLayout from '../components/admin/AdminLayout';
-import { apiUrl } from '../services/api';
+import { api } from '../services/api';
+import type { AdminStats } from '../types';
 import {
   Users,
   Package,
@@ -14,16 +15,9 @@ import {
   ArrowRight,
 } from 'lucide-react';
 
-interface DashboardStats {
-  totalUsers: number;
-  totalAds: number;
-  totalReports: number;
-  pendingReports: number;
-}
-
 export default function AdminDashboard() {
   const navigate = useNavigate();
-  const [stats, setStats] = useState<DashboardStats | null>(null);
+  const [stats, setStats] = useState<AdminStats | null>(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState('');
 
@@ -33,20 +27,12 @@ export default function AdminDashboard() {
 
   const fetchStats = async () => {
     try {
-      const response = await fetch(apiUrl('/admin/stats'), {
-        headers: {
-          'Authorization': `Bearer ${localStorage.getItem('qwik_token')}`,
-        },
-      });
-
-      if (!response.ok) {
-        throw new Error('Failed to fetch stats');
-      }
-
-      const data = await response.json();
-      setStats(data.data);
+      setLoading(true);
+      setError('');
+      const response = await api.adminStats();
+      setStats(response.data);
     } catch (err) {
-      setError(err instanceof Error ? err.message : 'Error loading stats');
+      setError(err instanceof Error ? err.message : 'Unable to load admin stats');
     } finally {
       setLoading(false);
     }
@@ -61,8 +47,15 @@ export default function AdminDashboard() {
   );
   if (error) return (
     <AdminLayout title="Admin Dashboard">
-      <div className="flex items-center justify-center h-64">
+      <div className="flex h-64 flex-col items-center justify-center gap-4">
         <div className="text-lg text-red-600">Error: {error}</div>
+        <button
+          type="button"
+          onClick={fetchStats}
+          className="rounded-lg bg-[#ff9715] px-4 py-2 text-sm font-medium text-white"
+        >
+          Retry
+        </button>
       </div>
     </AdminLayout>
   );
@@ -81,7 +74,7 @@ export default function AdminDashboard() {
         </button>
       }
     >
-      <div className="grid grid-cols-1 md:grid-cols-4 gap-6 mb-12">
+      <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-4 lg:gap-6 mb-12">
           {/* Total Users */}
           <div className="bg-white rounded-[16px] p-6 shadow-sm border border-[#e8e8ea]">
             <div className="flex items-center justify-between mb-2">

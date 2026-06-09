@@ -1,29 +1,12 @@
 import { useEffect, useState } from 'react';
-import { useNavigate } from 'react-router-dom';
 import AdminLayout from '../components/admin/AdminLayout';
 import { useToast } from '../context/ToastContext';
-import { apiUrl } from '../services/api';
-
-interface Report {
-  id: string;
-  reason: string;
-  status: string;
-  createdAt: string;
-  ad: {
-    id: string;
-    title: string;
-  };
-  user: {
-    id: string;
-    fullName: string;
-    email: string;
-  };
-}
+import { api } from '../services/api';
+import type { AdminReport } from '../types';
 
 export default function AdminReports() {
-  const navigate = useNavigate();
   const { error: showError, success } = useToast();
-  const [reports, setReports] = useState<Report[]>([]);
+  const [reports, setReports] = useState<AdminReport[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState('');
 
@@ -33,41 +16,22 @@ export default function AdminReports() {
 
   const fetchReports = async () => {
     try {
-      const response = await fetch(apiUrl('/admin/reports'), {
-        headers: {
-          'Authorization': `Bearer ${localStorage.getItem('qwik_token')}`,
-        },
-      });
-
-      if (!response.ok) {
-        throw new Error('Failed to fetch reports');
-      }
-
-      const data = await response.json();
-      setReports(data.data);
+      setLoading(true);
+      setError('');
+      const response = await api.adminReports();
+      setReports(response.data);
     } catch (err) {
-      setError(err instanceof Error ? err.message : 'Error loading reports');
+      setError(err instanceof Error ? err.message : 'Unable to load reports');
     } finally {
       setLoading(false);
     }
   };
 
-  const handleUpdateStatus = async (reportId: string, newStatus: string) => {
+  const handleUpdateStatus = async (reportId: string, newStatus: AdminReport['status']) => {
+    if (!confirm(`Mark this report as ${newStatus.toLowerCase()}?`)) return;
+
     try {
-      const response = await fetch(apiUrl(`/admin/reports/${reportId}`), {
-        method: 'PATCH',
-        headers: {
-          'Authorization': `Bearer ${localStorage.getItem('qwik_token')}`,
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify({ status: newStatus }),
-      });
-
-      if (!response.ok) {
-        const body = await response.json().catch(() => ({}));
-        throw new Error(body.message || 'Failed to update report');
-      }
-
+      await api.updateAdminReport(reportId, newStatus);
       success('Report status updated');
       fetchReports();
     } catch (err) {
@@ -84,8 +48,15 @@ export default function AdminReports() {
   );
   if (error) return (
     <AdminLayout title="Handle Reports">
-      <div className="flex items-center justify-center h-64">
+      <div className="flex h-64 flex-col items-center justify-center gap-4">
         <div className="text-lg text-red-600">Error: {error}</div>
+        <button
+          type="button"
+          onClick={fetchReports}
+          className="rounded-lg bg-[#ff9715] px-4 py-2 text-sm font-medium text-white"
+        >
+          Retry
+        </button>
       </div>
     </AdminLayout>
   );
@@ -99,7 +70,7 @@ export default function AdminReports() {
           No reports have been submitted yet.
         </div>
       ) : (
-      <div className="bg-white rounded-[16px] shadow-sm border border-[#e8e8ea] overflow-hidden">
+      <div className="bg-white rounded-[16px] shadow-sm border border-[#e8e8ea] overflow-x-auto">
         <table className="min-w-full divide-y divide-gray-200">
           <thead className="bg-gray-50">
             <tr>

@@ -45,6 +45,8 @@ export default function AdminVerification() {
   };
 
   const updateVerification = async (id: string, status: 'APPROVED' | 'REJECTED') => {
+    if (status === 'APPROVED' && !window.confirm('Approve this verification application?')) return;
+
     const rejectionReason = status === 'REJECTED'
       ? window.prompt('Reason for rejection:')
       : undefined;
@@ -115,7 +117,7 @@ export default function AdminVerification() {
                   <p className="mt-1 text-sm text-[#7f7e88]">{item.user?.email || '-'}</p>
                 </div>
 
-                <div className="flex gap-2">
+                <div className="flex flex-wrap gap-2">
                   <button
                     type="button"
                     onClick={() => updateVerification(item.id, 'APPROVED')}

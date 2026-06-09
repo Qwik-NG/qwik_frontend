@@ -25,7 +25,10 @@ import type {
   OfferCreatePayload,
   VerificationApplication,
   VerificationDocument,
-  PaymentCheckoutResponse
+  PaymentCheckoutResponse,
+  AdminStats,
+  AdminReport,
+  AdminAd
 } from "../types/index";
 
 export const API_BASE_URL = import.meta.env.VITE_API_URL ?? "http://localhost:4000/api";
@@ -345,8 +348,36 @@ export const api = {
 
   paymentById: (id: string) => request<any>(`/payments/${id}`),
 
-  // ===== Admin Verification Endpoints =====
-  adminVerifications: () => request<VerificationApplication[]>("/admin/verifications"),
+  // ===== Admin Endpoints =====
+  adminStats: () => request<AdminStats>("/admin/stats", { retry: 1 }),
+
+  adminUsers: () => request<User[]>("/admin/users", { retry: 1 }),
+
+  banAdminUser: (id: string, reason?: string) =>
+    request<User>(`/admin/users/${id}/ban`, {
+      method: "POST",
+      body: JSON.stringify({ reason }),
+    }),
+
+  unbanAdminUser: (id: string) =>
+    request<User>(`/admin/users/${id}/unban`, {
+      method: "POST",
+    }),
+
+  adminAds: () => request<AdminAd[]>("/admin/ads", { retry: 1 }),
+
+  deleteAdminAd: (id: string) =>
+    request<null>(`/admin/ads/${id}`, { method: "DELETE" }),
+
+  adminReports: () => request<AdminReport[]>("/admin/reports", { retry: 1 }),
+
+  updateAdminReport: (id: string, status: AdminReport["status"]) =>
+    request<AdminReport>(`/admin/reports/${id}`, {
+      method: "PATCH",
+      body: JSON.stringify({ status }),
+    }),
+
+  adminVerifications: () => request<VerificationApplication[]>("/admin/verifications", { retry: 1 }),
 
   updateAdminVerification: (id: string, payload: { status: "IN_REVIEW" | "APPROVED" | "REJECTED"; rejectionReason?: string }) =>
     request<VerificationApplication>(`/admin/verifications/${id}`, {
