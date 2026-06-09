@@ -116,7 +116,8 @@ export default function MessagesPage() {
         setLoading(true);
         setError(null);
 
-        const [meResponse, conversationsResponse] = await Promise.all([api.me(), api.getConversations()]);
+        const meResponse = await api.me();
+        const conversationsResponse = await api.getConversations();
         setCurrentUserId(meResponse.data.id);
         setConversations(conversationsResponse.data);
 

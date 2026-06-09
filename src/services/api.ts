@@ -265,9 +265,9 @@ export const api = {
     }),
 
   // ===== Messaging Endpoints =====
-  getConversations: () => request<Conversation[]>("/conversations"),
+  getConversations: () => request<Conversation[]>("/conversations", { retry: 1 }),
 
-  getConversation: (id: string) => request<Conversation>(`/conversations/${id}`),
+  getConversation: (id: string) => request<Conversation>(`/conversations/${id}`, { retry: 1 }),
 
   createConversation: (payload: ConversationCreatePayload) =>
     request<Conversation>("/conversations", { method: "POST", body: JSON.stringify(payload) }),
@@ -276,17 +276,20 @@ export const api = {
     request<Message>("/messages", { method: "POST", body: JSON.stringify(payload) }),
 
   // ===== Notification Endpoints =====
-  // TODO: getNotifications - fetch user's notifications
-  // getNotifications: (unreadOnly?: boolean) => request<Notification[]>(`/notifications${unreadOnly ? "?unread=true" : ""}`),
+  getNotifications: (unreadOnly?: boolean) =>
+    request<Notification[]>(`/notifications${unreadOnly ? "?unread=true" : ""}`, { retry: 1 }),
 
-  // TODO: markNotificationAsRead - mark notification as read
-  // markNotificationAsRead: (id: string) => request<null>(`/notifications/${id}/read`, { method: "PATCH" }),
+  markNotificationAsRead: (id: string) =>
+    request<Notification>(`/notifications/${id}/read`, { method: "PATCH" }),
 
-  // TODO: getNotificationSettings - fetch user's notification preferences
-  // getNotificationSettings: () => request<NotificationSettings>("/users/me/notification-settings"),
+  markAllNotificationsAsRead: () =>
+    request<null>("/notifications/read-all", { method: "PATCH" }),
 
-  // TODO: updateNotificationSettings - update notification preferences
-  // updateNotificationSettings: (payload: NotificationSettings) => request<NotificationSettings>("/users/me/notification-settings", { method: "PATCH", body: JSON.stringify(payload) }),
+  getNotificationSettings: () =>
+    request<NotificationSettings>("/users/me/notification-settings", { retry: 1 }),
+
+  updateNotificationSettings: (payload: Partial<NotificationSettings>) =>
+    request<NotificationSettings>("/users/me/notification-settings", { method: "PATCH", body: JSON.stringify(payload) }),
 
   // ===== Upload Endpoints =====
   uploadImages: (files: File[]) => {

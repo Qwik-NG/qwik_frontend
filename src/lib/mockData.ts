@@ -1645,7 +1645,7 @@ export const mockConversations: Conversation[] = [
       mockUser,
       { id: "user-2", email: "jane@example.com", fullName: "Jane Smith", location: "Lagos" }
     ],
-    lastMessage: { id: "msg-1", conversationId: "conv-1", senderId: "user-2", text: "Are you still selling?", read: false, createdAt: new Date().toISOString() },
+    lastMessage: { id: "msg-1", conversationId: "conv-1", senderId: "user-2", text: "Are you still selling?", readAt: null, createdAt: new Date().toISOString() },
     lastMessageAt: new Date().toISOString(),
     unreadCount: 2
   },
@@ -1655,7 +1655,7 @@ export const mockConversations: Conversation[] = [
       mockUser,
       { id: "user-3", email: "bob@example.com", fullName: "Bob Johnson", location: "Abuja" }
     ],
-    lastMessage: { id: "msg-2", conversationId: "conv-2", senderId: "user-3", text: "Thanks, I'll take it", read: true, createdAt: new Date(Date.now() - 3600000).toISOString() },
+    lastMessage: { id: "msg-2", conversationId: "conv-2", senderId: "user-3", text: "Thanks, I'll take it", readAt: new Date(Date.now() - 1800000).toISOString(), createdAt: new Date(Date.now() - 3600000).toISOString() },
     lastMessageAt: new Date(Date.now() - 3600000).toISOString(),
     unreadCount: 0
   }
@@ -1665,9 +1665,9 @@ export const mockConversations: Conversation[] = [
  * Mock Messages
  */
 export const mockMessages: Message[] = [
-  { id: "msg-1", conversationId: "conv-1", senderId: "user-2", text: "Hi, is this item still available?", read: true, createdAt: new Date(Date.now() - 7200000).toISOString() },
-  { id: "msg-2", conversationId: "conv-1", senderId: "user-1", text: "Yes, it is! Still in great condition.", read: true, createdAt: new Date(Date.now() - 3600000).toISOString() },
-  { id: "msg-3", conversationId: "conv-1", senderId: "user-2", text: "Are you still selling?", read: false, createdAt: new Date().toISOString() }
+  { id: "msg-1", conversationId: "conv-1", senderId: "user-2", text: "Hi, is this item still available?", readAt: new Date(Date.now() - 5400000).toISOString(), createdAt: new Date(Date.now() - 7200000).toISOString() },
+  { id: "msg-2", conversationId: "conv-1", senderId: "user-1", text: "Yes, it is! Still in great condition.", readAt: new Date(Date.now() - 1800000).toISOString(), createdAt: new Date(Date.now() - 3600000).toISOString() },
+  { id: "msg-3", conversationId: "conv-1", senderId: "user-2", text: "Are you still selling?", readAt: null, createdAt: new Date().toISOString() }
 ];
 
 /**

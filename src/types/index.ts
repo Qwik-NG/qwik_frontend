@@ -193,7 +193,7 @@ export interface Message {
   senderId: string;
   sender?: User;
   text: string;
-  read?: boolean;
+  readAt?: string | null;
   createdAt: string;
 }
 
@@ -228,7 +228,7 @@ export interface MessageSendPayload {
 export interface Notification {
   id: string;
   userId: string;
-  type: "message" | "offer" | "system" | "ad_sold" | "price_drop";
+  type: "message" | "offer" | "system" | "ad_sold" | "price_drop" | string;
   title: string;
   body: string;
   read: boolean;
@@ -238,11 +238,15 @@ export interface Notification {
 }
 
 export interface NotificationSettings {
+  id?: string;
+  userId?: string;
   emailNotifications: boolean;
   pushNotifications: boolean;
   messageNotifications: boolean;
   offerNotifications: boolean;
   systemNotifications: boolean;
+  createdAt?: string;
+  updatedAt?: string;
 }
 
 /**
