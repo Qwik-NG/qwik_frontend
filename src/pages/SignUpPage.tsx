@@ -7,6 +7,8 @@ import { setRole, setToken } from "../services/auth";
 import FormInput from "../components/ui/FormInput";
 import FormButton from "../components/ui/FormButton";
 
+const LEGAL_CONSENT_VERSION = "2026-06-09";
+
 export default function SignUpPage() {
   const navigate = useNavigate();
   const { error: showError, success } = useToast();
@@ -27,9 +29,9 @@ export default function SignUpPage() {
           qwik
         </button>
         <p className="text-[15px] text-[#9a99a6]">
-          New here?{" "}
-          <button className="text-[#ff8f00] transition-colors duration-200 hover:text-[#e67f00] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#ffb357] focus-visible:ring-offset-2 focus-visible:ring-offset-[#f3f3f5]" onClick={() => navigate("/signup")} type="button">
-            Create an account
+          Already have an account?{" "}
+          <button className="text-[#ff8f00] transition-colors duration-200 hover:text-[#e67f00] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#ffb357] focus-visible:ring-offset-2 focus-visible:ring-offset-[#f3f3f5]" onClick={() => navigate(ROUTES.LOGIN)} type="button">
+            Log in
           </button>
         </p>
       </header>
@@ -99,8 +101,16 @@ export default function SignUpPage() {
             onClick={async () => {
               try {
                 setIsSubmitting(true);
-                // TODO: send termsAcceptedAt/privacyAcceptedAt when backend supports legal consent persistence.
-                const res = await api.register({ email: email.trim().toLowerCase(), password, fullName: fullName.trim(), phone: phone.trim() });
+                const res = await api.register({
+                  email: email.trim().toLowerCase(),
+                  password,
+                  fullName: fullName.trim(),
+                  phone: phone.trim(),
+                  termsAccepted: true,
+                  privacyAccepted: true,
+                  termsVersion: LEGAL_CONSENT_VERSION,
+                  privacyVersion: LEGAL_CONSENT_VERSION,
+                });
                 setToken(res.data.token);
                 setRole(res.data.user.role);
                 success("Account created successfully");

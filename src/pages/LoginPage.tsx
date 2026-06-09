@@ -1,17 +1,17 @@
 import { useState } from "react";
-import { useNavigate } from "react-router-dom";
+import { Link, useNavigate } from "react-router-dom";
+import { ROUTES } from "../constants/routes";
 import { FacebookIcon, GoogleIcon } from "../components/icons/SocialIcons";
 import AuthLayout from "../components/layout/AuthLayout";
-import { useToast } from "../context/ToastContext";
 import FormInput from "../components/ui/FormInput";
 import FormButton from "../components/ui/FormButton";
 import { setLoginEmail } from "../services/auth";
 
 export default function LoginPage() {
   const navigate = useNavigate();
-  const { info } = useToast();
   const [email, setEmail] = useState("");
-  const canContinue = /\S+@\S+\.\S+/.test(email);
+  const [acceptedLegal, setAcceptedLegal] = useState(false);
+  const canContinue = /\S+@\S+\.\S+/.test(email) && acceptedLegal;
 
   return (
     <AuthLayout
@@ -22,18 +22,22 @@ export default function LoginPage() {
       titleClassName="whitespace-nowrap"
     >
           <button
-            className="mb-[10px] flex h-[48px] w-full items-center justify-center gap-2 rounded-[10px] bg-[#d9d9dc] text-[14px] text-[#20212a] transition-all duration-200 hover:bg-[#cfcfd3] active:scale-[0.99] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#ffb357] focus-visible:ring-offset-2 focus-visible:ring-offset-white"
-            onClick={() => info("Google login clicked")}
+            className="mb-[10px] flex h-[48px] w-full cursor-not-allowed items-center justify-center gap-2 rounded-[10px] bg-[#d9d9dc] text-[14px] text-[#8b8a94] opacity-70 transition-all duration-200"
             type="button"
+            disabled
+            aria-disabled="true"
+            title="Coming soon"
           >
             <GoogleIcon />
             <span>Continue with Google</span>
           </button>
 
           <button
-            className="mb-[16px] flex h-[48px] w-full items-center justify-center gap-2 rounded-[10px] bg-[#3f5db2] text-[14px] text-white transition-all duration-200 hover:bg-[#354aa3] active:scale-[0.99] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#ffb357] focus-visible:ring-offset-2 focus-visible:ring-offset-white"
-            onClick={() => info("Facebook login clicked")}
+            className="mb-[16px] flex h-[48px] w-full cursor-not-allowed items-center justify-center gap-2 rounded-[10px] bg-[#3f5db2] text-[14px] text-white opacity-55 transition-all duration-200"
             type="button"
+            disabled
+            aria-disabled="true"
+            title="Coming soon"
           >
             <FacebookIcon />
             <span>Continue with Facebook</span>
@@ -50,8 +54,33 @@ export default function LoginPage() {
             placeholder="Email"
             value={email}
             onChange={(e) => setEmail(e.target.value)}
-            containerClassName="mb-[16px]"
+            containerClassName="mb-[12px]"
           />
+
+          <label className="mb-[16px] flex items-start gap-2.5 text-[12px] leading-[1.35] text-[#7f7e88]">
+            <input
+              type="checkbox"
+              checked={acceptedLegal}
+              onChange={(e) => setAcceptedLegal(e.target.checked)}
+              className="mt-[1px] h-[16px] w-[16px] shrink-0 rounded-[4px] border border-[#acabb6] bg-transparent accent-[#ff8f00] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#ffb357] focus-visible:ring-offset-2 focus-visible:ring-offset-white"
+            />
+            <span>
+              I confirm &amp; accept the{" "}
+              <Link
+                to={ROUTES.TERMS}
+                className="font-medium text-[#ff8f00] underline-offset-2 transition-colors hover:text-[#e67f00] hover:underline focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#ffb357] focus-visible:ring-offset-2 focus-visible:ring-offset-white"
+              >
+                Terms of Use
+              </Link>{" "}
+              and{" "}
+              <Link
+                to={ROUTES.PRIVACY_POLICY}
+                className="font-medium text-[#ff8f00] underline-offset-2 transition-colors hover:text-[#e67f00] hover:underline focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#ffb357] focus-visible:ring-offset-2 focus-visible:ring-offset-white"
+              >
+                Privacy Policy
+              </Link>
+            </span>
+          </label>
 
           <FormButton
             disabled={!canContinue}

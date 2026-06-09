@@ -13,6 +13,10 @@ export interface User {
   phone?: string;
   location?: string;
   role?: "USER" | "ADMIN";
+  termsAcceptedAt?: string | null;
+  privacyAcceptedAt?: string | null;
+  termsVersion?: string | null;
+  privacyVersion?: string | null;
   profile?: UserProfile;
   verification?: VerificationSummary;
   verificationApplications?: VerificationSummary[];
@@ -91,6 +95,10 @@ export interface RegisterPayload {
   fullName: string;
   phone?: string;
   location?: string;
+  termsAccepted: boolean;
+  privacyAccepted: boolean;
+  termsVersion: string;
+  privacyVersion: string;
 }
 
 export interface ForgotPasswordPayload {
