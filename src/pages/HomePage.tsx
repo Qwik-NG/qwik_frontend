@@ -3,17 +3,7 @@ import { useCallback, useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { SiteFooter, SiteHeader } from "../components/AppShell";
 import { buildSearchResultsRoute, buildSearchRoute } from "../constants/routes";
-import {
-  BeautyIcon,
-  CarsIcon,
-  ElectronicsIcon,
-  FashionIcon,
-  FurnitureIcon,
-  JobsIcon,
-  MoreIcon,
-  PhonesIcon,
-  PropertiesIcon,
-} from "../components/icons/CategoryIcons";
+import { MoreIcon } from "../components/icons/CategoryIcons";
 import { ImagePlaceholder } from "../components/ui/ImagePlaceholder";
 import { api } from "../services/api";
 
@@ -21,20 +11,21 @@ type Category = {
   name: string;
   shortName: string;
   tone: string;
-  icon: ComponentType<{ className?: string }>;
+  image?: string;
+  icon?: ComponentType<{ className?: string }>;
   route: string;
 };
 type Product = { id: string; price: number; title: string; description: string; location: string; images: Array<{ url: string }> };
 
 const categories: Category[] = [
-  { name: "Vehicles", shortName: "Cars", icon: CarsIcon, tone: "#f8ebe4", route: buildSearchRoute("Vehicles") },
-  { name: "Phones & Tablets", shortName: "Phones", icon: PhonesIcon, tone: "#e9edff", route: buildSearchRoute("Phones") },
-  { name: "Jobs", shortName: "Jobs", icon: JobsIcon, tone: "#f2e8dd", route: buildSearchRoute("Job") },
-  { name: "Fashion", shortName: "Fashion", icon: FashionIcon, tone: "#f6eadc", route: buildSearchRoute("Fashion") },
-  { name: "Electronics", shortName: "Electronics", icon: ElectronicsIcon, tone: "#ebeef3", route: buildSearchRoute("Electronics") },
-  { name: "Properties", shortName: "Properties", icon: PropertiesIcon, tone: "#e2f1e9", route: buildSearchResultsRoute("Home") },
-  { name: "Furniture & Appliances", shortName: "Furniture", icon: FurnitureIcon, tone: "#f4e3f4", route: buildSearchRoute("Furniture") },
-  { name: "Beauty", shortName: "Beauty", icon: BeautyIcon, tone: "#f1e4ee", route: buildSearchRoute("Beauty") },
+  { name: "Vehicles", shortName: "Cars", image: "/category-images/vehicles.png", tone: "#f8ebe4", route: buildSearchRoute("Vehicles") },
+  { name: "Phones & Tablets", shortName: "Phones", image: "/category-images/phone.png", tone: "#e9edff", route: buildSearchRoute("Phones") },
+  { name: "Jobs", shortName: "Jobs", image: "/category-images/image.png", tone: "#f2e8dd", route: buildSearchRoute("Job") },
+  { name: "Fashion", shortName: "Fashion", image: "/category-images/fashion.png", tone: "#f6eadc", route: buildSearchRoute("Fashion") },
+  { name: "Electronics", shortName: "Electronics", image: "/category-images/electronics.png", tone: "#ebeef3", route: buildSearchRoute("Electronics") },
+  { name: "Properties", shortName: "Properties", image: "/category-images/properties.png", tone: "#e2f1e9", route: buildSearchResultsRoute("Home") },
+  { name: "Furniture & Appliances", shortName: "Furniture", image: "/category-images/furniture.png", tone: "#f4e3f4", route: buildSearchRoute("Furniture") },
+  { name: "Beauty", shortName: "Beauty", image: "/category-images/beauty.png", tone: "#f1e4ee", route: buildSearchRoute("Beauty") },
   { name: "More", shortName: "More", icon: MoreIcon, tone: "#f2f1ef", route: "/search-results-list" }
 ];
 
@@ -73,10 +64,23 @@ function CategoryCard({ item, onClick }: { item: Category; onClick: () => void }
       aria-label={`Browse ${item.name}`}
     >
       <span
-        className="grid h-[62px] w-[62px] place-items-center rounded-full shadow-[0_8px_18px_rgba(31,29,39,0.05)] transition duration-200 group-hover:scale-105 group-hover:shadow-[0_12px_24px_rgba(31,29,39,0.09)] sm:h-[76px] sm:w-[76px] lg:h-[82px] lg:w-[82px]"
+        className="grid h-[56px] w-[56px] place-items-center overflow-hidden rounded-[16px] shadow-[0_8px_18px_rgba(31,29,39,0.05)] transition duration-200 group-hover:scale-105 group-hover:shadow-[0_12px_24px_rgba(31,29,39,0.09)] sm:h-[66px] sm:w-[66px] lg:h-[72px] lg:w-[72px]"
         style={{ background: item.tone, borderRadius: "50%" }}
       >
-        <item.icon className="h-[38px] w-[38px] sm:h-[46px] sm:w-[46px] lg:h-[50px] lg:w-[50px]" />
+        {item.image ? (
+          <img
+            src={item.image}
+            alt=""
+            className="h-[42px] w-[42px] object-cover sm:h-[50px] sm:w-[50px] lg:h-[54px] lg:w-[54px]"
+            loading="eager"
+            decoding="async"
+            onError={(event) => {
+              event.currentTarget.style.display = "none";
+            }}
+          />
+        ) : item.icon ? (
+          <item.icon className="h-[34px] w-[34px] sm:h-[40px] sm:w-[40px] lg:h-[44px] lg:w-[44px]" />
+        ) : null}
       </span>
       <span className="max-w-[88px] text-[13px] font-medium leading-[1.15] text-[#1f1d27] sm:max-w-[112px] sm:text-[14px]">
         <span className="sm:hidden">{item.shortName}</span>
