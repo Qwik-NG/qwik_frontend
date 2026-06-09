@@ -202,6 +202,7 @@ export function SiteFooter({ navigate }: { navigate: NavigateTo }) {
         </button>
         <button onClick={() => navigate(ROUTES.CAREER)} className="mb-2.5 block text-[14px] text-[#5f6071]">Career</button>
         <button onClick={() => navigate(ROUTES.TERMS)} className="mb-2.5 block text-[14px] text-[#5f6071]">Terms</button>
+        <button onClick={() => navigate(ROUTES.PRIVACY_POLICY)} className="mb-2.5 block text-[14px] text-[#5f6071]">Privacy Policy</button>
       </div>
       <div className="col-span-1">
         <h5 className="mb-3.5 text-[18px] font-medium text-[#efeff5]">

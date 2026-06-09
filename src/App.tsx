@@ -7,6 +7,7 @@ import HomePage from "./pages/HomePage";
 import AboutPage from "./pages/AboutPage";
 import CareerPage from "./pages/CareerPage";
 import TermsPage from "./pages/TermsPage";
+import PrivacyPolicyPage from "./pages/PrivacyPolicyPage";
 import BlogPage from "./pages/BlogPage";
 import SupportPage from "./pages/SupportPage";
 import FaqsPage from "./pages/FaqsPage";
@@ -58,6 +59,7 @@ export default function App() {
       <Route path={ROUTES.ABOUT} element={<AboutPage />} />
       <Route path={ROUTES.CAREER} element={<CareerPage />} />
       <Route path={ROUTES.TERMS} element={<TermsPage />} />
+      <Route path={ROUTES.PRIVACY_POLICY} element={<PrivacyPolicyPage />} />
       <Route path={ROUTES.BLOG} element={<BlogPage />} />
       <Route path={ROUTES.SUPPORT} element={<SupportPage />} />
       <Route path={ROUTES.FAQS} element={<FaqsPage />} />
