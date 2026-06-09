@@ -342,6 +342,15 @@ export const api = {
 
   paymentById: (id: string) => request<any>(`/payments/${id}`),
 
+  // ===== Admin Verification Endpoints =====
+  adminVerifications: () => request<VerificationApplication[]>("/admin/verifications"),
+
+  updateAdminVerification: (id: string, payload: { status: "IN_REVIEW" | "APPROVED" | "REJECTED"; rejectionReason?: string }) =>
+    request<VerificationApplication>(`/admin/verifications/${id}`, {
+      method: "PATCH",
+      body: JSON.stringify(payload),
+    }),
+
   // ===== Offer Endpoints (Future) =====
   // TODO: createOffer - make offer on ad
   // createOffer: (payload: OfferCreatePayload) => request<Offer>("/offers", { method: "POST", body: JSON.stringify(payload) }),

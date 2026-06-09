@@ -48,6 +48,7 @@ import AdminDashboard from "./pages/AdminDashboard";
 import AdminUsers from "./pages/AdminUsers";
 import AdminAds from "./pages/AdminAds";
 import AdminReports from "./pages/AdminReports";
+import AdminVerification from "./pages/AdminVerification";
 
 export default function App() {
   return (
@@ -121,6 +122,7 @@ export default function App() {
       <Route path="/admin/users" element={<AdminRoute><AdminUsers /></AdminRoute>} />
       <Route path="/admin/ads" element={<AdminRoute><AdminAds /></AdminRoute>} />
       <Route path="/admin/reports" element={<AdminRoute><AdminReports /></AdminRoute>} />
+      <Route path={ROUTES.ADMIN_VERIFICATION} element={<AdminRoute><AdminVerification /></AdminRoute>} />
 
       {/* Error Pages */}
       <Route path={ROUTES.NOT_FOUND} element={<NotFoundPage />} />

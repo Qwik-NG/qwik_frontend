@@ -47,6 +47,8 @@ export interface VerificationApplication {
   status: VerificationStatus;
   businessInfo?: Record<string, string> | null;
   documents: VerificationDocument[];
+  user?: User;
+  payments?: Array<PaymentCheckoutResponse & { id?: string; createdAt?: string }>;
   paymentStatus: VerificationPaymentStatus;
   rejectionReason?: string | null;
   submittedAt?: string | null;

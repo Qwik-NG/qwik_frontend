@@ -63,12 +63,15 @@ export default function AdminReports() {
         body: JSON.stringify({ status: newStatus }),
       });
 
-      if (response.ok) {
-        success('Report status updated');
-        fetchReports();
+      if (!response.ok) {
+        const body = await response.json().catch(() => ({}));
+        throw new Error(body.message || 'Failed to update report');
       }
+
+      success('Report status updated');
+      fetchReports();
     } catch (err) {
-      showError('Error updating report');
+      showError(err instanceof Error ? err.message : 'Error updating report');
     }
   };
 
@@ -91,6 +94,11 @@ export default function AdminReports() {
 
   return (
     <AdminLayout title="Handle Reports" description={`${pendingReports.length} pending, ${reports.length} total`}>
+      {reports.length === 0 ? (
+        <div className="rounded-[16px] border border-[#e8e8ea] bg-white p-10 text-center text-[#7f7e88]">
+          No reports have been submitted yet.
+        </div>
+      ) : (
       <div className="bg-white rounded-[16px] shadow-sm border border-[#e8e8ea] overflow-hidden">
         <table className="min-w-full divide-y divide-gray-200">
           <thead className="bg-gray-50">
@@ -146,6 +154,7 @@ export default function AdminReports() {
             </tbody>
           </table>
       </div>
+      )}
     </AdminLayout>
   );
 }

@@ -71,6 +71,7 @@ export const ROUTES = {
   PREMIUM_PLAN_PAYMENT: "/premium-plan-payment",
   
   // Error pages
+  ADMIN_VERIFICATION: "/admin/verification",
   NOT_FOUND: "/not-found",
 };
 
