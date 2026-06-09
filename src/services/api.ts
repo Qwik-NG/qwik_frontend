@@ -22,7 +22,10 @@ import type {
   SearchFilters,
   SearchResults,
   Offer,
-  OfferCreatePayload
+  OfferCreatePayload,
+  VerificationApplication,
+  VerificationDocument,
+  PaymentCheckoutResponse
 } from "../types/index";
 
 export const API_BASE_URL = import.meta.env.VITE_API_URL ?? "http://localhost:4000/api";
@@ -224,6 +227,12 @@ export const api = {
   markAdUnavailable: (id: string) =>
     request<Ad>(`/ads/${id}/mark-unavailable`, { method: "PATCH" }),
 
+  promoteAd: (id: string, payload: { plan: "top-7" | "premium-30" }) =>
+    request<PaymentCheckoutResponse>(`/ads/${id}/promotions`, {
+      method: "POST",
+      body: JSON.stringify(payload),
+    }),
+
   getUserAds: (status?: string) => request<Ad[]>(`/users/me/ads${status ? `?status=${status}` : ""}`),
 
   // ===== Saved Ads Endpoints =====
@@ -288,6 +297,50 @@ export const api = {
       body: formData,
     });
   },
+
+  uploadDocuments: (files: File[], purpose = "verification_document") => {
+    const formData = new FormData();
+    files.forEach((file) => formData.append("documents", file));
+    formData.append("purpose", purpose);
+    return request<{ documents: VerificationDocument[] }>("/uploads/documents", {
+      method: "POST",
+      body: formData,
+    });
+  },
+
+  // ===== Verification Endpoints =====
+  verificationMe: () => request<VerificationApplication | null>("/verification/me"),
+
+  createVerification: () =>
+    request<VerificationApplication>("/verification", {
+      method: "POST",
+    }),
+
+  updateVerificationBusinessInfo: (id: string, payload: Record<string, string>) =>
+    request<VerificationApplication>(`/verification/${id}/business-info`, {
+      method: "PATCH",
+      body: JSON.stringify(payload),
+    }),
+
+  addVerificationDocuments: (id: string, documents: VerificationDocument[]) =>
+    request<VerificationApplication>(`/verification/${id}/documents`, {
+      method: "POST",
+      body: JSON.stringify({ documents }),
+    }),
+
+  submitVerification: (id: string) =>
+    request<VerificationApplication>(`/verification/${id}/submit`, {
+      method: "POST",
+    }),
+
+  // ===== Payment Endpoints =====
+  checkoutPayment: (payload: { purpose: "VERIFICATION" | "AD_PROMOTION"; verificationId?: string; adId?: string; plan?: string }) =>
+    request<PaymentCheckoutResponse>("/payments/checkout", {
+      method: "POST",
+      body: JSON.stringify(payload),
+    }),
+
+  paymentById: (id: string) => request<any>(`/payments/${id}`),
 
   // ===== Offer Endpoints (Future) =====
   // TODO: createOffer - make offer on ad

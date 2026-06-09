@@ -1,8 +1,11 @@
+import { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { SiteFooter, SiteHeader } from "../components/AppShell";
 import SettingsSidebar, { MobileSettingsMenu } from "../components/settings/SettingsSidebar";
 import { ROUTES } from "../constants/routes";
 import { getSettingsNavItems } from "../lib/settings-nav-config";
+import { api } from "../services/api";
+import type { VerificationApplication } from "../types";
 
 function ShieldIllustration() {
   return (
@@ -132,6 +135,55 @@ function PaymentLogo({ label }: { label: string }) {
 
 export default function GetVerifiedPaymentPage() {
   const navigate = useNavigate();
+  const [verification, setVerification] = useState<VerificationApplication | null>(null);
+  const [loading, setLoading] = useState(true);
+  const [submitting, setSubmitting] = useState(false);
+  const [error, setError] = useState<string | null>(null);
+  const [message, setMessage] = useState<string | null>(null);
+
+  useEffect(() => {
+    let mounted = true;
+    async function loadVerification() {
+      try {
+        setLoading(true);
+        setError(null);
+        const response = await api.verificationMe();
+        if (mounted) setVerification(response.data);
+      } catch (err) {
+        if (mounted) setError(err instanceof Error ? err.message : "Failed to load verification");
+      } finally {
+        if (mounted) setLoading(false);
+      }
+    }
+    loadVerification();
+    return () => {
+      mounted = false;
+    };
+  }, []);
+
+  const handleSubmitForReview = async () => {
+    try {
+      setSubmitting(true);
+      setError(null);
+      setMessage(null);
+      if (!verification) {
+        setError("Complete your verification details before continuing.");
+        return;
+      }
+      const checkout = await api.checkoutPayment({ purpose: "VERIFICATION", verificationId: verification.id });
+      if (checkout.data.checkoutUrl) {
+        window.location.href = checkout.data.checkoutUrl;
+        return;
+      }
+      await api.submitVerification(verification.id);
+      setMessage("Payment record created. Provider checkout is not configured yet, so your verification was submitted for admin review.");
+      navigate(ROUTES.GET_VERIFIED_SUCCESSFUL);
+    } catch (err) {
+      setError(err instanceof Error ? err.message : "Failed to submit verification");
+    } finally {
+      setSubmitting(false);
+    }
+  };
 
   return (
     <div className="min-h-screen bg-page text-ink">
@@ -161,8 +213,11 @@ export default function GetVerifiedPaymentPage() {
             <div className="max-w-[720px]">
               <h1 className="text-[30px] font-semibold text-[#1f1d27]">Purchase Verified Seller Badge</h1>
               <p className="mt-1 text-[14px] text-[#8f8b98]">
-                Complete your one time payment to get verified and unlock exclusive benefits.
+                Create a provider-ready payment record and submit your verification for admin review.
               </p>
+              {loading ? <p className="mt-3 text-[13px] text-[#8f8b98]">Loading verification status...</p> : null}
+              {error ? <p className="mt-3 rounded-[10px] bg-[#fff0f0] px-3 py-2 text-[13px] text-[#c24141]">{error}</p> : null}
+              {message ? <p className="mt-3 rounded-[10px] bg-[#eefaf2] px-3 py-2 text-[13px] text-[#26734d]">{message}</p> : null}
             </div>
 
             <div className="mt-6 grid gap-6 xl:grid-cols-[1fr_1.15fr]">
@@ -265,7 +320,7 @@ export default function GetVerifiedPaymentPage() {
 
                 <div className="mt-6 border-t border-[#eceaf0] pt-5">
                   <h3 className="text-[16px] font-semibold text-[#1f1d27]">Choose a payment method</h3>
-                  <p className="mt-1 text-[13px] text-[#8f8b98]">Complete your verification securely</p>
+                  <p className="mt-1 text-[13px] text-[#8f8b98]">Provider checkout is prepared but not live until payment keys are configured.</p>
 
                   <div className="mt-4 rounded-[14px] border border-[#ff8b2c] p-4">
                     <div className="flex items-start gap-4">
@@ -305,9 +360,10 @@ export default function GetVerifiedPaymentPage() {
                   <button
                     className="mt-6 flex h-[48px] w-full items-center justify-center gap-4 rounded-[12px] bg-gradient-to-r from-amber to-orange px-6 text-[15px] font-semibold text-white shadow-glow"
                     type="button"
-                    onClick={() => navigate(ROUTES.GET_VERIFIED_SUCCESSFUL)}
+                    onClick={handleSubmitForReview}
+                    disabled={loading || submitting || !verification}
                   >
-                    <span>Pay ₦5,300.00</span>
+                    <span>{submitting ? "Submitting..." : "Create Payment Record & Submit"}</span>
                     <span className="text-[18px]">-&gt;</span>
                   </button>
 
@@ -318,8 +374,8 @@ export default function GetVerifiedPaymentPage() {
                   <div className="mt-5 flex items-start gap-3 rounded-[14px] bg-[#f4f4f7] p-4">
                     <CheckIcon />
                     <div>
-                      <p className="text-[14px] font-semibold text-[#1f1d27]">Secure payment powered by Paystack.</p>
-                      <p className="text-[12px] text-[#8f8b98]">Your transaction is protected with industry-standard security.</p>
+                      <p className="text-[14px] font-semibold text-[#1f1d27]">Payment provider-ready foundation.</p>
+                      <p className="text-[12px] text-[#8f8b98]">No real money movement is claimed until a backend webhook confirms payment.</p>
                     </div>
                   </div>
                 </div>

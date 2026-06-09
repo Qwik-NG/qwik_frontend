@@ -14,8 +14,54 @@ export interface User {
   location?: string;
   role?: "USER" | "ADMIN";
   profile?: UserProfile;
+  verification?: VerificationSummary;
+  verificationApplications?: VerificationSummary[];
   createdAt?: string;
   updatedAt?: string;
+}
+
+export type VerificationStatus = "DRAFT" | "SUBMITTED" | "IN_REVIEW" | "APPROVED" | "REJECTED";
+export type VerificationPaymentStatus = "UNPAID" | "PENDING" | "PAID" | "FAILED";
+
+export interface VerificationSummary {
+  id: string | null;
+  status: VerificationStatus | null;
+  paymentStatus: VerificationPaymentStatus | null;
+  approved?: boolean;
+}
+
+export interface VerificationDocument {
+  id?: string;
+  url: string;
+  name?: string;
+  type?: string;
+  size?: number;
+  purpose: string;
+  createdAt?: string;
+}
+
+export interface VerificationApplication {
+  id: string;
+  userId: string;
+  type: "BUSINESS";
+  status: VerificationStatus;
+  businessInfo?: Record<string, string> | null;
+  documents: VerificationDocument[];
+  paymentStatus: VerificationPaymentStatus;
+  rejectionReason?: string | null;
+  submittedAt?: string | null;
+  reviewedAt?: string | null;
+  createdAt: string;
+  updatedAt: string;
+}
+
+export interface PaymentCheckoutResponse {
+  paymentId: string;
+  checkoutUrl: string | null;
+  amount: number;
+  currency: string;
+  status: "PENDING" | "PAID" | "FAILED" | "CANCELLED";
+  providerReady?: boolean;
 }
 
 export interface UserProfile {

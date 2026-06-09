@@ -1,9 +1,12 @@
 import type { ReactNode } from "react";
+import { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { SiteFooter, SiteHeader } from "../components/AppShell";
 import SettingsSidebar, { MobileSettingsMenu } from "../components/settings/SettingsSidebar";
 import { getSettingsNavItems } from "../lib/settings-nav-config";
 import { ROUTES } from "../constants/routes";
+import { api } from "../services/api";
+import type { VerificationApplication } from "../types";
 
 function BenefitIconWrapper({ children }: { children: ReactNode }) {
   return (
@@ -124,6 +127,21 @@ function BenefitBlock({ title, icon, align }: { title: string; icon: ReactNode; 
 
 export default function GetVerifiedPage() {
   const navigate = useNavigate();
+  const [verification, setVerification] = useState<VerificationApplication | null>(null);
+
+  useEffect(() => {
+    let mounted = true;
+    api.verificationMe()
+      .then((response) => {
+        if (mounted) setVerification(response.data);
+      })
+      .catch(() => {
+        if (mounted) setVerification(null);
+      });
+    return () => {
+      mounted = false;
+    };
+  }, []);
 
   const requirements = [
     {
@@ -236,6 +254,11 @@ export default function GetVerifiedPage() {
             <p className="mt-2 text-[14px] text-[#8f8b98]">
               Complete the verification process to unlock all platform benefits and grow your business.
             </p>
+            {verification ? (
+              <p className="mt-3 rounded-[10px] bg-[#fff6e8] px-3 py-2 text-[13px] font-medium text-[#8b5a00]">
+                Current status: {verification.status.replace(/_/g, " ")}
+              </p>
+            ) : null}
 
             <div className="mt-5">
               <h3 className="text-[14px] font-medium text-[#1f1d27]">Verification Requirements</h3>
@@ -257,9 +280,9 @@ export default function GetVerifiedPage() {
             <button
               className="mt-5 flex h-[52px] w-full items-center justify-between rounded-[12px] bg-gradient-to-r from-amber to-orange px-4 text-[15px] font-medium text-white shadow-glow"
               type="button"
-              onClick={() => navigate(ROUTES.GET_VERIFIED_BUSINESS_INFO)}
+              onClick={() => navigate(verification?.status === "SUBMITTED" || verification?.status === "IN_REVIEW" || verification?.status === "APPROVED" ? ROUTES.GET_VERIFIED_SUCCESSFUL : ROUTES.GET_VERIFIED_BUSINESS_INFO)}
             >
-              <span>Start Verification</span>
+              <span>{verification ? "Continue Verification" : "Start Verification"}</span>
               <span className="text-[20px]">→</span>
             </button>
 

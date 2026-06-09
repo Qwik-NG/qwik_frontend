@@ -1,9 +1,12 @@
 import type { ReactNode } from "react";
+import { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { SiteFooter, SiteHeader } from "../components/AppShell";
 import SettingsSidebar, { MobileSettingsMenu } from "../components/settings/SettingsSidebar";
 import { ROUTES } from "../constants/routes";
 import { getSettingsNavItems } from "../lib/settings-nav-config";
+import { api } from "../services/api";
+import type { VerificationApplication } from "../types";
 
 function ShieldIllustration() {
   return (
@@ -93,6 +96,33 @@ function StatusBadge({ icon, label }: { icon: ReactNode; label: string }) {
 
 export default function GetVerifiedSuccessfulPage() {
   const navigate = useNavigate();
+  const [verification, setVerification] = useState<VerificationApplication | null>(null);
+  const [loading, setLoading] = useState(true);
+
+  useEffect(() => {
+    let mounted = true;
+    api.verificationMe()
+      .then((response) => {
+        if (mounted) setVerification(response.data);
+      })
+      .catch(() => {
+        if (mounted) setVerification(null);
+      })
+      .finally(() => {
+        if (mounted) setLoading(false);
+      });
+    return () => {
+      mounted = false;
+    };
+  }, []);
+
+  const statusLabel = verification?.status === "APPROVED"
+    ? "Approved"
+    : verification?.status === "REJECTED"
+      ? "Rejected"
+      : verification?.status === "IN_REVIEW"
+        ? "In Review"
+        : "Under Review";
 
   return (
     <div className="min-h-screen bg-page text-ink">
@@ -114,15 +144,19 @@ export default function GetVerifiedSuccessfulPage() {
               <ShieldIllustration />
               <h1 className="mt-2 text-[28px] font-semibold text-[#1f1d27] sm:text-[30px]">Verification Request Submitted</h1>
               <p className="mt-2 text-[14px] text-[#8f8b98]">
-                Your payment was successful and your verification request has been submitted for review
+                Your verification request has been submitted. Approval is only granted after admin review.
               </p>
             </div>
 
             <div className="mx-auto mt-6 w-full max-w-[980px] rounded-card border border-[#e2e1e8] bg-white p-6 shadow-[0_8px_30px_rgba(0,0,0,0.04)]">
               <div className="flex flex-wrap items-center justify-between gap-3">
                 <h2 className="text-[16px] font-semibold text-[#1f1d27]">Verification Status</h2>
-                <StatusBadge icon={<BadgeClockIcon />} label="Under Review" />
+                <StatusBadge icon={<BadgeClockIcon />} label={loading ? "Loading..." : statusLabel} />
               </div>
+
+              {verification?.status === "REJECTED" && verification.rejectionReason ? (
+                <p className="mt-4 rounded-[10px] bg-[#fff0f0] px-3 py-2 text-[13px] text-[#c24141]">{verification.rejectionReason}</p>
+              ) : null}
 
               <div className="mt-5 grid grid-cols-1 gap-6 md:grid-cols-2">
                 <div className="flex items-center gap-3">

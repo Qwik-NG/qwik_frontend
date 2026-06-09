@@ -1,3 +1,4 @@
+import { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { SiteFooter, SiteHeader } from "../components/AppShell";
 import SettingsSidebar, { MobileSettingsMenu } from "../components/settings/SettingsSidebar";
@@ -5,6 +6,35 @@ import FormInput from "../components/ui/FormInput";
 import FormSelect from "../components/ui/FormSelect";
 import { ROUTES } from "../constants/routes";
 import { getSettingsNavItems } from "../lib/settings-nav-config";
+import { api } from "../services/api";
+
+type BusinessInfo = {
+  businessName: string;
+  storeName: string;
+  businessType: string;
+  businessCategory: string;
+  email: string;
+  phone: string;
+  address: string;
+  state: string;
+  city: string;
+  nin: string;
+  dateOfBirth: string;
+};
+
+const emptyBusinessInfo: BusinessInfo = {
+  businessName: "",
+  storeName: "",
+  businessType: "",
+  businessCategory: "",
+  email: "",
+  phone: "",
+  address: "",
+  state: "",
+  city: "",
+  nin: "",
+  dateOfBirth: "",
+};
 
 function StoreIcon() {
   return (
@@ -58,6 +88,53 @@ function StepDot({ active, label }: { active?: boolean; label: string }) {
 
 export default function GetVerifiedBusinessInfoPage() {
   const navigate = useNavigate();
+  const [verificationId, setVerificationId] = useState<string | null>(null);
+  const [form, setForm] = useState<BusinessInfo>(emptyBusinessInfo);
+  const [loading, setLoading] = useState(true);
+  const [saving, setSaving] = useState(false);
+  const [error, setError] = useState<string | null>(null);
+
+  useEffect(() => {
+    let mounted = true;
+    async function loadVerification() {
+      try {
+        setLoading(true);
+        setError(null);
+        const current = await api.verificationMe();
+        const verification = current.data ?? (await api.createVerification()).data;
+        if (!mounted) return;
+        setVerificationId(verification.id);
+        setForm({ ...emptyBusinessInfo, ...(verification.businessInfo ?? {}) });
+      } catch (err) {
+        if (mounted) setError(err instanceof Error ? err.message : "Failed to load verification");
+      } finally {
+        if (mounted) setLoading(false);
+      }
+    }
+    loadVerification();
+    return () => {
+      mounted = false;
+    };
+  }, []);
+
+  const updateField = (field: keyof BusinessInfo, value: string) => {
+    setForm((current) => ({ ...current, [field]: value }));
+  };
+
+  const handleContinue = async () => {
+    try {
+      setSaving(true);
+      setError(null);
+      const id = verificationId ?? (await api.createVerification()).data.id;
+      setVerificationId(id);
+      await api.updateVerificationBusinessInfo(id, form);
+      navigate(ROUTES.GET_VERIFIED_DOCUMENT_UPLOAD);
+    } catch (err) {
+      setError(err instanceof Error ? err.message : "Failed to save business information");
+    } finally {
+      setSaving(false);
+    }
+  };
 
   return (
     <div className="min-h-screen bg-page text-ink">
@@ -98,12 +175,16 @@ export default function GetVerifiedBusinessInfoPage() {
                 <StoreIcon />
                 <h2 className="text-[16px] font-semibold text-[#1f1d27]">Business Information</h2>
               </div>
+              {loading ? <p className="mt-3 text-[13px] text-[#8f8b98]">Loading saved verification details...</p> : null}
+              {error ? <p className="mt-3 rounded-[10px] bg-[#fff0f0] px-3 py-2 text-[13px] text-[#c24141]">{error}</p> : null}
 
               <div className="mt-4 grid grid-cols-1 gap-x-8 md:grid-cols-2">
                 <FormInput
                   label="Business Name"
                   type="text"
                   placeholder="Enter your business name"
+                  value={form.businessName}
+                  onChange={(event) => updateField("businessName", event.target.value)}
                   labelClassName="text-[14px] font-medium text-[#1f1d27]"
                   inputClassName="bg-white border-[#c9c7d2]"
                 />
@@ -111,11 +192,15 @@ export default function GetVerifiedBusinessInfoPage() {
                   label="Store Name"
                   type="text"
                   placeholder="Enter your store name"
+                  value={form.storeName}
+                  onChange={(event) => updateField("storeName", event.target.value)}
                   labelClassName="text-[14px] font-medium text-[#1f1d27]"
                   inputClassName="bg-white border-[#c9c7d2]"
                 />
                 <FormSelect
                   label="Business Type"
+                  value={form.businessType}
+                  onChange={(event) => updateField("businessType", event.target.value)}
                   labelClassName="text-[14px] font-medium text-[#1f1d27]"
                   selectClassName="bg-white border-[#c9c7d2]"
                 >
@@ -126,6 +211,8 @@ export default function GetVerifiedBusinessInfoPage() {
                 </FormSelect>
                 <FormSelect
                   label="Business Category"
+                  value={form.businessCategory}
+                  onChange={(event) => updateField("businessCategory", event.target.value)}
                   labelClassName="text-[14px] font-medium text-[#1f1d27]"
                   selectClassName="bg-white border-[#c9c7d2]"
                 >
@@ -146,6 +233,8 @@ export default function GetVerifiedBusinessInfoPage() {
                   label="Email Address"
                   type="email"
                   placeholder="Enter email address"
+                  value={form.email}
+                  onChange={(event) => updateField("email", event.target.value)}
                   labelClassName="text-[14px] font-medium text-[#1f1d27]"
                   inputClassName="bg-white border-[#c9c7d2]"
                 />
@@ -153,6 +242,8 @@ export default function GetVerifiedBusinessInfoPage() {
                   label="Phone Number"
                   type="tel"
                   placeholder="Enter phone number"
+                  value={form.phone}
+                  onChange={(event) => updateField("phone", event.target.value)}
                   labelClassName="text-[14px] font-medium text-[#1f1d27]"
                   inputClassName="bg-white border-[#c9c7d2]"
                 />
@@ -160,12 +251,16 @@ export default function GetVerifiedBusinessInfoPage() {
                   label="Business Address"
                   type="text"
                   placeholder="Enter your business address"
+                  value={form.address}
+                  onChange={(event) => updateField("address", event.target.value)}
                   labelClassName="text-[14px] font-medium text-[#1f1d27]"
                   inputClassName="bg-white border-[#c9c7d2]"
                   containerClassName="md:col-span-2"
                 />
                 <FormSelect
                   label="State"
+                  value={form.state}
+                  onChange={(event) => updateField("state", event.target.value)}
                   labelClassName="text-[14px] font-medium text-[#1f1d27]"
                   selectClassName="bg-white border-[#c9c7d2]"
                 >
@@ -175,6 +270,8 @@ export default function GetVerifiedBusinessInfoPage() {
                 </FormSelect>
                 <FormSelect
                   label="City"
+                  value={form.city}
+                  onChange={(event) => updateField("city", event.target.value)}
                   labelClassName="text-[14px] font-medium text-[#1f1d27]"
                   selectClassName="bg-white border-[#c9c7d2]"
                 >
@@ -194,6 +291,8 @@ export default function GetVerifiedBusinessInfoPage() {
                   label="NIN Number"
                   type="text"
                   placeholder="Enter your NIN number"
+                  value={form.nin}
+                  onChange={(event) => updateField("nin", event.target.value)}
                   labelClassName="text-[14px] font-medium text-[#1f1d27]"
                   inputClassName="bg-white border-[#c9c7d2]"
                 />
@@ -203,6 +302,8 @@ export default function GetVerifiedBusinessInfoPage() {
                     <input
                       type="date"
                       placeholder="Select date of birth"
+                      value={form.dateOfBirth}
+                      onChange={(event) => updateField("dateOfBirth", event.target.value)}
                       className="h-[48px] w-full rounded-btn border border-[#c9c7d2] bg-white px-3 pr-10 text-[14px] text-[#20212a] placeholder:text-[#a3a2ad] focus:outline-none"
                     />
                     <span className="absolute right-3 top-1/2 -translate-y-1/2">
@@ -216,9 +317,10 @@ export default function GetVerifiedBusinessInfoPage() {
                 <button
                   className="flex h-[48px] items-center gap-3 rounded-[12px] bg-gradient-to-r from-amber to-orange px-5 text-[14px] font-medium text-white shadow-glow"
                   type="button"
-                  onClick={() => navigate(ROUTES.GET_VERIFIED_DOCUMENT_UPLOAD)}
+                  onClick={handleContinue}
+                  disabled={loading || saving}
                 >
-                  <span>Continue to upload Document</span>
+                  <span>{saving ? "Saving..." : "Continue to upload Document"}</span>
                   <span className="text-[18px]">-&gt;</span>
                 </button>
               </div>

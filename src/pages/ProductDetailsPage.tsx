@@ -299,6 +299,11 @@ export default function ProductDetailsPage() {
   const sellerAvatarUrl = ad.user?.profile?.avatarUrl || "";
   const sellerMeta = formatMemberSince(ad.user?.createdAt);
   const isOwner = Boolean(currentUser?.id && ad.user?.id === currentUser.id);
+  const sellerVerified = Boolean(
+    ad.user?.verification?.approved ||
+    ad.user?.verification?.status === "APPROVED" ||
+    ad.user?.verificationApplications?.[0]?.status === "APPROVED",
+  );
 
   return (
     <div className="min-h-screen bg-page text-ink">
@@ -335,7 +340,7 @@ export default function ProductDetailsPage() {
             
             {/* Product Info */}
             <div className="pt-10">
-              <p className="mb-2 text-[18px] text-[#57b77a]">Verified Seller</p>
+              {sellerVerified ? <p className="mb-2 text-[18px] text-[#57b77a]">Verified Seller</p> : null}
               <h1 className="text-[42px] leading-tight">{ad.title}</h1>
               <p className="mb-6 mt-1 flex items-center gap-1 text-[18px] text-[#6d6a74]">
                 <LocationPin />

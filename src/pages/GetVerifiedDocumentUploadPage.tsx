@@ -1,9 +1,10 @@
-import { useRef, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { SiteFooter, SiteHeader } from "../components/AppShell";
 import SettingsSidebar, { MobileSettingsMenu } from "../components/settings/SettingsSidebar";
 import { ROUTES } from "../constants/routes";
 import { getSettingsNavItems } from "../lib/settings-nav-config";
+import { api } from "../services/api";
 
 function DocumentIcon() {
   return (
@@ -48,9 +49,18 @@ function formatFileSize(size: number) {
   return `${(size / (1024 * 1024)).toFixed(1)}MB`;
 }
 
-function UploadCard({ title, description }: { title: string; description: string }) {
+function UploadCard({
+  title,
+  description,
+  file,
+  onFileChange,
+}: {
+  title: string;
+  description: string;
+  file: File | null;
+  onFileChange: (file: File | null) => void;
+}) {
   const inputRef = useRef<HTMLInputElement | null>(null);
-  const [selectedFile, setSelectedFile] = useState<{ name: string; size: string } | null>(null);
 
   return (
     <div className="rounded-[14px] border border-dashed border-[#c9c7d2] bg-[#f8f8fa] px-5 py-6 text-center">
@@ -75,20 +85,12 @@ function UploadCard({ title, description }: { title: string; description: string
         className="hidden"
         onChange={(event) => {
           const file = event.target.files?.[0];
-          if (!file) {
-            setSelectedFile(null);
-            return;
-          }
-
-          setSelectedFile({
-            name: file.name,
-            size: formatFileSize(file.size),
-          });
+          onFileChange(file ?? null);
         }}
       />
-      {selectedFile ? (
+      {file ? (
         <p className="mt-3 text-[12px] text-[#1f1d27]">
-          {selectedFile.name} ({selectedFile.size})
+          {file.name} ({formatFileSize(file.size)})
         </p>
       ) : null}
     </div>
@@ -97,6 +99,65 @@ function UploadCard({ title, description }: { title: string; description: string
 
 export default function GetVerifiedDocumentUploadPage() {
   const navigate = useNavigate();
+  const [verificationId, setVerificationId] = useState<string | null>(null);
+  const [files, setFiles] = useState<Record<string, File | null>>({
+    cac_certificate: null,
+    proof_of_address: null,
+    storefront_photo: null,
+  });
+  const [loading, setLoading] = useState(true);
+  const [uploading, setUploading] = useState(false);
+  const [error, setError] = useState<string | null>(null);
+
+  useEffect(() => {
+    let mounted = true;
+    async function loadVerification() {
+      try {
+        setLoading(true);
+        setError(null);
+        const current = await api.verificationMe();
+        const verification = current.data ?? (await api.createVerification()).data;
+        if (mounted) setVerificationId(verification.id);
+      } catch (err) {
+        if (mounted) setError(err instanceof Error ? err.message : "Failed to load verification");
+      } finally {
+        if (mounted) setLoading(false);
+      }
+    }
+    loadVerification();
+    return () => {
+      mounted = false;
+    };
+  }, []);
+
+  const setFile = (purpose: string, file: File | null) => {
+    setFiles((current) => ({ ...current, [purpose]: file }));
+  };
+
+  const handleContinue = async () => {
+    try {
+      setUploading(true);
+      setError(null);
+      const id = verificationId ?? (await api.createVerification()).data.id;
+      setVerificationId(id);
+      const selected = Object.entries(files).filter((entry): entry is [string, File] => Boolean(entry[1]));
+      if (selected.length === 0) {
+        setError("Please choose at least one document before continuing.");
+        return;
+      }
+      const uploadedDocuments = [];
+      for (const [purpose, file] of selected) {
+        const upload = await api.uploadDocuments([file], purpose);
+        uploadedDocuments.push(...upload.data.documents);
+      }
+      await api.addVerificationDocuments(id, uploadedDocuments);
+      navigate(ROUTES.GET_VERIFIED_REVIEW);
+    } catch (err) {
+      setError(err instanceof Error ? err.message : "Failed to upload documents");
+    } finally {
+      setUploading(false);
+    }
+  };
 
   return (
     <div className="min-h-screen bg-page text-ink">
@@ -138,19 +199,27 @@ export default function GetVerifiedDocumentUploadPage() {
                 <h2 className="text-[16px] font-semibold text-[#1f1d27]">Document Upload</h2>
                 <p className="text-[13px] text-[#8f8b98]">Upload clear valid documents, all files are secure and encrypted</p>
               </div>
+              {loading ? <p className="mt-3 text-[13px] text-[#8f8b98]">Loading verification draft...</p> : null}
+              {error ? <p className="mt-3 rounded-[10px] bg-[#fff0f0] px-3 py-2 text-[13px] text-[#c24141]">{error}</p> : null}
 
               <div className="mt-6 grid grid-cols-1 gap-5 sm:grid-cols-2 xl:grid-cols-3">
                 <UploadCard
                   title="CAC Certificate Upload"
                   description="Drag & drop your CAC certificate"
+                  file={files.cac_certificate}
+                  onFileChange={(file) => setFile("cac_certificate", file)}
                 />
                 <UploadCard
                   title="Proof of Address Upload"
                   description="Drag & drop your proof of address"
+                  file={files.proof_of_address}
+                  onFileChange={(file) => setFile("proof_of_address", file)}
                 />
                 <UploadCard
                   title="Storefront Photo Upload"
                   description="Drag & drop your storefront photo"
+                  file={files.storefront_photo}
+                  onFileChange={(file) => setFile("storefront_photo", file)}
                 />
               </div>
 
@@ -166,9 +235,10 @@ export default function GetVerifiedDocumentUploadPage() {
                 <button
                   className="flex h-[44px] items-center gap-3 rounded-[12px] bg-gradient-to-r from-amber to-orange px-6 text-[13px] font-medium text-white shadow-glow"
                   type="button"
-                  onClick={() => navigate(ROUTES.GET_VERIFIED_REVIEW)}
+                  onClick={handleContinue}
+                  disabled={loading || uploading}
                 >
-                  <span>Continue to Review</span>
+                  <span>{uploading ? "Uploading..." : "Continue to Review"}</span>
                   <span className="text-[16px]">-&gt;</span>
                 </button>
               </div>

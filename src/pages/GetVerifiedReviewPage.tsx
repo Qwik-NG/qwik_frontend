@@ -1,8 +1,11 @@
+import { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { SiteFooter, SiteHeader } from "../components/AppShell";
 import SettingsSidebar, { MobileSettingsMenu } from "../components/settings/SettingsSidebar";
 import { ROUTES } from "../constants/routes";
 import { getSettingsNavItems } from "../lib/settings-nav-config";
+import { api } from "../services/api";
+import type { VerificationApplication } from "../types";
 
 function BadgeIcon() {
   return (
@@ -113,6 +116,33 @@ function FileCard({ label, name, size }: { label: string; name: string; size: st
 
 export default function GetVerifiedReviewPage() {
   const navigate = useNavigate();
+  const [verification, setVerification] = useState<VerificationApplication | null>(null);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState<string | null>(null);
+
+  useEffect(() => {
+    let mounted = true;
+    async function loadVerification() {
+      try {
+        setLoading(true);
+        setError(null);
+        const response = await api.verificationMe();
+        if (!mounted) return;
+        setVerification(response.data);
+      } catch (err) {
+        if (mounted) setError(err instanceof Error ? err.message : "Failed to load verification");
+      } finally {
+        if (mounted) setLoading(false);
+      }
+    }
+    loadVerification();
+    return () => {
+      mounted = false;
+    };
+  }, []);
+
+  const businessInfo = verification?.businessInfo ?? {};
+  const documents = verification?.documents ?? [];
 
   return (
     <div className="min-h-screen bg-page text-ink">
@@ -153,31 +183,31 @@ export default function GetVerifiedReviewPage() {
                 <h2 className="text-[18px] font-semibold text-[#1f1d27]">Verification Summary</h2>
                 <p className="mt-1 text-[14px] text-[#8f8b98]">Please review your details below before proceeding.</p>
               </div>
+              {loading ? <p className="mt-3 text-[13px] text-[#8f8b98]">Loading verification summary...</p> : null}
+              {error ? <p className="mt-3 rounded-[10px] bg-[#fff0f0] px-3 py-2 text-[13px] text-[#c24141]">{error}</p> : null}
+              {!loading && !verification ? (
+                <p className="mt-3 rounded-[10px] bg-[#fff6e8] px-3 py-2 text-[13px] text-[#8b5a00]">Start the verification flow before reviewing.</p>
+              ) : null}
 
               <div className="mt-4">
-                <SummaryRow icon={<BadgeIcon />} label="Business Name" value="Dreamz Autos Limited" />
-                <SummaryRow icon={<StoreIcon />} label="Store Name" value="Dreamz Autos Limited" />
-                <SummaryRow icon={<IdIcon />} label="NIN" value="1234567890000" />
+                <SummaryRow icon={<BadgeIcon />} label="Business Name" value={businessInfo.businessName || "Not provided"} />
+                <SummaryRow icon={<StoreIcon />} label="Store Name" value={businessInfo.storeName || "Not provided"} />
+                <SummaryRow icon={<IdIcon />} label="NIN" value={businessInfo.nin || "Not provided"} />
                 <SummaryRow
                   icon={<LocationIcon />}
                   label="Business Address"
-                  value="12 Adeola odeku Street, Victoria Island Lagos State, Nigeria."
+                  value={businessInfo.address || "Not provided"}
                 />
-                <SummaryRow
-                  icon={<FileIcon />}
-                  label="Uploaded CAC"
-                  value={<FileCard label="PDF" name="CAC_Certificate.pdf" size="245KB" />}
-                />
-                <SummaryRow
-                  icon={<FileIcon />}
-                  label="Uploaded Proof of Address"
-                  value={<FileCard label="PDF" name="Proof_of_Address.pdf" size="245KB" />}
-                />
-                <SummaryRow
-                  icon={<FileIcon />}
-                  label="Uploaded Store front"
-                  value={<FileCard label="JPG" name="Store_front.jpg" size="245KB" />}
-                />
+                {documents.length > 0 ? documents.map((document) => (
+                  <SummaryRow
+                    key={document.id ?? document.url}
+                    icon={<FileIcon />}
+                    label={document.purpose.replace(/_/g, " ")}
+                    value={<FileCard label={(document.type ?? "FILE").split("/").pop()?.toUpperCase() ?? "FILE"} name={document.name ?? document.url} size={document.size ? `${Math.round(document.size / 1024)}KB` : "Uploaded"} />}
+                  />
+                )) : (
+                  <SummaryRow icon={<FileIcon />} label="Uploaded Documents" value="No documents attached yet" />
+                )}
               </div>
 
               <div className="mt-4 flex items-center gap-3">
@@ -202,6 +232,7 @@ export default function GetVerifiedReviewPage() {
                   className="flex h-[44px] items-center gap-3 rounded-[12px] bg-gradient-to-r from-amber to-orange px-6 text-[13px] font-medium text-white shadow-glow"
                   type="button"
                   onClick={() => navigate(ROUTES.GET_VERIFIED_PAYMENT)}
+                  disabled={loading || !verification}
                 >
                   <span>Proceed to Payment</span>
                   <span className="text-[16px]">-&gt;</span>
