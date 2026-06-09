@@ -37,13 +37,13 @@ const FURNITURE_TYPE_OPTIONS: Array<"all" | FurnitureType> = ["all", "Chairs", "
 const FURNITURE_ROOM_OPTIONS: Array<"all" | MockFurnitureListing["room"]> = ["all", "Bedroom", "Kitchen", "Home Office / Study"];
 const FURNITURE_CONDITION_OPTIONS: Array<"all" | FurnitureCondition> = ["all", "Brand New", "Used"];
 const FURNITURE_STRIP_OPTIONS: Array<{ name: FurnitureType; image: string }> = [
-  { name: "Chairs", image: "https://images.unsplash.com/photo-1505843513577-22bb7d21e455?w=240" },
-  { name: "Tables", image: "https://images.unsplash.com/photo-1499933374294-4584851497cc?w=240" },
-  { name: "Bed & Frames", image: "https://images.unsplash.com/photo-1505693416388-ac5ce068fe85?w=240" },
-  { name: "Sofas", image: "https://images.unsplash.com/photo-1493663284031-b7e3aefcae8e?w=240" },
-  { name: "TV Stand & Mount", image: "https://images.unsplash.com/photo-1582582429416-f2ef8f0f5bce?w=240" },
-  { name: "Mattresses", image: "https://images.unsplash.com/photo-1631049307264-da0ec9d70304?w=240" },
-  { name: "Wardrobes", image: "https://images.unsplash.com/photo-1595526114035-0d45ed16cfbf?w=240" },
+  { name: "Chairs", image: "/category-images/furniture.png" },
+  { name: "Tables", image: "/category-images/furniture.png" },
+  { name: "Bed & Frames", image: "/category-images/furniture.png" },
+  { name: "Sofas", image: "/category-images/furniture.png" },
+  { name: "TV Stand & Mount", image: "/category-images/furniture.png" },
+  { name: "Mattresses", image: "/category-images/furniture.png" },
+  { name: "Wardrobes", image: "/category-images/furniture.png" },
 ];
 const VERIFIED_OPTIONS: Array<{ label: string; value: VerifiedValue }> = [
   { label: "Show All", value: "all" },
@@ -113,7 +113,14 @@ function StripBubble({
   return (
     <button type="button" onClick={onClick} className="flex min-w-[110px] flex-col items-center gap-2 text-center sm:min-w-[118px]">
       <span className={`grid h-[74px] w-[74px] place-items-center overflow-hidden rounded-full border ${active ? "border-[#1f1d27]" : "border-[#ddd9d2]"}`}>
-        <img src={image} alt={name} className="h-full w-full object-cover" />
+        <img
+          src={image}
+          alt={name}
+          className="h-full w-full object-cover"
+          onError={(event) => {
+            event.currentTarget.src = "/category-images/image.png";
+          }}
+        />
       </span>
       <span className="text-[15px] font-medium leading-[1.15] text-[#1f1d27]">{name}</span>
     </button>
