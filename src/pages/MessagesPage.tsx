@@ -3,6 +3,7 @@ import { useLocation, useNavigate } from "react-router-dom";
 import { SiteFooter, SiteHeader } from "../components/AppShell";
 import { UserAvatar } from "../components/ui/UserAvatar";
 import { api } from "../services/api";
+import { getRealtimeSocket, joinConversation } from "../services/realtime";
 import type { Conversation, Message } from "../types";
 
 const QUICK_EMOJIS = ["😀", "😂", "❤️", "👍", "🙏", "🔥"];
@@ -104,6 +105,11 @@ function ChatBubble({ message, mine }: { message: Message; mine: boolean }) {
       </div>
     </div>
   );
+}
+
+function appendMessage(messages: Message[] | undefined, message: Message) {
+  if (messages?.some((item) => item.id === message.id)) return messages;
+  return [...(messages || []), message];
 }
 
 export default function MessagesPage() {
@@ -285,6 +291,71 @@ export default function MessagesPage() {
     setDraftMessage((current) => `${current}${emoji}`);
     setEmojiOpen(false);
   };
+
+  const mergeMessageIntoConversation = useCallback((conversationId: string, message: Message) => {
+    setConversations((current) =>
+      current
+        .map((conversation) =>
+          conversation.id === conversationId
+            ? {
+                ...conversation,
+                lastMessage: message,
+                lastMessageAt: message.createdAt,
+                messages: appendMessage(conversation.messages, message),
+              }
+            : conversation,
+        )
+        .sort((a, b) => new Date(b.lastMessageAt || 0).getTime() - new Date(a.lastMessageAt || 0).getTime()),
+    );
+  }, []);
+
+  useEffect(() => {
+    const socket = getRealtimeSocket();
+    if (!socket) return;
+
+    const handleNewMessage = ({ conversationId, message }: { conversationId: string; message: Message }) => {
+      mergeMessageIntoConversation(conversationId, message);
+    };
+
+    const handleConversationUpdated = ({
+      conversationId,
+      lastMessage,
+      lastMessageAt,
+    }: {
+      conversationId: string;
+      lastMessage?: Message;
+      lastMessageAt?: string;
+    }) => {
+      setConversations((current) =>
+        current
+          .map((conversation) =>
+            conversation.id === conversationId
+              ? {
+                  ...conversation,
+                  lastMessage: lastMessage || conversation.lastMessage,
+                  lastMessageAt: lastMessageAt || conversation.lastMessageAt,
+                  messages: lastMessage ? appendMessage(conversation.messages, lastMessage) : conversation.messages,
+                }
+              : conversation,
+          )
+          .sort((a, b) => new Date(b.lastMessageAt || 0).getTime() - new Date(a.lastMessageAt || 0).getTime()),
+      );
+    };
+
+    socket.on("message:new", handleNewMessage);
+    socket.on("conversation:updated", handleConversationUpdated);
+
+    return () => {
+      socket.off("message:new", handleNewMessage);
+      socket.off("conversation:updated", handleConversationUpdated);
+    };
+  }, [mergeMessageIntoConversation]);
+
+  useEffect(() => {
+    if (selectedConversationId) {
+      joinConversation(selectedConversationId);
+    }
+  }, [selectedConversationId]);
 
   return (
     <div className="min-h-screen bg-page font-outfit text-ink">

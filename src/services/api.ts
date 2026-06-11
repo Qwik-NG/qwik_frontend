@@ -60,6 +60,7 @@ const GET_CACHE = new Map<string, CachedResponse>();
 const ADS_STALE_TIME = 30_000;
 const AD_DETAILS_STALE_TIME = 60_000;
 const CATEGORIES_STALE_TIME = 5 * 60_000;
+const SHORT_LIST_STALE_TIME = 15_000;
 
 function sleep(ms: number) {
   return new Promise((resolve) => window.setTimeout(resolve, ms));
@@ -236,19 +237,35 @@ export const api = {
       body: JSON.stringify(payload),
     }),
 
-  getUserAds: (status?: string) => request<Ad[]>(`/users/me/ads${status ? `?status=${status}` : ""}`),
+  getUserAds: (status?: string) =>
+    request<Ad[]>(`/users/me/ads${status ? `?status=${status}` : ""}`, {
+      staleTime: SHORT_LIST_STALE_TIME,
+      cacheTime: SHORT_LIST_STALE_TIME * 2,
+      retry: 1,
+    }),
 
   // ===== Saved Ads Endpoints =====
-  savedAds: () => request<Ad[]>("/users/me/saved"),
+  savedAds: () =>
+    request<Ad[]>("/users/me/saved", {
+      staleTime: SHORT_LIST_STALE_TIME,
+      cacheTime: SHORT_LIST_STALE_TIME * 2,
+      retry: 1,
+    }),
 
   saveAd: (id: string) =>
     request<null>(`/ads/${id}/save`, {
       method: "POST"
+    }).then((response) => {
+      GET_CACHE.clear();
+      return response;
     }),
 
   unsaveAd: (id: string) =>
     request<null>(`/ads/${id}/save`, {
       method: "DELETE"
+    }).then((response) => {
+      GET_CACHE.clear();
+      return response;
     }),
 
   isSaved: (id: string) => request<{ saved: boolean }>(`/ads/${id}/saved`),
@@ -273,20 +290,36 @@ export const api = {
   getConversation: (id: string) => request<Conversation>(`/conversations/${id}`, { retry: 1 }),
 
   createConversation: (payload: ConversationCreatePayload) =>
-    request<Conversation>("/conversations", { method: "POST", body: JSON.stringify(payload) }),
+    request<Conversation>("/conversations", { method: "POST", body: JSON.stringify(payload) }).then((response) => {
+      GET_CACHE.clear();
+      return response;
+    }),
 
   sendMessage: (payload: MessageSendPayload) =>
-    request<Message>("/messages", { method: "POST", body: JSON.stringify(payload) }),
+    request<Message>("/messages", { method: "POST", body: JSON.stringify(payload) }).then((response) => {
+      GET_CACHE.clear();
+      return response;
+    }),
 
   // ===== Notification Endpoints =====
   getNotifications: (unreadOnly?: boolean) =>
-    request<Notification[]>(`/notifications${unreadOnly ? "?unread=true" : ""}`, { retry: 1 }),
+    request<Notification[]>(`/notifications${unreadOnly ? "?unread=true" : ""}`, {
+      staleTime: SHORT_LIST_STALE_TIME,
+      cacheTime: SHORT_LIST_STALE_TIME * 2,
+      retry: 1,
+    }),
 
   markNotificationAsRead: (id: string) =>
-    request<Notification>(`/notifications/${id}/read`, { method: "PATCH" }),
+    request<Notification>(`/notifications/${id}/read`, { method: "PATCH" }).then((response) => {
+      GET_CACHE.clear();
+      return response;
+    }),
 
   markAllNotificationsAsRead: () =>
-    request<null>("/notifications/read-all", { method: "PATCH" }),
+    request<null>("/notifications/read-all", { method: "PATCH" }).then((response) => {
+      GET_CACHE.clear();
+      return response;
+    }),
 
   getNotificationSettings: () =>
     request<NotificationSettings>("/users/me/notification-settings", { retry: 1 }),

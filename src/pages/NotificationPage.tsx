@@ -3,6 +3,7 @@ import type { ReactNode } from "react";
 import { useNavigate } from "react-router-dom";
 import { SiteFooter, SiteHeader } from "../components/AppShell";
 import { api } from "../services/api";
+import { getRealtimeSocket } from "../services/realtime";
 import type { Notification } from "../types";
 
 function BellIcon({ small = false }: { small?: boolean }) {
@@ -61,6 +62,23 @@ export default function NotificationPage() {
 
   useEffect(() => {
     void loadNotifications();
+  }, []);
+
+  useEffect(() => {
+    const socket = getRealtimeSocket();
+    if (!socket) return;
+
+    const handleNotification = ({ notification }: { notification: Notification }) => {
+      setNotifications((current) => {
+        if (current.some((item) => item.id === notification.id)) return current;
+        return [notification, ...current];
+      });
+    };
+
+    socket.on("notification:new", handleNotification);
+    return () => {
+      socket.off("notification:new", handleNotification);
+    };
   }, []);
 
   const markRead = async (notification: Notification) => {
