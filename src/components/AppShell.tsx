@@ -1,6 +1,6 @@
-import { useState, type ReactNode } from "react";
+import { useEffect, useRef, useState, type ReactNode } from "react";
+import { useLocation } from "react-router-dom";
 import { LocationPin } from "./icons/LocationPin";
-import { buildSearchRoute } from "../constants/routes";
 import { ROUTES } from "../constants/routes";
 import { useCurrentUser } from "../hooks/useCurrentUser";
 import { UserAvatar } from "./ui/UserAvatar";
@@ -56,6 +56,27 @@ function SearchIcon() {
   );
 }
 
+const MARKETPLACE_SEARCH_PATHS = [ROUTES.HOME, ROUTES.SEARCH, ROUTES.SEARCH_RESULTS, ROUTES.SEARCH_RESULTS_LIST];
+const LOCATION_OPTIONS = [
+  "All Nigeria",
+  "Lagos",
+  "Abuja",
+  "Port Harcourt",
+  "Kano",
+  "Ibadan",
+  "Enugu",
+  "Kaduna",
+  "Benin City",
+];
+
+function shouldShowHeaderSearch(pathname: string) {
+  return (
+    MARKETPLACE_SEARCH_PATHS.includes(pathname) ||
+    pathname.startsWith("/product-details/") ||
+    pathname.startsWith("/products/")
+  );
+}
+
 export function SiteHeader({
   navigate,
   activeIcon,
@@ -64,12 +85,65 @@ export function SiteHeader({
   activeIcon?: HeaderIcon;
 }) {
   const [searchQuery, setSearchQuery] = useState("");
+  const [selectedLocation, setSelectedLocation] = useState("All Nigeria");
+  const [locationOpen, setLocationOpen] = useState(false);
+  const locationRef = useRef<HTMLDivElement | null>(null);
+  const location = useLocation();
   const { display: currentUser } = useCurrentUser();
+  const showSearch = shouldShowHeaderSearch(location.pathname);
+  const locationLabel = selectedLocation === "All Nigeria" ? "Nig." : selectedLocation;
 
   const handleSearchSubmit = (event: React.FormEvent<HTMLFormElement>) => {
     event.preventDefault();
-    navigate(buildSearchRoute(searchQuery.trim() || undefined));
+    const params = new URLSearchParams();
+    const query = searchQuery.trim();
+    if (query) params.set("q", query);
+    if (selectedLocation !== "All Nigeria") params.set("location", selectedLocation);
+    navigate(`${ROUTES.SEARCH}${params.toString() ? `?${params.toString()}` : ""}`);
   };
+
+  const handleLocationSelect = (option: string) => {
+    setSelectedLocation(option);
+    setLocationOpen(false);
+
+    if (!showSearch) return;
+
+    // TODO: remove this frontend URL-state bridge once every category search view consumes backend location filters.
+    const params = new URLSearchParams(location.search);
+    if (option === "All Nigeria") {
+      params.delete("location");
+    } else {
+      params.set("location", option);
+    }
+    navigate(`${location.pathname}${params.toString() ? `?${params.toString()}` : ""}`);
+  };
+
+  useEffect(() => {
+    const nextLocation = new URLSearchParams(location.search).get("location");
+    setSelectedLocation(nextLocation || "All Nigeria");
+  }, [location.search]);
+
+  useEffect(() => {
+    if (!locationOpen) return;
+
+    const handlePointerDown = (event: MouseEvent | TouchEvent) => {
+      if (locationRef.current && !locationRef.current.contains(event.target as Node)) {
+        setLocationOpen(false);
+      }
+    };
+    const handleKeyDown = (event: KeyboardEvent) => {
+      if (event.key === "Escape") setLocationOpen(false);
+    };
+
+    document.addEventListener("mousedown", handlePointerDown);
+    document.addEventListener("touchstart", handlePointerDown);
+    document.addEventListener("keydown", handleKeyDown);
+    return () => {
+      document.removeEventListener("mousedown", handlePointerDown);
+      document.removeEventListener("touchstart", handlePointerDown);
+      document.removeEventListener("keydown", handleKeyDown);
+    };
+  }, [locationOpen]);
 
   return (
     <header className="sticky top-0 z-[100] mx-auto flex w-full max-w-[1728px] flex-wrap items-center gap-2 bg-page/95 px-4 py-0.5 backdrop-blur-sm sm:px-6 lg:gap-4 lg:px-12 lg:py-1">
@@ -85,24 +159,57 @@ export function SiteHeader({
       </button>
 
       <div className="order-3 mt-2.5 flex w-full items-center gap-2.5 lg:order-2 lg:mt-0 lg:flex-1">
-        <form
-          onSubmit={handleSearchSubmit}
-          className="flex h-11 w-full items-center gap-2 rounded-[10px] border-2 border-orange px-3 text-left text-[14px] text-[#b6b3bd] lg:h-[42px] lg:w-[250px] lg:rounded-[8px] lg:px-[13px] lg:text-[16px]"
-        >
-          <button type="submit" className="text-[#f5932b]" aria-label="Search">
-            <SearchIcon />
+        {showSearch ? (
+          <form
+            onSubmit={handleSearchSubmit}
+            className="flex h-11 w-full items-center gap-2 rounded-[10px] border-2 border-orange px-3 text-left text-[14px] text-[#b6b3bd] lg:h-[42px] lg:w-[250px] lg:rounded-[8px] lg:px-[13px] lg:text-[16px]"
+          >
+            <button type="submit" className="text-[#f5932b]" aria-label="Search">
+              <SearchIcon />
+            </button>
+            <input
+              value={searchQuery}
+              onChange={(event) => setSearchQuery(event.target.value)}
+              className="w-full bg-transparent text-[#1f1d27] outline-none placeholder:text-[#b6b3bd]"
+              placeholder="I am looking for ..."
+              aria-label="Search listings"
+            />
+          </form>
+        ) : null}
+        <div ref={locationRef} className="relative shrink-0">
+          <button
+            type="button"
+            onClick={() => setLocationOpen((open) => !open)}
+            aria-haspopup="listbox"
+            aria-expanded={locationOpen}
+            className="flex h-10 max-w-[160px] items-center gap-1 rounded-lg px-2 text-[15px] text-[#6f6c78] transition hover:bg-white hover:text-[#1f1d27] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#ff9715] focus-visible:ring-offset-2 focus-visible:ring-offset-page active:scale-[0.98] sm:max-w-[190px] sm:text-[16px]"
+          >
+            <LocationPin className="h-4 w-4 shrink-0" />
+            <span className="truncate">{locationLabel}</span>
+            <span className={`text-[12px] transition ${locationOpen ? "rotate-180" : ""}`} aria-hidden="true">⌄</span>
           </button>
-          <input
-            value={searchQuery}
-            onChange={(event) => setSearchQuery(event.target.value)}
-            className="w-full bg-transparent text-[#1f1d27] outline-none placeholder:text-[#b6b3bd]"
-            placeholder="I am looking for ..."
-            aria-label="Search listings"
-          />
-        </form>
-        <div className="flex shrink-0 items-center gap-1 text-[15px] text-[#9c98a5] sm:text-[16px]">
-          <LocationPin className="h-4 w-4" />
-          <span>Nig.</span>
+          {locationOpen ? (
+            <div
+              role="listbox"
+              aria-label="Choose location"
+              className="absolute left-0 top-[calc(100%+8px)] z-[120] w-[210px] overflow-hidden rounded-[14px] border border-[#e8e5df] bg-white py-2 shadow-[0_18px_50px_rgba(31,29,39,0.16)]"
+            >
+              {LOCATION_OPTIONS.map((option) => (
+                <button
+                  key={option}
+                  type="button"
+                  role="option"
+                  aria-selected={selectedLocation === option}
+                  onClick={() => handleLocationSelect(option)}
+                  className={`block w-full px-4 py-2.5 text-left text-[14px] transition hover:bg-[#fff3e5] focus:bg-[#fff3e5] focus:outline-none ${
+                    selectedLocation === option ? "font-semibold text-[#ff9715]" : "text-[#3f3c48]"
+                  }`}
+                >
+                  {option}
+                </button>
+              ))}
+            </div>
+          ) : null}
         </div>
       </div>
 

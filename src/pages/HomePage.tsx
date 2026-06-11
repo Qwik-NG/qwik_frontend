@@ -3,7 +3,6 @@ import { useCallback, useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { SiteFooter, SiteHeader } from "../components/AppShell";
 import { buildSearchResultsRoute, buildSearchRoute } from "../constants/routes";
-import { MoreIcon } from "../components/icons/CategoryIcons";
 import { ImagePlaceholder } from "../components/ui/ImagePlaceholder";
 import { api } from "../services/api";
 
@@ -25,8 +24,7 @@ const categories: Category[] = [
   { name: "Electronics", shortName: "Electronics", image: "/category-images/electronics.png", tone: "#ebeef3", route: buildSearchRoute("Electronics") },
   { name: "Properties", shortName: "Properties", image: "/category-images/properties.png", tone: "#e2f1e9", route: buildSearchResultsRoute("Home") },
   { name: "Furniture & Appliances", shortName: "Furniture", image: "/category-images/furniture.png", tone: "#f4e3f4", route: buildSearchRoute("Furniture") },
-  { name: "Beauty", shortName: "Beauty", image: "/category-images/beauty.png", tone: "#f1e4ee", route: buildSearchRoute("Beauty") },
-  { name: "More", shortName: "More", icon: MoreIcon, tone: "#f2f1ef", route: "/search-results-list" }
+  { name: "Beauty", shortName: "Beauty", image: "/category-images/beauty.png", tone: "#f1e4ee", route: buildSearchRoute("Beauty") }
 ];
 
 function LocationPin({ className = "h-4 w-4" }: { className?: string }) {
@@ -118,7 +116,7 @@ export default function HomePage() {
       <SiteHeader navigate={navigate} />
 
       <section className="mx-auto w-full max-w-[1728px] px-4 pb-1 pt-6 sm:px-6 sm:pt-9 lg:px-12 xl:pt-12">
-        <div className="grid grid-cols-3 justify-items-center gap-x-4 gap-y-4 min-[420px]:grid-cols-4 sm:grid-cols-5 sm:gap-x-5 sm:gap-y-5 lg:grid-cols-9 lg:gap-x-4">
+        <div className="grid grid-cols-3 justify-items-center gap-x-4 gap-y-4 min-[420px]:grid-cols-4 sm:grid-cols-4 sm:gap-x-5 sm:gap-y-5 lg:grid-cols-8 lg:gap-x-4">
           {categories.map((item) => (
             <CategoryCard key={item.name} item={item} onClick={() => navigate(item.route)} />
           ))}

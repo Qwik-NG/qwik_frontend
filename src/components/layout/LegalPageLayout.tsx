@@ -29,8 +29,8 @@ export default function LegalPageLayout({ eyebrow, title, subtitle, intro, secti
             <section key={section.title}>
               <h2 className="text-[20px] font-semibold leading-[1.25] text-[#1f1d27] sm:text-[24px]">{section.title}</h2>
               <div className="mt-3 space-y-3 text-[15px] leading-[1.75] text-[#5f5d6c] sm:text-[16px]">
-                {section.body.map((paragraph) => (
-                  <p key={paragraph}>{paragraph}</p>
+                {section.body.map((paragraph, index) => (
+                  <p key={`${section.title}-${index}`}>{paragraph}</p>
                 ))}
               </div>
             </section>
