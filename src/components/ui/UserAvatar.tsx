@@ -1,4 +1,5 @@
 import { getUserInitials } from "../../lib/currentUser";
+import { useEffect, useState } from "react";
 
 type UserAvatarProps = {
   name: string;
@@ -15,8 +16,14 @@ export function UserAvatar({
   className = "",
   fallbackClassName = "",
 }: UserAvatarProps) {
-  if (imageUrl) {
-    return <img src={imageUrl} alt={alt ?? name} className={className} />;
+  const [imageFailed, setImageFailed] = useState(false);
+
+  useEffect(() => {
+    setImageFailed(false);
+  }, [imageUrl]);
+
+  if (imageUrl && !imageFailed) {
+    return <img src={imageUrl} alt={alt ?? name} className={className} onError={() => setImageFailed(true)} />;
   }
 
   return (
