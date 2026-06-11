@@ -472,12 +472,12 @@ export default function MessagesPage() {
                         <SmileIcon />
                       </button>
                       {emojiOpen ? (
-                        <div className="absolute bottom-[48px] left-0 z-20 grid grid-cols-3 gap-1 rounded-[18px] bg-white p-2 shadow-[0_18px_40px_rgba(10,10,24,0.14)]">
+                        <div className="absolute bottom-[48px] left-0 z-20 grid w-[164px] grid-cols-3 gap-2 rounded-[18px] bg-white p-3 shadow-[0_18px_40px_rgba(10,10,24,0.14)]">
                           {QUICK_EMOJIS.map((emoji) => (
                             <button
                               key={emoji}
                               type="button"
-                              className="grid h-9 w-9 place-items-center rounded-full text-[20px] transition hover:bg-card focus:outline-none focus:ring-2 focus:ring-orange/30"
+                              className="flex h-11 w-11 items-center justify-center rounded-full text-[26px] leading-none transition hover:bg-card focus:outline-none focus:ring-2 focus:ring-orange/30"
                               onClick={() => addEmoji(emoji)}
                             >
                               <span aria-hidden="true">{emoji}</span>
