@@ -2,130 +2,174 @@ import LegalPageLayout from "../components/layout/LegalPageLayout";
 
 const termsSections = [
   {
-    title: "1. Acceptance of These Terms",
+    title: "1. Definitions",
     body: [
-      "These Terms and Conditions of Use govern your access to and use of QWIK.NG, including our website, mobile experiences, marketplace tools, communication features, advertising services, verification services, and related support channels.",
-      "By creating an account, browsing listings, posting an advert, contacting a seller, making an offer, using paid promotional tools, or otherwise using QWIK.NG, you confirm that you have read, understood, and agreed to these Terms of Use and our Privacy Policy.",
-      "If you do not agree to these Terms, you must not access or use QWIK.NG."
-    ]
+      "\"Platform\" means Qwik.ng website, mobile applications, and related services.",
+      "\"User\" means any individual or entity accessing or using the Platform.",
+      "\"Vendor\" means any individual or business offering products or services through the Platform.",
+      "\"Buyer\" means any User purchasing products or services through the Platform.",
+      "\"Company\" means Qwik.ng Online Marketplace Nig. Ltd.",
+    ],
   },
   {
-    title: "2. About QWIK.NG",
+    title: "2. Eligibility",
     body: [
-      "QWIK.NG ONLINE MARKETPLACE NIG. LTD operates an online marketplace that allows users to discover, post, promote, and respond to classified advertisements for products, services, jobs, properties, vehicles, electronics, phones, furniture, fashion, beauty, and other permitted marketplace categories.",
-      "QWIK.NG is a marketplace platform. Unless expressly stated otherwise, QWIK.NG is not the seller, buyer, employer, landlord, agent, payment processor, delivery provider, guarantor, or party to transactions arranged between users."
-    ]
+      "To use the Platform, you must:",
+      "Be at least 18 years old or have the consent of a parent or legal guardian.",
+      "Provide accurate and complete registration information.",
+      "Comply with all applicable laws and regulations.",
+      "The Company reserves the right to refuse registration or suspend accounts at its discretion.",
+    ],
   },
   {
-    title: "3. Eligibility and Account Registration",
+    title: "3. User Accounts",
     body: [
-      "You must be at least 18 years old, or the age of legal majority in your jurisdiction, to create an account or use QWIK.NG for transactions.",
-      "You agree to provide accurate, current, and complete information during registration and to keep your account information updated.",
-      "You are responsible for maintaining the confidentiality of your login credentials and for all activity that occurs under your account.",
-      "QWIK.NG may suspend, restrict, or terminate accounts that contain false information, impersonate another person or business, violate these Terms, or present a risk to users or the platform."
-    ]
+      "Users are responsible for:",
+      "Maintaining the confidentiality of login credentials.",
+      "All activities conducted through their accounts.",
+      "Providing accurate and updated information.",
+      "Users must immediately notify the Company of any unauthorized access or security breach.",
+    ],
   },
   {
-    title: "4. Marketplace Listings and User Content",
+    title: "4. Vendor Obligations",
     body: [
-      "You are responsible for the adverts, images, descriptions, prices, business information, verification documents, messages, reviews, reports, and other content you submit to QWIK.NG.",
-      "You must ensure that each listing is accurate, lawful, not misleading, and placed in the correct category.",
-      "You must not post counterfeit goods, stolen items, illegal products or services, misleading job opportunities, fraudulent property listings, prohibited financial schemes, offensive content, or any content that violates applicable law.",
-      "By submitting content, you grant QWIK.NG a non-exclusive, worldwide, royalty-free licence to host, store, display, reproduce, resize, modify for formatting, distribute, and promote that content for the purpose of operating, improving, marketing, and protecting the marketplace.",
-      "QWIK.NG may remove, demote, edit for formatting, restrict, or reject any listing or content that violates these Terms, appears suspicious, creates legal exposure, or may harm users."
-    ]
+      "Vendors agree to:",
+      "Provide accurate product descriptions and pricing.",
+      "Deliver products and services as advertised.",
+      "Comply with all applicable laws, regulations, and industry standards.",
+      "Possess all licenses, permits, and approvals required for their business operations.",
+      "Vendors shall not list prohibited, counterfeit, illegal, stolen, or fraudulent products.",
+      "The Company reserves the right to remove listings or suspend Vendor accounts that violate these Terms.",
+    ],
   },
   {
-    title: "5. Buyer and Seller Responsibilities",
+    title: "5. Prohibited Items and Activities",
     body: [
-      "Users are responsible for verifying product details, seller identity, item condition, ownership, delivery arrangements, pricing, and payment terms before completing any transaction.",
-      "Sellers must have the legal right to sell or advertise the goods or services they list.",
-      "Buyers must make reasonable checks before paying, sharing sensitive information, or meeting another user.",
-      "Users should use caution when communicating, meeting in person, arranging deliveries, or making payments outside QWIK.NG.",
-      "QWIK.NG does not guarantee the existence, quality, safety, legality, availability, delivery, suitability, or accuracy of items, adverts, users, sellers, buyers, employers, employees, landlords, agents, or service providers."
-    ]
+      "The following are prohibited on the Platform:",
+      "Illegal goods or services.",
+      "Counterfeit products.",
+      "Stolen property.",
+      "Fraudulent schemes.",
+      "Offensive, harmful, or unlawful content.",
+      "Products prohibited under Nigerian law.",
+      "Activities that interfere with the operation of the Platform.",
+      "Any violation may result in account suspension, termination, and reporting to relevant authorities.",
+    ],
   },
   {
-    title: "6. Verification, Badges, and Trust Signals",
+    title: "6. Orders and Payments",
     body: [
-      "QWIK.NG may offer account, business, document, seller, or listing verification features. Verification may require information, uploaded documents, payment records, manual review, and other checks.",
-      "A verification badge or status means only that QWIK.NG has completed certain checks based on information available at the time of review. It is not a warranty, endorsement, guarantee, insurance, or promise that a user or listing is risk-free.",
-      "QWIK.NG may approve, reject, revoke, suspend, or require additional information for verification at any time."
-    ]
+      "All payments made through the Platform must be completed using approved payment methods.",
+      "The Company may utilize third-party payment providers to facilitate transactions.",
+      "The Company reserves the right to cancel, suspend, or refuse transactions suspected to be fraudulent or unlawful.",
+    ],
   },
   {
-    title: "7. Payments, Promotions, and Paid Services",
+    title: "7. Delivery and Fulfillment",
     body: [
-      "QWIK.NG may offer paid services such as promoted adverts, verification fees, premium placements, subscriptions, or other marketplace tools.",
-      "Prices, features, availability, billing terms, and refund rules for paid services may be shown at checkout or in the relevant product page.",
-      "Paid promotional services may increase visibility but do not guarantee sales, leads, ranking, traffic, impressions, messages, or transaction success.",
-      "You must not use stolen cards, unauthorised payment methods, fraudulent chargebacks, or payment activity intended to avoid fees."
-    ]
+      "Vendors are solely responsible for:",
+      "Product availability.",
+      "Packaging.",
+      "Shipping and delivery.",
+      "Product quality and authenticity.",
+      "Delivery timelines will be both agreed between vendors and buyers during the transaction.",
+    ],
   },
   {
-    title: "8. Prohibited Conduct",
+    title: "8. Refunds and Disputes",
     body: [
-      "You must not use QWIK.NG to commit fraud, impersonate others, post misleading adverts, scrape or harvest data, distribute malware, spam users, evade moderation, manipulate reviews, abuse reports, or interfere with platform security.",
-      "You must not bypass account restrictions, create multiple accounts for deceptive purposes, use automated tools without permission, or attempt to access systems, data, or features that you are not authorised to use.",
-      "You must not threaten, harass, discriminate against, exploit, or harm other users."
-    ]
+      "Buyers may report to the company upport if any veriied sellers didnt comply with delivery arrangement with buyers epecially after payment is initiated for a product.",
+      "Refund requests shall be assessed based on:",
+      "Non-delivery of goods.",
+      "Material misrepresentation of products.",
+      "Damaged or defective products.",
+      "Other valid grounds as determined by the Company.",
+      "The Company may mediate disputes between Buyers and Vendors but is not obligated to resolve every dispute.",
+    ],
   },
   {
-    title: "9. Reviews, Reports, Messages, and Communications",
+    title: "9. Intellectual Property",
     body: [
-      "Reviews and reports must be honest, relevant, and based on genuine interactions.",
-      "QWIK.NG may review messages, reports, and other content where necessary to investigate abuse, enforce these Terms, comply with law, or protect users.",
-      "You agree that platform notifications, service emails, security alerts, account messages, support responses, and transaction-related communications may be sent to the contact details connected to your account."
-    ]
+      "All trademarks, logos, software, content, graphics, and branding associated with Qwik.ng are the property of the Company or its licensors.",
+      "Users may not reproduce, distribute, modify, or exploit any content from the Platform without prior written consent.",
+    ],
   },
   {
-    title: "10. Intellectual Property",
+    title: "10. Privacy",
     body: [
-      "QWIK.NG, the QWIK.NG name, logos, interface designs, software, content structure, and marketplace features are owned by or licensed to QWIK.NG ONLINE MARKETPLACE NIG. LTD and are protected by applicable intellectual property laws.",
-      "You may not copy, reproduce, sell, license, reverse engineer, or misuse any part of QWIK.NG except as permitted by these Terms or with our written permission."
-    ]
+      "Use of the Platform is also governed by the Company's Privacy Policy.",
+      "By using the Platform, Users consent to the collection, storage, and processing of information in accordance with the Privacy Policy.",
+    ],
   },
   {
-    title: "11. Suspension and Termination",
+    title: "11. Limitation of Liability",
     body: [
-      "QWIK.NG may suspend, restrict, delete, or terminate your account, listings, messages, verification status, or access to services if we believe you have violated these Terms, created risk for users, failed verification, or engaged in suspicious or unlawful activity.",
-      "You may stop using QWIK.NG at any time. Some information may be retained where required for legal, safety, fraud prevention, dispute resolution, accounting, or legitimate business purposes."
-    ]
+      "Qwik.ng operates as an online marketplace connecting Buyers and Vendors.",
+      "The Company does not manufacture, own, inspect, guarantee, or endorse products listed by Vendors.",
+      "To the maximum extent permitted by law, the Company shall not be liable for:",
+      "Loss of profits.",
+      "Business interruption.",
+      "Data loss.",
+      "Indirect or consequential damages.",
+      "Vendor misconduct.",
+      "Product defects or inaccuracies.",
+      "Users transact at their own risk.",
+    ],
   },
   {
-    title: "12. Disclaimers and Limitation of Liability",
+    title: "12. Indemnification",
     body: [
-      "QWIK.NG is provided on an as-is and as-available basis. We do not promise that the platform will always be uninterrupted, error-free, secure, current, or available in every location.",
-      "To the maximum extent permitted by law, QWIK.NG ONLINE MARKETPLACE NIG. LTD is not liable for indirect, incidental, special, consequential, exemplary, or punitive damages, or for loss of profit, data, goodwill, business opportunity, or transaction value arising from your use of the marketplace.",
-      "Nothing in these Terms limits liability that cannot be limited under applicable law."
-    ]
+      "Users agree to indemnify and hold harmless Qwik.ng Online Marketplace Nig. Ltd., its directors, officers, employees, and agents from any claims, liabilities, damages, losses, or expenses arising from:",
+      "Violation of these Terms.",
+      "Breach of applicable laws.",
+      "Misuse of the Platform.",
+    ],
   },
   {
-    title: "13. Indemnity",
+    title: "13. Account Suspension and Termination",
     body: [
-      "You agree to indemnify and hold QWIK.NG ONLINE MARKETPLACE NIG. LTD, its directors, officers, employees, agents, partners, and service providers harmless from claims, losses, liabilities, damages, costs, and expenses arising from your use of QWIK.NG, your content, your transactions, your breach of these Terms, or your violation of law or third-party rights."
-    ]
+      "The Company may suspend or terminate accounts without prior notice where:",
+      "False information is provided.",
+      "Fraudulent activities are suspected.",
+      "These Terms are violated.",
+      "Legal or regulatory requirements necessitate such action.",
+    ],
   },
   {
-    title: "14. Changes to These Terms",
+    title: "14. Modifications to the Platform",
     body: [
-      "We may update these Terms to reflect changes in our services, legal requirements, marketplace rules, or business operations.",
-      "When we make material changes, we may notify users through the platform, by email, or by updating the effective date. Continued use of QWIK.NG after changes become effective means you accept the updated Terms."
-    ]
+      "The Company reserves the right to modify, suspend, or discontinue any part of the Platform at any time without liability.",
+    ],
   },
   {
-    title: "15. Governing Law and Disputes",
+    title: "15. Force Majeure",
     body: [
-      "These Terms are governed by the laws of the Federal Republic of Nigeria, without regard to conflict of law rules.",
-      "Users agree to first contact QWIK.NG support in good faith to resolve complaints or disputes connected with the platform."
-    ]
+      "The Company shall not be liable for delays or failures resulting from events beyond its reasonable control, including natural disasters, strikes, government actions, internet outages, or technical failures.",
+    ],
   },
   {
-    title: "16. Contact",
+    title: "16. Governing Law",
     body: [
-      "For questions about these Terms, account issues, safety concerns, or legal notices, contact QWIK.NG support through the support channels provided on the platform."
-    ]
-  }
+      "These Terms shall be governed by and construed in accordance with the laws of the Federal Republic of Nigeria.",
+      "Any disputes arising from these Terms shall first be resolved through amicable negotiations. Where resolution cannot be achieved, disputes shall be subject to the jurisdiction of competent courts in Nigeria.",
+    ],
+  },
+  {
+    title: "17. Contact Information",
+    body: [
+      "Qwik.ng Online Marketplace Nig. Ltd.",
+      "Email: [qwik.ngonlinemarketplace@gmail.com]",
+      "Website: www.qwik.ng",
+      "Address: [Metro Command Estate, Phase 2 Plot A&B Life Camp]",
+    ],
+  },
+  {
+    title: "18. Acceptance of Terms",
+    body: [
+      "By accessing or using Qwik.ng, you acknowledge that you have read, understood, and agreed to be bound by these Terms and Conditions.",
+    ],
+  },
 ];
 
 export default function TermsPage() {
@@ -134,7 +178,7 @@ export default function TermsPage() {
       eyebrow="Terms of Use"
       title="Terms and Conditions of Use"
       subtitle="QWIK.NG ONLINE MARKETPLACE NIG. LTD"
-      intro="Please read these Terms carefully before using QWIK.NG. They explain the rules that apply to your account, listings, marketplace activity, verification, paid services, and user content."
+      intro={"Welcome to Qwik.ng (\"Platform\"), owned and operated by Qwik.ng Online Marketplace Nig. Ltd. These Terms and Conditions (\"Terms\") govern your access to and use of the Platform, including all services, features, content, and transactions available through the Platform. By accessing, registering on, or using Qwik.ng, you agree to be bound by these Terms. If you do not agree with these Terms, you should not use the Platform."}
       sections={termsSections}
     />
   );
