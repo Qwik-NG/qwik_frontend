@@ -357,6 +357,14 @@ export default function MessagesPage() {
     navigate("/messages", { replace: true });
   };
 
+  const handleLeaveMessages = () => {
+    if (location.key !== "default" && window.history.length > 1) {
+      navigate(-1);
+      return;
+    }
+    navigate("/");
+  };
+
   const addEmoji = (emoji: string) => {
     setDraftMessage((current) => `${current}${emoji}`);
     setEmojiOpen(false);
@@ -427,7 +435,17 @@ export default function MessagesPage() {
         <section className="mx-auto grid h-dvh min-h-0 w-full max-w-[1080px] grid-cols-1 overflow-hidden bg-white md:h-[calc(100vh-190px)] md:min-h-[560px] md:rounded-[28px] md:p-[10px] md:shadow-[0_24px_60px_rgba(10,10,24,0.04)] lg:h-[720px] lg:grid-cols-[320px_minmax(0,1fr)] lg:p-[18px]">
           <aside className={`${activeConversation ? "hidden lg:flex" : "flex"} min-h-0 min-w-0 flex-col border-card px-[4px] pb-[max(6px,env(safe-area-inset-bottom))] pt-[6px] lg:border-r lg:pb-[6px] lg:pr-[18px]`}>
             <div className="mb-[14px] flex items-center justify-between px-[12px]">
-              <h2 className="text-[20px] font-semibold text-ink">Chats</h2>
+              <div className="flex min-w-0 items-center gap-2">
+                <button
+                  type="button"
+                  className="grid h-10 w-10 shrink-0 place-items-center rounded-full text-muted transition hover:bg-card focus:outline-none focus:ring-2 focus:ring-orange/30 md:hidden"
+                  onClick={handleLeaveMessages}
+                  aria-label="Leave messages"
+                >
+                  <BackIcon />
+                </button>
+                <h2 className="text-[20px] font-semibold text-ink">Chats</h2>
+              </div>
               <span className="rounded-full bg-amber/10 px-3 py-1 text-[13px] text-orange">{conversations.length}</span>
             </div>
             {error ? (
