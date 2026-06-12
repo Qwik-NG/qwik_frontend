@@ -23,12 +23,12 @@ export default function SignUpPage() {
   const canCreate = fullName.trim().length >= 2 && /\S+@\S+\.\S+/.test(email) && isPhoneValid && password.length >= 6 && acceptedLegal;
 
   return (
-    <div className="min-h-screen overflow-hidden bg-[#f3f3f5] font-outfit text-[#1f1f29]">
-      <header className="flex items-center justify-between px-[68px] pt-[46px]">
-        <button onClick={() => navigate("/")} className="text-[36px] font-normal leading-none text-[#ff8300] transition-opacity duration-200 hover:opacity-80 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#ffb357] focus-visible:ring-offset-2 focus-visible:ring-offset-[#f3f3f5] sm:text-[40px]" type="button">
+    <div className="min-h-screen bg-[#f3f3f5] font-outfit text-[#1f1f29]">
+      <header className="flex items-start justify-between gap-4 px-4 pt-5 sm:px-8 sm:pt-7 lg:px-[68px] lg:pt-[46px]">
+        <button onClick={() => navigate("/")} className="shrink-0 text-[34px] font-normal leading-none text-[#ff8300] transition-opacity duration-200 hover:opacity-80 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#ffb357] focus-visible:ring-offset-2 focus-visible:ring-offset-[#f3f3f5] sm:text-[40px]" type="button">
           qwik
         </button>
-        <p className="text-[15px] text-[#9a99a6]">
+        <p className="max-w-[210px] text-right text-[13px] leading-[1.35] text-[#9a99a6] sm:max-w-none sm:text-[15px]">
           Already have an account?{" "}
           <button className="text-[#ff8f00] transition-colors duration-200 hover:text-[#e67f00] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#ffb357] focus-visible:ring-offset-2 focus-visible:ring-offset-[#f3f3f5]" onClick={() => navigate(ROUTES.LOGIN)} type="button">
             Log in
@@ -36,9 +36,9 @@ export default function SignUpPage() {
         </p>
       </header>
 
-      <main className="mx-auto flex h-[calc(100vh-124px)] w-full max-w-[1728px] items-center justify-center px-4 pb-8">
-        <section className="mx-auto w-[540px] rounded-[24px] bg-white px-[26px] pb-[26px] pt-[18px]">
-          <h2 className="mb-[14px] text-center text-[24px] font-normal leading-[1.1] text-[#22222b] whitespace-nowrap">
+      <main className="mx-auto flex min-h-[calc(100dvh-84px)] w-full max-w-[1728px] items-center justify-center px-4 py-8 sm:min-h-[calc(100dvh-100px)]">
+        <section className="mx-auto w-full max-w-[540px] rounded-[24px] bg-white px-[22px] pb-[26px] pt-[18px] sm:px-[26px]">
+          <h2 className="mb-[14px] text-center text-[24px] font-normal leading-[1.1] text-[#22222b]">
             Create a fresh account
           </h2>
 

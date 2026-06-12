@@ -3,6 +3,7 @@ import { Link, useNavigate } from "react-router-dom";
 import { ROUTES } from "../constants/routes";
 import { FacebookIcon, GoogleIcon } from "../components/icons/SocialIcons";
 import AuthLayout from "../components/layout/AuthLayout";
+import { setLoginEmail } from "../services/auth";
 
 export default function SignInPage() {
   const navigate = useNavigate();
@@ -18,7 +19,6 @@ export default function SignInPage() {
       onCreateAccountClick={() => navigate("/signup")}
       cardClassName="w-[455px] rounded-[22px] px-[22px] pb-[22px] pt-[16px]"
       titleClassName="mb-[12px] text-[30px]"
-      headerClassName="px-[68px] pt-[46px]"
     >
           <button
             className="mb-[10px] flex h-[48px] w-full cursor-not-allowed items-center justify-center gap-2 rounded-[10px] bg-[#d9d9dc] text-[14px] text-[#8b8a94] opacity-70 transition-all duration-200"
@@ -77,7 +77,10 @@ export default function SignInPage() {
 
           <button
             disabled={!canContinue}
-            onClick={() => navigate("/")}
+            onClick={() => {
+              setLoginEmail(email.trim().toLowerCase());
+              navigate(ROUTES.LOGIN_PASSWORD);
+            }}
             className={`h-[48px] w-full rounded-[10px] text-[14px] transition-all duration-200 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#ffb357] focus-visible:ring-offset-2 focus-visible:ring-offset-white ${
               canContinue ? "bg-[#3f5db2] text-white hover:bg-[#354aa3] active:scale-[0.99]" : "bg-[#d8d8dc] text-[#b5b4be]"
             }`}
