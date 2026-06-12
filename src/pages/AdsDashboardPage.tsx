@@ -3,6 +3,7 @@ import { useNavigate } from "react-router-dom";
 import { SiteFooter, SiteHeader } from "../components/AppShell";
 import { LocationPin } from "../components/icons/LocationPin";
 import SettingsSidebar, { MobileSettingsMenu } from "../components/settings/SettingsSidebar";
+import { FallbackImage } from "../components/ui/FallbackImage";
 import { ImagePlaceholder } from "../components/ui/ImagePlaceholder";
 import { getSettingsNavItems } from "../lib/settings-nav-config";
 import { api } from "../services/api";
@@ -61,7 +62,13 @@ function AdCard({ ad, onClick }: { ad: DashboardAd; onClick: () => void }) {
     <article className="cursor-pointer rounded-card bg-white p-3.5 transition hover:scale-[1.01]" onClick={onClick}>
       <div className="h-[300px] w-full overflow-hidden rounded-[16px] bg-white">
         {ad.image ? (
-          <img src={ad.image} alt={ad.title} className={`h-full w-full ${ad.fit === "contain" ? "object-contain p-4" : "object-cover"}`} />
+          <FallbackImage
+            src={ad.image}
+            alt={ad.title}
+            fit={ad.fit === "contain" ? "contain" : "cover"}
+            className={`h-full w-full ${ad.fit === "contain" ? "p-4" : ""}`}
+            fallbackClassName="rounded-[16px]"
+          />
         ) : (
           <ImagePlaceholder className="rounded-[16px]" />
         )}

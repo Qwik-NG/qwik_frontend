@@ -1,6 +1,7 @@
 import { useCallback, useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { SiteFooter, SiteHeader } from "../components/AppShell";
+import { FallbackImage } from "../components/ui/FallbackImage";
 import { ImagePlaceholder } from "../components/ui/ImagePlaceholder";
 import { api } from "../services/api";
 import type { Ad } from "../types";
@@ -64,10 +65,12 @@ function SavedCard({ ad, onClick }: { ad: SavedCardAd; onClick: () => void }) {
     <article className="cursor-pointer rounded-[22px] bg-white p-2.5 transition hover:scale-[1.01] sm:rounded-[26px] sm:p-4" onClick={onClick}>
       <div className="h-[170px] w-full overflow-hidden rounded-[14px] bg-white sm:h-[260px] sm:rounded-[18px]">
         {ad.image ? (
-          <img
+          <FallbackImage
             src={ad.image}
             alt={ad.title}
-            className={`h-full w-full ${ad.fit === "contain" ? "object-contain p-4" : "object-cover"}`}
+            fit={ad.fit === "contain" ? "contain" : "cover"}
+            className={`h-full w-full ${ad.fit === "contain" ? "p-4" : ""}`}
+            fallbackClassName="rounded-[14px] sm:rounded-[18px]"
           />
         ) : (
           <ImagePlaceholder className="rounded-[14px] sm:rounded-[18px]" />

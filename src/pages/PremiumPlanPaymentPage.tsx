@@ -26,6 +26,7 @@ export default function PremiumPlanPaymentPage() {
   const navigate = useNavigate();
   const [searchParams] = useSearchParams();
   const adId = searchParams.get("adId")?.trim() ?? "";
+  const selectedPlan = searchParams.get("plan")?.trim() || "premium-30";
   const [submitting, setSubmitting] = useState(false);
   const [message, setMessage] = useState<string | null>(null);
   const [error, setError] = useState<string | null>(adId ? null : "Choose an existing ad before starting promotion.");
@@ -66,6 +67,7 @@ export default function PremiumPlanPaymentPage() {
             <h1 className="text-[28px] font-semibold leading-tight sm:text-[32px]">Premium Plan</h1>
             <p className="mt-2 text-[16px] text-[#8d8996] sm:text-[18px]">Everything you need to grow and scale your business</p>
             <p className="mt-4 text-[32px] font-semibold leading-none sm:text-[34px]">₦4,000 <span className="text-[16px] font-medium text-[#1f1d27]">/ Month</span></p>
+            <p className="mt-2 text-[14px] text-[#ff7f1f]">Selected plan: {selectedPlan === "premium-30" ? "Premium - 30 Days" : "Custom selection"}</p>
 
             <div className="mt-5 rounded-card border border-[#d9d7de] bg-white p-5 sm:p-6">
               <ul className="space-y-4 text-[16px] sm:text-[16px]">

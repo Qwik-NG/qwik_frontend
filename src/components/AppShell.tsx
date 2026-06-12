@@ -178,7 +178,7 @@ export function SiteHeader({
             onSubmit={handleSearchSubmit}
             className={
               mobile
-                ? "flex h-10 min-w-0 max-w-[280px] flex-1 items-center gap-1.5 rounded-[9px] border-2 border-orange px-2 text-left text-[13px] text-[#b6b3bd]"
+                ? "flex h-10 min-w-0 max-w-[280px] flex-1 items-center gap-1.5 rounded-[9px] border-2 border-orange px-2 text-left text-[16px] text-[#b6b3bd]"
                 : "flex h-11 w-full items-center gap-2 rounded-[10px] border-2 border-orange px-3 text-left text-[14px] text-[#b6b3bd] lg:h-[42px] lg:w-[250px] lg:rounded-[8px] lg:px-[13px] lg:text-[16px]"
             }
           >
@@ -188,7 +188,7 @@ export function SiteHeader({
             <input
               value={searchQuery}
               onChange={(event) => setSearchQuery(event.target.value)}
-              className="w-full min-w-0 bg-transparent text-[#1f1d27] outline-none placeholder:text-[#b6b3bd]"
+              className={`w-full min-w-0 bg-transparent text-[#1f1d27] outline-none placeholder:text-[#b6b3bd] ${mobile ? "text-[16px]" : ""}`}
               placeholder={searchPlaceholder}
               aria-label="Search listings"
             />

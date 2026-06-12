@@ -3,6 +3,10 @@
 @tailwind utilities;
 
 @layer base {
+  html {
+    -webkit-text-size-adjust: 100%;
+  }
+
   body {
     @apply m-0 bg-page text-ink font-outfit;
   }
@@ -33,6 +37,12 @@
 }
 
 @media (max-width: 640px) {
+  input,
+  select,
+  textarea {
+    font-size: 16px !important;
+  }
+
   [class*="max-w-[1728px]"] {
     width: 100%;
   }

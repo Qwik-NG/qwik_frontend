@@ -3,7 +3,7 @@ export type ProductCardItem = {
   price: string;
   location: string;
   description: string;
-  image: string;
+  image?: string;
 };
 
 type ProductCardProps = {
@@ -15,6 +15,8 @@ type ProductCardProps = {
 };
 
 import { LocationPin } from "../icons/LocationPin";
+import { FallbackImage } from "../ui/FallbackImage";
+import { ImagePlaceholder } from "../ui/ImagePlaceholder";
 
 export default function ProductCard({
   item,
@@ -25,7 +27,12 @@ export default function ProductCard({
 }: ProductCardProps) {
   return (
     <article className={`cursor-pointer rounded-[18px] bg-white p-3 ${className}`.trim()} onClick={onClick}>
-      <img src={item.image} alt={item.title} className="h-[180px] w-full rounded-[12px] object-cover" />
+      <FallbackImage
+        src={item.image}
+        alt={item.title}
+        className="h-[180px] w-full rounded-[12px]"
+        fallback={<ImagePlaceholder className="h-[180px] rounded-[12px]" />}
+      />
       <div className="pt-3">
         <div className="mb-2 flex items-center justify-between">
           <h4 className="text-[20px] font-semibold">{item.price}</h4>

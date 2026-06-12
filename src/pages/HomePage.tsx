@@ -3,6 +3,7 @@ import { useCallback, useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { SiteFooter, SiteHeader } from "../components/AppShell";
 import { buildSearchResultsRoute, buildSearchRoute } from "../constants/routes";
+import { FallbackImage } from "../components/ui/FallbackImage";
 import { ImagePlaceholder } from "../components/ui/ImagePlaceholder";
 import { api } from "../services/api";
 
@@ -158,7 +159,12 @@ export default function HomePage() {
               >
                 <div className="h-[170px] w-full overflow-hidden rounded-[14px] bg-white sm:h-[260px] sm:rounded-[18px]">
                   {item.images?.[0]?.url ? (
-                    <img src={item.images[0].url} alt={item.title} className="h-full w-full object-cover" />
+                    <FallbackImage
+                      src={item.images[0].url}
+                      alt={item.title}
+                      className="h-full w-full"
+                      fallbackClassName="rounded-[14px] sm:rounded-[18px]"
+                    />
                   ) : (
                     <ImagePlaceholder className="rounded-[14px] sm:rounded-[18px]" />
                   )}

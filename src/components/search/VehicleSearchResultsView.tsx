@@ -6,6 +6,7 @@ import {
 } from "../../constants/routes";
 import { isCategoryMarkerQuery } from "../../lib/searchContext";
 import ListingCard from "../listings/ListingCard";
+import { FallbackImage } from "../ui/FallbackImage";
 import BackButton from "../ui/BackButton";
 import { LocationPin } from "../icons/LocationPin";
 import { ImagePlaceholder } from "../ui/ImagePlaceholder";
@@ -161,7 +162,12 @@ function VehicleListCard({ item, onClick }: { item: MockVehicleListing; onClick:
             </span>
           ) : null}
           {item.ad.images?.[0]?.url ? (
-            <img src={item.ad.images[0].url} alt={item.ad.title} className="h-full w-full object-cover" />
+            <FallbackImage
+              src={item.ad.images[0].url}
+              alt={item.ad.title}
+              className="h-full w-full"
+              fallbackClassName="rounded-[18px]"
+            />
           ) : (
             <ImagePlaceholder className="rounded-[18px]" />
           )}

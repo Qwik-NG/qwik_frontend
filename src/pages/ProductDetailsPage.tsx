@@ -1,6 +1,7 @@
 import { useCallback, useEffect, useState } from "react";
 import { useNavigate, useParams } from "react-router-dom";
 import { SiteFooter, SiteHeader } from "../components/AppShell";
+import { FallbackImage } from "../components/ui/FallbackImage";
 import { ImagePlaceholder } from "../components/ui/ImagePlaceholder";
 import { UserAvatar } from "../components/ui/UserAvatar";
 import { useToast } from "../context/ToastContext";
@@ -32,7 +33,12 @@ function ProductCard({ item, onClick }: { item: SimilarAd; onClick: () => void }
     <article className="cursor-pointer rounded-[18px] bg-white p-3" onClick={onClick}>
       <div className="h-[180px] w-full overflow-hidden rounded-[12px] bg-white">
         {item.images?.[0]?.url ? (
-          <img src={item.images[0].url} alt={item.title} className="h-full w-full object-cover" />
+          <FallbackImage
+            src={item.images[0].url}
+            alt={item.title}
+            className="h-full w-full"
+            fallbackClassName="rounded-[12px]"
+          />
         ) : (
           <ImagePlaceholder className="rounded-[12px]" />
         )}
@@ -320,7 +326,12 @@ export default function ProductDetailsPage() {
             <div>
               <div className="h-[430px] w-full overflow-hidden rounded-[14px] bg-white">
                 {selected ? (
-                  <img src={selected} alt={ad.title} className="h-full w-full object-cover" />
+                  <FallbackImage
+                    src={selected}
+                    alt={ad.title}
+                    className="h-full w-full"
+                    fallbackClassName="rounded-[14px]"
+                  />
                 ) : (
                   <ImagePlaceholder className="rounded-[14px]" />
                 )}
@@ -334,7 +345,12 @@ export default function ProductDetailsPage() {
                       onClick={() => setActiveImage(idx)}
                       type="button"
                     >
-                      <img src={src} alt={`thumb-${idx + 1}`} className="h-[54px] w-full object-cover" />
+                      <FallbackImage
+                        src={src}
+                        alt={`thumb-${idx + 1}`}
+                        className="h-[54px] w-full"
+                        fallbackClassName="h-[54px]"
+                      />
                     </button>
                   ))}
                 </div>

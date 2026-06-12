@@ -5,6 +5,34 @@ import { ROUTES, buildProductDetailsRoute } from "../constants/routes";
 import { api } from "../services/api";
 import type { Ad } from "../types";
 
+type PromotionPlan = "top-7" | "premium-30";
+
+const PROMOTION_PLANS: Array<{
+  id: PromotionPlan;
+  title: string;
+  label: string;
+  duration: string;
+  price: string;
+  helper: string;
+}> = [
+  {
+    id: "top-7",
+    title: "TOP",
+    label: "Promote this ad with TOP",
+    duration: "7 Days",
+    price: "₦1,500",
+    helper: "A simple boost for fresh visibility.",
+  },
+  {
+    id: "premium-30",
+    title: "Premium",
+    label: "Promote this ad with Premium",
+    duration: "30 Days",
+    price: "₦4,000",
+    helper: "Longer placement for higher repeat exposure.",
+  },
+];
+
 function DayPill({ label, active = false }: { label: string; active?: boolean }) {
   return (
     <span
@@ -33,6 +61,7 @@ export default function PromoteAdPage() {
   const navigate = useNavigate();
   const [searchParams] = useSearchParams();
   const adId = searchParams.get("adId")?.trim() ?? "";
+  const [selectedPlan, setSelectedPlan] = useState<PromotionPlan | null>(null);
   const [ad, setAd] = useState<Ad | null>(null);
   const [loading, setLoading] = useState(Boolean(adId));
   const [error, setError] = useState<string | null>(null);
@@ -76,7 +105,17 @@ export default function PromoteAdPage() {
       setError("Create an ad before choosing a promotion.");
       return;
     }
-    navigate(`${path}?adId=${encodeURIComponent(adId)}`);
+    navigate(`${path}?adId=${encodeURIComponent(adId)}&plan=${encodeURIComponent(selectedPlan ?? "")}`);
+  };
+
+  const handleContinue = () => {
+    if (!selectedPlan) {
+      setError("Select a promotion plan to continue to payment.");
+      return;
+    }
+
+    setError(null);
+    openPayment(selectedPlan === "premium-30" ? ROUTES.PREMIUM_PLAN_PAYMENT : ROUTES.PLAN_PAYMENT);
   };
 
   return (
@@ -142,40 +181,68 @@ export default function PromoteAdPage() {
                 <span className="text-[#57a56d]">Already live</span>
               </button>
 
-              <button
-                type="button"
-                onClick={() => openPayment(ROUTES.PLAN_PAYMENT)}
-                className="mb-5 w-full rounded-[10px] border border-[#d8d8de] p-3 text-left transition hover:border-orange focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-orange"
-              >
-                <p className="mb-3 text-[14px] text-[#8f8c98] sm:text-[15px]">Promote this ad with TOP</p>
-                <div className="flex flex-wrap items-center justify-between gap-3">
-                  <div className="flex gap-2">
-                    <DayPill label="7 Days" active />
-                    <DayPill label="30 Days" />
-                  </div>
-                  <span className="text-[18px] text-[#9b97a4] sm:text-[20px]">₦1,500</span>
-                </div>
-              </button>
+              <div className="mb-6 space-y-4">
+                {PROMOTION_PLANS.map((plan) => {
+                  const isSelected = selectedPlan === plan.id;
+                  return (
+                    <button
+                      key={plan.id}
+                      type="button"
+                      onClick={() => {
+                        setSelectedPlan(plan.id);
+                        setError(null);
+                      }}
+                      className={`w-full rounded-[12px] border p-3 text-left transition focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-orange ${
+                        isSelected
+                          ? "border-orange bg-[#fff6ea] shadow-[0_10px_24px_rgba(255,151,21,0.14)]"
+                          : "border-[#d8d8de] hover:border-orange"
+                      }`}
+                    >
+                      <div className="mb-3 flex items-start justify-between gap-3">
+                        <div>
+                          <p className="text-[14px] text-[#8f8c98] sm:text-[15px]">{plan.label}</p>
+                          <p className="mt-1 text-[13px] text-[#a09ba7]">{plan.helper}</p>
+                        </div>
+                        <span
+                          className={`mt-0.5 grid h-6 w-6 place-items-center rounded-full border text-[14px] ${
+                            isSelected
+                              ? "border-orange bg-orange text-white"
+                              : "border-[#d0ccd6] text-transparent"
+                          }`}
+                          aria-hidden="true"
+                        >
+                          ✓
+                        </span>
+                      </div>
+                      <div className="flex flex-wrap items-center justify-between gap-3">
+                        <div className="flex gap-2">
+                          <DayPill label={plan.duration} active />
+                          <DayPill label={plan.id === "top-7" ? "30 Days" : "7 Days"} />
+                        </div>
+                        <span className={`text-[18px] sm:text-[20px] ${isSelected ? "text-[#ff7f1f]" : "text-[#9b97a4]"}`}>
+                          {plan.price}
+                        </span>
+                      </div>
+                    </button>
+                  );
+                })}
+              </div>
+
+              {error ? <p className="mb-4 text-[14px] text-[#d14343]">{error}</p> : null}
 
               <button
                 type="button"
-                onClick={() => openPayment(ROUTES.PREMIUM_PLAN_PAYMENT)}
-                className="mb-6 w-full rounded-[10px] border border-[#d8d8de] p-3 text-left transition hover:border-orange focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-orange"
+                onClick={handleContinue}
+                disabled={!selectedPlan}
+                className="h-[50px] w-full rounded-[11px] bg-gradient-to-r from-amber to-orange text-[16px] text-white shadow-glow disabled:cursor-not-allowed disabled:opacity-50 sm:text-[18px]"
               >
-                <p className="mb-3 text-[14px] text-[#8f8c98] sm:text-[15px]">Promote this ad with Premium</p>
-                <div className="flex flex-wrap items-center justify-between gap-3">
-                  <div className="flex gap-2">
-                    <DayPill label="7 Days" />
-                    <DayPill label="30 Days" active />
-                  </div>
-                  <span className="text-[18px] text-[#9b97a4] sm:text-[20px]">₦4,000</span>
-                </div>
+                Continue to Payment
               </button>
 
               <button
                 type="button"
                 onClick={viewAd}
-                className="h-[50px] w-full rounded-[11px] bg-gradient-to-r from-amber to-orange text-[16px] text-white shadow-glow sm:text-[18px]"
+                className="mt-3 h-[50px] w-full rounded-[11px] border border-[#d8d8de] text-[16px] text-[#6f6c78] transition hover:bg-[#f4f3f6] sm:text-[18px]"
               >
                 Skip and view ad
               </button>

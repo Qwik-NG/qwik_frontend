@@ -15,6 +15,7 @@ import PhonesSearchResultsView from "../components/search/PhonesSearchResultsVie
 import VehicleSearchResultsView from "../components/search/VehicleSearchResultsView";
 import { LocationPin } from "../components/icons/LocationPin";
 import BackButton from "../components/ui/BackButton";
+import { FallbackImage } from "../components/ui/FallbackImage";
 import { ImagePlaceholder } from "../components/ui/ImagePlaceholder";
 import { isBeautySearchQuery, isElectronicsSearchQuery, isFashionSearchQuery, isFurnitureSearchQuery, isJobSearchQuery, isPhonesSearchQuery, isVehicleSearchQuery, mockCategories } from "../lib/mockData";
 import { getCategorySearchContext } from "../lib/searchContext";
@@ -247,7 +248,12 @@ function ListCard({ item, onClick }: { item: Listing; onClick: () => void }) {
             </span>
           ) : null}
           {item.image ? (
-            <img src={item.image} alt={item.title} className="h-full w-full object-cover" />
+            <FallbackImage
+              src={item.image}
+              alt={item.title}
+              className="h-full w-full"
+              fallbackClassName="rounded-[18px]"
+            />
           ) : (
             <ImagePlaceholder className="rounded-[18px]" />
           )}

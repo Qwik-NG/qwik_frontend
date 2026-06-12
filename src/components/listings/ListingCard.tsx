@@ -1,6 +1,7 @@
 import type { CSSProperties } from "react";
 import { LocationPin } from "../icons/LocationPin";
 import { ImagePlaceholder } from "../ui/ImagePlaceholder";
+import { FallbackImage } from "../ui/FallbackImage";
 
 export type ListingCardItem = {
   price: string;
@@ -62,10 +63,12 @@ export default function ListingCard({
           </span>
         ) : null}
         {item.image ? (
-          <img
+          <FallbackImage
             src={item.image}
             alt={item.title}
-            className={`h-full w-full ${item.imageFit === "contain" ? "object-contain p-4" : "object-cover"}`}
+            fit={item.imageFit === "contain" ? "contain" : "cover"}
+            className={`h-full w-full ${item.imageFit === "contain" ? "p-4" : ""}`}
+            fallbackClassName="rounded-[14px] sm:rounded-[18px]"
           />
         ) : (
           <ImagePlaceholder className="rounded-[14px] sm:rounded-[18px]" />
