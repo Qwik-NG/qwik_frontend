@@ -148,7 +148,7 @@ export function SiteHeader({
   }, [locationOpen]);
 
   return (
-    <header className={`${hideOnMobile ? "hidden md:flex" : "flex"} sticky top-0 z-[100] mx-auto w-full max-w-[1728px] flex-wrap items-center gap-2 bg-page/95 px-4 py-0.5 backdrop-blur-sm sm:px-6 lg:gap-4 lg:px-12 lg:py-1`}>
+    <header className={`${hideOnMobile ? "hidden md:flex" : "flex"} relative z-[100] mx-auto w-full max-w-[1728px] flex-wrap items-center gap-2 bg-page/95 px-4 py-0.5 backdrop-blur-sm md:sticky md:top-0 sm:px-6 lg:gap-4 lg:px-12 lg:py-1`}>
       <button
         className="relative h-[54px] w-[54px] shrink-0 overflow-hidden rounded-full bg-white lg:h-[58px] lg:w-[58px]"
         onClick={() => navigate("/")}
@@ -160,11 +160,11 @@ export function SiteHeader({
         />
       </button>
 
-      <div className="order-3 mt-2.5 flex w-full items-center gap-2.5 lg:order-2 lg:mt-0 lg:flex-1">
+      <div className="order-3 mt-1.5 flex w-full min-w-0 items-center gap-1.5 md:mt-2.5 md:gap-2.5 lg:order-2 lg:mt-0 lg:flex-1">
         {showSearch ? (
           <form
             onSubmit={handleSearchSubmit}
-            className="flex h-11 w-full items-center gap-2 rounded-[10px] border-2 border-orange px-3 text-left text-[14px] text-[#b6b3bd] lg:h-[42px] lg:w-[250px] lg:rounded-[8px] lg:px-[13px] lg:text-[16px]"
+            className="flex h-10 min-w-0 max-w-[280px] flex-1 items-center gap-1.5 rounded-[9px] border-2 border-orange px-2 text-left text-[13px] text-[#b6b3bd] md:h-11 md:max-w-none md:gap-2 md:rounded-[10px] md:px-3 md:text-[14px] lg:h-[42px] lg:w-[250px] lg:flex-initial lg:rounded-[8px] lg:px-[13px] lg:text-[16px]"
           >
             <button type="submit" className="text-[#f5932b]" aria-label="Search">
               <SearchIcon />
@@ -184,7 +184,7 @@ export function SiteHeader({
             onClick={() => setLocationOpen((open) => !open)}
             aria-haspopup="listbox"
             aria-expanded={locationOpen}
-            className="flex h-10 max-w-[160px] items-center gap-1 rounded-lg px-2 text-[15px] text-[#6f6c78] transition hover:bg-white hover:text-[#1f1d27] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#ff9715] focus-visible:ring-offset-2 focus-visible:ring-offset-page active:scale-[0.98] sm:max-w-[190px] sm:text-[16px]"
+            className="flex h-10 max-w-[104px] items-center gap-0.5 rounded-lg px-1.5 text-[13px] text-[#6f6c78] transition hover:bg-white hover:text-[#1f1d27] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#ff9715] focus-visible:ring-offset-2 focus-visible:ring-offset-page active:scale-[0.98] md:max-w-[190px] md:gap-1 md:px-2 md:text-[16px]"
           >
             <LocationPin className="h-4 w-4 shrink-0" />
             <span className="truncate">{locationLabel}</span>
