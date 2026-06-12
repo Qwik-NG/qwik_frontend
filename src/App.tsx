@@ -81,7 +81,7 @@ export default function App() {
       <Route path={ROUTES.POST} element={<ProtectedRoute><PostPage /></ProtectedRoute>} />
       <Route path={ROUTES.POST_DETAILS} element={<ProtectedRoute><PostDetailsPage /></ProtectedRoute>} />
       <Route path={ROUTES.NEW_ADVERT_DETAILS} element={<ProtectedRoute><NewAdvertDetailsPage /></ProtectedRoute>} />
-      <Route path={ROUTES.PROMOTE_AD} element={<PromoteAdPage />} />
+      <Route path={ROUTES.PROMOTE_AD} element={<ProtectedRoute><PromoteAdPage /></ProtectedRoute>} />
       <Route path={ROUTES.MAKE_OFFER} element={<MakeOfferPage />} />
 
       {/* Search & Discovery */}
@@ -116,8 +116,8 @@ export default function App() {
       <Route path={ROUTES.SAVED} element={<ProtectedRoute><SavedPage /></ProtectedRoute>} />
 
       {/* Payment & Subscriptions */}
-      <Route path={ROUTES.PLAN_PAYMENT} element={<PlanPaymentPage />} />
-      <Route path={ROUTES.PREMIUM_PLAN_PAYMENT} element={<PremiumPlanPaymentPage />} />
+      <Route path={ROUTES.PLAN_PAYMENT} element={<ProtectedRoute><PlanPaymentPage /></ProtectedRoute>} />
+      <Route path={ROUTES.PREMIUM_PLAN_PAYMENT} element={<ProtectedRoute><PremiumPlanPaymentPage /></ProtectedRoute>} />
 
       {/* Admin Dashboard */}
       <Route path="/admin" element={<AdminRoute><AdminDashboard /></AdminRoute>} />

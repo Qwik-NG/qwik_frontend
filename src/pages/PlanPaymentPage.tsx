@@ -1,5 +1,8 @@
-import { useNavigate } from "react-router-dom";
+import { useState } from "react";
+import { useNavigate, useSearchParams } from "react-router-dom";
 import { SiteFooter, SiteHeader } from "../components/AppShell";
+import { ROUTES, buildProductDetailsRoute } from "../constants/routes";
+import { api } from "../services/api";
 
 function CheckIcon() {
   return (
@@ -21,6 +24,34 @@ function ShieldIcon() {
 
 export default function PlanPaymentPage() {
   const navigate = useNavigate();
+  const [searchParams] = useSearchParams();
+  const adId = searchParams.get("adId")?.trim() ?? "";
+  const [submitting, setSubmitting] = useState(false);
+  const [message, setMessage] = useState<string | null>(null);
+  const [error, setError] = useState<string | null>(adId ? null : "Choose an existing ad before starting promotion.");
+
+  const handleCheckout = async () => {
+    if (!adId) {
+      setError("Choose an existing ad before starting promotion.");
+      return;
+    }
+
+    try {
+      setSubmitting(true);
+      setError(null);
+      setMessage(null);
+      const response = await api.promoteAd(adId, { plan: "top-7" });
+      if (response.data.checkoutUrl) {
+        window.location.assign(response.data.checkoutUrl);
+        return;
+      }
+      setMessage("Payment checkout is not live yet. Your ad remains active without promotion.");
+    } catch (err) {
+      setError(err instanceof Error ? err.message : "Failed to prepare promotion checkout.");
+    } finally {
+      setSubmitting(false);
+    }
+  };
 
   return (
     <div className="min-h-screen bg-page text-ink">
@@ -29,7 +60,7 @@ export default function PlanPaymentPage() {
       <main className="mx-auto w-full max-w-[1728px] px-4 pb-14 pt-6 sm:px-6 lg:px-12">
         <div className="grid gap-6 lg:grid-cols-[0.9fr_1.3fr]">
           <section>
-            <button className="mb-5 text-[16px] text-[#9e9aa7]" onClick={() => navigate("/promote-ad")}>
+            <button className="mb-5 text-[16px] text-[#9e9aa7]" onClick={() => navigate(adId ? `${ROUTES.PROMOTE_AD}?adId=${encodeURIComponent(adId)}` : ROUTES.POST)}>
               ‹ Back to Plans
             </button>
 
@@ -104,12 +135,23 @@ export default function PlanPaymentPage() {
             </div>
 
             <button
-              onClick={() => navigate("/post")}
-              className="mt-5 flex h-[52px] w-full items-center justify-between rounded-[12px] bg-gradient-to-r from-amber to-orange px-5 text-[18px] font-semibold text-white sm:h-[50px] sm:text-[18px]"
+              type="button"
+              onClick={() => void handleCheckout()}
+              disabled={!adId || submitting}
+              className="mt-5 flex h-[52px] w-full items-center justify-between rounded-[12px] bg-gradient-to-r from-amber to-orange px-5 text-[18px] font-semibold text-white disabled:cursor-not-allowed disabled:opacity-50 sm:h-[50px] sm:text-[18px]"
             >
-              <span>Pay Now</span>
+              <span>{submitting ? "Preparing..." : "Pay Now"}</span>
               <span>₦1,612.50 →</span>
             </button>
+            {error ? <p className="mt-3 text-[14px] text-[#d14343]">{error}</p> : null}
+            {message ? (
+              <div className="mt-3 rounded-[12px] bg-[#fff7ed] p-3 text-[14px] text-[#8f6c42]">
+                <p>{message}</p>
+                <button type="button" onClick={() => navigate(buildProductDetailsRoute(adId))} className="mt-2 font-semibold text-[#ff6b1b]">
+                  View your ad
+                </button>
+              </div>
+            ) : null}
 
             <p className="mt-3 text-[14px] text-[#8f8b98] sm:text-[14px]">
               By proceeding you agree to our <span className="text-[#ff6b1b]">Terms of Service</span> and <span className="text-[#ff6b1b]">Privacy policy</span>.

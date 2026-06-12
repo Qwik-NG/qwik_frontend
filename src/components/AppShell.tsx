@@ -320,7 +320,7 @@ export function SiteHeader({
         </button>
         <button
           className="h-10 cursor-pointer rounded-[11px] bg-gradient-to-r from-amber to-orange px-3 text-[13px] text-white shadow-glow lg:h-[42px] lg:rounded-[8px] lg:px-[16px] lg:text-[16px]"
-          onClick={() => navigate("/promote-ad")}
+          onClick={() => navigate(ROUTES.POST)}
         >
           Post a free ad
         </button>

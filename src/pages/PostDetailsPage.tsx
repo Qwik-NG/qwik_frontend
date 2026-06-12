@@ -336,7 +336,7 @@ export default function PostDetailsPage() {
       });
 
       clearDraft();
-      navigate(`/product-details/${response.data.id}`);
+      navigate(`/promote-ad?adId=${encodeURIComponent(response.data.id)}`);
     } catch (err) {
       setError(err instanceof Error ? err.message : "Failed to create advert");
     } finally {
