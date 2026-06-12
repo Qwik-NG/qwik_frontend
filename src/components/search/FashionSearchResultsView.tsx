@@ -5,6 +5,7 @@ import {
   buildSearchResultsListRoute,
   buildSearchResultsRoute,
 } from "../../constants/routes";
+import { isCategoryMarkerQuery } from "../../lib/searchContext";
 import {
   getFashionSearchState,
   type FashionBrand,
@@ -404,7 +405,8 @@ export default function FashionSearchResultsView({ query, navigate, view }: Fash
 
   useEffect(() => {
     const loadAds = async () => {
-      const params = new URLSearchParams({ category: "fashion", pageSize: "24" });
+      const params = new URLSearchParams({ category: "fashion", pageSize: "24", imagesLimit: "1" });
+      if (query && !isCategoryMarkerQuery(query)) params.set("q", query);
       const response = await api.ads(`?${params.toString()}`);
       setFashionResults(response.data.map(toFashionResult));
     };

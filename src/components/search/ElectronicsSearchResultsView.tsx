@@ -4,6 +4,7 @@ import {
   buildSearchResultsListRoute,
   buildSearchResultsRoute,
 } from "../../constants/routes";
+import { isCategoryMarkerQuery } from "../../lib/searchContext";
 import ListingCard from "../listings/ListingCard";
 import {
   type ElectronicsCondition,
@@ -301,7 +302,8 @@ export default function ElectronicsSearchResultsView({ query, navigate, view }: 
 
   useEffect(() => {
     const loadAds = async () => {
-      const params = new URLSearchParams({ category: "electronics", pageSize: "24" });
+      const params = new URLSearchParams({ category: "electronics", pageSize: "24", imagesLimit: "1" });
+      if (query && !isCategoryMarkerQuery(query)) params.set("q", query);
       const response = await api.ads(`?${params.toString()}`);
       setElectronicsResults(response.data.map(toElectronicsResult));
     };

@@ -4,6 +4,7 @@ import {
   buildSearchResultsListRoute,
   buildSearchResultsRoute,
 } from "../../constants/routes";
+import { isCategoryMarkerQuery } from "../../lib/searchContext";
 import {
   type MockPhonesListing,
   type PhonesCondition,
@@ -287,7 +288,8 @@ export default function PhonesSearchResultsView({ query, navigate, view }: Phone
 
   useEffect(() => {
     const loadAds = async () => {
-      const params = new URLSearchParams({ category: "phones-tablets", pageSize: "24" });
+      const params = new URLSearchParams({ category: "phones-tablets", pageSize: "24", imagesLimit: "1" });
+      if (query && !isCategoryMarkerQuery(query)) params.set("q", query);
       const response = await api.ads(`?${params.toString()}`);
       setPhonesResults(response.data.map(toPhonesResult));
     };

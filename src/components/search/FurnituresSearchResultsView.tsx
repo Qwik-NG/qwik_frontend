@@ -4,6 +4,7 @@ import {
   buildSearchResultsListRoute,
   buildSearchResultsRoute,
 } from "../../constants/routes";
+import { isCategoryMarkerQuery } from "../../lib/searchContext";
 import {
   type FurnitureCondition,
   type FurnitureType,
@@ -310,7 +311,8 @@ export default function FurnituresSearchResultsView({ query, navigate, view }: F
 
   useEffect(() => {
     const loadAds = async () => {
-      const params = new URLSearchParams({ category: "furniture-appliances", pageSize: "24" });
+      const params = new URLSearchParams({ category: "furniture-appliances", pageSize: "24", imagesLimit: "1" });
+      if (query && !isCategoryMarkerQuery(query)) params.set("q", query);
       const response = await api.ads(`?${params.toString()}`);
       setFurnitureResults(response.data.map(toFurnitureResult));
     };

@@ -4,6 +4,7 @@ import {
   buildSearchResultsListRoute,
   buildSearchResultsRoute,
 } from "../../constants/routes";
+import { isCategoryMarkerQuery } from "../../lib/searchContext";
 import ListingCard from "../listings/ListingCard";
 import BackButton from "../ui/BackButton";
 import { LocationPin } from "../icons/LocationPin";
@@ -344,7 +345,8 @@ export default function VehicleSearchResultsView({ query, navigate, view }: Vehi
 
   useEffect(() => {
     const loadAds = async () => {
-      const params = new URLSearchParams({ category: "vehicles", pageSize: "24" });
+      const params = new URLSearchParams({ category: "vehicles", pageSize: "24", imagesLimit: "1" });
+      if (query && !isCategoryMarkerQuery(query)) params.set("q", query);
       const response = await api.ads(`?${params.toString()}`);
       setVehicleResults(response.data.map(toVehicleResult));
     };

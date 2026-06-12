@@ -4,6 +4,7 @@ import { LocationPin } from "./icons/LocationPin";
 import { ROUTES } from "../constants/routes";
 import { useCurrentUser } from "../hooks/useCurrentUser";
 import { UserAvatar } from "./ui/UserAvatar";
+import { getCategorySearchContext, isSearchResultsPath } from "../lib/searchContext";
 
 type NavigateTo = (to: string) => void;
 type HeaderIcon = "bell" | "bookmark" | "mail";
@@ -56,7 +57,6 @@ function SearchIcon() {
   );
 }
 
-const MARKETPLACE_SEARCH_PATHS = [ROUTES.HOME, ROUTES.SEARCH, ROUTES.SEARCH_RESULTS, ROUTES.SEARCH_RESULTS_LIST];
 const MOBILE_CHROME_HIDDEN_PATHS = [ROUTES.MESSAGES];
 const LOCATION_OPTIONS = [
   "All Nigeria",
@@ -70,12 +70,8 @@ const LOCATION_OPTIONS = [
   "Benin City",
 ];
 
-function shouldShowHeaderSearch(pathname: string) {
-  return (
-    MARKETPLACE_SEARCH_PATHS.includes(pathname) ||
-    pathname.startsWith("/product-details/") ||
-    pathname.startsWith("/products/")
-  );
+function isProductDetailsPath(pathname: string) {
+  return pathname.startsWith("/product-details/") || pathname.startsWith("/products/");
 }
 
 export function SiteHeader({
@@ -92,7 +88,15 @@ export function SiteHeader({
   const mobileLocationRef = useRef<HTMLDivElement | null>(null);
   const location = useLocation();
   const { display: currentUser } = useCurrentUser();
-  const showSearch = shouldShowHeaderSearch(location.pathname);
+  const categoryContext = getCategorySearchContext(location.search);
+  const showMarketplaceSearch = location.pathname === ROUTES.HOME || isSearchResultsPath(location.pathname);
+  const showDesktopSearch = showMarketplaceSearch || isProductDetailsPath(location.pathname);
+  const showMobileSearch = showMarketplaceSearch;
+  const searchPlaceholder = location.pathname === ROUTES.HOME
+    ? "I am looking for ..."
+    : categoryContext
+      ? `Search in ${categoryContext.name}`
+      : "Search all categories";
   const hideOnMobile = MOBILE_CHROME_HIDDEN_PATHS.includes(location.pathname);
   const locationLabel = selectedLocation === "All Nigeria" ? "Nig." : selectedLocation;
 
@@ -101,6 +105,7 @@ export function SiteHeader({
     const params = new URLSearchParams();
     const query = searchQuery.trim();
     if (query) params.set("q", query);
+    if (categoryContext) params.set("category", categoryContext.slug);
     if (selectedLocation !== "All Nigeria") params.set("location", selectedLocation);
     navigate(`${ROUTES.SEARCH}${params.toString() ? `?${params.toString()}` : ""}`);
   };
@@ -109,10 +114,11 @@ export function SiteHeader({
     setSelectedLocation(option);
     setLocationOpen(false);
 
-    if (!showSearch) return;
+    if (!showMarketplaceSearch) return;
 
     // TODO: remove this frontend URL-state bridge once every category search view consumes backend location filters.
     const params = new URLSearchParams(location.search);
+    if (categoryContext) params.set("category", categoryContext.slug);
     if (option === "All Nigeria") {
       params.delete("location");
     } else {
@@ -157,6 +163,9 @@ export function SiteHeader({
     locationRef: React.RefObject<HTMLDivElement>,
   ) => {
     const mobile = mode === "mobile";
+    const visible = mobile ? showMobileSearch : showDesktopSearch;
+    if (!visible) return null;
+
     return (
       <div
         className={
@@ -165,8 +174,7 @@ export function SiteHeader({
             : "order-3 mt-2.5 hidden w-full min-w-0 items-center gap-2.5 md:flex lg:order-2 lg:mt-0 lg:flex-1"
         }
       >
-        {showSearch ? (
-          <form
+        <form
             onSubmit={handleSearchSubmit}
             className={
               mobile
@@ -181,11 +189,10 @@ export function SiteHeader({
               value={searchQuery}
               onChange={(event) => setSearchQuery(event.target.value)}
               className="w-full min-w-0 bg-transparent text-[#1f1d27] outline-none placeholder:text-[#b6b3bd]"
-              placeholder="I am looking for ..."
+              placeholder={searchPlaceholder}
               aria-label="Search listings"
             />
           </form>
-        ) : null}
         <div ref={locationRef} className="relative shrink-0">
           <button
             type="button"

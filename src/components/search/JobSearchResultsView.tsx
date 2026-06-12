@@ -4,6 +4,7 @@ import {
   buildSearchResultsListRoute,
   buildSearchResultsRoute,
 } from "../../constants/routes";
+import { isCategoryMarkerQuery } from "../../lib/searchContext";
 import {
   getJobSearchStrip,
   type JobCategoryType,
@@ -239,7 +240,8 @@ export default function JobSearchResultsView({ query, navigate, view }: JobSearc
 
   useEffect(() => {
     const loadAds = async () => {
-      const params = new URLSearchParams({ category: "jobs", pageSize: "24" });
+      const params = new URLSearchParams({ category: "jobs", pageSize: "24", imagesLimit: "1" });
+      if (query && !isCategoryMarkerQuery(query)) params.set("q", query);
       const response = await api.ads(`?${params.toString()}`);
       setJobResults(response.data.map(toJobResult));
     };

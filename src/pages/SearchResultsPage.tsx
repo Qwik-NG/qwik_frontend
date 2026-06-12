@@ -16,6 +16,7 @@ import ListingCard, { type ListingCardItem } from "../components/listings/Listin
 import VehicleSearchResultsView from "../components/search/VehicleSearchResultsView";
 import BackButton from "../components/ui/BackButton";
 import { isBeautySearchQuery, isElectronicsSearchQuery, isFashionSearchQuery, isFurnitureSearchQuery, isJobSearchQuery, isPhonesSearchQuery, isVehicleSearchQuery, mockCategories } from "../lib/mockData";
+import { getCategorySearchContext } from "../lib/searchContext";
 import { api } from "../services/api";
 import type { Ad } from "../types";
 
@@ -224,8 +225,10 @@ export default function SearchResultsPage() {
   const navigate = useNavigate();
   const [searchParams] = useSearchParams();
   const query = searchParams.get("q")?.trim() || "";
+  const categoryContext = getCategorySearchContext(`?${searchParams.toString()}`);
+  const categorySlug = categoryContext?.slug;
 
-  if (isVehicleSearchQuery(query)) {
+  if (categorySlug === "vehicles" || isVehicleSearchQuery(query)) {
     return (
       <div className="min-h-screen bg-page text-ink">
         <SiteHeader navigate={navigate} />
@@ -235,7 +238,7 @@ export default function SearchResultsPage() {
     );
   }
 
-  if (isElectronicsSearchQuery(query)) {
+  if (categorySlug === "electronics" || isElectronicsSearchQuery(query)) {
     return (
       <div className="min-h-screen bg-page text-ink">
         <SiteHeader navigate={navigate} />
@@ -245,7 +248,7 @@ export default function SearchResultsPage() {
     );
   }
 
-  if (isPhonesSearchQuery(query)) {
+  if (categorySlug === "phones-tablets" || isPhonesSearchQuery(query)) {
     return (
       <div className="min-h-screen bg-page text-ink">
         <SiteHeader navigate={navigate} />
@@ -255,7 +258,7 @@ export default function SearchResultsPage() {
     );
   }
 
-  if (isBeautySearchQuery(query)) {
+  if (categorySlug === "beauty" || isBeautySearchQuery(query)) {
     return (
       <div className="min-h-screen bg-page text-ink">
         <SiteHeader navigate={navigate} />
@@ -265,7 +268,7 @@ export default function SearchResultsPage() {
     );
   }
 
-  if (isFashionSearchQuery(query)) {
+  if (categorySlug === "fashion" || isFashionSearchQuery(query)) {
     return (
       <div className="min-h-screen bg-page text-ink">
         <SiteHeader navigate={navigate} />
@@ -275,7 +278,7 @@ export default function SearchResultsPage() {
     );
   }
 
-  if (isJobSearchQuery(query)) {
+  if (categorySlug === "jobs" || isJobSearchQuery(query)) {
     return (
       <div className="min-h-screen bg-page text-ink">
         <SiteHeader navigate={navigate} />
@@ -285,7 +288,7 @@ export default function SearchResultsPage() {
     );
   }
 
-  if (isFurnitureSearchQuery(query)) {
+  if (categorySlug === "furniture-appliances" || isFurnitureSearchQuery(query)) {
     return (
       <div className="min-h-screen bg-page text-ink">
         <SiteHeader navigate={navigate} />
@@ -312,6 +315,7 @@ export default function SearchResultsPage() {
       setAdsError(null);
       const params = new URLSearchParams({ pageSize: "24", imagesLimit: "1" });
       if (query) params.set("q", query);
+      if (categorySlug) params.set("category", categorySlug);
       const response = await api.ads(`?${params.toString()}`);
       setMatchedAds(response.data);
     } catch (err) {
@@ -320,7 +324,7 @@ export default function SearchResultsPage() {
     } finally {
       setLoadingAds(false);
     }
-  }, [query]);
+  }, [categorySlug, query]);
 
   useEffect(() => {
     void loadAds();
