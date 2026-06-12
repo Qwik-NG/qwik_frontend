@@ -57,6 +57,7 @@ function SearchIcon() {
 }
 
 const MARKETPLACE_SEARCH_PATHS = [ROUTES.HOME, ROUTES.SEARCH, ROUTES.SEARCH_RESULTS, ROUTES.SEARCH_RESULTS_LIST];
+const MOBILE_CHROME_HIDDEN_PATHS = [ROUTES.MESSAGES];
 const LOCATION_OPTIONS = [
   "All Nigeria",
   "Lagos",
@@ -91,6 +92,7 @@ export function SiteHeader({
   const location = useLocation();
   const { display: currentUser } = useCurrentUser();
   const showSearch = shouldShowHeaderSearch(location.pathname);
+  const hideOnMobile = MOBILE_CHROME_HIDDEN_PATHS.includes(location.pathname);
   const locationLabel = selectedLocation === "All Nigeria" ? "Nig." : selectedLocation;
 
   const handleSearchSubmit = (event: React.FormEvent<HTMLFormElement>) => {
@@ -146,7 +148,7 @@ export function SiteHeader({
   }, [locationOpen]);
 
   return (
-    <header className="sticky top-0 z-[100] mx-auto flex w-full max-w-[1728px] flex-wrap items-center gap-2 bg-page/95 px-4 py-0.5 backdrop-blur-sm sm:px-6 lg:gap-4 lg:px-12 lg:py-1">
+    <header className={`${hideOnMobile ? "hidden md:flex" : "flex"} sticky top-0 z-[100] mx-auto w-full max-w-[1728px] flex-wrap items-center gap-2 bg-page/95 px-4 py-0.5 backdrop-blur-sm sm:px-6 lg:gap-4 lg:px-12 lg:py-1`}>
       <button
         className="relative h-[54px] w-[54px] shrink-0 overflow-hidden rounded-full bg-white lg:h-[58px] lg:w-[58px]"
         onClick={() => navigate("/")}
@@ -291,8 +293,11 @@ export function SiteHeader({
 }
 
 export function SiteFooter({ navigate }: { navigate: NavigateTo }) {
+  const location = useLocation();
+  const hideOnMobile = MOBILE_CHROME_HIDDEN_PATHS.includes(location.pathname);
+
   return (
-    <footer className="grid grid-cols-3 gap-4 bg-[#040316] px-4 py-10 text-[#b0afbc] sm:gap-6 sm:px-6 lg:px-10 xl:grid-cols-[1fr_1fr_1fr_1fr_1fr_1.8fr] xl:px-[70px] xl:py-[76px]">
+    <footer className={`${hideOnMobile ? "hidden md:grid" : "grid"} grid-cols-3 gap-4 bg-[#040316] px-4 py-10 text-[#b0afbc] sm:gap-6 sm:px-6 lg:px-10 xl:grid-cols-[1fr_1fr_1fr_1fr_1fr_1.8fr] xl:px-[70px] xl:py-[76px]`}>
       <button
         onClick={() => navigate("/")}
         className="col-span-3 mt-2 text-left text-[40px] leading-none text-[#ff9412] sm:col-span-1 sm:text-[58px]"

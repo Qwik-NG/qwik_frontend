@@ -415,17 +415,17 @@ export default function MessagesPage() {
   }, [selectedConversationId]);
 
   return (
-    <div className="min-h-screen bg-page font-outfit text-ink">
+    <div className="min-h-dvh bg-page font-outfit text-ink">
       <SiteHeader navigate={navigate} activeIcon="mail" />
 
-      <main className="mx-auto w-full max-w-[1512px] px-[16px] pb-[80px] pt-[28px] sm:px-[60px] sm:pb-[120px] sm:pt-[37px]">
-        <div className="mb-[34px] flex items-center gap-[10px]">
+      <main className="mx-auto h-dvh w-full max-w-[1512px] overflow-hidden md:h-auto md:px-[60px] md:pb-[120px] md:pt-[37px]">
+        <div className="mb-[34px] hidden items-center gap-[10px] md:flex">
           <MessageIcon className="h-[23px] w-[23px]" />
           <h1 className="text-[30px] font-normal leading-none tracking-normal">Messages</h1>
         </div>
 
-        <section className="mx-auto grid h-[calc(100vh-190px)] min-h-[560px] w-full max-w-[1080px] grid-cols-1 overflow-hidden rounded-[24px] bg-white p-[10px] shadow-[0_24px_60px_rgba(10,10,24,0.04)] sm:rounded-[28px] lg:h-[720px] lg:grid-cols-[320px_minmax(0,1fr)] lg:p-[18px]">
-          <aside className={`${activeConversation ? "hidden lg:block" : "block"} min-h-0 min-w-0 border-card px-[4px] py-[6px] lg:border-r lg:pr-[18px]`}>
+        <section className="mx-auto grid h-dvh min-h-0 w-full max-w-[1080px] grid-cols-1 overflow-hidden bg-white md:h-[calc(100vh-190px)] md:min-h-[560px] md:rounded-[28px] md:p-[10px] md:shadow-[0_24px_60px_rgba(10,10,24,0.04)] lg:h-[720px] lg:grid-cols-[320px_minmax(0,1fr)] lg:p-[18px]">
+          <aside className={`${activeConversation ? "hidden lg:flex" : "flex"} min-h-0 min-w-0 flex-col border-card px-[4px] pb-[max(6px,env(safe-area-inset-bottom))] pt-[6px] lg:border-r lg:pb-[6px] lg:pr-[18px]`}>
             <div className="mb-[14px] flex items-center justify-between px-[12px]">
               <h2 className="text-[20px] font-semibold text-ink">Chats</h2>
               <span className="rounded-full bg-amber/10 px-3 py-1 text-[13px] text-orange">{conversations.length}</span>
@@ -438,7 +438,7 @@ export default function MessagesPage() {
                 </button>
               </div>
             ) : null}
-            <div className="flex max-h-[calc(100vh-280px)] flex-col gap-[8px] overflow-auto pr-1 lg:max-h-[620px]">
+            <div className="flex min-h-0 flex-1 flex-col gap-[8px] overflow-auto pr-1 lg:max-h-[620px]">
               {loading ? (
                 Array.from({ length: 5 }).map((_, index) => (
                   <div key={index} className="flex items-center gap-[12px] rounded-[18px] px-[14px] py-[13px]">
@@ -516,7 +516,7 @@ export default function MessagesPage() {
                   <div ref={messagesEndRef} />
                 </div>
 
-                <div className="border-t border-card bg-white px-[10px] py-[10px] sm:px-[12px] lg:px-[26px] lg:py-[18px]">
+                <div className="border-t border-card bg-white px-[10px] pb-[max(10px,env(safe-area-inset-bottom))] pt-[10px] sm:px-[12px] lg:px-[26px] lg:py-[18px]">
                   <div className="relative flex min-w-0 items-center gap-[8px] rounded-card bg-card px-[10px] py-[8px] sm:px-[12px] sm:py-[10px]">
                     <div ref={emojiRef} className="relative shrink-0">
                       <button
