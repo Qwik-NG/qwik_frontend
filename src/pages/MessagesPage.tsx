@@ -93,7 +93,7 @@ function ConversationItem({
   );
 }
 
-function ChatBubble({ message, mine }: { message: Message; mine: boolean }) {
+function ChatBubble({ message, mine, onRetry }: { message: Message; mine: boolean; onRetry?: (message: Message) => void }) {
   return (
     <div className={`flex ${mine ? "justify-end" : "justify-start"}`}>
       <div
@@ -102,14 +102,38 @@ function ChatBubble({ message, mine }: { message: Message; mine: boolean }) {
         }`}
       >
         {message.text}
+        {mine && message.deliveryStatus ? (
+          <div className="mt-1 text-right text-[11px] text-white/80">
+            {message.deliveryStatus === "pending" ? "Sending..." : null}
+            {message.deliveryStatus === "failed" ? (
+              <button type="button" className="font-semibold underline" onClick={() => onRetry?.(message)}>
+                Failed. Retry
+              </button>
+            ) : null}
+          </div>
+        ) : null}
       </div>
     </div>
   );
 }
 
-function appendMessage(messages: Message[] | undefined, message: Message) {
-  if (messages?.some((item) => item.id === message.id)) return messages;
-  return [...(messages || []), message];
+function messagesMatch(existing: Message, incoming: Message) {
+  if (existing.id === incoming.id) return true;
+  if (existing.clientId && incoming.clientId && existing.clientId === incoming.clientId) return true;
+
+  const isOptimisticMatch = existing.deliveryStatus === "pending" || existing.deliveryStatus === "failed";
+  if (!isOptimisticMatch || existing.senderId !== incoming.senderId || existing.text !== incoming.text) return false;
+
+  return Math.abs(new Date(existing.createdAt).getTime() - new Date(incoming.createdAt).getTime()) < 30_000;
+}
+
+function mergeMessage(messages: Message[] | undefined, incoming: Message) {
+  const current = messages || [];
+  const matchIndex = current.findIndex((message) => messagesMatch(message, incoming));
+  const confirmed = { ...incoming, deliveryStatus: incoming.deliveryStatus ?? "sent" as const };
+
+  if (matchIndex === -1) return [...current, confirmed];
+  return current.map((message, index) => (index === matchIndex ? confirmed : message));
 }
 
 export default function MessagesPage() {
@@ -131,14 +155,14 @@ export default function MessagesPage() {
   const [emojiOpen, setEmojiOpen] = useState(false);
   const messagesEndRef = useRef<HTMLDivElement | null>(null);
   const emojiRef = useRef<HTMLDivElement | null>(null);
+  const conversationIdsRef = useRef<Set<string>>(new Set());
 
   const loadConversations = useCallback(async () => {
     try {
       setLoading(true);
       setError(null);
 
-      const meResponse = await api.me();
-      const conversationsResponse = await api.getConversations();
+      const [meResponse, conversationsResponse] = await Promise.all([api.me(), api.getConversations()]);
       setCurrentUserId(meResponse.data.id);
       setConversations(conversationsResponse.data);
 
@@ -213,6 +237,10 @@ export default function MessagesPage() {
   );
 
   useEffect(() => {
+    conversationIdsRef.current = new Set(conversations.map((conversation) => conversation.id));
+  }, [conversations]);
+
+  useEffect(() => {
     messagesEndRef.current?.scrollIntoView({ block: "end" });
   }, [selectedConversation?.messages?.length, selectedConversationId]);
 
@@ -227,51 +255,93 @@ export default function MessagesPage() {
   const conversationName = selectedConversation ? conversationParticipant?.fullName || "Conversation" : pendingConversation?.name || "Conversation";
   const conversationTitle = selectedConversation?.ad?.title || pendingConversation?.title || "Conversation";
 
-  const handleSend = async () => {
-    if (!draftMessage.trim()) return;
+  const mergeMessageIntoConversation = useCallback((conversationId: string, message: Message) => {
+    setConversations((current) =>
+      current
+        .map((conversation) =>
+          conversation.id === conversationId
+            ? {
+                ...conversation,
+                lastMessage: message,
+                lastMessageAt: message.createdAt,
+                messages: mergeMessage(conversation.messages, message),
+              }
+            : conversation,
+        )
+        .sort((a, b) => new Date(b.lastMessageAt || 0).getTime() - new Date(a.lastMessageAt || 0).getTime()),
+    );
+  }, []);
 
+  const sendExistingConversationMessage = async (text: string, clientId: string) => {
+    if (!selectedConversationId || !currentUserId) return;
+
+    const optimisticMessage: Message = {
+      id: `pending-${clientId}`,
+      clientId,
+      conversationId: selectedConversationId,
+      senderId: currentUserId,
+      text,
+      createdAt: new Date().toISOString(),
+      readAt: null,
+      deliveryStatus: "pending",
+    };
+
+    mergeMessageIntoConversation(selectedConversationId, optimisticMessage);
     try {
       setSending(true);
       setError(null);
+      const response = await api.sendMessage({
+        conversationId: selectedConversationId,
+        text,
+        clientId,
+      });
+      mergeMessageIntoConversation(selectedConversationId, response.data);
+    } catch (err) {
+      mergeMessageIntoConversation(selectedConversationId, { ...optimisticMessage, deliveryStatus: "failed" });
+      setError(err instanceof Error ? err.message : "Failed to send message");
+    } finally {
+      setSending(false);
+    }
+  };
 
-      if (selectedConversationId) {
-        const response = await api.sendMessage({
-          conversationId: selectedConversationId,
-          text: draftMessage.trim(),
-        });
+  const handleSend = async () => {
+    const text = draftMessage.trim();
+    if (!text || sending) return;
 
-        setConversations((current) =>
-          current
-            .map((conversation) =>
-              conversation.id === selectedConversationId
-                ? {
-                    ...conversation,
-                    lastMessage: response.data,
-                    lastMessageAt: response.data.createdAt,
-                    messages: [...(conversation.messages || []), response.data],
-                  }
-                : conversation,
-            )
-            .sort((a, b) => new Date(b.lastMessageAt || 0).getTime() - new Date(a.lastMessageAt || 0).getTime()),
-        );
-      } else if (pendingRecipientId) {
+    const clientId = crypto.randomUUID();
+    setDraftMessage("");
+
+    if (selectedConversationId) {
+      await sendExistingConversationMessage(text, clientId);
+      return;
+    }
+
+    if (pendingRecipientId) {
+      try {
+        setSending(true);
+        setError(null);
         const response = await api.createConversation({
           recipientId: pendingRecipientId,
           adId: pendingAdId || undefined,
-          message: draftMessage.trim(),
+          message: text,
+          clientId,
         });
 
         setConversations((current) => [response.data, ...current]);
         setSelectedConversationId(response.data.id);
         navigate(`/messages?conversation=${response.data.id}`, { replace: true });
+      } catch (err) {
+        setDraftMessage(text);
+        setError(err instanceof Error ? err.message : "Failed to send message");
+      } finally {
+        setSending(false);
       }
-
-      setDraftMessage("");
-    } catch (err) {
-      setError(err instanceof Error ? err.message : "Failed to send message");
-    } finally {
-      setSending(false);
     }
+  };
+
+  const retryMessage = (message: Message) => {
+    if (!message.clientId || sending) return;
+    void sendExistingConversationMessage(message.text, message.clientId);
   };
 
   const handleSelectConversation = (id: string) => {
@@ -292,28 +362,15 @@ export default function MessagesPage() {
     setEmojiOpen(false);
   };
 
-  const mergeMessageIntoConversation = useCallback((conversationId: string, message: Message) => {
-    setConversations((current) =>
-      current
-        .map((conversation) =>
-          conversation.id === conversationId
-            ? {
-                ...conversation,
-                lastMessage: message,
-                lastMessageAt: message.createdAt,
-                messages: appendMessage(conversation.messages, message),
-              }
-            : conversation,
-        )
-        .sort((a, b) => new Date(b.lastMessageAt || 0).getTime() - new Date(a.lastMessageAt || 0).getTime()),
-    );
-  }, []);
-
   useEffect(() => {
     const socket = getRealtimeSocket();
     if (!socket) return;
 
     const handleNewMessage = ({ conversationId, message }: { conversationId: string; message: Message }) => {
+      if (!conversationIdsRef.current.has(conversationId)) {
+        void loadConversations();
+        return;
+      }
       mergeMessageIntoConversation(conversationId, message);
     };
 
@@ -334,7 +391,7 @@ export default function MessagesPage() {
                   ...conversation,
                   lastMessage: lastMessage || conversation.lastMessage,
                   lastMessageAt: lastMessageAt || conversation.lastMessageAt,
-                  messages: lastMessage ? appendMessage(conversation.messages, lastMessage) : conversation.messages,
+                  messages: lastMessage ? mergeMessage(conversation.messages, lastMessage) : conversation.messages,
                 }
               : conversation,
           )
@@ -349,7 +406,7 @@ export default function MessagesPage() {
       socket.off("message:new", handleNewMessage);
       socket.off("conversation:updated", handleConversationUpdated);
     };
-  }, [mergeMessageIntoConversation]);
+  }, [loadConversations, mergeMessageIntoConversation]);
 
   useEffect(() => {
     if (selectedConversationId) {
@@ -448,7 +505,7 @@ export default function MessagesPage() {
 
                 <div className="flex flex-1 flex-col gap-[14px] overflow-auto bg-[#fbfaf8] px-[12px] py-[18px] sm:px-[14px] lg:px-[34px] lg:py-[24px]">
                   {(selectedConversation?.messages || []).map((message) => (
-                    <ChatBubble key={message.id} message={message} mine={message.senderId === currentUserId} />
+                    <ChatBubble key={message.clientId || message.id} message={message} mine={message.senderId === currentUserId} onRetry={retryMessage} />
                   ))}
                   {!selectedConversation?.messages?.length ? (
                     <div className="m-auto max-w-[300px] rounded-[20px] bg-white px-[20px] py-[18px] text-center shadow-[0_14px_34px_rgba(10,10,24,0.05)]">

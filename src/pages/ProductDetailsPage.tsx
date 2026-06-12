@@ -128,30 +128,33 @@ export default function ProductDetailsPage() {
         
         const result = await api.adById(id);
         setAd(result.data);
+        setLoading(false);
 
         const token = getToken();
-        if (token) {
-          try {
-            const [savedResponse, meResponse] = await Promise.all([api.isSaved(id), api.me()]);
-            setIsSaved(savedResponse.data.saved);
-            setCurrentUser(meResponse.data);
-          } catch {
-            setIsSaved(false);
-            setCurrentUser(null);
-          }
-        } else {
-          setIsSaved(false);
-          setCurrentUser(null);
-        }
-
-        // Fetch similar ads
         const categoryId = result.data.categoryId;
-        const similarResult = await api.ads(`?pageSize=4&categoryId=${categoryId}&imagesLimit=1`);
-        setSimilarAds(similarResult.data.filter((item: any) => item.id !== id).slice(0, 4));
+        const authRequest = token
+          ? Promise.all([api.isSaved(id), api.me()])
+              .then(([savedResponse, meResponse]) => {
+                setIsSaved(savedResponse.data.saved);
+                setCurrentUser(meResponse.data);
+              })
+              .catch(() => {
+                setIsSaved(false);
+                setCurrentUser(null);
+              })
+          : Promise.resolve();
+        const similarRequest = api
+          .ads(`?pageSize=4&categoryId=${categoryId}&imagesLimit=1`)
+          .then((similarResult) => {
+            setSimilarAds(similarResult.data.filter((item: any) => item.id !== id).slice(0, 4));
+          })
+          .catch(() => setSimilarAds([]));
+        const reviewsRequest = api
+          .getReviews(id)
+          .then((reviewsResult) => setReviews(reviewsResult.data || []))
+          .catch(() => setReviews([]));
 
-        // Fetch reviews
-        const reviewsResult = await api.getReviews(id);
-        setReviews(reviewsResult.data || []);
+        await Promise.all([authRequest, similarRequest, reviewsRequest]);
       } catch (err) {
         setError(err instanceof Error ? err.message : "Failed to load product");
         console.error("Error fetching product:", err);

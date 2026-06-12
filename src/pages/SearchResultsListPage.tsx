@@ -387,7 +387,7 @@ export default function SearchResultsListPage() {
     try {
       setLoadingAds(true);
       setAdsError(null);
-      const params = new URLSearchParams({ pageSize: "24" });
+      const params = new URLSearchParams({ pageSize: "24", imagesLimit: "1" });
       if (query) params.set("q", query);
       const response = await api.ads(`?${params.toString()}`);
       setMatchedAds(response.data);

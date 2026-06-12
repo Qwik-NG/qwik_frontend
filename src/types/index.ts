@@ -235,6 +235,8 @@ export interface Message {
   text: string;
   readAt?: string | null;
   createdAt: string;
+  clientId?: string;
+  deliveryStatus?: "pending" | "sent" | "failed";
 }
 
 export interface Conversation {
@@ -255,11 +257,13 @@ export interface ConversationCreatePayload {
   recipientId: string;
   message: string;
   adId?: string;
+  clientId?: string;
 }
 
 export interface MessageSendPayload {
   conversationId: string;
   text: string;
+  clientId?: string;
 }
 
 /**

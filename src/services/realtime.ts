@@ -14,14 +14,20 @@ type ClientToServerEvents = {
 };
 
 let socket: Socket<ServerToClientEvents, ClientToServerEvents> | null = null;
+let socketToken: string | null = null;
 
 function socketUrl() {
-  return API_BASE_URL.replace(/\/api\/?$/, "");
+  return (import.meta.env.VITE_SOCKET_URL ?? API_BASE_URL.replace(/\/api\/?$/, "")).replace(/\/$/, "");
 }
 
 export function getRealtimeSocket() {
   const token = getToken();
   if (!token || isTokenExpired(token)) return null;
+
+  if (socket && socketToken !== token) {
+    socket.disconnect();
+    socket = null;
+  }
 
   if (!socket) {
     socket = io(socketUrl(), {
@@ -29,6 +35,12 @@ export function getRealtimeSocket() {
       autoConnect: true,
       transports: ["websocket", "polling"],
     });
+    socketToken = token;
+    if (import.meta.env.DEV) {
+      socket.on("connect_error", (error) => {
+        console.warn("Realtime connection unavailable; REST messaging remains active.", error.message);
+      });
+    }
   } else if (!socket.connected) {
     socket.auth = { token };
     socket.connect();
@@ -46,4 +58,5 @@ export function joinConversation(conversationId: string) {
 export function disconnectRealtimeSocket() {
   socket?.disconnect();
   socket = null;
+  socketToken = null;
 }

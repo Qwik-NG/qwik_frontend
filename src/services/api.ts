@@ -31,7 +31,7 @@ import type {
   AdminAd
 } from "../types/index";
 
-export const API_BASE_URL = import.meta.env.VITE_API_URL ?? "http://localhost:4000/api";
+export const API_BASE_URL = import.meta.env.VITE_API_URL ?? import.meta.env.VITE_API_BASE_URL ?? "http://localhost:4000/api";
 
 export function apiUrl(path: string) {
   return `${API_BASE_URL}${path.startsWith("/") ? path : `/${path}`}`;
@@ -57,6 +57,7 @@ type CachedResponse = {
 };
 
 const GET_CACHE = new Map<string, CachedResponse>();
+const IN_FLIGHT_GETS = new Map<string, Promise<ApiResponse<unknown>>>();
 const ADS_STALE_TIME = 30_000;
 const AD_DETAILS_STALE_TIME = 60_000;
 const CATEGORIES_STALE_TIME = 5 * 60_000;
@@ -75,14 +76,6 @@ function friendlyRequestError(status: number, message?: string) {
 async function request<T>(path: string, init?: ApiRequestInit): Promise<ApiResponse<T>> {
   const { staleTime = 0, cacheTime = 0, retry = 0, ...fetchInit } = init ?? {};
   const method = (fetchInit.method ?? "GET").toUpperCase();
-  const cacheKey = method === "GET" && cacheTime > 0 ? path : "";
-  const now = Date.now();
-  const cached = cacheKey ? GET_CACHE.get(cacheKey) : undefined;
-
-  if (cached && cached.staleAt > now) {
-    return cached.response as ApiResponse<T>;
-  }
-
   const token = getToken();
   const authToken = token && !isTokenExpired(token) ? token : null;
 
@@ -90,50 +83,74 @@ async function request<T>(path: string, init?: ApiRequestInit): Promise<ApiRespo
     clearAllAuthData();
   }
 
-  const headers: HeadersInit = {
-    ...(fetchInit.body instanceof FormData ? {} : { "Content-Type": "application/json" }),
-    ...(fetchInit.headers ?? {}),
-    ...(authToken ? { Authorization: `Bearer ${authToken}` } : {})
-  };
+  const cacheKey = method === "GET" && cacheTime > 0 ? `${authToken ?? "guest"}:${path}` : "";
+  const now = Date.now();
+  const cached = cacheKey ? GET_CACHE.get(cacheKey) : undefined;
 
-  let lastError: unknown;
-  for (let attempt = 0; attempt <= retry; attempt += 1) {
-    try {
-      const res = await fetch(`${API_BASE_URL}${path}`, { ...fetchInit, headers });
-      const body = (await res.json().catch(() => ({}))) as ApiResponse<T>;
-      if (!res.ok || !body.success) {
-        const error = new Error(friendlyRequestError(res.status, body.message));
-        if (attempt < retry && res.status >= 500) {
-          lastError = error;
+  if (cached && cached.staleAt > now) {
+    return cached.response as ApiResponse<T>;
+  }
+
+  if (cacheKey) {
+    const inFlight = IN_FLIGHT_GETS.get(cacheKey);
+    if (inFlight) return inFlight as Promise<ApiResponse<T>>;
+  }
+
+  const performRequest = async () => {
+    const headers: HeadersInit = {
+      ...(fetchInit.body instanceof FormData ? {} : { "Content-Type": "application/json" }),
+      ...(fetchInit.headers ?? {}),
+      ...(authToken ? { Authorization: `Bearer ${authToken}` } : {})
+    };
+
+    let lastError: unknown;
+    for (let attempt = 0; attempt <= retry; attempt += 1) {
+      try {
+        const res = await fetch(`${API_BASE_URL}${path}`, { ...fetchInit, headers });
+        const body = (await res.json().catch(() => ({}))) as ApiResponse<T>;
+        if (!res.ok || !body.success) {
+          const error = new Error(friendlyRequestError(res.status, body.message));
+          if (attempt < retry && res.status >= 500) {
+            lastError = error;
+            await sleep(350 * (attempt + 1));
+            continue;
+          }
+          throw error;
+        }
+
+        if (cacheKey) {
+          const cachedAt = Date.now();
+          GET_CACHE.set(cacheKey, {
+            staleAt: cachedAt + staleTime,
+            expiresAt: cachedAt + cacheTime,
+            response: body as ApiResponse<unknown>,
+          });
+          window.setTimeout(() => {
+            const entry = GET_CACHE.get(cacheKey);
+            if (entry && entry.expiresAt <= Date.now()) GET_CACHE.delete(cacheKey);
+          }, cacheTime);
+        }
+
+        return body;
+      } catch (err) {
+        lastError = err;
+        if (attempt < retry) {
           await sleep(350 * (attempt + 1));
           continue;
         }
-        throw error;
-      }
-
-      if (cacheKey) {
-        GET_CACHE.set(cacheKey, {
-          staleAt: now + staleTime,
-          expiresAt: now + cacheTime,
-          response: body as ApiResponse<unknown>,
-        });
-        window.setTimeout(() => {
-          const entry = GET_CACHE.get(cacheKey);
-          if (entry && entry.expiresAt <= Date.now()) GET_CACHE.delete(cacheKey);
-        }, cacheTime);
-      }
-
-      return body;
-    } catch (err) {
-      lastError = err;
-      if (attempt < retry) {
-        await sleep(350 * (attempt + 1));
-        continue;
       }
     }
-  }
 
-  throw lastError instanceof Error ? lastError : new Error("Request failed");
+    throw lastError instanceof Error ? lastError : new Error("Request failed");
+  };
+
+  const promise = performRequest();
+  if (cacheKey) IN_FLIGHT_GETS.set(cacheKey, promise as Promise<ApiResponse<unknown>>);
+  try {
+    return await promise;
+  } finally {
+    if (cacheKey) IN_FLIGHT_GETS.delete(cacheKey);
+  }
 }
 
 export { type ApiResponse };
@@ -168,7 +185,12 @@ export const api = {
   // logout: () => request<null>("/auth/logout", { method: "POST" }),
 
   // ===== User & Profile Endpoints =====
-  me: () => request<User>("/users/me"),
+  me: () =>
+    request<User>("/users/me", {
+      staleTime: SHORT_LIST_STALE_TIME,
+      cacheTime: SHORT_LIST_STALE_TIME * 2,
+      retry: 1,
+    }),
 
   updateMe: (payload: Partial<User> & { bio?: string; avatarUrl?: string }) =>
     request<User>("/users/me", {
@@ -290,16 +312,10 @@ export const api = {
   getConversation: (id: string) => request<Conversation>(`/conversations/${id}`, { retry: 1 }),
 
   createConversation: (payload: ConversationCreatePayload) =>
-    request<Conversation>("/conversations", { method: "POST", body: JSON.stringify(payload) }).then((response) => {
-      GET_CACHE.clear();
-      return response;
-    }),
+    request<Conversation>("/conversations", { method: "POST", body: JSON.stringify(payload) }),
 
   sendMessage: (payload: MessageSendPayload) =>
-    request<Message>("/messages", { method: "POST", body: JSON.stringify(payload) }).then((response) => {
-      GET_CACHE.clear();
-      return response;
-    }),
+    request<Message>("/messages", { method: "POST", body: JSON.stringify(payload) }),
 
   // ===== Notification Endpoints =====
   getNotifications: (unreadOnly?: boolean) =>
