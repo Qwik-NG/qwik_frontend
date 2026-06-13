@@ -62,11 +62,11 @@ function CategoryCard({ item, onClick }: { item: Category; onClick: () => void }
     <button
       type="button"
       onClick={onClick}
-      className="group flex min-w-0 flex-col items-center gap-2 text-center transition duration-200 hover:-translate-y-0.5 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#ff9715] focus-visible:ring-offset-4 focus-visible:ring-offset-page active:scale-[0.96]"
+      className="group flex w-[70px] shrink-0 flex-col items-center gap-1.5 text-center transition duration-200 hover:-translate-y-0.5 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#ff9715] focus-visible:ring-offset-4 focus-visible:ring-offset-page active:scale-[0.96] sm:w-[82px] lg:w-[88px]"
       aria-label={`Browse ${item.name}`}
     >
       <span
-        className="grid h-[56px] w-[56px] place-items-center overflow-hidden rounded-full shadow-[0_8px_18px_rgba(31,29,39,0.05)] transition duration-200 group-hover:scale-105 group-hover:shadow-[0_12px_24px_rgba(31,29,39,0.09)] sm:h-[66px] sm:w-[66px] lg:h-[72px] lg:w-[72px]"
+        className="grid h-[48px] w-[48px] place-items-center overflow-hidden rounded-full shadow-[0_8px_18px_rgba(31,29,39,0.05)] transition duration-200 group-hover:scale-105 group-hover:shadow-[0_12px_24px_rgba(31,29,39,0.09)] sm:h-[52px] sm:w-[52px] lg:h-[56px] lg:w-[56px]"
         style={{ background: item.tone }}
       >
         {item.image ? (
@@ -74,16 +74,16 @@ function CategoryCard({ item, onClick }: { item: Category; onClick: () => void }
             src={item.image}
             alt=""
             fit="contain"
-            className="h-[42px] w-[42px] rounded-full mix-blend-multiply sm:h-[50px] sm:w-[50px] lg:h-[54px] lg:w-[54px]"
-            fallbackClassName="h-[42px] w-[42px] rounded-full sm:h-[50px] sm:w-[50px] lg:h-[54px] lg:w-[54px]"
+            className="h-[34px] w-[34px] rounded-full mix-blend-multiply sm:h-[38px] sm:w-[38px] lg:h-[40px] lg:w-[40px]"
+            fallbackClassName="h-[34px] w-[34px] rounded-full sm:h-[38px] sm:w-[38px] lg:h-[40px] lg:w-[40px]"
             loading="eager"
             decoding="async"
           />
         ) : item.icon ? (
-          <item.icon className="h-[34px] w-[34px] sm:h-[40px] sm:w-[40px] lg:h-[44px] lg:w-[44px]" />
+          <item.icon className="h-[30px] w-[30px] sm:h-[34px] sm:w-[34px] lg:h-[36px] lg:w-[36px]" />
         ) : null}
       </span>
-      <span className="max-w-[88px] text-[13px] font-medium leading-[1.15] text-[#1f1d27] sm:max-w-[112px] sm:text-[14px]">
+      <span className="max-w-full text-[11px] font-medium leading-[1.15] text-[#1f1d27] sm:text-[12px] lg:text-[12px]">
         <span className="sm:hidden">{item.shortName}</span>
         <span className="hidden sm:inline">{item.name}</span>
       </span>
@@ -118,11 +118,13 @@ export default function HomePage() {
     <div className="min-h-screen bg-page text-ink">
       <SiteHeader navigate={navigate} />
 
-      <section className="mx-auto w-full max-w-[1728px] px-4 pb-1 pt-6 sm:px-6 sm:pt-9 lg:px-12 xl:pt-12">
-        <div className="grid grid-cols-3 justify-items-center gap-x-4 gap-y-4 min-[420px]:grid-cols-4 sm:grid-cols-4 sm:gap-x-5 sm:gap-y-5 lg:grid-cols-8 lg:gap-x-4">
-          {categories.map((item) => (
-            <CategoryCard key={item.name} item={item} onClick={() => navigate(item.route)} />
-          ))}
+      <section className="mx-auto w-full max-w-[1728px] overflow-hidden px-4 pb-1 pt-5 sm:px-6 sm:pt-7 lg:px-12 xl:pt-8">
+        <div className="category-scroll -mx-4 overflow-x-auto overscroll-x-contain px-4 pb-2 sm:-mx-6 sm:px-6 lg:-mx-12 lg:px-12">
+          <div className="flex w-max min-w-full flex-nowrap items-start gap-3 sm:gap-4 lg:gap-3 xl:justify-between xl:gap-4">
+            {categories.map((item) => (
+              <CategoryCard key={item.name} item={item} onClick={() => navigate(item.route)} />
+            ))}
+          </div>
         </div>
       </section>
 
