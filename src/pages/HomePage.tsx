@@ -22,7 +22,7 @@ const categories: Category[] = [
   { name: "Vehicles", shortName: "Cars", image: "/category-images/vehicles.png", tone: "#f8ebe4", route: buildSearchRoute("Vehicles") },
   { name: "Phones & Tablets", shortName: "Phones", image: "/category-images/phone.png", tone: "#e9edff", route: buildSearchRoute("Phones") },
   { name: "Jobs", shortName: "Jobs", image: "/category-images/image.png", tone: "#f2e8dd", route: buildSearchRoute("Job") },
-  { name: "Agriculture", shortName: "Agric", image: "/category-images/agriculture.png", tone: "#e5f1df", route: buildSearchRoute("Agriculture") },
+  { name: "Agriculture & Food", shortName: "Agriculture & Food", image: "/category-images/agriculture.png", tone: "#e5f1df", route: buildSearchRoute("Agriculture") },
   { name: "Sports & Leisure", shortName: "Sports", image: "/category-images/sports.png", tone: "#e7eefb", route: buildSearchRoute("Sports & Leisure") },
   { name: "Fashion", shortName: "Fashion", image: "/category-images/fashion.png", tone: "#f6eadc", route: buildSearchRoute("Fashion") },
   { name: "Art", shortName: "Art", image: "/category-images/art.png", tone: "#f0e8f7", route: buildSearchRoute("Art") },

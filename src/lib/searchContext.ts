@@ -9,7 +9,7 @@ type CategorySearchContext = {
 const CATEGORY_SEARCH_CONTEXTS: CategorySearchContext[] = [
   { name: "Vehicles", slug: "vehicles", aliases: ["vehicle", "vehicles", "car", "cars"] },
   { name: "Phones & Tablets", slug: "phones-tablets", aliases: ["phone", "phones", "tablet", "tablets", "phones & tablets"] },
-  { name: "Agriculture", slug: "agriculture", aliases: ["agriculture", "agric"] },
+  { name: "Agriculture & Food", slug: "agriculture", aliases: ["agriculture", "agric", "agriculture & food", "food"] },
   { name: "Sports & Leisure", slug: "sports-leisure", aliases: ["sport", "sports", "sports & leisure", "leisure"] },
   { name: "Art", slug: "art", aliases: ["art", "arts"] },
   { name: "Electronics", slug: "electronics", aliases: ["electronic", "electronics"] },

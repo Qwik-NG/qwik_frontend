@@ -1,16 +1,18 @@
 import type { ReactNode } from "react";
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { SiteFooter, SiteHeader } from "../components/AppShell";
 import { MobileSettingsMenu } from "../components/settings/SettingsSidebar";
 import { useCurrentUser } from "../hooks/useCurrentUser";
 import type { CurrentUserDisplay } from "../lib/currentUser";
+import { api } from "../services/api";
 import { clearAllAuthData } from "../services/auth";
 import { QwikLogo } from "../components/ui/QwikLogo";
 import { IconButton } from "../components/ui/IconButton";
 import Toggle from "../components/ui/Toggle";
 import { UserAvatar } from "../components/ui/UserAvatar";
 import { getSettingsNavItems } from "../lib/settings-nav-config";
+import { useToast } from "../context/ToastContext";
 
 type TabKey = "profile" | "company" | "chat";
 type MenuItem = { label: string; icon: ReactNode; active?: boolean; to?: string };
@@ -173,24 +175,65 @@ function SaveButton({ className = "" }: { className?: string }) {
   );
 }
 
-function ProfileSummary({ display }: { display: CurrentUserDisplay }) {
+function ProfileSummary({
+  display,
+  avatarImageUrl,
+  avatarFileName,
+  savingAvatar,
+  onAvatarFileChange,
+  onSaveAvatar,
+}: {
+  display: CurrentUserDisplay;
+  avatarImageUrl: string;
+  avatarFileName: string;
+  savingAvatar: boolean;
+  onAvatarFileChange: (file: File | null) => void;
+  onSaveAvatar: () => void;
+}) {
   return (
     <section className="flex min-w-0 flex-col gap-7 rounded-[24px] bg-white px-[28px] py-[34px] sm:px-[40px] lg:h-[164px] lg:flex-row lg:items-center lg:justify-between lg:px-[40px]">
       <div className="flex min-w-0 flex-col items-start gap-[16px] sm:flex-row sm:items-center">
         <div className="relative shrink-0">
-          <UserAvatar
-            name={display.fullName}
-            imageUrl={display.avatarUrl}
-            alt={`${display.fullName} profile`}
-            className="h-[84px] w-[84px] rounded-full bg-[#df8ca2] object-cover"
-          />
-          <button type="button" className="absolute bottom-0 right-[-2px] grid h-[28px] w-[28px] place-items-center rounded-full border border-card bg-white text-ink" aria-label="Edit profile picture">
+          <label className="block cursor-pointer" aria-label="Choose profile photo">
+            <UserAvatar
+              name={display.fullName}
+              imageUrl={avatarImageUrl}
+              alt={`${display.fullName} profile`}
+              className="h-[84px] w-[84px] rounded-full object-cover"
+            />
+            <input
+              type="file"
+              accept="image/jpeg,image/png,image/webp,image/gif"
+              className="hidden"
+              onChange={(event) => onAvatarFileChange(event.target.files?.[0] ?? null)}
+            />
+          </label>
+          <label className="absolute bottom-0 right-[-2px] grid h-[28px] w-[28px] cursor-pointer place-items-center rounded-full border border-card bg-white text-ink" aria-label="Edit profile picture">
             <PencilIcon />
-          </button>
+            <input
+              type="file"
+              accept="image/jpeg,image/png,image/webp,image/gif"
+              className="hidden"
+              onChange={(event) => onAvatarFileChange(event.target.files?.[0] ?? null)}
+            />
+          </label>
         </div>
         <div className="min-w-0">
           <h1 className="truncate text-[22px] font-normal leading-tight text-ink sm:text-[26px]">{display.fullName}</h1>
           <p className="truncate text-[14px] text-muted sm:text-[16px]">{display.email}</p>
+          {avatarFileName ? (
+            <div className="mt-3 flex flex-wrap items-center gap-3">
+              <span className="max-w-[220px] truncate text-[13px] text-muted">{avatarFileName}</span>
+              <button
+                type="button"
+                onClick={onSaveAvatar}
+                disabled={savingAvatar}
+                className="h-[34px] rounded-[8px] bg-gradient-to-r from-amber to-orange px-4 text-[13px] font-medium text-white shadow-glow disabled:cursor-not-allowed disabled:opacity-60"
+              >
+                {savingAvatar ? "Saving..." : "Save photo"}
+              </button>
+            </div>
+          ) : null}
         </div>
       </div>
 
@@ -346,7 +389,41 @@ function Footer() {
 export default function AccountPage() {
   const navigate = useNavigate();
   const [activeTab, setActiveTab] = useState<TabKey>("profile");
-  const { display } = useCurrentUser();
+  const { display, setUser } = useCurrentUser();
+  const { success, error: showError } = useToast();
+  const [selectedAvatarFile, setSelectedAvatarFile] = useState<File | null>(null);
+  const [avatarPreviewUrl, setAvatarPreviewUrl] = useState("");
+  const [savingAvatar, setSavingAvatar] = useState(false);
+
+  useEffect(() => {
+    if (!selectedAvatarFile) {
+      setAvatarPreviewUrl("");
+      return;
+    }
+
+    const previewUrl = URL.createObjectURL(selectedAvatarFile);
+    setAvatarPreviewUrl(previewUrl);
+
+    return () => URL.revokeObjectURL(previewUrl);
+  }, [selectedAvatarFile]);
+
+  const saveAvatar = async () => {
+    if (!selectedAvatarFile || savingAvatar) return;
+
+    try {
+      setSavingAvatar(true);
+      const uploadResponse = await api.uploadImages([selectedAvatarFile]);
+      const avatarUrl = uploadResponse.data.urls[0] || "";
+      const response = await api.updateMe({ avatarUrl });
+      setUser(response.data);
+      setSelectedAvatarFile(null);
+      success("Profile photo updated");
+    } catch (error) {
+      showError(error instanceof Error ? error.message : "Failed to update profile photo");
+    } finally {
+      setSavingAvatar(false);
+    }
+  };
 
   const menuItems: MenuItem[] = [
     { label: "Profile", icon: <UserIcon />, active: true, to: "/profile-settings" },
@@ -409,7 +486,14 @@ export default function AccountPage() {
           <div className="mb-4">
             <MobileSettingsMenu items={mobileItems} label="Menu" title="Account" />
           </div>
-          <ProfileSummary display={display} />
+          <ProfileSummary
+            display={display}
+            avatarImageUrl={avatarPreviewUrl || display.avatarUrl}
+            avatarFileName={selectedAvatarFile?.name ?? ""}
+            savingAvatar={savingAvatar}
+            onAvatarFileChange={setSelectedAvatarFile}
+            onSaveAvatar={saveAvatar}
+          />
           <div className="mt-[42px]">
             <Tabs activeTab={activeTab} onChange={setActiveTab} />
             {activeTab === "profile" ? <EditProfileForm display={display} /> : null}

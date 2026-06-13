@@ -4,7 +4,7 @@ export const POST_CATEGORY_OPTIONS = [
   { name: "Vehicles", slug: "vehicles" },
   { name: "Phones & Tablets", slug: "phones-tablets" },
   { name: "Jobs", slug: "jobs" },
-  { name: "Agriculture", slug: "agriculture" },
+  { name: "Agriculture & Food", slug: "agriculture" },
   { name: "Sports & Leisure", slug: "sports-leisure" },
   { name: "Fashion", slug: "fashion" },
   { name: "Art", slug: "art" },
@@ -38,6 +38,9 @@ const CATEGORY_NAME_ALIASES: Record<string, string> = {
   "furniture & appliances": "furniture-appliances",
   phones: "phones-tablets",
   "phones & tablets": "phones-tablets",
+  agriculture: "agriculture",
+  agric: "agriculture",
+  "agriculture & food": "agriculture",
 };
 
 export function normalizeCategorySlug(category: Pick<Category, "name" | "slug">) {

@@ -125,7 +125,7 @@ export const mockCategories: Category[] = [
   { id: "1", name: "Cars", slug: "cars", icon: "🚗" },
   { id: "2", name: "Phones", slug: "phones", icon: "📱" },
   { id: "3", name: "Jobs", slug: "jobs", icon: "💼" },
-  { id: "4", name: "Agriculture", slug: "agriculture", icon: "🌾" },
+  { id: "4", name: "Agriculture & Food", slug: "agriculture", icon: "🌾" },
   { id: "5", name: "Sports & Leisure", slug: "sports-leisure", icon: "⚽" },
   { id: "6", name: "Fashion", slug: "fashion", icon: "👗" },
   { id: "7", name: "Electronics", slug: "electronics", icon: "💻" },
