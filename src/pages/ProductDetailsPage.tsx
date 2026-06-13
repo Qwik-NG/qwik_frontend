@@ -494,7 +494,13 @@ export default function ProductDetailsPage() {
               </div>
             </div>
             <div className="mt-4 flex gap-2">
-              <button className="h-10 rounded-[8px] bg-gradient-to-r from-amber to-orange px-4 text-white shadow-glow transition-all duration-200 hover:opacity-95 active:scale-[0.99] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#ffb357] focus-visible:ring-offset-2 focus-visible:ring-offset-white" onClick={() => navigate("/make-offer")} type="button">Make an offer</button>
+              <button
+                className="h-10 rounded-[8px] bg-gradient-to-r from-amber to-orange px-4 text-white shadow-glow transition-all duration-200 hover:opacity-95 active:scale-[0.99] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#ffb357] focus-visible:ring-offset-2 focus-visible:ring-offset-white"
+                onClick={() => navigate(`/make-offer?adId=${encodeURIComponent(ad.id)}`)}
+                type="button"
+              >
+                Make an offer
+              </button>
               <button className="h-10 rounded-[8px] bg-badge-bg px-4 text-[#ff9715] transition-colors duration-200 hover:bg-[#ffe2c5] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#ffb357] focus-visible:ring-offset-2 focus-visible:ring-offset-white" type="button">Call</button>
             </div>
           </div>

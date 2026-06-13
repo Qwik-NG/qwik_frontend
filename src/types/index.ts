@@ -258,12 +258,16 @@ export interface ConversationCreatePayload {
   message: string;
   adId?: string;
   clientId?: string;
+  messageType?: "text" | "offer";
+  offerAmount?: number;
 }
 
 export interface MessageSendPayload {
   conversationId: string;
   text: string;
   clientId?: string;
+  messageType?: "text" | "offer";
+  offerAmount?: number;
 }
 
 /**

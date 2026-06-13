@@ -97,7 +97,7 @@ function ChatBubble({ message, mine, onRetry }: { message: Message; mine: boolea
   return (
     <div className={`flex ${mine ? "justify-end" : "justify-start"}`}>
       <div
-        className={`max-w-[78%] rounded-card px-[18px] py-[13px] text-[15px] leading-[1.45] ${
+        className={`max-w-[78%] whitespace-pre-line rounded-card px-[18px] py-[13px] text-[15px] leading-[1.45] ${
           mine ? "rounded-br-[6px] bg-gradient-to-r from-amber to-orange text-white" : "rounded-bl-[6px] bg-card text-ink"
         }`}
       >
