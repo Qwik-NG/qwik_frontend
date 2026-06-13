@@ -2,46 +2,24 @@ import { useEffect, useState } from "react";
 import { useNavigate, useSearchParams } from "react-router-dom";
 import { SiteFooter, SiteHeader } from "../components/AppShell";
 import { ROUTES, buildProductDetailsRoute } from "../constants/routes";
+import { PROMOTION_PLAN_GROUPS, formatNaira, type PromotionOption } from "../lib/promotionPlans";
 import { api } from "../services/api";
 import type { Ad } from "../types";
 
-type PromotionPlan = "top-7" | "premium-30";
-
-const PROMOTION_PLANS: Array<{
-  id: PromotionPlan;
-  title: string;
-  label: string;
-  duration: string;
-  price: string;
-  helper: string;
-}> = [
-  {
-    id: "top-7",
-    title: "TOP",
-    label: "Promote this ad with TOP",
-    duration: "7 Days",
-    price: "₦1,500",
-    helper: "A simple boost for fresh visibility.",
-  },
-  {
-    id: "premium-30",
-    title: "Premium",
-    label: "Promote this ad with Premium",
-    duration: "30 Days",
-    price: "₦4,000",
-    helper: "Longer placement for higher repeat exposure.",
-  },
-];
-
-function DayPill({ label, active = false }: { label: string; active?: boolean }) {
+function DayPill({ option, active = false, onSelect }: { option: PromotionOption; active?: boolean; onSelect: () => void }) {
   return (
-    <span
-      className={`rounded-[10px] px-3 py-1 text-[15px] ${
-        active ? "bg-[#ff9a12] text-white" : "bg-badge-bg text-[#ff9715]"
+    <button
+      type="button"
+      role="radio"
+      aria-checked={active}
+      onClick={onSelect}
+      className={`rounded-[10px] border px-3 py-2 text-left text-[14px] transition focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-orange ${
+        active ? "border-orange bg-[#ff9a12] text-white shadow-[0_8px_18px_rgba(255,151,21,0.22)]" : "border-[#f1d8bd] bg-badge-bg text-[#ff9715] hover:border-orange"
       }`}
     >
-      {label}
-    </span>
+      <span className="block font-semibold">{option.duration} Days</span>
+      <span className={`block text-[12px] ${active ? "text-white/85" : "text-[#8f6c42]"}`}>{formatNaira(option.price)}</span>
+    </button>
   );
 }
 
@@ -61,7 +39,7 @@ export default function PromoteAdPage() {
   const navigate = useNavigate();
   const [searchParams] = useSearchParams();
   const adId = searchParams.get("adId")?.trim() ?? "";
-  const [selectedPlan, setSelectedPlan] = useState<PromotionPlan | null>(null);
+  const [selectedOption, setSelectedOption] = useState<PromotionOption | null>(null);
   const [ad, setAd] = useState<Ad | null>(null);
   const [loading, setLoading] = useState(Boolean(adId));
   const [error, setError] = useState<string | null>(null);
@@ -100,22 +78,31 @@ export default function PromoteAdPage() {
     if (adId) navigate(buildProductDetailsRoute(adId));
   };
 
-  const openPayment = (path: string) => {
+  const openPayment = (option: PromotionOption) => {
     if (!adId || !ad) {
       setError("Create an ad before choosing a promotion.");
       return;
     }
-    navigate(`${path}?adId=${encodeURIComponent(adId)}&plan=${encodeURIComponent(selectedPlan ?? "")}`);
+
+    const params = new URLSearchParams({
+      adId,
+      option: option.id,
+      plan: option.plan,
+      duration: String(option.duration),
+      price: String(option.price),
+    });
+    const path = option.plan === "premium" ? ROUTES.PREMIUM_PLAN_PAYMENT : ROUTES.PLAN_PAYMENT;
+    navigate(`${path}?${params.toString()}`);
   };
 
   const handleContinue = () => {
-    if (!selectedPlan) {
-      setError("Select a promotion plan to continue to payment.");
+    if (!selectedOption) {
+      setError("Select a promotion duration to continue to payment.");
       return;
     }
 
     setError(null);
-    openPayment(selectedPlan === "premium-30" ? ROUTES.PREMIUM_PLAN_PAYMENT : ROUTES.PLAN_PAYMENT);
+    openPayment(selectedOption);
   };
 
   return (
@@ -182,16 +169,11 @@ export default function PromoteAdPage() {
               </button>
 
               <div className="mb-6 space-y-4">
-                {PROMOTION_PLANS.map((plan) => {
-                  const isSelected = selectedPlan === plan.id;
+                {PROMOTION_PLAN_GROUPS.map((group) => {
+                  const isSelected = selectedOption?.plan === group.plan;
                   return (
-                    <button
-                      key={plan.id}
-                      type="button"
-                      onClick={() => {
-                        setSelectedPlan(plan.id);
-                        setError(null);
-                      }}
+                    <div
+                      key={group.plan}
                       className={`w-full rounded-[12px] border p-3 text-left transition focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-orange ${
                         isSelected
                           ? "border-orange bg-[#fff6ea] shadow-[0_10px_24px_rgba(255,151,21,0.14)]"
@@ -200,8 +182,8 @@ export default function PromoteAdPage() {
                     >
                       <div className="mb-3 flex items-start justify-between gap-3">
                         <div>
-                          <p className="text-[14px] text-[#8f8c98] sm:text-[15px]">{plan.label}</p>
-                          <p className="mt-1 text-[13px] text-[#a09ba7]">{plan.helper}</p>
+                          <p className="text-[14px] text-[#8f8c98] sm:text-[15px]">{group.label}</p>
+                          <p className="mt-1 text-[13px] text-[#a09ba7]">{group.helper}</p>
                         </div>
                         <span
                           className={`mt-0.5 grid h-6 w-6 place-items-center rounded-full border text-[14px] ${
@@ -215,15 +197,24 @@ export default function PromoteAdPage() {
                         </span>
                       </div>
                       <div className="flex flex-wrap items-center justify-between gap-3">
-                        <div className="flex gap-2">
-                          <DayPill label={plan.duration} active />
-                          <DayPill label={plan.id === "top-7" ? "30 Days" : "7 Days"} />
+                        <div className="flex flex-wrap gap-2" role="radiogroup" aria-label={`${group.title} duration options`}>
+                          {group.options.map((option) => (
+                            <DayPill
+                              key={option.id}
+                              option={option}
+                              active={selectedOption?.id === option.id}
+                              onSelect={() => {
+                                setSelectedOption(option);
+                                setError(null);
+                              }}
+                            />
+                          ))}
                         </div>
-                        <span className={`text-[18px] sm:text-[20px] ${isSelected ? "text-[#ff7f1f]" : "text-[#9b97a4]"}`}>
-                          {plan.price}
+                        <span className={`text-[18px] sm:text-[20px] ${isSelected ? "text-[#ff7f1f]" : "text-[#9b97a4]"}`} aria-live="polite">
+                          {isSelected && selectedOption ? formatNaira(selectedOption.price) : "Select duration"}
                         </span>
                       </div>
-                    </button>
+                    </div>
                   );
                 })}
               </div>
@@ -233,7 +224,7 @@ export default function PromoteAdPage() {
               <button
                 type="button"
                 onClick={handleContinue}
-                disabled={!selectedPlan}
+                disabled={!selectedOption}
                 className="h-[50px] w-full rounded-[11px] bg-gradient-to-r from-amber to-orange text-[16px] text-white shadow-glow disabled:cursor-not-allowed disabled:opacity-50 sm:text-[18px]"
               >
                 Continue to Payment

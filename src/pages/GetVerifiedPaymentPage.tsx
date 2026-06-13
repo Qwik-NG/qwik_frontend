@@ -7,6 +7,28 @@ import { getSettingsNavItems } from "../lib/settings-nav-config";
 import { api } from "../services/api";
 import type { VerificationApplication } from "../types";
 
+type VerificationPaymentMethod = "paystack" | "bank-transfer";
+
+const VERIFICATION_PAYMENT_METHODS: Array<{
+  id: VerificationPaymentMethod;
+  title: string;
+  description: string;
+  provider: string;
+}> = [
+  {
+    id: "paystack",
+    title: "Pay with Paystack",
+    description: "Cards, Bank Transfer, USSD and more",
+    provider: "paystack",
+  },
+  {
+    id: "bank-transfer",
+    title: "Pay with Bank Transfer",
+    description: "Manually transfer to our bank account.",
+    provider: "manual",
+  },
+];
+
 function ShieldIllustration() {
   return (
     <div className="relative mx-auto flex h-[220px] w-[220px] items-center justify-center">
@@ -133,11 +155,55 @@ function PaymentLogo({ label }: { label: string }) {
   );
 }
 
+function PaymentMethodCard({
+  method,
+  selected,
+  onSelect,
+  children,
+}: {
+  method: (typeof VERIFICATION_PAYMENT_METHODS)[number];
+  selected: boolean;
+  onSelect: () => void;
+  children?: React.ReactNode;
+}) {
+  return (
+    <button
+      type="button"
+      role="radio"
+      aria-checked={selected}
+      onClick={onSelect}
+      className={`mt-4 w-full rounded-[14px] border p-4 text-left transition focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-orange ${
+        selected ? "border-[#ff8b2c] bg-[#fff7ed] shadow-[0_10px_24px_rgba(255,151,21,0.14)]" : "border-[#e0dee6] bg-white hover:border-[#ff8b2c]"
+      }`}
+    >
+      <div className="flex items-start gap-4">
+        <span
+          className={`mt-1 grid h-[18px] w-[18px] shrink-0 place-items-center rounded-full border ${
+            selected ? "border-[#ff8b2c] bg-[#ff8b2c]" : "border-[#c7c5d0] bg-white"
+          }`}
+          aria-hidden="true"
+        >
+          {selected ? <span className="h-2 w-2 rounded-full bg-white" /> : null}
+        </span>
+        <div className="flex min-w-0 flex-1 items-center gap-3">
+          {method.id === "paystack" ? <PaystackIcon /> : <BankIcon />}
+          <div className="min-w-0">
+            <p className="text-[14px] font-semibold text-[#1f1d27]">{method.title}</p>
+            <p className="text-[12px] text-[#8f8b98]">{method.description}</p>
+          </div>
+        </div>
+      </div>
+      {children}
+    </button>
+  );
+}
+
 export default function GetVerifiedPaymentPage() {
   const navigate = useNavigate();
   const [verification, setVerification] = useState<VerificationApplication | null>(null);
   const [loading, setLoading] = useState(true);
   const [submitting, setSubmitting] = useState(false);
+  const [selectedPaymentMethod, setSelectedPaymentMethod] = useState<VerificationPaymentMethod | null>(null);
   const [error, setError] = useState<string | null>(null);
   const [message, setMessage] = useState<string | null>(null);
 
@@ -170,7 +236,17 @@ export default function GetVerifiedPaymentPage() {
         setError("Complete your verification details before continuing.");
         return;
       }
-      const checkout = await api.checkoutPayment({ purpose: "VERIFICATION", verificationId: verification.id });
+      const method = VERIFICATION_PAYMENT_METHODS.find((item) => item.id === selectedPaymentMethod);
+      if (!method) {
+        setError("Select a payment method before continuing.");
+        return;
+      }
+      const checkout = await api.checkoutPayment({
+        purpose: "VERIFICATION",
+        verificationId: verification.id,
+        provider: method.provider,
+        paymentMethod: method.id,
+      });
       if (checkout.data.checkoutUrl) {
         window.location.href = checkout.data.checkoutUrl;
         return;
@@ -322,18 +398,15 @@ export default function GetVerifiedPaymentPage() {
                   <h3 className="text-[16px] font-semibold text-[#1f1d27]">Choose a payment method</h3>
                   <p className="mt-1 text-[13px] text-[#8f8b98]">Provider checkout is prepared but not live until payment keys are configured.</p>
 
-                  <div className="mt-4 rounded-[14px] border border-[#ff8b2c] p-4">
-                    <div className="flex items-start gap-4">
-                      <span className="mt-1 h-[18px] w-[18px] rounded-full border border-[#ff8b2c] bg-[#ff8b2c]" />
-                      <div className="flex flex-1 items-center gap-3">
-                        <PaystackIcon />
-                        <div>
-                          <p className="text-[14px] font-semibold text-[#1f1d27]">Pay with Paystack</p>
-                          <p className="text-[12px] text-[#8f8b98]">Cards, Bank Transfer, USSD and more</p>
-                        </div>
-                      </div>
-                    </div>
-
+                  <div role="radiogroup" aria-label="Verification payment method">
+                  <PaymentMethodCard
+                    method={VERIFICATION_PAYMENT_METHODS[0]}
+                    selected={selectedPaymentMethod === "paystack"}
+                    onSelect={() => {
+                      setSelectedPaymentMethod("paystack");
+                      setError(null);
+                    }}
+                  >
                     <div className="mt-4 rounded-[12px] bg-[#f4f4f7] p-4">
                       <div className="flex flex-wrap gap-3">
                         <PaymentLogo label="VISA" />
@@ -342,26 +415,23 @@ export default function GetVerifiedPaymentPage() {
                         <PaymentLogo label="Mastercard" />
                       </div>
                     </div>
-                  </div>
+                  </PaymentMethodCard>
 
-                  <div className="mt-4 rounded-[14px] border border-[#e0dee6] p-4">
-                    <div className="flex items-start gap-4">
-                      <span className="mt-1 h-[18px] w-[18px] rounded-full border border-[#c7c5d0]" />
-                      <div className="flex flex-1 items-center gap-3">
-                        <BankIcon />
-                        <div>
-                          <p className="text-[14px] font-semibold text-[#1f1d27]">Pay with Bank Transfer</p>
-                          <p className="text-[12px] text-[#8f8b98]">Manually transfer to our bank account.</p>
-                        </div>
-                      </div>
-                    </div>
+                  <PaymentMethodCard
+                    method={VERIFICATION_PAYMENT_METHODS[1]}
+                    selected={selectedPaymentMethod === "bank-transfer"}
+                    onSelect={() => {
+                      setSelectedPaymentMethod("bank-transfer");
+                      setError(null);
+                    }}
+                  />
                   </div>
 
                   <button
                     className="mt-6 flex h-[48px] w-full items-center justify-center gap-4 rounded-[12px] bg-gradient-to-r from-amber to-orange px-6 text-[15px] font-semibold text-white shadow-glow"
                     type="button"
                     onClick={handleSubmitForReview}
-                    disabled={loading || submitting || !verification}
+                    disabled={loading || submitting || !verification || !selectedPaymentMethod}
                   >
                     <span>{submitting ? "Submitting..." : "Create Payment Record & Submit"}</span>
                     <span className="text-[18px]">-&gt;</span>

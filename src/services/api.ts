@@ -389,7 +389,7 @@ export const api = {
     }),
 
   // ===== Payment Endpoints =====
-  checkoutPayment: (payload: { purpose: "VERIFICATION" | "AD_PROMOTION"; verificationId?: string; adId?: string; plan?: string }) =>
+  checkoutPayment: (payload: { purpose: "VERIFICATION" | "AD_PROMOTION"; verificationId?: string; adId?: string; plan?: string; provider?: string; paymentMethod?: string }) =>
     request<PaymentCheckoutResponse>("/payments/checkout", {
       method: "POST",
       body: JSON.stringify(payload),
