@@ -324,6 +324,8 @@ export const api = {
 
   getConversation: (id: string) => request<Conversation>(`/conversations/${id}`, { retry: 1 }),
 
+  getUnreadMessageCount: () => request<{ count: number }>("/conversations/unread-count", { retry: 1 }),
+
   createConversation: (payload: ConversationCreatePayload) =>
     request<Conversation>("/conversations", { method: "POST", body: JSON.stringify(payload) }),
 

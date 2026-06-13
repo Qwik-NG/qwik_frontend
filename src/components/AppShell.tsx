@@ -5,6 +5,8 @@ import { ROUTES } from "../constants/routes";
 import { useCurrentUser } from "../hooks/useCurrentUser";
 import { UserAvatar } from "./ui/UserAvatar";
 import { ALL_NIGERIA_LOCATION, NIGERIAN_LOCATIONS, getCategorySearchContext, isSearchResultsPath } from "../lib/searchContext";
+import { api } from "../services/api";
+import { getRealtimeSocket, UNREAD_MESSAGES_REFRESH_EVENT } from "../services/realtime";
 
 type NavigateTo = (to: string) => void;
 type HeaderIcon = "bell" | "bookmark" | "mail";
@@ -26,14 +28,18 @@ function IconBox({
   children,
   onClick,
   active = false,
+  ariaLabel,
 }: {
   children: ReactNode;
   onClick: () => void;
   active?: boolean;
+  ariaLabel?: string;
 }) {
   return (
     <button
+      type="button"
       onClick={onClick}
+      aria-label={ariaLabel}
       className={`grid h-10 w-10 place-items-center rounded-lg lg:h-[42px] lg:w-[42px] ${active ? "bg-[#0a0820] text-white" : "bg-[#ececec] text-[#1f1d27]"}`}
     >
       {children}
@@ -77,7 +83,8 @@ export function SiteHeader({
   const desktopLocationRef = useRef<HTMLDivElement | null>(null);
   const mobileLocationRef = useRef<HTMLDivElement | null>(null);
   const location = useLocation();
-  const { display: currentUser } = useCurrentUser();
+  const { user: currentUserRecord, display: currentUser } = useCurrentUser();
+  const [unreadMessageCount, setUnreadMessageCount] = useState(0);
   const categoryContext = getCategorySearchContext(location.search);
   const showMarketplaceSearch = location.pathname === ROUTES.HOME || isSearchResultsPath(location.pathname);
   const showDesktopSearch = showMarketplaceSearch || isProductDetailsPath(location.pathname);
@@ -121,6 +128,43 @@ export function SiteHeader({
     const nextLocation = new URLSearchParams(location.search).get("location");
     setSelectedLocation(nextLocation || ALL_NIGERIA_LOCATION);
   }, [location.search]);
+
+  useEffect(() => {
+    let cancelled = false;
+
+    const refreshUnreadCount = () => {
+      if (!currentUserRecord?.id) {
+        setUnreadMessageCount(0);
+        return;
+      }
+
+      void api.getUnreadMessageCount()
+        .then((response) => {
+          if (!cancelled) setUnreadMessageCount(response.data.count);
+        })
+        .catch(() => {
+          if (!cancelled) setUnreadMessageCount(0);
+        });
+    };
+
+    refreshUnreadCount();
+
+    const socket = getRealtimeSocket();
+    const handleUnreadCount = ({ count }: { count: number }) => setUnreadMessageCount(count);
+    const handleNewMessage = () => refreshUnreadCount();
+    const handleRefresh = () => refreshUnreadCount();
+
+    socket?.on("messages:unread-count", handleUnreadCount);
+    socket?.on("message:new", handleNewMessage);
+    window.addEventListener(UNREAD_MESSAGES_REFRESH_EVENT, handleRefresh);
+
+    return () => {
+      cancelled = true;
+      socket?.off("messages:unread-count", handleUnreadCount);
+      socket?.off("message:new", handleNewMessage);
+      window.removeEventListener(UNREAD_MESSAGES_REFRESH_EVENT, handleRefresh);
+    };
+  }, [currentUserRecord?.id]);
 
   useEffect(() => {
     if (!locationOpen) return;
@@ -254,6 +298,7 @@ export function SiteHeader({
         <IconBox
           onClick={() => navigate("/notification-empty")}
           active={activeIcon === "bell"}
+          ariaLabel="Notifications"
         >
           <svg
             viewBox="0 0 24 24"
@@ -272,6 +317,7 @@ export function SiteHeader({
         <IconBox
           onClick={() => navigate("/saved")}
           active={activeIcon === "bookmark"}
+          ariaLabel="Saved listings"
         >
           <svg
             viewBox="0 0 24 24"
@@ -289,20 +335,28 @@ export function SiteHeader({
         <IconBox
           onClick={() => navigate("/messages")}
           active={activeIcon === "mail"}
+          ariaLabel={unreadMessageCount > 0 ? `Messages, ${unreadMessageCount > 9 ? "9+" : unreadMessageCount} unread` : "Messages"}
         >
-          <svg
-            viewBox="0 0 24 24"
-            className="h-5 w-5"
-            fill="none"
-            stroke="currentColor"
-            strokeLinecap="round"
-            strokeLinejoin="round"
-            strokeWidth="2"
-            aria-hidden="true"
-          >
-            <rect x="4" y="6" width="16" height="12" rx="3" />
-            <path d="m7.5 9.5 4.5 3.3 4.5-3.3" />
-          </svg>
+          <span className="relative grid h-5 w-5 place-items-center">
+            <svg
+              viewBox="0 0 24 24"
+              className="h-5 w-5"
+              fill="none"
+              stroke="currentColor"
+              strokeLinecap="round"
+              strokeLinejoin="round"
+              strokeWidth="2"
+              aria-hidden="true"
+            >
+              <rect x="4" y="6" width="16" height="12" rx="3" />
+              <path d="m7.5 9.5 4.5 3.3 4.5-3.3" />
+            </svg>
+            {unreadMessageCount > 0 ? (
+              <span className="absolute -right-2.5 -top-2.5 grid min-h-[18px] min-w-[18px] place-items-center rounded-full bg-[#f04438] px-1 text-[10px] font-semibold leading-none text-white shadow-[0_4px_10px_rgba(240,68,56,0.32)] ring-2 ring-page">
+                {unreadMessageCount > 9 ? "9+" : unreadMessageCount}
+              </span>
+            ) : null}
+          </span>
         </IconBox>
         <button
           onClick={() => navigate("/profile-settings")}

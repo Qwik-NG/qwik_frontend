@@ -7,6 +7,7 @@ type ServerToClientEvents = {
   "message:new": (payload: { conversationId: string; message: Message }) => void;
   "notification:new": (payload: { notification: Notification }) => void;
   "conversation:updated": (payload: { conversationId: string; lastMessage?: Message; lastMessageAt?: string }) => void;
+  "messages:unread-count": (payload: { count: number }) => void;
 };
 
 type ClientToServerEvents = {
@@ -15,6 +16,8 @@ type ClientToServerEvents = {
 
 let socket: Socket<ServerToClientEvents, ClientToServerEvents> | null = null;
 let socketToken: string | null = null;
+
+export const UNREAD_MESSAGES_REFRESH_EVENT = "qwik:messages-unread-refresh";
 
 function socketUrl() {
   return (import.meta.env.VITE_SOCKET_URL ?? API_BASE_URL.replace(/\/api\/?$/, "")).replace(/\/$/, "");

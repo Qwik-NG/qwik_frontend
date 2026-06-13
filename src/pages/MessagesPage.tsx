@@ -3,7 +3,7 @@ import { useLocation, useNavigate } from "react-router-dom";
 import { SiteFooter, SiteHeader } from "../components/AppShell";
 import { UserAvatar } from "../components/ui/UserAvatar";
 import { api } from "../services/api";
-import { getRealtimeSocket, joinConversation } from "../services/realtime";
+import { getRealtimeSocket, joinConversation, UNREAD_MESSAGES_REFRESH_EVENT } from "../services/realtime";
 import type { Conversation, Message } from "../types";
 
 const QUICK_EMOJIS = ["😀", "😂", "❤️", "👍", "🙏", "🔥"];
@@ -103,22 +103,7 @@ function ConversationItem({
           className="h-[48px] w-[48px] rounded-full object-cover text-[13px]"
         />
       </span>
-      <span
-        role="button"
-        tabIndex={0}
-        className="min-w-0 flex-1"
-        onClick={(event) => {
-          event.stopPropagation();
-          if (otherParticipant?.id) onOpenProfile(otherParticipant.id);
-        }}
-        onKeyDown={(event) => {
-          if ((event.key === "Enter" || event.key === " ") && otherParticipant?.id) {
-            event.preventDefault();
-            event.stopPropagation();
-            onOpenProfile(otherParticipant.id);
-          }
-        }}
-      >
+      <span className="min-w-0 flex-1">
         <span className="block truncate text-[15px] font-semibold text-ink sm:text-[16px]">{participantName}</span>
         <span className="mt-1 block truncate text-[13px] text-muted">{item.lastMessage?.text || item.ad?.title || "No messages yet"}</span>
       </span>
@@ -231,6 +216,7 @@ export default function MessagesPage() {
         setConversations((current) =>
           current.map((conversation) => (conversation.id === selectedConversationId ? response.data : conversation)),
         );
+        window.dispatchEvent(new Event(UNREAD_MESSAGES_REFRESH_EVENT));
       } catch (err) {
         setError(err instanceof Error ? err.message : "Failed to load conversation");
       }
