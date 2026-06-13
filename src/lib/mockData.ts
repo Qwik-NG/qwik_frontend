@@ -126,12 +126,13 @@ export const mockCategories: Category[] = [
   { id: "2", name: "Phones", slug: "phones", icon: "📱" },
   { id: "3", name: "Jobs", slug: "jobs", icon: "💼" },
   { id: "4", name: "Agriculture", slug: "agriculture", icon: "🌾" },
-  { id: "5", name: "Sports", slug: "sports", icon: "⚽" },
+  { id: "5", name: "Sports & Leisure", slug: "sports-leisure", icon: "⚽" },
   { id: "6", name: "Fashion", slug: "fashion", icon: "👗" },
   { id: "7", name: "Electronics", slug: "electronics", icon: "💻" },
   { id: "8", name: "Properties", slug: "properties", icon: "🏠" },
   { id: "9", name: "Furniture", slug: "furniture", icon: "🛋️" },
-  { id: "10", name: "Beauty", slug: "beauty", icon: "💄" }
+  { id: "10", name: "Beauty", slug: "beauty", icon: "💄" },
+  { id: "11", name: "Art", slug: "art", icon: "🎨" }
 ];
 
 /**
