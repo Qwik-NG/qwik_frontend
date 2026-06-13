@@ -32,6 +32,8 @@ const MODEL_OPTIONS_BY_BRAND: Record<string, string[]> = {
 };
 
 const CATEGORY_NAME_ALIASES: Record<string, string> = {
+  car: "vehicles",
+  cars: "vehicles",
   furniture: "furniture-appliances",
   "furniture & appliances": "furniture-appliances",
   phones: "phones-tablets",
@@ -48,9 +50,10 @@ export function getOrderedPostCategories(categories: Category[]) {
   return POST_CATEGORY_OPTIONS.map((expected) => {
     const apiCategory = categories.find((category) => normalizeCategorySlug(category) === expected.slug);
     return {
-      id: apiCategory?.id ?? expected.slug,
+      id: apiCategory?.id ?? "",
       name: expected.name,
       slug: expected.slug,
+      available: Boolean(apiCategory),
     };
   });
 }

@@ -3,6 +3,8 @@ import { useEffect, useId, useRef, useState } from "react";
 export type DropdownOption = {
   value: string;
   label: string;
+  disabled?: boolean;
+  helperText?: string;
 };
 
 type DropdownSelectProps = {
@@ -96,7 +98,7 @@ export default function DropdownSelect({ label, placeholder, value, options, onC
           id={`${id}-listbox`}
           role="listbox"
           aria-labelledby={`${id}-label`}
-          className="absolute left-0 right-0 z-[120] mt-2 max-h-[240px] overflow-y-auto rounded-[14px] border border-[#eee3d6] bg-white p-1.5 shadow-[0_18px_44px_rgba(34,25,16,0.16)]"
+          className="pointer-events-none absolute left-0 right-0 z-[120] mt-2 max-h-[240px] overflow-y-auto rounded-[14px] border border-[#eee3d6] bg-white p-1.5 shadow-[0_18px_44px_rgba(34,25,16,0.16)]"
         >
           {options.map((option) => {
             const selected = option.value === value;
@@ -106,12 +108,21 @@ export default function DropdownSelect({ label, placeholder, value, options, onC
                 type="button"
                 role="option"
                 aria-selected={selected}
+                aria-disabled={option.disabled}
+                disabled={option.disabled}
                 onClick={() => chooseOption(option.value)}
-                className={`flex min-h-[42px] w-full items-center justify-between rounded-[10px] px-3 text-left text-[15px] transition ${
-                  selected ? "bg-[#fff4e8] font-semibold text-[#ff6c1c]" : "text-[#282530] hover:bg-[#fff8ef]"
+                className={`pointer-events-auto flex min-h-[42px] w-full items-center justify-between gap-3 rounded-[10px] px-3 text-left text-[15px] transition ${
+                  option.disabled
+                    ? "cursor-not-allowed text-[#b2aeba] opacity-70"
+                    : selected
+                      ? "bg-[#fff4e8] font-semibold text-[#ff6c1c]"
+                      : "text-[#282530] hover:bg-[#fff8ef]"
                 }`}
               >
-                <span className="truncate">{option.label}</span>
+                <span className="min-w-0">
+                  <span className="block truncate">{option.label}</span>
+                  {option.helperText ? <span className="block text-[12px] font-normal text-[#9c98a5]">{option.helperText}</span> : null}
+                </span>
                 {selected ? <span className="text-[#ff6c1c]">✓</span> : null}
               </button>
             );

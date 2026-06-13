@@ -76,6 +76,7 @@ export default function NewAdvertDetailsPage() {
   const [categories, setCategories] = useState<Category[]>([]);
   const [navigating, setNavigating] = useState(false);
   const [error, setError] = useState<string | null>(null);
+  const [categoryWarning, setCategoryWarning] = useState<string | null>(null);
 
   useEffect(() => {
     const draft = readDraft();
@@ -163,13 +164,23 @@ export default function NewAdvertDetailsPage() {
                 label="Category"
                 placeholder="What type of item is it?"
                 value={categoryId}
-                options={orderedCategories.map((category) => ({ value: category.id, label: category.name }))}
+                options={orderedCategories.map((category) => ({
+                  value: category.id || `missing:${category.slug}`,
+                  label: category.name,
+                  disabled: !category.available,
+                  helperText: category.available ? undefined : "Unavailable right now",
+                }))}
                 onChange={(value) => {
+                  const selectedCategory = orderedCategories.find((category) => category.id === value);
+                  if (!selectedCategory?.available) return;
+
                   setCategoryId(value);
                   setBrand("");
                   setModel("");
+                  setCategoryWarning(null);
                 }}
               />
+              {categoryWarning ? <p className="text-[13px] leading-snug text-[#d14343]">{categoryWarning}</p> : null}
               <DropdownSelect
                 label="Brand"
                 placeholder="Who's the creator?"
