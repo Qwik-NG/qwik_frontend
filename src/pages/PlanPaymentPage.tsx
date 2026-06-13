@@ -1,6 +1,7 @@
 import { useState } from "react";
 import { useNavigate, useSearchParams } from "react-router-dom";
 import { SiteFooter, SiteHeader } from "../components/AppShell";
+import { PromotionPaymentMethods, type PromotionPaymentMethod } from "../components/payments/PromotionPaymentMethods";
 import { ROUTES, buildProductDetailsRoute } from "../constants/routes";
 import { formatNaira, getPromotionOption, getPromotionOptionFromParams, getPromotionTotal, getPromotionVat } from "../lib/promotionPlans";
 import { api } from "../services/api";
@@ -31,12 +32,17 @@ export default function PlanPaymentPage() {
   const vat = getPromotionVat(selectedOption.price);
   const total = getPromotionTotal(selectedOption.price);
   const [submitting, setSubmitting] = useState(false);
+  const [selectedPaymentMethod, setSelectedPaymentMethod] = useState<PromotionPaymentMethod | null>(null);
   const [message, setMessage] = useState<string | null>(null);
   const [error, setError] = useState<string | null>(adId ? null : "Choose an existing ad before starting promotion.");
 
   const handleCheckout = async () => {
     if (!adId) {
       setError("Choose an existing ad before starting promotion.");
+      return;
+    }
+    if (!selectedPaymentMethod) {
+      setError("Select a payment method before continuing.");
       return;
     }
 
@@ -111,39 +117,12 @@ export default function PlanPaymentPage() {
             <h2 className="text-[24px] font-semibold leading-tight sm:text-[26px]">Choose a payment method</h2>
             <p className="mt-2 text-[16px] text-[#8f8b98] sm:text-[18px]">Complete your subscription securely</p>
 
-            <div className="mt-5 rounded-[18px] border border-[#ff8e3b] p-4 sm:p-5">
-              <div className="flex items-start gap-4">
-                <span className="mt-1 h-4 w-4 rounded-full bg-[#ff6b1b]" />
-                <div>
-                  <p className="text-[18px] font-semibold sm:text-[20px]">Pay with Paystack</p>
-                  <p className="text-[14px] text-[#8f8b98] sm:text-[16px]">Cards, Bank Transfer, USSD and more</p>
-                </div>
-              </div>
-
-              <div className="mt-4 rounded-[14px] bg-[#f2f2f5] p-4">
-                <div className="flex flex-wrap gap-3">
-                  {["VISA", "GPay", " Pay", "Mastercard"].map((b) => (
-                    <div key={b} className="rounded-[10px] bg-white px-4 py-2 text-[14px] font-semibold text-[#4b4b55] sm:text-[14px]">{b}</div>
-                  ))}
-                </div>
-                <p className="mt-4 text-[14px] text-[#9b98a3] sm:text-[14px]">You will be redirected to Paystack to complete your payment securely.</p>
-              </div>
-            </div>
-
-            <div className="mt-4 rounded-[18px] border border-[#d9d7de] p-4 sm:p-5">
-              <label className="flex items-center gap-4">
-                <input type="radio" name="payment" className="h-5 w-5" />
-                <div>
-                  <p className="text-[18px] font-semibold sm:text-[20px]">Pay with Bank Transfer</p>
-                  <p className="text-[14px] text-[#8f8b98] sm:text-[16px]">Manually transfer to our bank account.</p>
-                </div>
-              </label>
-            </div>
+            <PromotionPaymentMethods selectedPaymentMethod={selectedPaymentMethod} onSelect={(method) => { setSelectedPaymentMethod(method); setError(null); }} />
 
             <button
               type="button"
               onClick={() => void handleCheckout()}
-              disabled={!adId || submitting}
+              disabled={!adId || !selectedPaymentMethod || submitting}
               className="mt-5 flex h-[52px] w-full items-center justify-between rounded-[12px] bg-gradient-to-r from-amber to-orange px-5 text-[18px] font-semibold text-white disabled:cursor-not-allowed disabled:opacity-50 sm:h-[50px] sm:text-[18px]"
             >
               <span>{submitting ? "Preparing..." : "Pay Now"}</span>
