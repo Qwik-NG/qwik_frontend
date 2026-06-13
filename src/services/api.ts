@@ -28,7 +28,8 @@ import type {
   PaymentCheckoutResponse,
   AdminStats,
   AdminReport,
-  AdminAd
+  AdminAd,
+  PublicUserProfile
 } from "../types/index";
 
 export const API_BASE_URL = import.meta.env.VITE_API_URL ?? import.meta.env.VITE_API_BASE_URL ?? "http://localhost:4000/api";
@@ -198,8 +199,17 @@ export const api = {
       body: JSON.stringify(payload)
     }),
 
-  // TODO: getUser - fetch public user profile by ID
-  // getUser: (id: string) => request<User>(`/users/${id}`),
+  getUser: (id: string) => request<PublicUserProfile>(`/users/${id}`, { retry: 1 }),
+
+  followUser: (id: string) => request<{ following: boolean; stats: { followers: number; following: number } }>(`/users/${id}/follow`, { method: "POST" }).then((response) => {
+    GET_CACHE.clear();
+    return response;
+  }),
+
+  unfollowUser: (id: string) => request<{ following: boolean; stats: { followers: number; following: number } }>(`/users/${id}/follow`, { method: "DELETE" }).then((response) => {
+    GET_CACHE.clear();
+    return response;
+  }),
 
   // TODO: updateProfile - update user profile (bio, avatar, etc.)
   // updateProfile: (payload: UserProfile) => request<User>("/users/me/profile", { method: "PATCH", body: JSON.stringify(payload) }),

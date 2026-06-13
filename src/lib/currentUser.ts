@@ -16,8 +16,6 @@ export type CurrentUserDisplay = {
   stats: UserMetric[];
 };
 
-const DEFAULT_METRIC_VALUE = "—";
-
 export function getUserInitials(name: string) {
   const parts = name
     .trim()
@@ -56,6 +54,7 @@ export function buildCurrentUserDisplay(user?: Partial<User> | null): CurrentUse
   const location = user?.location?.trim() || "";
   const bio = user?.profile?.bio?.trim() || "";
   const avatarUrl = user?.profile?.avatarUrl?.trim() || "";
+  const stats = user?.stats;
 
   return {
     fullName,
@@ -66,9 +65,9 @@ export function buildCurrentUserDisplay(user?: Partial<User> | null): CurrentUse
     avatarUrl,
     initials: getUserInitials(fullName),
     stats: [
-      { label: "Following", value: DEFAULT_METRIC_VALUE },
-      { label: "Followers", value: DEFAULT_METRIC_VALUE },
-      { label: "adverts", value: DEFAULT_METRIC_VALUE },
+      { label: "Following", value: String(stats?.following ?? 0) },
+      { label: "Followers", value: String(stats?.followers ?? 0) },
+      { label: "adverts", value: String(stats?.adverts ?? 0) },
     ],
   };
 }

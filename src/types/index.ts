@@ -23,8 +23,20 @@ export interface User {
   profile?: UserProfile;
   verification?: VerificationSummary;
   verificationApplications?: VerificationSummary[];
+  stats?: UserStats;
   createdAt?: string;
   updatedAt?: string;
+}
+
+export interface UserStats {
+  adverts: number;
+  followers: number;
+  following: number;
+}
+
+export interface PublicUserProfile extends User {
+  ads: Ad[];
+  isFollowing?: boolean;
 }
 
 export type VerificationStatus = "DRAFT" | "SUBMITTED" | "IN_REVIEW" | "APPROVED" | "REJECTED";

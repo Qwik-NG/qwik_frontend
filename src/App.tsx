@@ -24,6 +24,7 @@ import MakeOfferPage from "./pages/MakeOfferPage";
 import SearchResultsPage from "./pages/SearchResultsPage";
 import SearchResultsListPage from "./pages/SearchResultsListPage";
 import ProfileSettingsPage from "./pages/ProfileSettingsPage";
+import PublicProfilePage from "./pages/PublicProfilePage";
 import ChatSettingsPage from "./pages/ChatSettingsPage";
 import AdsDashboardPage from "./pages/AdsDashboardPage";
 import NotificationSettingsPage from "./pages/NotificationSettingsPage";
@@ -78,6 +79,8 @@ export default function App() {
       <Route path={ROUTES.PRODUCT_DETAILS} element={<ProductDetailsPage />} />
       <Route path={ROUTES.PRODUCT_DETAILS_WITH_ID} element={<ProductDetailsPage />} />
       <Route path={ROUTES.PRODUCTS_WITH_ID} element={<ProductDetailsPage />} />
+      <Route path={ROUTES.PUBLIC_USER_PROFILE} element={<PublicProfilePage />} />
+      <Route path="/profile/:id" element={<PublicProfilePage />} />
       <Route path={ROUTES.POST} element={<ProtectedRoute><PostPage /></ProtectedRoute>} />
       <Route path={ROUTES.POST_DETAILS} element={<ProtectedRoute><PostDetailsPage /></ProtectedRoute>} />
       <Route path={ROUTES.NEW_ADVERT_DETAILS} element={<ProtectedRoute><NewAdvertDetailsPage /></ProtectedRoute>} />

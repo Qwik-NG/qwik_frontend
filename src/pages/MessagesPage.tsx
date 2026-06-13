@@ -62,11 +62,13 @@ function ConversationItem({
   currentUserId,
   active,
   onSelect,
+  onOpenProfile,
 }: {
   item: Conversation;
   currentUserId?: string;
   active: boolean;
   onSelect: () => void;
+  onOpenProfile: (userId: string) => void;
 }) {
   const otherParticipant = getOtherParticipant(item, currentUserId);
   const participantName = otherParticipant?.fullName || item.ad?.title || "Conversation";
@@ -78,13 +80,45 @@ function ConversationItem({
       }`}
       onClick={onSelect}
     >
-      <UserAvatar
-        name={participantName}
-        imageUrl={otherParticipant?.profile?.avatarUrl}
-        alt={participantName}
-        className="h-[48px] w-[48px] shrink-0 rounded-full object-cover text-[13px]"
-      />
-      <span className="min-w-0 flex-1">
+      <span
+        role="button"
+        tabIndex={0}
+        className="shrink-0"
+        onClick={(event) => {
+          event.stopPropagation();
+          if (otherParticipant?.id) onOpenProfile(otherParticipant.id);
+        }}
+        onKeyDown={(event) => {
+          if ((event.key === "Enter" || event.key === " ") && otherParticipant?.id) {
+            event.preventDefault();
+            event.stopPropagation();
+            onOpenProfile(otherParticipant.id);
+          }
+        }}
+      >
+        <UserAvatar
+          name={participantName}
+          imageUrl={otherParticipant?.profile?.avatarUrl}
+          alt={participantName}
+          className="h-[48px] w-[48px] rounded-full object-cover text-[13px]"
+        />
+      </span>
+      <span
+        role="button"
+        tabIndex={0}
+        className="min-w-0 flex-1"
+        onClick={(event) => {
+          event.stopPropagation();
+          if (otherParticipant?.id) onOpenProfile(otherParticipant.id);
+        }}
+        onKeyDown={(event) => {
+          if ((event.key === "Enter" || event.key === " ") && otherParticipant?.id) {
+            event.preventDefault();
+            event.stopPropagation();
+            onOpenProfile(otherParticipant.id);
+          }
+        }}
+      >
         <span className="block truncate text-[15px] font-semibold text-ink sm:text-[16px]">{participantName}</span>
         <span className="mt-1 block truncate text-[13px] text-muted">{item.lastMessage?.text || item.ad?.title || "No messages yet"}</span>
       </span>
@@ -350,6 +384,11 @@ export default function MessagesPage() {
     navigate(`/messages?conversation=${id}`, { replace: true });
   };
 
+  const handleOpenProfile = (userId?: string) => {
+    if (!userId) return;
+    navigate(`/users/${userId}`);
+  };
+
   const handleBackToList = () => {
     setSelectedConversationId(null);
     setDraftMessage("");
@@ -480,6 +519,7 @@ export default function MessagesPage() {
                     currentUserId={currentUserId}
                     active={item.id === selectedConversationId}
                     onSelect={() => handleSelectConversation(item.id)}
+                    onOpenProfile={handleOpenProfile}
                   />
                 ))
               )}
@@ -498,18 +538,25 @@ export default function MessagesPage() {
                   >
                     <BackIcon />
                   </button>
-                  <UserAvatar
-                    name={conversationName}
-                    imageUrl={conversationParticipant?.profile?.avatarUrl}
-                    alt={conversationName}
-                    className="h-[46px] w-[46px] shrink-0 rounded-full object-cover text-[13px] sm:h-[54px] sm:w-[54px]"
-                  />
-                  <div className="min-w-0">
+                  <button
+                    type="button"
+                    className="shrink-0 rounded-full focus:outline-none focus:ring-2 focus:ring-orange/30"
+                    onClick={() => handleOpenProfile(conversationParticipant?.id)}
+                    aria-label={`Open ${conversationName} profile`}
+                  >
+                    <UserAvatar
+                      name={conversationName}
+                      imageUrl={conversationParticipant?.profile?.avatarUrl}
+                      alt={conversationName}
+                      className="h-[46px] w-[46px] rounded-full object-cover text-[13px] sm:h-[54px] sm:w-[54px]"
+                    />
+                  </button>
+                  <button type="button" className="min-w-0 text-left" onClick={() => handleOpenProfile(conversationParticipant?.id)}>
                     <h2 className="truncate text-[18px] font-semibold text-ink">
                       {conversationName}
                     </h2>
                     <p className="truncate text-[14px] text-muted">{conversationTitle}</p>
-                  </div>
+                  </button>
                 </div>
 
                 {error ? (

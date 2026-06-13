@@ -50,6 +50,7 @@ export function useCurrentUser() {
 
   return {
     user,
+    setUser,
     display,
     loading,
   };

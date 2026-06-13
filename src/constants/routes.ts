@@ -52,6 +52,7 @@ export const ROUTES = {
   
   // Settings & Account
   PROFILE_SETTINGS: "/profile-settings",
+  PUBLIC_USER_PROFILE: "/users/:id",
   CHAT_SETTINGS: "/chat-settings",
   ACCOUNT: "/account",
   GET_VERIFIED: "/get-verified",

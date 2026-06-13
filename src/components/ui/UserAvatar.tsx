@@ -1,4 +1,5 @@
 import { getUserInitials } from "../../lib/currentUser";
+import { normalizeImageUrl } from "../../lib/imageUrls";
 import { useEffect, useState } from "react";
 
 type UserAvatarProps = {
@@ -16,14 +17,15 @@ export function UserAvatar({
   className = "",
   fallbackClassName = "",
 }: UserAvatarProps) {
+  const normalizedImageUrl = normalizeImageUrl(imageUrl);
   const [imageFailed, setImageFailed] = useState(false);
 
   useEffect(() => {
     setImageFailed(false);
-  }, [imageUrl]);
+  }, [normalizedImageUrl]);
 
-  if (imageUrl && !imageFailed) {
-    return <img src={imageUrl} alt={alt ?? name} className={className} onError={() => setImageFailed(true)} />;
+  if (normalizedImageUrl && !imageFailed) {
+    return <img src={normalizedImageUrl} alt={alt ?? name} className={className} onError={() => setImageFailed(true)} />;
   }
 
   return (

@@ -23,7 +23,7 @@ function DetailCard({ label, value }: { label: string; value: string }) {
 export default function ProfileSettingsPage() {
   const navigate = useNavigate();
   const { success, error: showError } = useToast();
-  const { user, display } = useCurrentUser();
+  const { user, display, setUser } = useCurrentUser();
   const profileFallback = (user?.profile ?? {}) as Record<string, unknown>;
   const [activeTab, setActiveTab] = useState<TabKey>("edit-profile");
   const [fullName, setFullName] = useState("");
@@ -32,7 +32,22 @@ export default function ProfileSettingsPage() {
   const [phone, setPhone] = useState("");
   const [location, setLocation] = useState("");
   const [selectedLogoName, setSelectedLogoName] = useState("");
+  const [selectedAvatarFile, setSelectedAvatarFile] = useState<File | null>(null);
+  const [avatarPreviewUrl, setAvatarPreviewUrl] = useState("");
+  const [avatarUrl, setAvatarUrl] = useState("");
   const [loading, setLoading] = useState(false);
+
+  useEffect(() => {
+    if (!selectedAvatarFile) {
+      setAvatarPreviewUrl("");
+      return;
+    }
+
+    const previewUrl = URL.createObjectURL(selectedAvatarFile);
+    setAvatarPreviewUrl(previewUrl);
+
+    return () => URL.revokeObjectURL(previewUrl);
+  }, [selectedAvatarFile]);
 
   // TODO: replace these fallbacks with real company profile fields when backend company settings are available.
   const companyDetails = {
@@ -50,8 +65,9 @@ export default function ProfileSettingsPage() {
     setEmail(user?.email ?? display.email);
     setBio(user?.profile?.bio ?? display.bio);
     setPhone(user?.phone ?? display.phone);
+    setAvatarUrl(user?.profile?.avatarUrl ?? display.avatarUrl);
     setLocation(typeof profileFallback.location === "string" ? profileFallback.location : display.location);
-  }, [display.bio, display.email, display.fullName, display.location, display.phone, profileFallback.location, user]);
+  }, [display.avatarUrl, display.bio, display.email, display.fullName, display.location, display.phone, profileFallback.location, user]);
 
   return (
     <div className="min-h-screen bg-page text-ink">
@@ -74,12 +90,24 @@ export default function ProfileSettingsPage() {
               <div className="flex flex-wrap items-center justify-between gap-6">
                 <div className="flex items-center gap-4">
                   <div className="relative">
-                    <UserAvatar
-                      name={fullName || display.fullName}
-                      imageUrl={user?.profile?.avatarUrl || display.avatarUrl}
-                      alt={`${fullName || display.fullName} profile`}
-                      className="h-[84px] w-[84px] rounded-full object-cover"
-                    />
+                    <label className="block cursor-pointer" aria-label="Choose profile photo">
+                      <UserAvatar
+                        name={fullName || display.fullName}
+                        imageUrl={avatarPreviewUrl || avatarUrl}
+                        alt={`${fullName || display.fullName} profile`}
+                        className="h-[84px] w-[84px] rounded-full object-cover"
+                      />
+                      <input
+                        type="file"
+                        accept="image/jpeg,image/png,image/webp,image/gif"
+                        className="hidden"
+                        onChange={(event) => {
+                          const file = event.target.files?.[0] || null;
+                          setSelectedAvatarFile(file);
+                          setSelectedLogoName(file?.name || "");
+                        }}
+                      />
+                    </label>
                   </div>
                   <div>
                     <h1 className="text-[28px] font-medium leading-tight sm:text-[32px]">{fullName || display.fullName}</h1>
@@ -136,9 +164,13 @@ export default function ProfileSettingsPage() {
                     <span className="ml-4 shrink-0 text-[#ff7f11]">Browse</span>
                     <input
                       type="file"
-                      accept="image/*"
+                      accept="image/jpeg,image/png,image/webp,image/gif"
                       className="hidden"
-                      onChange={(event) => setSelectedLogoName(event.target.files?.[0]?.name || "")}
+                      onChange={(event) => {
+                        const file = event.target.files?.[0] || null;
+                        setSelectedAvatarFile(file);
+                        setSelectedLogoName(file?.name || "");
+                      }}
                     />
                   </label>
 
@@ -154,7 +186,16 @@ export default function ProfileSettingsPage() {
                   <button className="h-[50px] w-full rounded-[10px] bg-gradient-to-r from-amber to-orange text-[16px] text-white shadow-glow transition-all duration-200 hover:opacity-95 active:scale-[0.99] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#ffb357] focus-visible:ring-offset-2 focus-visible:ring-offset-white" type="button" onClick={async () => {
                     try {
                       setLoading(true);
-                      await api.updateMe({ fullName, bio });
+                      let nextAvatarUrl = avatarUrl;
+                      if (selectedAvatarFile) {
+                        const uploadResponse = await api.uploadImages([selectedAvatarFile]);
+                        nextAvatarUrl = uploadResponse.data.urls[0] || "";
+                      }
+                      const response = await api.updateMe({ fullName, bio, phone, location, avatarUrl: nextAvatarUrl });
+                      setUser(response.data);
+                      setAvatarUrl(response.data.profile?.avatarUrl || "");
+                      setSelectedAvatarFile(null);
+                      setSelectedLogoName("");
                       success("Profile updated");
                     } catch (error) {
                       showError(error instanceof Error ? error.message : "Failed to update profile");
