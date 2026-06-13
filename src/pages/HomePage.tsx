@@ -1,10 +1,11 @@
 import type { ComponentType } from "react";
 import { useCallback, useEffect, useState } from "react";
-import { useNavigate } from "react-router-dom";
+import { useLocation, useNavigate } from "react-router-dom";
 import { SiteFooter, SiteHeader } from "../components/AppShell";
 import { buildSearchResultsRoute, buildSearchRoute } from "../constants/routes";
 import { FallbackImage } from "../components/ui/FallbackImage";
 import { ImagePlaceholder } from "../components/ui/ImagePlaceholder";
+import { getLocationSearchParam } from "../lib/searchContext";
 import { api } from "../services/api";
 
 type Category = {
@@ -93,6 +94,8 @@ function CategoryCard({ item, onClick }: { item: Category; onClick: () => void }
 
 export default function HomePage() {
   const navigate = useNavigate();
+  const location = useLocation();
+  const selectedLocation = getLocationSearchParam(location.search);
   const [products, setProducts] = useState<Product[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
@@ -101,7 +104,9 @@ export default function HomePage() {
     try {
       setLoading(true);
       setError(null);
-      const result = await api.ads("?pageSize=12&imagesLimit=1");
+      const params = new URLSearchParams({ pageSize: "12", imagesLimit: "1" });
+      if (selectedLocation) params.set("location", selectedLocation);
+      const result = await api.ads(`?${params.toString()}`);
       setProducts(result.data || []);
     } catch (err) {
       setError(err instanceof Error ? err.message : "Failed to load ads");
@@ -109,7 +114,7 @@ export default function HomePage() {
     } finally {
       setLoading(false);
     }
-  }, []);
+  }, [selectedLocation]);
 
   useEffect(() => {
     fetchAds();

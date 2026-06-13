@@ -25,6 +25,7 @@ type JobSearchResultsViewProps = {
   query: string;
   navigate: NavigateTo;
   view: JobView;
+  locationFilter?: string;
 };
 
 const JOB_COUNT_LABEL = "23,029";
@@ -227,7 +228,7 @@ function JobFilters({
   );
 }
 
-export default function JobSearchResultsView({ query, navigate, view }: JobSearchResultsViewProps) {
+export default function JobSearchResultsView({ query, navigate, view, locationFilter }: JobSearchResultsViewProps) {
   const initialStrip = getJobSearchStrip(query);
   const [selectedCategory, setSelectedCategory] = useState<"all" | JobCategoryType>("all");
   const [sortBy, setSortBy] = useState<SortValue>("newest");
@@ -242,11 +243,12 @@ export default function JobSearchResultsView({ query, navigate, view }: JobSearc
     const loadAds = async () => {
       const params = new URLSearchParams({ category: "jobs", pageSize: "24", imagesLimit: "1" });
       if (query && !isCategoryMarkerQuery(query)) params.set("q", query);
+      if (locationFilter) params.set("location", locationFilter);
       const response = await api.ads(`?${params.toString()}`);
       setJobResults(response.data.map(toJobResult));
     };
     void loadAds();
-  }, [query]);
+  }, [query, locationFilter]);
 
   useEffect(() => {
     setSelectedCategory("all");

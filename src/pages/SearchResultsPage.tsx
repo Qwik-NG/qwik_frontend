@@ -16,7 +16,7 @@ import ListingCard, { type ListingCardItem } from "../components/listings/Listin
 import VehicleSearchResultsView from "../components/search/VehicleSearchResultsView";
 import BackButton from "../components/ui/BackButton";
 import { isBeautySearchQuery, isElectronicsSearchQuery, isFashionSearchQuery, isFurnitureSearchQuery, isJobSearchQuery, isPhonesSearchQuery, isVehicleSearchQuery, mockCategories } from "../lib/mockData";
-import { getCategorySearchContext } from "../lib/searchContext";
+import { getCategorySearchContext, getLocationSearchParam } from "../lib/searchContext";
 import { api } from "../services/api";
 import type { Ad } from "../types";
 
@@ -227,12 +227,13 @@ export default function SearchResultsPage() {
   const query = searchParams.get("q")?.trim() || "";
   const categoryContext = getCategorySearchContext(`?${searchParams.toString()}`);
   const categorySlug = categoryContext?.slug;
+  const selectedLocation = getLocationSearchParam(`?${searchParams.toString()}`);
 
   if (categorySlug === "vehicles" || isVehicleSearchQuery(query)) {
     return (
       <div className="min-h-screen bg-page text-ink">
         <SiteHeader navigate={navigate} />
-        <VehicleSearchResultsView query={query} navigate={navigate} view="grid" />
+        <VehicleSearchResultsView query={query} navigate={navigate} view="grid" locationFilter={selectedLocation} />
         <SiteFooter navigate={navigate} />
       </div>
     );
@@ -242,7 +243,7 @@ export default function SearchResultsPage() {
     return (
       <div className="min-h-screen bg-page text-ink">
         <SiteHeader navigate={navigate} />
-        <ElectronicsSearchResultsView query={query} navigate={navigate} view="grid" />
+        <ElectronicsSearchResultsView query={query} navigate={navigate} view="grid" locationFilter={selectedLocation} />
         <SiteFooter navigate={navigate} />
       </div>
     );
@@ -252,7 +253,7 @@ export default function SearchResultsPage() {
     return (
       <div className="min-h-screen bg-page text-ink">
         <SiteHeader navigate={navigate} />
-        <PhonesSearchResultsView query={query} navigate={navigate} view="grid" />
+        <PhonesSearchResultsView query={query} navigate={navigate} view="grid" locationFilter={selectedLocation} />
         <SiteFooter navigate={navigate} />
       </div>
     );
@@ -262,7 +263,7 @@ export default function SearchResultsPage() {
     return (
       <div className="min-h-screen bg-page text-ink">
         <SiteHeader navigate={navigate} />
-        <BeautySearchResultsView query={query} navigate={navigate} view="grid" />
+        <BeautySearchResultsView query={query} navigate={navigate} view="grid" locationFilter={selectedLocation} />
         <SiteFooter navigate={navigate} />
       </div>
     );
@@ -272,7 +273,7 @@ export default function SearchResultsPage() {
     return (
       <div className="min-h-screen bg-page text-ink">
         <SiteHeader navigate={navigate} />
-        <FashionSearchResultsView query={query} navigate={navigate} view="grid" />
+        <FashionSearchResultsView query={query} navigate={navigate} view="grid" locationFilter={selectedLocation} />
         <SiteFooter navigate={navigate} />
       </div>
     );
@@ -282,7 +283,7 @@ export default function SearchResultsPage() {
     return (
       <div className="min-h-screen bg-page text-ink">
         <SiteHeader navigate={navigate} />
-        <JobSearchResultsView query={query} navigate={navigate} view="grid" />
+        <JobSearchResultsView query={query} navigate={navigate} view="grid" locationFilter={selectedLocation} />
         <SiteFooter navigate={navigate} />
       </div>
     );
@@ -292,7 +293,7 @@ export default function SearchResultsPage() {
     return (
       <div className="min-h-screen bg-page text-ink">
         <SiteHeader navigate={navigate} />
-        <FurnituresSearchResultsView query={query} navigate={navigate} view="grid" />
+        <FurnituresSearchResultsView query={query} navigate={navigate} view="grid" locationFilter={selectedLocation} />
         <SiteFooter navigate={navigate} />
       </div>
     );
@@ -316,6 +317,7 @@ export default function SearchResultsPage() {
       const params = new URLSearchParams({ pageSize: "24", imagesLimit: "1" });
       if (query) params.set("q", query);
       if (categorySlug) params.set("category", categorySlug);
+      if (selectedLocation) params.set("location", selectedLocation);
       const response = await api.ads(`?${params.toString()}`);
       setMatchedAds(response.data);
     } catch (err) {
@@ -324,7 +326,7 @@ export default function SearchResultsPage() {
     } finally {
       setLoadingAds(false);
     }
-  }, [categorySlug, query]);
+  }, [categorySlug, query, selectedLocation]);
 
   useEffect(() => {
     void loadAds();

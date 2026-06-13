@@ -4,7 +4,7 @@ import { LocationPin } from "./icons/LocationPin";
 import { ROUTES } from "../constants/routes";
 import { useCurrentUser } from "../hooks/useCurrentUser";
 import { UserAvatar } from "./ui/UserAvatar";
-import { getCategorySearchContext, isSearchResultsPath } from "../lib/searchContext";
+import { ALL_NIGERIA_LOCATION, NIGERIAN_LOCATIONS, getCategorySearchContext, isSearchResultsPath } from "../lib/searchContext";
 
 type NavigateTo = (to: string) => void;
 type HeaderIcon = "bell" | "bookmark" | "mail";
@@ -58,17 +58,7 @@ function SearchIcon() {
 }
 
 const MOBILE_CHROME_HIDDEN_PATHS = [ROUTES.MESSAGES];
-const LOCATION_OPTIONS = [
-  "All Nigeria",
-  "Lagos",
-  "Abuja",
-  "Port Harcourt",
-  "Kano",
-  "Ibadan",
-  "Enugu",
-  "Kaduna",
-  "Benin City",
-];
+const LOCATION_OPTIONS = NIGERIAN_LOCATIONS;
 
 function isProductDetailsPath(pathname: string) {
   return pathname.startsWith("/product-details/") || pathname.startsWith("/products/");
@@ -82,7 +72,7 @@ export function SiteHeader({
   activeIcon?: HeaderIcon;
 }) {
   const [searchQuery, setSearchQuery] = useState("");
-  const [selectedLocation, setSelectedLocation] = useState("All Nigeria");
+  const [selectedLocation, setSelectedLocation] = useState(ALL_NIGERIA_LOCATION);
   const [locationOpen, setLocationOpen] = useState(false);
   const desktopLocationRef = useRef<HTMLDivElement | null>(null);
   const mobileLocationRef = useRef<HTMLDivElement | null>(null);
@@ -98,7 +88,7 @@ export function SiteHeader({
       ? `Search in ${categoryContext.name}`
       : "Search all categories";
   const hideOnMobile = MOBILE_CHROME_HIDDEN_PATHS.includes(location.pathname);
-  const locationLabel = selectedLocation === "All Nigeria" ? "Nig." : selectedLocation;
+  const locationLabel = selectedLocation === ALL_NIGERIA_LOCATION ? "Nig." : selectedLocation;
 
   const handleSearchSubmit = (event: React.FormEvent<HTMLFormElement>) => {
     event.preventDefault();
@@ -106,7 +96,7 @@ export function SiteHeader({
     const query = searchQuery.trim();
     if (query) params.set("q", query);
     if (categoryContext) params.set("category", categoryContext.slug);
-    if (selectedLocation !== "All Nigeria") params.set("location", selectedLocation);
+    if (selectedLocation !== ALL_NIGERIA_LOCATION) params.set("location", selectedLocation);
     navigate(`${ROUTES.SEARCH}${params.toString() ? `?${params.toString()}` : ""}`);
   };
 
@@ -119,7 +109,7 @@ export function SiteHeader({
     // TODO: remove this frontend URL-state bridge once every category search view consumes backend location filters.
     const params = new URLSearchParams(location.search);
     if (categoryContext) params.set("category", categoryContext.slug);
-    if (option === "All Nigeria") {
+    if (option === ALL_NIGERIA_LOCATION) {
       params.delete("location");
     } else {
       params.set("location", option);
@@ -129,7 +119,7 @@ export function SiteHeader({
 
   useEffect(() => {
     const nextLocation = new URLSearchParams(location.search).get("location");
-    setSelectedLocation(nextLocation || "All Nigeria");
+    setSelectedLocation(nextLocation || ALL_NIGERIA_LOCATION);
   }, [location.search]);
 
   useEffect(() => {
@@ -197,6 +187,12 @@ export function SiteHeader({
           <button
             type="button"
             onClick={() => setLocationOpen((open) => !open)}
+            onKeyDown={(event) => {
+              if (event.key === "Enter" || event.key === " ") {
+                event.preventDefault();
+                setLocationOpen((open) => !open);
+              }
+            }}
             aria-haspopup="listbox"
             aria-expanded={locationOpen}
             className={
@@ -205,15 +201,17 @@ export function SiteHeader({
                 : "flex h-10 max-w-[190px] items-center gap-1 rounded-lg px-2 text-[16px] text-[#6f6c78] transition hover:bg-white hover:text-[#1f1d27] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#ff9715] focus-visible:ring-offset-2 focus-visible:ring-offset-page active:scale-[0.98]"
             }
           >
-            <LocationPin className="h-4 w-4 shrink-0" />
-            <span className="truncate">{locationLabel}</span>
-            <span className={`text-[12px] transition ${locationOpen ? "rotate-180" : ""}`} aria-hidden="true">⌄</span>
+            <LocationPin className="pointer-events-none h-4 w-4 shrink-0" />
+            <span className="pointer-events-none truncate">{locationLabel}</span>
+            <span className={`pointer-events-none text-[12px] transition ${locationOpen ? "rotate-180" : ""}`} aria-hidden="true">⌄</span>
           </button>
           {locationOpen ? (
             <div
               role="listbox"
               aria-label="Choose location"
-              className="absolute left-0 top-[calc(100%+8px)] z-[120] w-[210px] overflow-hidden rounded-[14px] border border-[#e8e5df] bg-white py-2 shadow-[0_18px_50px_rgba(31,29,39,0.16)]"
+              onWheel={(event) => event.stopPropagation()}
+              onTouchMove={(event) => event.stopPropagation()}
+              className="absolute right-0 top-[calc(100%+8px)] z-[140] max-h-[280px] w-[min(210px,calc(100vw-32px))] overflow-y-auto overscroll-contain rounded-[14px] border border-[#e8e5df] bg-white py-2 shadow-[0_18px_50px_rgba(31,29,39,0.16)] md:left-0 md:right-auto md:max-h-[340px]"
             >
               {LOCATION_OPTIONS.map((option) => (
                 <button

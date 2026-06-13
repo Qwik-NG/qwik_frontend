@@ -18,7 +18,7 @@ import BackButton from "../components/ui/BackButton";
 import { FallbackImage } from "../components/ui/FallbackImage";
 import { ImagePlaceholder } from "../components/ui/ImagePlaceholder";
 import { isBeautySearchQuery, isElectronicsSearchQuery, isFashionSearchQuery, isFurnitureSearchQuery, isJobSearchQuery, isPhonesSearchQuery, isVehicleSearchQuery, mockCategories } from "../lib/mockData";
-import { getCategorySearchContext } from "../lib/searchContext";
+import { getCategorySearchContext, getLocationSearchParam } from "../lib/searchContext";
 import { api } from "../services/api";
 import type { Ad } from "../types";
 
@@ -282,6 +282,7 @@ export default function SearchResultsListPage() {
   const query = searchParams.get("q")?.trim() || "";
   const categoryContext = getCategorySearchContext(`?${searchParams.toString()}`);
   const categorySlug = categoryContext?.slug;
+  const selectedLocation = getLocationSearchParam(`?${searchParams.toString()}`);
 
   if (categorySlug === "vehicles" || isVehicleSearchQuery(query)) {
     return (
@@ -291,6 +292,7 @@ export default function SearchResultsListPage() {
           query={query}
           navigate={navigate}
           view={location.pathname === "/search-results-list" ? "list" : "grid"}
+          locationFilter={selectedLocation}
         />
         <SiteFooter navigate={navigate} />
       </div>
@@ -305,6 +307,7 @@ export default function SearchResultsListPage() {
           query={query}
           navigate={navigate}
           view={location.pathname === "/search-results-list" ? "list" : "grid"}
+          locationFilter={selectedLocation}
         />
         <SiteFooter navigate={navigate} />
       </div>
@@ -319,6 +322,7 @@ export default function SearchResultsListPage() {
           query={query}
           navigate={navigate}
           view={location.pathname === "/search-results-list" ? "list" : "grid"}
+          locationFilter={selectedLocation}
         />
         <SiteFooter navigate={navigate} />
       </div>
@@ -333,6 +337,7 @@ export default function SearchResultsListPage() {
           query={query}
           navigate={navigate}
           view={location.pathname === "/search-results-list" ? "list" : "grid"}
+          locationFilter={selectedLocation}
         />
         <SiteFooter navigate={navigate} />
       </div>
@@ -347,6 +352,7 @@ export default function SearchResultsListPage() {
           query={query}
           navigate={navigate}
           view={location.pathname === "/search-results-list" ? "list" : "grid"}
+          locationFilter={selectedLocation}
         />
         <SiteFooter navigate={navigate} />
       </div>
@@ -361,6 +367,7 @@ export default function SearchResultsListPage() {
           query={query}
           navigate={navigate}
           view={location.pathname === "/search-results-list" ? "list" : "grid"}
+          locationFilter={selectedLocation}
         />
         <SiteFooter navigate={navigate} />
       </div>
@@ -375,6 +382,7 @@ export default function SearchResultsListPage() {
           query={query}
           navigate={navigate}
           view={location.pathname === "/search-results-list" ? "list" : "grid"}
+          locationFilter={selectedLocation}
         />
         <SiteFooter navigate={navigate} />
       </div>
@@ -399,6 +407,7 @@ export default function SearchResultsListPage() {
       const params = new URLSearchParams({ pageSize: "24", imagesLimit: "1" });
       if (query) params.set("q", query);
       if (categorySlug) params.set("category", categorySlug);
+      if (selectedLocation) params.set("location", selectedLocation);
       const response = await api.ads(`?${params.toString()}`);
       setMatchedAds(response.data);
     } catch (err) {
@@ -407,7 +416,7 @@ export default function SearchResultsListPage() {
     } finally {
       setLoadingAds(false);
     }
-  }, [categorySlug, query]);
+  }, [categorySlug, query, selectedLocation]);
 
   useEffect(() => {
     void loadAds();

@@ -29,6 +29,7 @@ type VehicleSearchResultsViewProps = {
   query: string;
   navigate: NavigateTo;
   view: VehicleView;
+  locationFilter?: string;
 };
 
 const VEHICLE_COUNT_LABEL = "23,029";
@@ -335,7 +336,7 @@ function VehicleFilters({
   );
 }
 
-export default function VehicleSearchResultsView({ query, navigate, view }: VehicleSearchResultsViewProps) {
+export default function VehicleSearchResultsView({ query, navigate, view, locationFilter }: VehicleSearchResultsViewProps) {
   const [selectedType, setSelectedType] = useState<"all" | VehicleType>("Car");
   const [sortBy, setSortBy] = useState<SortValue>("newest");
   const [selectedBrand, setSelectedBrand] = useState<"all" | VehicleBrand>("all");
@@ -353,11 +354,12 @@ export default function VehicleSearchResultsView({ query, navigate, view }: Vehi
     const loadAds = async () => {
       const params = new URLSearchParams({ category: "vehicles", pageSize: "24", imagesLimit: "1" });
       if (query && !isCategoryMarkerQuery(query)) params.set("q", query);
+      if (locationFilter) params.set("location", locationFilter);
       const response = await api.ads(`?${params.toString()}`);
       setVehicleResults(response.data.map(toVehicleResult));
     };
     void loadAds();
-  }, [query]);
+  }, [query, locationFilter]);
 
   useEffect(() => {
     setSelectedType("Car");

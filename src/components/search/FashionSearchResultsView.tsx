@@ -32,6 +32,7 @@ type FashionSearchResultsViewProps = {
   query: string;
   navigate: NavigateTo;
   view: FashionView;
+  locationFilter?: string;
 };
 
 type FashionStateConfig = {
@@ -386,7 +387,7 @@ function FashionFilters({
   );
 }
 
-export default function FashionSearchResultsView({ query, navigate, view }: FashionSearchResultsViewProps) {
+export default function FashionSearchResultsView({ query, navigate, view, locationFilter }: FashionSearchResultsViewProps) {
   const state = getFashionSearchState(query) ?? "general";
   const stateConfig = FASHION_STATE_CONFIG[state];
   const [selectedCategory, setSelectedCategory] = useState<"all" | FashionCategory>(stateConfig.defaultCategory);
@@ -407,11 +408,12 @@ export default function FashionSearchResultsView({ query, navigate, view }: Fash
     const loadAds = async () => {
       const params = new URLSearchParams({ category: "fashion", pageSize: "24", imagesLimit: "1" });
       if (query && !isCategoryMarkerQuery(query)) params.set("q", query);
+      if (locationFilter) params.set("location", locationFilter);
       const response = await api.ads(`?${params.toString()}`);
       setFashionResults(response.data.map(toFashionResult));
     };
     void loadAds();
-  }, [query]);
+  }, [query, locationFilter]);
 
   useEffect(() => {
     setSelectedCategory(stateConfig.defaultCategory);

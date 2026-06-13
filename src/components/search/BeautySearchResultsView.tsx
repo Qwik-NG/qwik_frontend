@@ -25,6 +25,7 @@ type BeautySearchResultsViewProps = {
   query: string;
   navigate: NavigateTo;
   view: BeautyView;
+  locationFilter?: string;
 };
 
 const BEAUTY_COUNT_LABEL = "23,029";
@@ -269,7 +270,7 @@ function BeautyFilters({
   );
 }
 
-export default function BeautySearchResultsView({ query, navigate, view }: BeautySearchResultsViewProps) {
+export default function BeautySearchResultsView({ query, navigate, view, locationFilter }: BeautySearchResultsViewProps) {
   const [selectedCategory, setSelectedCategory] = useState<"all" | MockBeautyListing["categoryType"]>("Body Care");
   const [sortBy, setSortBy] = useState<SortValue>("newest");
   const [selectedType, setSelectedType] = useState<"all" | BeautyType>("Body Lotion");
@@ -285,11 +286,12 @@ export default function BeautySearchResultsView({ query, navigate, view }: Beaut
     const loadAds = async () => {
       const params = new URLSearchParams({ category: "beauty", pageSize: "24", imagesLimit: "1" });
       if (query && !isCategoryMarkerQuery(query)) params.set("q", query);
+      if (locationFilter) params.set("location", locationFilter);
       const response = await api.ads(`?${params.toString()}`);
       setBeautyResults(response.data.map(toBeautyResult));
     };
     void loadAds();
-  }, [query]);
+  }, [query, locationFilter]);
 
   useEffect(() => {
     setSelectedCategory("Body Care");

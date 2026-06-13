@@ -26,6 +26,7 @@ type ElectronicsSearchResultsViewProps = {
   query: string;
   navigate: NavigateTo;
   view: ElectronicsView;
+  locationFilter?: string;
 };
 
 const ELECTRONICS_COUNT_LABEL = "23,029";
@@ -285,7 +286,7 @@ function ElectronicsFilters({
   );
 }
 
-export default function ElectronicsSearchResultsView({ query, navigate, view }: ElectronicsSearchResultsViewProps) {
+export default function ElectronicsSearchResultsView({ query, navigate, view, locationFilter }: ElectronicsSearchResultsViewProps) {
   const [selectedType, setSelectedType] = useState<"all" | ElectronicsType>("Laptops & Computers");
   const [sortBy, setSortBy] = useState<SortValue>("newest");
   const [selectedBrand, setSelectedBrand] = useState<"all" | ElectronicsBrand>("all");
@@ -304,11 +305,12 @@ export default function ElectronicsSearchResultsView({ query, navigate, view }: 
     const loadAds = async () => {
       const params = new URLSearchParams({ category: "electronics", pageSize: "24", imagesLimit: "1" });
       if (query && !isCategoryMarkerQuery(query)) params.set("q", query);
+      if (locationFilter) params.set("location", locationFilter);
       const response = await api.ads(`?${params.toString()}`);
       setElectronicsResults(response.data.map(toElectronicsResult));
     };
     void loadAds();
-  }, [query]);
+  }, [query, locationFilter]);
 
   useEffect(() => {
     setSelectedType("Laptops & Computers");

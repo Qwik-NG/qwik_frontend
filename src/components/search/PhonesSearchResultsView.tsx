@@ -26,6 +26,7 @@ type PhonesSearchResultsViewProps = {
   query: string;
   navigate: NavigateTo;
   view: PhonesView;
+  locationFilter?: string;
 };
 
 const PHONES_COUNT_LABEL = "23,029";
@@ -274,7 +275,7 @@ function PhonesFilters({
   );
 }
 
-export default function PhonesSearchResultsView({ query, navigate, view }: PhonesSearchResultsViewProps) {
+export default function PhonesSearchResultsView({ query, navigate, view, locationFilter }: PhonesSearchResultsViewProps) {
   const [selectedType, setSelectedType] = useState<"all" | PhonesType>("Mobile Phones");
   const [sortBy, setSortBy] = useState<SortValue>("newest");
   const [selectedBrand, setSelectedBrand] = useState<"all" | PhonesBrand>("all");
@@ -290,11 +291,12 @@ export default function PhonesSearchResultsView({ query, navigate, view }: Phone
     const loadAds = async () => {
       const params = new URLSearchParams({ category: "phones-tablets", pageSize: "24", imagesLimit: "1" });
       if (query && !isCategoryMarkerQuery(query)) params.set("q", query);
+      if (locationFilter) params.set("location", locationFilter);
       const response = await api.ads(`?${params.toString()}`);
       setPhonesResults(response.data.map(toPhonesResult));
     };
     void loadAds();
-  }, [query]);
+  }, [query, locationFilter]);
 
   useEffect(() => {
     setSelectedType("Mobile Phones");

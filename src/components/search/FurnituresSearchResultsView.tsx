@@ -24,6 +24,7 @@ type FurnituresSearchResultsViewProps = {
   query: string;
   navigate: NavigateTo;
   view: FurnituresView;
+  locationFilter?: string;
 };
 
 const FURNITURE_COUNT_LABEL = "23,029";
@@ -296,7 +297,7 @@ function FurnitureFilters({
   );
 }
 
-export default function FurnituresSearchResultsView({ query, navigate, view }: FurnituresSearchResultsViewProps) {
+export default function FurnituresSearchResultsView({ query, navigate, view, locationFilter }: FurnituresSearchResultsViewProps) {
   const [selectedCategory, setSelectedCategory] = useState<"all" | MockFurnitureListing["categoryType"]>("Furnitures");
   const [sortBy, setSortBy] = useState<SortValue>("newest");
   const [selectedType, setSelectedType] = useState<"all" | FurnitureType>("all");
@@ -313,11 +314,12 @@ export default function FurnituresSearchResultsView({ query, navigate, view }: F
     const loadAds = async () => {
       const params = new URLSearchParams({ category: "furniture-appliances", pageSize: "24", imagesLimit: "1" });
       if (query && !isCategoryMarkerQuery(query)) params.set("q", query);
+      if (locationFilter) params.set("location", locationFilter);
       const response = await api.ads(`?${params.toString()}`);
       setFurnitureResults(response.data.map(toFurnitureResult));
     };
     void loadAds();
-  }, [query]);
+  }, [query, locationFilter]);
 
   useEffect(() => {
     setSelectedCategory("Furnitures");
