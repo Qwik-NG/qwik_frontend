@@ -6,7 +6,9 @@ import { PROMOTION_PLAN_GROUPS, formatNaira, type PromotionOption } from "../lib
 import { api } from "../services/api";
 import type { Ad } from "../types";
 
-function DayPill({ option, active = false, onSelect }: { option: PromotionOption; active?: boolean; onSelect: () => void }) {
+const STANDARD_AD_FEE = 2150;
+
+function DurationPill({ option, active = false, onSelect }: { option: PromotionOption; active?: boolean; onSelect: () => void }) {
   return (
     <button
       type="button"
@@ -17,7 +19,7 @@ function DayPill({ option, active = false, onSelect }: { option: PromotionOption
         active ? "border-orange bg-[#ff9a12] text-white shadow-[0_8px_18px_rgba(255,151,21,0.22)]" : "border-[#f1d8bd] bg-badge-bg text-[#ff9715] hover:border-orange"
       }`}
     >
-      <span className="block font-semibold">{option.duration} Days</span>
+      <span className="block font-semibold">{option.durationLabel}</span>
       <span className={`block text-[12px] ${active ? "text-white/85" : "text-[#8f6c42]"}`}>{formatNaira(option.price)}</span>
     </button>
   );
@@ -41,6 +43,7 @@ export default function PromoteAdPage() {
   const adId = searchParams.get("adId")?.trim() ?? "";
   const [selectedOption, setSelectedOption] = useState<PromotionOption | null>(null);
   const [ad, setAd] = useState<Ad | null>(null);
+  const [userAdCount, setUserAdCount] = useState<number | null>(null);
   const [loading, setLoading] = useState(Boolean(adId));
   const [error, setError] = useState<string | null>(null);
 
@@ -55,9 +58,12 @@ export default function PromoteAdPage() {
     setLoading(true);
     setError(null);
 
-    api.adById(adId)
-      .then((response) => {
-        if (active) setAd(response.data);
+    Promise.all([api.adById(adId), api.getUserAds().catch(() => null)])
+      .then(([adResponse, adsResponse]) => {
+        if (active) {
+          setAd(adResponse.data);
+          setUserAdCount(adsResponse?.data.length ?? null);
+        }
       })
       .catch((err) => {
         if (active) {
@@ -88,7 +94,7 @@ export default function PromoteAdPage() {
       adId,
       option: option.id,
       plan: option.plan,
-      duration: String(option.duration),
+      duration: option.durationLabel,
       price: String(option.price),
     });
     const path = option.plan === "premium" ? ROUTES.PREMIUM_PLAN_PAYMENT : ROUTES.PLAN_PAYMENT;
@@ -104,6 +110,8 @@ export default function PromoteAdPage() {
     setError(null);
     openPayment(selectedOption);
   };
+
+  const standardAdIsFree = userAdCount === null || userAdCount <= 1;
 
   return (
     <div className="min-h-screen bg-page text-ink">
@@ -151,7 +159,9 @@ export default function PromoteAdPage() {
                 <p className="text-[14px] font-medium text-[#ff7f1f]">Your ad has been created</p>
                 <h2 className="mt-1 break-words text-[18px] font-semibold">{ad.title}</h2>
                 <p className="mt-2 text-[14px] leading-[1.45] text-[#918d99]">
-                  Promotion is optional. Your ad is already live and can be viewed or managed without payment.
+                  {standardAdIsFree
+                    ? "Promotion is optional. Your ad is already live and can be viewed or managed without payment."
+                    : "Promotion is optional. Additional standard ads cost a listing fee before standard placement."}
                 </p>
               </div>
 
@@ -165,8 +175,16 @@ export default function PromoteAdPage() {
                 className="mb-5 flex h-[50px] w-full items-center justify-between rounded-[10px] border-2 border-orange px-3.5 text-[15px] text-[#8f8c98] sm:text-[16px]"
               >
                 <span>Standard ad</span>
-                <span className="text-[#57a56d]">Already live</span>
+                <span className={standardAdIsFree ? "text-[#57a56d]" : "text-[#ff7f1f]"}>
+                  {standardAdIsFree ? "Already live" : formatNaira(STANDARD_AD_FEE)}
+                </span>
               </button>
+
+              {!standardAdIsFree ? (
+                <p className="mb-5 rounded-[10px] bg-[#fff7ed] px-3 py-2 text-[13px] leading-[1.45] text-[#8f6c42]">
+                  Standard listing payment is not available on this screen yet, so continue with a promotion plan or manage the ad from your dashboard.
+                </p>
+              ) : null}
 
               <div className="mb-6 space-y-4">
                 {PROMOTION_PLAN_GROUPS.map((group) => {
@@ -199,7 +217,7 @@ export default function PromoteAdPage() {
                       <div className="flex flex-wrap items-center justify-between gap-3">
                         <div className="flex flex-wrap gap-2" role="radiogroup" aria-label={`${group.title} duration options`}>
                           {group.options.map((option) => (
-                            <DayPill
+                            <DurationPill
                               key={option.id}
                               option={option}
                               active={selectedOption?.id === option.id}

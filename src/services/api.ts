@@ -263,7 +263,7 @@ export const api = {
   markAdUnavailable: (id: string) =>
     request<Ad>(`/ads/${id}/mark-unavailable`, { method: "PATCH" }),
 
-  promoteAd: (id: string, payload: { plan: "top-7" | "premium-30" }) =>
+  promoteAd: (id: string, payload: { plan: "top-1-month" | "top-30-days" | "premium-1-month" | "premium-3-months" }) =>
     request<PaymentCheckoutResponse>(`/ads/${id}/promotions`, {
       method: "POST",
       body: JSON.stringify(payload),

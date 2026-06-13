@@ -28,7 +28,7 @@ export default function PlanPaymentPage() {
   const navigate = useNavigate();
   const [searchParams] = useSearchParams();
   const adId = searchParams.get("adId")?.trim() ?? "";
-  const selectedOption = getPromotionOptionFromParams(searchParams) ?? getPromotionOption("top-7")!;
+  const selectedOption = getPromotionOptionFromParams(searchParams) ?? getPromotionOption("top-1-month")!;
   const vat = getPromotionVat(selectedOption.price);
   const total = getPromotionTotal(selectedOption.price);
   const [submitting, setSubmitting] = useState(false);
@@ -76,8 +76,8 @@ export default function PlanPaymentPage() {
 
             <h1 className="text-[28px] font-semibold leading-tight sm:text-[32px]">{selectedOption.title} Plan</h1>
             <p className="mt-2 text-[16px] text-[#8d8996] sm:text-[18px]">Everything you need to grow and scale your business</p>
-            <p className="mt-4 text-[32px] font-semibold leading-none sm:text-[34px]">{formatNaira(selectedOption.price)} <span className="text-[16px] font-medium text-[#1f1d27]">/ {selectedOption.duration} Days</span></p>
-            <p className="mt-2 text-[14px] text-[#ff7f1f]">Selected plan: {selectedOption.title} - {selectedOption.duration} Days</p>
+            <p className="mt-4 text-[32px] font-semibold leading-none sm:text-[34px]">{formatNaira(selectedOption.price)} <span className="text-[16px] font-medium text-[#1f1d27]">/ {selectedOption.durationLabel}</span></p>
+            <p className="mt-2 text-[14px] text-[#ff7f1f]">Selected plan: {selectedOption.title} - {selectedOption.durationLabel}</p>
             <p className="mt-1 break-all text-[13px] text-[#8d8996]">Ad ID: {adId || "Missing ad"}</p>
 
             <div className="mt-5 rounded-card border border-[#d9d7de] bg-white p-5 sm:p-6">
@@ -100,7 +100,7 @@ export default function PlanPaymentPage() {
 
             <div className="mt-5 rounded-card border border-[#d9d7de] bg-white p-5 sm:p-6">
               <div className="space-y-4 text-[16px] sm:text-[16px]">
-                <div className="flex items-center justify-between"><span>{selectedOption.title} / {selectedOption.duration} Days</span><span>{formatNaira(selectedOption.price)}</span></div>
+                <div className="flex items-center justify-between"><span>{selectedOption.title} / {selectedOption.durationLabel}</span><span>{formatNaira(selectedOption.price)}</span></div>
                 <div className="flex items-center justify-between"><span>VAT</span><span>{formatNaira(vat)}</span></div>
                 <hr className="border-[#d9d7de]" />
                 <div className="flex items-center justify-between font-semibold"><span>Total</span><span className="text-[#ff6c1c]">{formatNaira(total)}</span></div>

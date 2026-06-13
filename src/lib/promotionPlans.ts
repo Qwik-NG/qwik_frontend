@@ -1,7 +1,6 @@
 export type PromotionPlanType = "top" | "premium";
-export type PromotionDuration = 7 | 30;
-export type PromotionOptionId = "top-7" | "top-30" | "premium-7" | "premium-30";
-export type PromotionBackendPlan = "top-7" | "premium-30";
+export type PromotionOptionId = "top-1-month" | "top-30-days" | "premium-1-month" | "premium-3-months";
+export type PromotionBackendPlan = PromotionOptionId;
 
 export type PromotionOption = {
   id: PromotionOptionId;
@@ -9,50 +8,50 @@ export type PromotionOption = {
   backendPlan: PromotionBackendPlan;
   title: string;
   label: string;
-  duration: PromotionDuration;
+  durationLabel: string;
   price: number;
   helper: string;
 };
 
 export const PROMOTION_OPTIONS: PromotionOption[] = [
   {
-    id: "top-7",
+    id: "top-1-month",
     plan: "top",
-    backendPlan: "top-7",
+    backendPlan: "top-1-month",
     title: "TOP",
     label: "Promote this ad with TOP",
-    duration: 7,
-    price: 1500,
-    helper: "A simple boost for fresh visibility.",
+    durationLabel: "1 Month",
+    price: 9950,
+    helper: "A simple boost for monthly visibility.",
   },
   {
-    id: "top-30",
+    id: "top-30-days",
     plan: "top",
-    backendPlan: "top-7",
+    backendPlan: "top-30-days",
     title: "TOP",
     label: "Promote this ad with TOP",
-    duration: 30,
-    price: 4000,
-    helper: "Sustain TOP visibility for a full month.",
+    durationLabel: "30 Days",
+    price: 25850,
+    helper: "Sustain TOP visibility for a focused campaign.",
   },
   {
-    id: "premium-7",
+    id: "premium-1-month",
     plan: "premium",
-    backendPlan: "premium-30",
+    backendPlan: "premium-1-month",
     title: "Premium",
     label: "Promote this ad with Premium",
-    duration: 7,
-    price: 4000,
-    helper: "High-impact placement for a focused campaign.",
+    durationLabel: "1 Month",
+    price: 24800,
+    helper: "High-impact placement for a monthly campaign.",
   },
   {
-    id: "premium-30",
+    id: "premium-3-months",
     plan: "premium",
-    backendPlan: "premium-30",
+    backendPlan: "premium-3-months",
     title: "Premium",
     label: "Promote this ad with Premium",
-    duration: 30,
-    price: 10000,
+    durationLabel: "3 Months",
+    price: 69400,
     helper: "Longer placement for higher repeat exposure.",
   },
 ];
@@ -90,8 +89,8 @@ export function getPromotionOptionFromParams(searchParams: URLSearchParams) {
   if (option) return option;
 
   const plan = searchParams.get("plan");
-  const duration = Number(searchParams.get("duration"));
-  return PROMOTION_OPTIONS.find((item) => item.plan === plan && item.duration === duration) ?? null;
+  const durationLabel = searchParams.get("duration") ?? searchParams.get("durationLabel");
+  return PROMOTION_OPTIONS.find((item) => item.plan === plan && item.durationLabel === durationLabel) ?? null;
 }
 
 export function getPromotionVat(price: number) {

@@ -4,10 +4,16 @@ import { SiteFooter, SiteHeader } from "../components/AppShell";
 import SettingsSidebar, { MobileSettingsMenu } from "../components/settings/SettingsSidebar";
 import { ROUTES } from "../constants/routes";
 import { getSettingsNavItems } from "../lib/settings-nav-config";
+import { formatNaira } from "../lib/promotionPlans";
 import { api } from "../services/api";
 import type { VerificationApplication } from "../types";
 
 type VerificationPaymentMethod = "paystack" | "bank-transfer";
+
+const VERIFICATION_BASE_PRICE = 10000;
+const VERIFICATION_VAT_RATE = 0.075;
+const VERIFICATION_VAT = VERIFICATION_BASE_PRICE * VERIFICATION_VAT_RATE;
+const VERIFICATION_TOTAL = VERIFICATION_BASE_PRICE + VERIFICATION_VAT;
 
 const VERIFICATION_PAYMENT_METHODS: Array<{
   id: VerificationPaymentMethod;
@@ -380,16 +386,16 @@ export default function GetVerifiedPaymentPage() {
                   <div className="mt-4 space-y-4 text-[14px] text-[#1f1d27]">
                     <div className="flex items-center justify-between">
                       <span>Verification Fee</span>
-                      <span>₦5,000</span>
+                      <span>{formatNaira(VERIFICATION_BASE_PRICE)}</span>
                     </div>
                     <div className="flex items-center justify-between">
-                      <span>VAT</span>
-                      <span>₦300.00</span>
+                      <span>VAT 7.5%</span>
+                      <span>{formatNaira(VERIFICATION_VAT)}</span>
                     </div>
                     <div className="h-px w-full bg-[#e5e3ea]" />
                     <div className="flex items-center justify-between font-semibold">
                       <span>Total</span>
-                      <span className="text-[#ff7f1f]">₦5,300.00</span>
+                      <span className="text-[#ff7f1f]">{formatNaira(VERIFICATION_TOTAL)}</span>
                     </div>
                   </div>
                 </div>
