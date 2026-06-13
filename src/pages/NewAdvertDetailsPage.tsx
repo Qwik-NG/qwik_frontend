@@ -1,6 +1,8 @@
 import { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { SiteFooter, SiteHeader } from "../components/AppShell";
+import DropdownSelect from "../components/ui/DropdownSelect";
+import { getBrandOptions, getCategorySlugById, getModelOptions, getOrderedPostCategories } from "../lib/postAdOptions";
 import { api } from "../services/api";
 import type { Category } from "../types";
 
@@ -36,23 +38,6 @@ function writeDraft(draft: PostDraft) {
   window.sessionStorage.setItem(POST_DRAFT_KEY, JSON.stringify(draft));
 }
 
-function ChevronDownIcon() {
-  return (
-    <svg
-      viewBox="0 0 24 24"
-      className="h-5 w-5 text-[#b2b0bb]"
-      fill="none"
-      stroke="currentColor"
-      strokeWidth="2.2"
-      strokeLinecap="round"
-      strokeLinejoin="round"
-      aria-hidden="true"
-    >
-      <path d="m6 9 6 6 6-6" />
-    </svg>
-  );
-}
-
 function InputField({
   label,
   placeholder,
@@ -66,18 +51,19 @@ function InputField({
 }) {
   return (
     <label className="block">
-      <span className="mb-2 block text-[16px] text-[#9c98a5]">{label}</span>
-      <div className="flex h-[50px] items-center justify-between rounded-[10px] border border-[#e1e0e6] px-3 text-[16px] leading-none text-[#afacb8] sm:h-[52px] sm:text-[16px]">
-        <input
-          className="w-full bg-transparent text-[#1f1d27] outline-none placeholder:text-[#afacb8]"
-          placeholder={placeholder}
-          value={value}
-          onChange={(event) => onChange(event.target.value)}
-        />
-        <ChevronDownIcon />
-      </div>
+      <span className="mb-2 block text-[15px] font-medium text-[#27242d]">{label}</span>
+      <input
+        className="h-[54px] w-full rounded-[12px] border border-[#dddbe4] bg-white px-4 text-[16px] text-[#201d27] outline-none transition placeholder:text-[#a4a0aa] focus:border-orange focus:ring-2 focus:ring-orange/20"
+        placeholder={placeholder}
+        value={value}
+        onChange={(event) => onChange(event.target.value)}
+      />
     </label>
   );
+}
+
+function Spinner() {
+  return <span className="inline-block h-5 w-5 animate-spin rounded-full border-2 border-current border-t-transparent" aria-hidden="true" />;
 }
 
 export default function NewAdvertDetailsPage() {
@@ -88,6 +74,7 @@ export default function NewAdvertDetailsPage() {
   const [brand, setBrand] = useState("");
   const [model, setModel] = useState("");
   const [categories, setCategories] = useState<Category[]>([]);
+  const [navigating, setNavigating] = useState(false);
   const [error, setError] = useState<string | null>(null);
 
   useEffect(() => {
@@ -110,9 +97,16 @@ export default function NewAdvertDetailsPage() {
     void loadCategories();
   }, []);
 
-  const canProceed = Number(price) > 0 && categoryId;
+  const orderedCategories = getOrderedPostCategories(categories);
+  const categorySlug = getCategorySlugById(categoryId, categories);
+  const brandOptions = getBrandOptions(categorySlug);
+  const modelOptions = getModelOptions(brand);
+  const canProceed = Number(price) > 0 && categoryId && !navigating;
 
   const handleNext = () => {
+    if (!canProceed) return;
+
+    setNavigating(true);
     writeDraft({
       ...readDraft(),
       price,
@@ -121,7 +115,7 @@ export default function NewAdvertDetailsPage() {
       brand: brand.trim(),
       model: model.trim(),
     });
-    navigate("/post-details");
+    window.setTimeout(() => navigate("/post-details"), 120);
   };
 
   return (
@@ -141,13 +135,13 @@ export default function NewAdvertDetailsPage() {
             <h1 className="text-[20px] font-normal leading-none text-ink sm:text-[24px]">New advert</h1>
           </div>
 
-          <section className="rounded-[28px] bg-white p-4 sm:p-5">
+          <section className="rounded-[28px] bg-white p-4 shadow-[0_14px_36px_rgba(26,24,35,0.06)] sm:p-5">
             <label className="block">
-              <span className="mb-2 block text-[16px] text-[#9c98a5]">Price</span>
+              <span className="mb-2 block text-[15px] font-medium text-[#27242d]">Price</span>
               <input
                 type="number"
                 inputMode="numeric"
-                className="h-[50px] w-full rounded-[10px] border border-[#e1e0e6] bg-transparent px-3 text-[16px] text-[#afacb8] outline-none sm:h-[52px] sm:text-[16px]"
+                className="h-[54px] w-full rounded-[12px] border border-[#dddbe4] bg-white px-4 text-[16px] text-[#201d27] outline-none transition placeholder:text-[#a4a0aa] focus:border-orange focus:ring-2 focus:ring-orange/20"
                 placeholder="₦ 0.0"
                 value={price}
                 onChange={(event) => setPrice(event.target.value.replace(/[^\d.]/g, ""))}
@@ -165,24 +159,38 @@ export default function NewAdvertDetailsPage() {
             </label>
 
             <div className="mt-4 space-y-4">
-              <label className="block">
-                <span className="mb-2 block text-[16px] text-[#9c98a5]">Category</span>
-                <div className="flex h-[50px] items-center justify-between rounded-[10px] border border-[#e1e0e6] px-3 text-[16px] leading-none text-[#afacb8] sm:h-[52px] sm:text-[16px]">
-                  <select
-                    className="w-full bg-transparent text-[#1f1d27] outline-none"
-                    value={categoryId}
-                    onChange={(event) => setCategoryId(event.target.value)}
-                  >
-                    <option value="">What type of item is it?</option>
-                    {categories.map((category) => (
-                      <option key={category.id} value={category.id}>{category.name}</option>
-                    ))}
-                  </select>
-                  <ChevronDownIcon />
-                </div>
-              </label>
-              <InputField label="Brand" placeholder="Who's the creator?" value={brand} onChange={setBrand} />
-              <InputField label="Model" placeholder="What's the model?" value={model} onChange={setModel} />
+              <DropdownSelect
+                label="Category"
+                placeholder="What type of item is it?"
+                value={categoryId}
+                options={orderedCategories.map((category) => ({ value: category.id, label: category.name }))}
+                onChange={(value) => {
+                  setCategoryId(value);
+                  setBrand("");
+                  setModel("");
+                }}
+              />
+              <DropdownSelect
+                label="Brand"
+                placeholder="Who's the creator?"
+                value={brand}
+                options={brandOptions.map((option) => ({ value: option, label: option }))}
+                onChange={(value) => {
+                  setBrand(value);
+                  setModel("");
+                }}
+                disabled={!categoryId}
+                helperText={!categoryId ? "Select category first" : undefined}
+              />
+              <DropdownSelect
+                label="Model"
+                placeholder="What's the model?"
+                value={model}
+                options={modelOptions.map((option) => ({ value: option, label: option }))}
+                onChange={setModel}
+                disabled={!brand}
+                helperText={!brand ? "Select brand first" : undefined}
+              />
             </div>
 
             {error && <p className="mt-4 text-[15px] text-[#d14343]">{error}</p>}
@@ -190,10 +198,11 @@ export default function NewAdvertDetailsPage() {
             <button
               type="button"
               onClick={handleNext}
-              className="mt-4 h-[48px] w-full rounded-[10px] bg-[#e1e1e6] text-[16px] text-[#c3c1cb]"
+              className="mt-4 flex h-[54px] w-full items-center justify-center gap-2 rounded-[12px] bg-gradient-to-r from-amber to-orange text-[17px] font-semibold text-white shadow-glow transition hover:brightness-105 active:scale-[0.99] disabled:cursor-not-allowed disabled:bg-none disabled:bg-[#e1e1e6] disabled:text-[#aaa6b3] disabled:shadow-none"
               disabled={!canProceed}
             >
-              Next
+              {navigating ? <Spinner /> : null}
+              {navigating ? "Loading..." : "Next"}
             </button>
           </section>
         </div>

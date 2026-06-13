@@ -2,6 +2,8 @@ import type { ReactNode } from "react";
 import { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { SiteFooter, SiteHeader } from "../components/AppShell";
+import DropdownSelect from "../components/ui/DropdownSelect";
+import { CONDITION_OPTIONS } from "../lib/postAdOptions";
 import { api } from "../services/api";
 
 const POST_DRAFT_KEY = "qwik_post_draft";
@@ -261,12 +263,12 @@ function TextField({
 }) {
   return (
     <label className="block">
-      <span className="mb-[10px] block text-[16px] leading-none text-[#9c98a5]">
+      <span className="mb-[10px] block text-[15px] font-medium leading-none text-[#27242d]">
         {label}
       </span>
       <input
         type="text"
-        className="h-[54px] w-full rounded-[9px] border-2 border-card bg-white px-[16px] text-[17px] text-ink outline-none placeholder:text-[#a4a0aa] focus:border-orange"
+        className="h-[54px] w-full rounded-[12px] border border-[#dddbe4] bg-white px-[16px] text-[16px] text-[#201d27] outline-none transition placeholder:text-[#a4a0aa] focus:border-orange focus:ring-2 focus:ring-orange/20"
         placeholder={placeholder}
         value={value}
         onChange={(event) => onChange(event.target.value)}
@@ -289,6 +291,11 @@ function Toggle({ enabled, onToggle }: { enabled: boolean; onToggle: () => void 
     </button>
   );
 }
+
+function Spinner() {
+  return <span className="inline-block h-5 w-5 animate-spin rounded-full border-2 border-current border-t-transparent" aria-hidden="true" />;
+}
+
 export default function PostDetailsPage() {
   const navigate = useNavigate();
   const [condition, setCondition] = useState("");
@@ -307,6 +314,8 @@ export default function PostDetailsPage() {
   }, []);
 
   const handleSubmit = async () => {
+    if (submitting) return;
+
     const draft = readDraft();
 
     if (!draft.title || !draft.description || !draft.categoryId || !draft.price || !draft.imageUrls?.length) {
@@ -365,12 +374,13 @@ export default function PostDetailsPage() {
           </h1>
         </div>
 
-        <section className="w-full max-w-[420px] rounded-[28px] bg-white px-[20px] pb-[24px] pt-[24px] sm:px-[24px]">
-          <div className="space-y-[28px]">
-            <TextField
+        <section className="w-full max-w-[420px] rounded-[28px] bg-white px-[20px] pb-[24px] pt-[24px] shadow-[0_14px_36px_rgba(26,24,35,0.06)] sm:px-[24px]">
+          <div className="space-y-[24px]">
+            <DropdownSelect
               label="Condition"
               placeholder="Is it new, used, which?"
               value={condition}
+              options={CONDITION_OPTIONS.map((option) => ({ value: option, label: option }))}
               onChange={setCondition}
             />
             <TextField label="Colour" placeholder="What's the colour?" value={color} onChange={setColor} />
@@ -389,13 +399,15 @@ export default function PostDetailsPage() {
           <button
             type="button"
             onClick={() => {
+              if (!canSubmit) return;
               writeDraft({ ...readDraft(), condition: condition.trim(), color: color.trim(), location: location.trim(), exchangeAvailable });
               void handleSubmit();
             }}
-            className="mt-[26px] h-[56px] w-full rounded-[9px] bg-card text-[18px] text-[#b9b6be]"
+            className="mt-[26px] flex h-[56px] w-full items-center justify-center gap-2 rounded-[12px] bg-gradient-to-r from-amber to-orange text-[18px] font-semibold text-white shadow-glow transition hover:brightness-105 active:scale-[0.99] disabled:cursor-not-allowed disabled:bg-none disabled:bg-[#e1e1e6] disabled:text-[#aaa6b3] disabled:shadow-none"
             disabled={!canSubmit}
           >
-            Next
+            {submitting ? <Spinner /> : null}
+            {submitting ? "Creating..." : "Next"}
           </button>
         </section>
       </main>

@@ -22,7 +22,7 @@ type PostDraft = {
   exchangeAvailable?: boolean;
 };
 
-const MAX_IMAGE_COUNT = 10;
+const MAX_IMAGE_COUNT = 5;
 const MAX_IMAGE_SIZE = 5 * 1024 * 1024;
 const ALLOWED_IMAGE_TYPES = new Set(["image/jpeg", "image/png", "image/webp", "image/gif"]);
 
@@ -173,10 +173,10 @@ function TextField({
 }) {
   return (
     <label className="block">
-      <span className="mb-[10px] block text-[16px] leading-none text-[#9c98a5]">{label}</span>
+      <span className="mb-[10px] block text-[16px] font-medium leading-none text-[#27242d]">{label}</span>
       <input
         type="text"
-        className="h-[54px] w-full rounded-[9px] border-2 border-card bg-white px-[16px] text-[17px] text-ink outline-none placeholder:text-[#a4a0aa] focus:border-orange"
+        className="h-[54px] w-full rounded-[12px] border border-[#dddbe4] bg-white px-[16px] text-[16px] text-[#201d27] outline-none transition placeholder:text-[#a4a0aa] focus:border-orange focus:ring-2 focus:ring-orange/20"
         placeholder={placeholder}
         value={value}
         onChange={(event) => onChange(event.target.value)}
@@ -197,6 +197,7 @@ export default function PostPage() {
   const [description, setDescription] = useState("");
   const [imageUrls, setImageUrls] = useState<string[]>([]);
   const [uploading, setUploading] = useState(false);
+  const [navigating, setNavigating] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [uploadMessage, setUploadMessage] = useState<string | null>(null);
 
@@ -214,7 +215,7 @@ export default function PostPage() {
       const selectedFiles = Array.from(files);
       const remainingSlots = MAX_IMAGE_COUNT - imageUrls.length;
       if (remainingSlots <= 0) {
-        throw new Error("You can upload up to 10 images");
+        throw new Error("You can upload up to 5 images");
       }
 
       if (selectedFiles.length > remainingSlots) {
@@ -254,12 +255,15 @@ export default function PostPage() {
   };
 
   const handleNext = () => {
+    if (!canProceed || navigating) return;
+
+    setNavigating(true);
     const nextDraft = { ...readDraft(), title: title.trim(), description: description.trim(), imageUrls };
     writeDraft(nextDraft);
-    navigate("/new-advert-details");
+    window.setTimeout(() => navigate("/new-advert-details"), 120);
   };
 
-  const canProceed = title.trim().length > 0 && description.trim().length > 0 && imageUrls.length > 0 && !uploading;
+  const canProceed = title.trim().length > 0 && description.trim().length > 0 && imageUrls.length > 0 && !uploading && !navigating;
 
   return (
     <div className="min-h-screen bg-page font-outfit text-ink">
@@ -270,10 +274,10 @@ export default function PostPage() {
           <h1 className="text-center text-[24px] font-normal leading-none text-ink sm:text-[26px]">New advert</h1>
         </div>
 
-        <section className="w-full max-w-[420px] rounded-[28px] bg-white px-[20px] pb-[24px] pt-[24px] sm:px-[24px]">
-          <h2 className="text-[22px] font-semibold leading-none text-ink">Add pictures</h2>
-          <p className="mt-[18px] max-w-[360px] text-[18px] leading-[1.45] text-[#9c98a5]">
-            Add a minimum of 6 pictures - your first picture will be used as the cover
+        <section className="w-full max-w-[420px] rounded-[28px] bg-white px-[20px] pb-[24px] pt-[24px] shadow-[0_14px_36px_rgba(26,24,35,0.06)] sm:px-[24px]">
+          <h2 className="text-[22px] font-semibold leading-none text-[#201d27]">Add pictures</h2>
+          <p className="mt-[12px] max-w-[360px] text-[15px] leading-[1.45] text-[#7c7785]">
+            Add clear photos of your item. Your first picture will be used as the cover.
           </p>
 
           <input
@@ -288,10 +292,14 @@ export default function PostPage() {
           <button
             type="button"
             onClick={() => fileInputRef.current?.click()}
-            className="mt-[18px] grid h-[104px] w-[104px] place-items-center rounded-[12px] border-2 border-card text-[#b9b6be] disabled:cursor-not-allowed disabled:opacity-60"
+            className="mt-[18px] flex min-h-[132px] w-full items-center justify-center rounded-[18px] border-2 border-dashed border-[#f1c999] bg-[#fff9f1] text-[#ff7f1f] transition hover:border-orange hover:bg-[#fff3e3] active:scale-[0.99] disabled:cursor-not-allowed disabled:opacity-60"
             disabled={uploading || imageUrls.length >= MAX_IMAGE_COUNT}
           >
-            {uploading ? <Spinner /> : <PlusIcon />}
+            <span className="flex flex-col items-center gap-2 text-center">
+              {uploading ? <Spinner /> : <PlusIcon />}
+              <span className="text-[15px] font-semibold text-[#201d27]">{uploading ? "Uploading images..." : "Tap to add pictures"}</span>
+              <span className="text-[13px] text-[#827c8b]">{imageUrls.length}/{MAX_IMAGE_COUNT} images - jpg, gif, png & webp, 5MB max</span>
+            </span>
           </button>
 
           {imageUrls.length > 0 && (
@@ -302,18 +310,18 @@ export default function PostPage() {
             </div>
           )}
 
-          <p className="mt-[20px] text-[17px] leading-none text-[#b9b6be]">
-            {uploading ? "Uploading images..." : `${imageUrls.length}/${MAX_IMAGE_COUNT} images - jpg, gif, png & webp, 5MB max`}
+          <p className="mt-[16px] text-[14px] leading-snug text-[#6f6a78]">
+            {uploading ? "Please wait while your images upload." : "Upload up to 5 images. Accepted formats: jpg, gif, png, webp."}
           </p>
           {uploadMessage && <p className="mt-[12px] text-[15px] text-[#57b77a]">{uploadMessage}</p>}
           {error && <p className="mt-[12px] text-[15px] text-[#d14343]">{error}</p>}
 
-          <div className="mt-[34px] space-y-[28px]">
+          <div className="mt-[30px] space-y-[24px]">
             <TextField label="Title" placeholder="What are you selling?" value={title} onChange={setTitle} />
             <label className="block">
-              <span className="mb-[10px] block text-[16px] leading-none text-[#9c98a5]">Description</span>
+              <span className="mb-[10px] block text-[16px] font-medium leading-none text-[#27242d]">Description</span>
               <textarea
-                className="h-[92px] w-full resize-none rounded-[9px] border-2 border-card bg-white px-[16px] py-[14px] text-[17px] leading-[1.45] text-ink outline-none placeholder:text-[#a4a0aa] focus:border-orange"
+                className="h-[112px] w-full resize-none rounded-[12px] border border-[#dddbe4] bg-white px-[16px] py-[14px] text-[16px] leading-[1.45] text-[#201d27] outline-none transition placeholder:text-[#a4a0aa] focus:border-orange focus:ring-2 focus:ring-orange/20"
                 placeholder="A brief description of what it is that you're selling..."
                 value={description}
                 onChange={(event) => setDescription(event.target.value)}
@@ -324,10 +332,11 @@ export default function PostPage() {
           <button
             type="button"
             onClick={handleNext}
-            className="mt-[26px] h-[56px] w-full rounded-[9px] bg-card text-[18px] text-[#b9b6be] disabled:cursor-not-allowed disabled:opacity-70"
+            className="mt-[26px] flex h-[56px] w-full items-center justify-center gap-2 rounded-[12px] bg-gradient-to-r from-amber to-orange text-[18px] font-semibold text-white shadow-glow transition hover:brightness-105 active:scale-[0.99] disabled:cursor-not-allowed disabled:bg-none disabled:bg-[#e1e1e6] disabled:text-[#aaa6b3] disabled:shadow-none"
             disabled={!canProceed}
           >
-            Next
+            {navigating ? <Spinner /> : null}
+            {navigating ? "Loading..." : "Next"}
           </button>
         </section>
       </main>
