@@ -351,7 +351,7 @@ export default function AccountPage() {
   const menuItems: MenuItem[] = [
     { label: "Profile", icon: <UserIcon />, active: true, to: "/profile-settings" },
     { label: "Ads", icon: <BoxIcon />, to: "/ads-dashboard" },
-    { label: "Make money", icon: <TicketIcon />, to: "/promote-ad" },
+    { label: "Start selling", icon: <TicketIcon />, to: "/promote-ad" },
     { label: "Notification", icon: <BellIcon />, to: "/notification-settings" },
     { label: "Help", icon: <PhoneIcon />, to: "/messages" },
     { label: "About", icon: <InfoIcon />, to: "/" },

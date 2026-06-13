@@ -14,7 +14,7 @@ export function getSettingsNavItems(navigate: ReturnType<typeof useNavigate>, ac
   return [
     { label: "Profile", icon: <UserIcon />, active: activePage === "profile", onClick: () => navigate("/profile-settings") },
     { label: "Ads", icon: <BoxIcon />, active: activePage === "ads", onClick: () => navigate("/ads-dashboard") },
-    { label: "Make money", icon: <TicketIcon />, active: activePage === "promote", onClick: () => navigate("/promote-ad") },
+    { label: "Start selling", icon: <TicketIcon />, active: activePage === "promote", onClick: () => navigate("/promote-ad") },
     { label: "Get Verified", icon: <ShieldCheckIcon />, active: activePage === "get-verified", onClick: () => navigate("/get-verified") },
     { label: "Notification", icon: <BellIcon />, active: activePage === "notification", onClick: () => navigate("/notification-settings") },
     { label: "Help", icon: <PhoneIcon />, active: activePage === "help", onClick: () => navigate("/messages") },

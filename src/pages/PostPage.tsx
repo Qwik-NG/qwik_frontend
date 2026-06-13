@@ -23,7 +23,8 @@ type PostDraft = {
   exchangeAvailable?: boolean;
 };
 
-const MAX_IMAGE_COUNT = 5;
+const MIN_IMAGE_COUNT = 4;
+const MAX_IMAGE_COUNT = 10;
 const MAX_IMAGE_SIZE = 5 * 1024 * 1024;
 const ALLOWED_IMAGE_TYPES = new Set(["image/jpeg", "image/png", "image/webp", "image/gif"]);
 
@@ -190,6 +191,14 @@ function Spinner() {
   return <span className="inline-block h-5 w-5 animate-spin rounded-full border-2 border-current border-t-transparent" aria-hidden="true" />;
 }
 
+function RemoveIcon() {
+  return (
+    <svg viewBox="0 0 20 20" className="h-3.5 w-3.5" fill="none" stroke="currentColor" strokeLinecap="round" strokeWidth="2.2">
+      <path d="m5 5 10 10M15 5 5 15" />
+    </svg>
+  );
+}
+
 export default function PostPage() {
   const navigate = useNavigate();
   const { success } = useToast();
@@ -216,7 +225,7 @@ export default function PostPage() {
       const selectedFiles = Array.from(files);
       const remainingSlots = MAX_IMAGE_COUNT - imageUrls.length;
       if (remainingSlots <= 0) {
-        throw new Error("You can upload up to 5 images");
+        throw new Error("You can upload up to 10 images");
       }
 
       if (selectedFiles.length > remainingSlots) {
@@ -242,6 +251,7 @@ export default function PostPage() {
       const nextImageUrls = [...imageUrls, ...uploadedUrls].slice(0, MAX_IMAGE_COUNT);
       setImageUrls(nextImageUrls);
       writeDraft({ ...readDraft(), title, description, imageUrls: nextImageUrls });
+      setError(nextImageUrls.length < MIN_IMAGE_COUNT ? "Please upload at least 4 product photos." : null);
       setUploadMessage(`${uploadedUrls.length} image${uploadedUrls.length === 1 ? "" : "s"} uploaded`);
       success("Images uploaded");
     } catch (err) {
@@ -255,16 +265,31 @@ export default function PostPage() {
     }
   };
 
+  const handleRemoveImage = (index: number) => {
+    if (uploading || navigating) return;
+    const nextImageUrls = imageUrls.filter((_, imageIndex) => imageIndex !== index);
+    setImageUrls(nextImageUrls);
+    writeDraft({ ...readDraft(), title: title.trim(), description: description.trim(), imageUrls: nextImageUrls });
+    setUploadMessage(null);
+    setError(nextImageUrls.length < MIN_IMAGE_COUNT ? "Please upload at least 4 product photos." : null);
+  };
+
   const handleNext = () => {
+    if (imageUrls.length < MIN_IMAGE_COUNT) {
+      setError("Please upload at least 4 product photos.");
+      return;
+    }
+
     if (!canProceed || navigating) return;
 
     setNavigating(true);
+    setError(null);
     const nextDraft = { ...readDraft(), title: title.trim(), description: description.trim(), imageUrls };
     writeDraft(nextDraft);
     window.setTimeout(() => navigate("/new-advert-details"), 120);
   };
 
-  const canProceed = title.trim().length > 0 && description.trim().length > 0 && imageUrls.length > 0 && !uploading && !navigating;
+  const canProceed = title.trim().length >= 3 && description.trim().length > 0 && imageUrls.length >= MIN_IMAGE_COUNT && !uploading && !navigating;
 
   return (
     <div className="min-h-screen bg-page font-outfit text-ink">
@@ -278,13 +303,13 @@ export default function PostPage() {
         <section className="w-full max-w-[420px] rounded-[28px] bg-white px-[20px] pb-[24px] pt-[24px] shadow-[0_14px_36px_rgba(26,24,35,0.06)] sm:px-[24px]">
           <h2 className="text-[22px] font-semibold leading-none text-[#201d27]">Add pictures</h2>
           <p className="mt-[12px] max-w-[360px] text-[15px] leading-[1.45] text-[#7c7785]">
-            Add clear photos of your item. Your first picture will be used as the cover.
+            Add a minimum of 4 pictures - your first picture will be used as the cover
           </p>
 
           <input
             ref={fileInputRef}
             type="file"
-            accept="image/*"
+            accept="image/jpeg,image/png,image/webp,image/gif"
             multiple
             className="hidden"
             onChange={(event) => void handleFilesSelected(event.target.files)}
@@ -305,14 +330,26 @@ export default function PostPage() {
 
           {imageUrls.length > 0 && (
             <div className="mt-[16px] flex flex-wrap gap-2">
-              {imageUrls.map((url) => (
-                <img key={url} src={url} alt="Uploaded ad" className="h-[64px] w-[64px] rounded-[12px] object-cover" />
+              {imageUrls.map((url, index) => (
+                <div key={`${url}-${index}`} className="relative h-[64px] w-[64px] overflow-hidden rounded-[12px]">
+                  <img src={url} alt={index === 0 ? "Uploaded ad cover" : "Uploaded ad"} className="h-full w-full object-cover" />
+                  {index === 0 ? <span className="absolute bottom-1 left-1 rounded bg-black/65 px-1.5 py-0.5 text-[10px] font-medium text-white">Cover</span> : null}
+                  <button
+                    type="button"
+                    onClick={() => handleRemoveImage(index)}
+                    disabled={uploading || navigating}
+                    aria-label={`Remove image ${index + 1}`}
+                    className="absolute right-1 top-1 grid h-6 w-6 place-items-center rounded-full bg-black/70 text-white shadow-sm transition hover:bg-black disabled:cursor-not-allowed disabled:opacity-50"
+                  >
+                    <RemoveIcon />
+                  </button>
+                </div>
               ))}
             </div>
           )}
 
           <p className="mt-[16px] text-[14px] leading-snug text-[#6f6a78]">
-            {uploading ? "Please wait while your images upload." : "Upload up to 5 images. Accepted formats: jpg, gif, png, webp."}
+            {uploading ? "Please wait while your images upload." : "Upload 4 to 10 images. Accepted formats: jpg, jpeg, gif, png, webp."}
           </p>
           {uploadMessage && <p className="mt-[12px] text-[15px] text-[#57b77a]">{uploadMessage}</p>}
           {error && <p className="mt-[12px] text-[15px] text-[#d14343]">{error}</p>}
