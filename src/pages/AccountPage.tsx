@@ -155,23 +155,60 @@ function PlayIcon() {
   );
 }
 
-function Field({ label, placeholder, type = "text", icon, defaultValue = "" }: { label: string; placeholder: string; type?: string; icon?: ReactNode; defaultValue?: string }) {
+function Field({
+  label,
+  placeholder,
+  type = "text",
+  icon,
+  value,
+  onChange,
+  readOnly = false,
+}: {
+  label: string;
+  placeholder: string;
+  type?: string;
+  icon?: ReactNode;
+  value: string;
+  onChange?: (value: string) => void;
+  readOnly?: boolean;
+}) {
   return (
     <label className="block">
       <span className="mb-[10px] block text-[16px] text-[#9c98a5]">{label}</span>
       <span className="flex h-[49px] w-full max-w-[322px] items-center rounded-[8px] border border-card bg-page px-[12px] focus-within:border-orange md:max-w-[322px]">
-        <input className="min-w-0 flex-1 bg-transparent text-[17px] text-ink outline-none placeholder:text-[#a4a0aa]" type={type} placeholder={placeholder} defaultValue={defaultValue} />
+        <input
+          className="min-w-0 flex-1 bg-transparent text-[17px] text-ink outline-none placeholder:text-[#a4a0aa] read-only:text-[#6f6b78]"
+          type={type}
+          placeholder={placeholder}
+          value={value}
+          onChange={(event) => onChange?.(event.target.value)}
+          readOnly={readOnly}
+        />
         {icon ? <span className="ml-3 shrink-0 text-ink">{icon}</span> : null}
       </span>
     </label>
   );
 }
 
-function SaveButton({ className = "" }: { className?: string }) {
+function SaveButton({ className = "", disabled = false, loading = false, type = "button" }: { className?: string; disabled?: boolean; loading?: boolean; type?: "button" | "submit" }) {
   return (
-    <button type="button" className={`h-[49px] w-full max-w-[322px] rounded-[8px] bg-gradient-to-r from-amber to-orange text-[16px] text-white shadow-glow ${className}`}>
-      Save
+    <button
+      type={type}
+      disabled={disabled || loading}
+      className={`flex h-[49px] w-full max-w-[322px] items-center justify-center gap-2 rounded-[8px] bg-gradient-to-r from-amber to-orange text-[16px] text-white shadow-glow disabled:cursor-not-allowed disabled:opacity-60 ${className}`}
+    >
+      {loading ? <span className="h-4 w-4 animate-spin rounded-full border-2 border-white/40 border-t-white" aria-hidden="true" /> : null}
+      {loading ? "Saving..." : "Save"}
     </button>
+  );
+}
+
+function SummaryItem({ label, value, className = "" }: { label: string; value: string; className?: string }) {
+  return (
+    <div className={`min-w-0 rounded-[14px] border border-[#eceaf0] bg-[#faf9fc] px-4 py-3 ${className}`}>
+      <p className="text-[13px] text-[#94919d]">{label}</p>
+      <p className="mt-1 break-words text-[15px] font-medium leading-snug text-ink">{value || "Not added yet"}</p>
+    </div>
   );
 }
 
@@ -272,22 +309,122 @@ function Tabs({ activeTab, onChange }: { activeTab: TabKey; onChange: (tab: TabK
   );
 }
 
-function EditProfileForm({ display }: { display: CurrentUserDisplay }) {
-  return (
-    <div className="mt-[44px] w-full max-w-[322px]">
-      <div className="space-y-[24px]">
-        <Field label="Full Name" placeholder="Enter your full name" defaultValue={display.fullName === "Qwik User" ? "" : display.fullName} />
-        <Field label="Email" placeholder="@mail" type="email" defaultValue={display.email} />
-        <Field label="Password" placeholder="*********" type="password" icon={<EyeIcon />} />
-        <Field label="Phone Number" placeholder="0800 000 0000" type="tel" defaultValue={display.phone} />
-        <Field label="Address" placeholder="Where do you live?" defaultValue={display.location} />
+function EditProfilePanel({
+  display,
+  isEditing,
+  fullName,
+  bio,
+  email,
+  phone,
+  location,
+  avatarImageUrl,
+  selectedAvatarFileName,
+  saving,
+  onEdit,
+  onSubmit,
+  onAvatarFileChange,
+  onFullNameChange,
+  onBioChange,
+  onPhoneChange,
+  onLocationChange,
+}: {
+  display: CurrentUserDisplay;
+  isEditing: boolean;
+  fullName: string;
+  bio: string;
+  email: string;
+  phone: string;
+  location: string;
+  avatarImageUrl: string;
+  selectedAvatarFileName: string;
+  saving: boolean;
+  onEdit: () => void;
+  onSubmit: () => void;
+  onAvatarFileChange: (file: File | null) => void;
+  onFullNameChange: (value: string) => void;
+  onBioChange: (value: string) => void;
+  onPhoneChange: (value: string) => void;
+  onLocationChange: (value: string) => void;
+}) {
+  if (!isEditing) {
+    return (
+      <div className="mt-[34px] w-full max-w-[720px] rounded-[22px] bg-white p-5 shadow-[0_18px_48px_rgba(24,20,31,0.06)] sm:p-6">
+        <div className="flex flex-col gap-5 sm:flex-row sm:items-start sm:justify-between">
+          <div className="flex min-w-0 items-center gap-4">
+            <UserAvatar
+              name={display.fullName}
+              imageUrl={avatarImageUrl}
+              alt={`${display.fullName} profile`}
+              className="h-[76px] w-[76px] shrink-0 rounded-full object-cover"
+            />
+            <div className="min-w-0">
+              <p className="text-[13px] uppercase tracking-[0.12em] text-[#94919d]">Saved profile</p>
+              <h2 className="mt-1 break-words text-[24px] font-medium leading-tight text-ink">{display.fullName}</h2>
+              <p className="mt-1 break-words text-[15px] text-[#7d7986]">{email || "No email added"}</p>
+            </div>
+          </div>
+          <button
+            type="button"
+            onClick={onEdit}
+            className="h-[44px] shrink-0 rounded-[10px] border border-[#eceaf0] px-4 text-[15px] font-medium text-ink transition hover:border-orange hover:text-orange"
+          >
+            Edit Profile
+          </button>
+        </div>
+
+        <div className="mt-6 grid gap-3 sm:grid-cols-2">
+          <SummaryItem label="Business/Profile name" value={display.fullName} />
+          <SummaryItem label="Phone" value={phone} />
+          <SummaryItem label="Email" value={email} />
+          <SummaryItem label="Address" value={location} />
+          <SummaryItem label="Description" value={bio} className="sm:col-span-2" />
+        </div>
       </div>
-      <button type="button" className="mt-[24px] flex w-full items-center justify-between text-left text-[16px] text-red-600 underline">
+    );
+  }
+
+  return (
+    <form
+      className="mt-[44px] w-full max-w-[584px]"
+      onSubmit={(event) => {
+        event.preventDefault();
+        onSubmit();
+      }}
+    >
+      <div className="space-y-[24px]">
+        <Field label="Business/Profile Name" placeholder="Enter your business or profile name" value={fullName} onChange={onFullNameChange} />
+        <label className="block">
+          <span className="mb-[10px] block text-[16px] text-[#9c98a5]">Description</span>
+          <textarea
+            className="h-[150px] w-full max-w-[584px] resize-none rounded-[8px] border border-card bg-page px-[20px] py-[18px] text-[17px] text-ink outline-none placeholder:text-[#a4a0aa] focus:border-orange"
+            placeholder="What should buyers know about you or your business?"
+            value={bio}
+            onChange={(event) => onBioChange(event.target.value)}
+          />
+        </label>
+        <label className="block">
+          <span className="mb-[10px] block text-[16px] text-[#9c98a5]">Profile / Logo Image</span>
+          <span className="flex min-h-[54px] w-full max-w-[584px] cursor-pointer items-center justify-between gap-4 rounded-[8px] border border-dashed border-card bg-page px-[16px] text-[15px] text-[#6c6a74]">
+            <span className="min-w-0 truncate">{selectedAvatarFileName || (avatarImageUrl ? "Current profile image saved" : "Choose a logo or profile image")}</span>
+            <span className="shrink-0 text-orange">Browse</span>
+            <input
+              type="file"
+              accept="image/jpeg,image/png,image/webp,image/gif"
+              className="hidden"
+              onChange={(event) => onAvatarFileChange(event.target.files?.[0] ?? null)}
+            />
+          </span>
+        </label>
+        <Field label="Email" placeholder="@mail" type="email" value={email} readOnly />
+        <Field label="Phone Number" placeholder="0800 000 0000" type="tel" value={phone} onChange={onPhoneChange} />
+        <Field label="Address" placeholder="Where do you live?" value={location} onChange={onLocationChange} />
+      </div>
+      <button type="button" className="mt-[24px] flex w-full max-w-[322px] items-center justify-between text-left text-[16px] text-red-600 underline">
         Delete my account
         <ArrowRightIcon />
       </button>
-      <SaveButton className="mt-[27px]" />
-    </div>
+      <SaveButton className="mt-[27px] max-w-[584px]" type="submit" loading={saving} disabled={saving || fullName.trim().length < 2} />
+    </form>
   );
 }
 
@@ -295,7 +432,7 @@ function CompanyDetailsForm({ display }: { display: CurrentUserDisplay }) {
   return (
     <div className="mt-[48px] w-full max-w-[584px]">
       <div className="space-y-[34px]">
-        <Field label="Business Name" placeholder="Enter your full name" defaultValue={display.fullName === "Qwik User" ? "" : display.fullName} />
+        <Field label="Business Name" placeholder="Enter your full name" value={display.fullName === "Qwik User" ? "" : display.fullName} readOnly />
         <label className="block">
           <span className="mb-[10px] block text-[16px] text-[#9c98a5]">Description</span>
           <textarea
@@ -389,11 +526,29 @@ function Footer() {
 export default function AccountPage() {
   const navigate = useNavigate();
   const [activeTab, setActiveTab] = useState<TabKey>("profile");
-  const { display, setUser } = useCurrentUser();
+  const { display, setUser, loading: loadingUser } = useCurrentUser();
   const { success, error: showError } = useToast();
+  const [isEditingProfile, setIsEditingProfile] = useState(false);
+  const [profileModeInitialized, setProfileModeInitialized] = useState(false);
+  const [fullName, setFullName] = useState("");
+  const [bio, setBio] = useState("");
+  const [phone, setPhone] = useState("");
+  const [location, setLocation] = useState("");
   const [selectedAvatarFile, setSelectedAvatarFile] = useState<File | null>(null);
   const [avatarPreviewUrl, setAvatarPreviewUrl] = useState("");
   const [savingAvatar, setSavingAvatar] = useState(false);
+  const [savingProfile, setSavingProfile] = useState(false);
+
+  useEffect(() => {
+    setFullName(display.fullName === "Qwik User" ? "" : display.fullName);
+    setBio(display.bio);
+    setPhone(display.phone);
+    setLocation(display.location);
+    if (!loadingUser && !profileModeInitialized) {
+      setIsEditingProfile(!(display.fullName !== "Qwik User" || display.bio || display.phone || display.location || display.avatarUrl));
+      setProfileModeInitialized(true);
+    }
+  }, [display.avatarUrl, display.bio, display.fullName, display.location, display.phone, loadingUser, profileModeInitialized]);
 
   useEffect(() => {
     if (!selectedAvatarFile) {
@@ -422,6 +577,35 @@ export default function AccountPage() {
       showError(error instanceof Error ? error.message : "Failed to update profile photo");
     } finally {
       setSavingAvatar(false);
+    }
+  };
+
+  const saveProfile = async () => {
+    if (savingProfile) return;
+
+    try {
+      setSavingProfile(true);
+      let nextAvatarUrl = display.avatarUrl;
+      if (selectedAvatarFile) {
+        const uploadResponse = await api.uploadImages([selectedAvatarFile]);
+        nextAvatarUrl = uploadResponse.data.urls[0] || "";
+      }
+
+      const response = await api.updateMe({
+        fullName: fullName.trim(),
+        bio: bio.trim(),
+        phone: phone.trim(),
+        location: location.trim(),
+        avatarUrl: nextAvatarUrl,
+      });
+      setUser(response.data);
+      setSelectedAvatarFile(null);
+      setIsEditingProfile(false);
+      success("Profile updated");
+    } catch (error) {
+      showError(error instanceof Error ? error.message : "Failed to update profile");
+    } finally {
+      setSavingProfile(false);
     }
   };
 
@@ -496,7 +680,27 @@ export default function AccountPage() {
           />
           <div className="mt-[42px]">
             <Tabs activeTab={activeTab} onChange={setActiveTab} />
-            {activeTab === "profile" ? <EditProfileForm display={display} /> : null}
+            {activeTab === "profile" ? (
+              <EditProfilePanel
+                display={display}
+                isEditing={isEditingProfile}
+                fullName={fullName}
+                bio={bio}
+                email={display.email}
+                phone={phone}
+                location={location}
+                avatarImageUrl={avatarPreviewUrl || display.avatarUrl}
+                selectedAvatarFileName={selectedAvatarFile?.name ?? ""}
+                saving={savingProfile}
+                onEdit={() => setIsEditingProfile(true)}
+                onSubmit={saveProfile}
+                onAvatarFileChange={setSelectedAvatarFile}
+                onFullNameChange={setFullName}
+                onBioChange={setBio}
+                onPhoneChange={setPhone}
+                onLocationChange={setLocation}
+              />
+            ) : null}
             {activeTab === "company" ? <CompanyDetailsForm display={display} /> : null}
             {activeTab === "chat" ? <ChatSettingsForm /> : null}
           </div>

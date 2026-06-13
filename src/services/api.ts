@@ -197,6 +197,9 @@ export const api = {
     request<User>("/users/me", {
       method: "PATCH",
       body: JSON.stringify(payload)
+    }).then((response) => {
+      GET_CACHE.clear();
+      return response;
     }),
 
   getUser: (id: string) => request<PublicUserProfile>(`/users/${id}`, { retry: 1 }),
