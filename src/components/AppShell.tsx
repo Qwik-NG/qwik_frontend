@@ -237,8 +237,8 @@ export function SiteHeader({
   };
 
   return (
-    <>
-      <header className={`${hideOnMobile ? "hidden md:flex" : "flex"} sticky top-0 z-[100] mx-auto w-full max-w-[1728px] flex-wrap items-center gap-2 bg-page/95 px-4 py-0.5 backdrop-blur-sm sm:px-6 lg:gap-4 lg:px-12 lg:py-1`}>
+    <div className={`${hideOnMobile ? "hidden md:contents" : "block md:contents"} sticky top-0 z-[100] bg-page/95 backdrop-blur-sm`}>
+      <header className={`${hideOnMobile ? "hidden md:flex" : "flex"} mx-auto w-full max-w-[1728px] flex-wrap items-center gap-2 bg-page/95 px-4 py-0.5 backdrop-blur-sm md:sticky md:top-0 md:z-[100] sm:px-6 lg:gap-4 lg:px-12 lg:py-1`}>
         <button
           className="relative h-[54px] w-[54px] shrink-0 overflow-hidden rounded-full bg-white lg:h-[58px] lg:w-[58px]"
           onClick={() => navigate("/")}
@@ -327,7 +327,7 @@ export function SiteHeader({
         </div>
       </header>
       {renderSearchControls("mobile", mobileLocationRef)}
-    </>
+    </div>
   );
 }
 
