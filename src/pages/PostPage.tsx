@@ -3,7 +3,8 @@ import { useNavigate } from "react-router-dom";
 import { SiteFooter, SiteHeader } from "../components/AppShell";
 import { PlusIcon } from "../components/icons/CoreIcons";
 import { useToast } from "../context/ToastContext";
-import { API_BASE_URL, api } from "../services/api";
+import { normalizeImageUrls } from "../lib/imageUrls";
+import { api } from "../services/api";
 
 const POST_DRAFT_KEY = "qwik_post_draft";
 
@@ -237,7 +238,7 @@ export default function PostPage() {
       setUploadMessage(null);
 
       const payload = await api.uploadImages(selectedFiles);
-      const uploadedUrls = payload.data.urls.map((url) => new URL(url, API_BASE_URL).toString());
+      const uploadedUrls = normalizeImageUrls(payload.data.urls);
       const nextImageUrls = [...imageUrls, ...uploadedUrls].slice(0, MAX_IMAGE_COUNT);
       setImageUrls(nextImageUrls);
       writeDraft({ ...readDraft(), title, description, imageUrls: nextImageUrls });

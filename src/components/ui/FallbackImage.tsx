@@ -1,5 +1,8 @@
 import { useEffect, useState, type ReactNode } from "react";
 import { ImagePlaceholder } from "./ImagePlaceholder";
+import { normalizeImageUrl } from "../../lib/imageUrls";
+
+const failedImageUrls = new Set<string>();
 
 type FallbackImageProps = {
   src?: string | null;
@@ -22,13 +25,14 @@ export function FallbackImage({
   decoding = "async",
   fallback,
 }: FallbackImageProps) {
+  const normalizedSrc = normalizeImageUrl(src);
   const [failed, setFailed] = useState(false);
 
   useEffect(() => {
-    setFailed(false);
-  }, [src]);
+    setFailed(Boolean(normalizedSrc && failedImageUrls.has(normalizedSrc)));
+  }, [normalizedSrc]);
 
-  if (!src || failed) {
+  if (!normalizedSrc || failed) {
     return (
       fallback ?? (
         <ImagePlaceholder
@@ -41,12 +45,15 @@ export function FallbackImage({
 
   return (
     <img
-      src={src}
+      src={normalizedSrc}
       alt={alt}
       loading={loading}
       decoding={decoding}
       className={`${className} ${fit === "contain" ? "object-contain" : "object-cover"}`.trim()}
-      onError={() => setFailed(true)}
+      onError={() => {
+        failedImageUrls.add(normalizedSrc);
+        setFailed(true);
+      }}
     />
   );
 }
