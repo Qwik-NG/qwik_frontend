@@ -1,14 +1,16 @@
 import { useState } from "react";
-import { Link, useNavigate } from "react-router-dom";
+import { useNavigate } from "react-router-dom";
 import { ROUTES } from "../constants/routes";
 import { FacebookIcon, GoogleIcon } from "../components/icons/SocialIcons";
 import AuthLayout from "../components/layout/AuthLayout";
 import { setLoginEmail } from "../services/auth";
+import LegalConsentModal, { type LegalDocumentType } from "../components/auth/LegalConsentModal";
 
 export default function SignInPage() {
   const navigate = useNavigate();
   const [email, setEmail] = useState("");
   const [acceptedLegal, setAcceptedLegal] = useState(false);
+  const [legalModal, setLegalModal] = useState<LegalDocumentType | null>(null);
   const isEmailValid = /\S+@\S+\.\S+/.test(email);
   const canContinue = isEmailValid && acceptedLegal;
 
@@ -65,13 +67,13 @@ export default function SignInPage() {
             />
             <span>
               I confirm &amp; accept the{" "}
-              <Link to={ROUTES.TERMS} className="font-medium text-[#ff8f00] underline-offset-2 hover:underline">
+              <button type="button" onClick={() => setLegalModal("terms")} className="font-medium text-[#ff8f00] underline-offset-2 hover:underline">
                 Terms of Use
-              </Link>{" "}
+              </button>{" "}
               and{" "}
-              <Link to={ROUTES.PRIVACY_POLICY} className="font-medium text-[#ff8f00] underline-offset-2 hover:underline">
+              <button type="button" onClick={() => setLegalModal("privacy")} className="font-medium text-[#ff8f00] underline-offset-2 hover:underline">
                 Privacy Policy
-              </Link>
+              </button>
             </span>
           </label>
 
@@ -88,6 +90,7 @@ export default function SignInPage() {
           >
             Next
           </button>
+          <LegalConsentModal documentType={legalModal} onClose={() => setLegalModal(null)} onAgree={() => setAcceptedLegal(true)} />
     </AuthLayout>
   );
 }

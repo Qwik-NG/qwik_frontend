@@ -1,6 +1,6 @@
 import LegalPageLayout from "../components/layout/LegalPageLayout";
 
-const privacySections = [
+export const privacySections = [
   {
     title: "1. Information We Collect",
     body: [

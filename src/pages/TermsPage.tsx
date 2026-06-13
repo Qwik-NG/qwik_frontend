@@ -1,6 +1,6 @@
 import LegalPageLayout from "../components/layout/LegalPageLayout";
 
-const termsSections = [
+export const termsSections = [
   {
     title: "1. Definitions",
     body: [

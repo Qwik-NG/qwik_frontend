@@ -1,16 +1,17 @@
 import { useState } from "react";
-import { Link, useNavigate } from "react-router-dom";
-import { ROUTES } from "../constants/routes";
+import { useNavigate } from "react-router-dom";
 import { FacebookIcon, GoogleIcon } from "../components/icons/SocialIcons";
 import AuthLayout from "../components/layout/AuthLayout";
 import FormInput from "../components/ui/FormInput";
 import FormButton from "../components/ui/FormButton";
 import { setLoginEmail } from "../services/auth";
+import LegalConsentModal, { type LegalDocumentType } from "../components/auth/LegalConsentModal";
 
 export default function LoginPage() {
   const navigate = useNavigate();
   const [email, setEmail] = useState("");
   const [acceptedLegal, setAcceptedLegal] = useState(false);
+  const [legalModal, setLegalModal] = useState<LegalDocumentType | null>(null);
   const canContinue = /\S+@\S+\.\S+/.test(email) && acceptedLegal;
 
   return (
@@ -66,19 +67,21 @@ export default function LoginPage() {
             />
             <span>
               I confirm &amp; accept the{" "}
-              <Link
-                to={ROUTES.TERMS}
+              <button
+                type="button"
+                onClick={() => setLegalModal("terms")}
                 className="font-medium text-[#ff8f00] underline-offset-2 transition-colors hover:text-[#e67f00] hover:underline focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#ffb357] focus-visible:ring-offset-2 focus-visible:ring-offset-white"
               >
                 Terms of Use
-              </Link>{" "}
+              </button>{" "}
               and{" "}
-              <Link
-                to={ROUTES.PRIVACY_POLICY}
+              <button
+                type="button"
+                onClick={() => setLegalModal("privacy")}
                 className="font-medium text-[#ff8f00] underline-offset-2 transition-colors hover:text-[#e67f00] hover:underline focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#ffb357] focus-visible:ring-offset-2 focus-visible:ring-offset-white"
               >
                 Privacy Policy
-              </Link>
+              </button>
             </span>
           </label>
 
@@ -91,6 +94,7 @@ export default function LoginPage() {
           >
             Next
           </FormButton>
+          <LegalConsentModal documentType={legalModal} onClose={() => setLegalModal(null)} onAgree={() => setAcceptedLegal(true)} />
     </AuthLayout>
   );
 }

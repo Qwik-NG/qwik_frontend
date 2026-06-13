@@ -1,6 +1,6 @@
 import PageLayout from "./PageLayout";
 
-type LegalSection = {
+export type LegalSection = {
   title: string;
   body: string[];
 };

@@ -1,11 +1,12 @@
 import { useMemo, useState } from "react";
-import { Link, useNavigate } from "react-router-dom";
+import { useNavigate } from "react-router-dom";
 import { ROUTES } from "../constants/routes";
 import { api } from "../services/api";
 import { useToast } from "../context/ToastContext";
 import { setRole, setToken } from "../services/auth";
 import FormInput from "../components/ui/FormInput";
 import FormButton from "../components/ui/FormButton";
+import LegalConsentModal, { type LegalDocumentType } from "../components/auth/LegalConsentModal";
 
 const LEGAL_CONSENT_VERSION = "2026-06-09";
 
@@ -17,6 +18,7 @@ export default function SignUpPage() {
   const [phone, setPhone] = useState("");
   const [password, setPassword] = useState("");
   const [acceptedLegal, setAcceptedLegal] = useState(false);
+  const [legalModal, setLegalModal] = useState<LegalDocumentType | null>(null);
   const [isSubmitting, setIsSubmitting] = useState(false);
 
   const isPhoneValid = useMemo(() => /^\+?\d{10,15}$/.test(phone.replace(/\s/g, "")), [phone]);
@@ -80,19 +82,21 @@ export default function SignUpPage() {
             />
             <span>
               I confirm &amp; accept the{" "}
-              <Link
-                to={ROUTES.TERMS}
+              <button
+                type="button"
+                onClick={() => setLegalModal("terms")}
                 className="font-medium text-[#ff8f00] underline-offset-2 transition-colors hover:text-[#e67f00] hover:underline focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#ffb357] focus-visible:ring-offset-2 focus-visible:ring-offset-white"
               >
                 Terms of Use
-              </Link>{" "}
+              </button>{" "}
               and{" "}
-              <Link
-                to={ROUTES.PRIVACY_POLICY}
+              <button
+                type="button"
+                onClick={() => setLegalModal("privacy")}
                 className="font-medium text-[#ff8f00] underline-offset-2 transition-colors hover:text-[#e67f00] hover:underline focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#ffb357] focus-visible:ring-offset-2 focus-visible:ring-offset-white"
               >
                 Privacy Policy
-              </Link>
+              </button>
             </span>
           </label>
 
@@ -126,6 +130,7 @@ export default function SignUpPage() {
           >
             Create Account
           </FormButton>
+          <LegalConsentModal documentType={legalModal} onClose={() => setLegalModal(null)} onAgree={() => setAcceptedLegal(true)} />
         </section>
       </main>
     </div>
