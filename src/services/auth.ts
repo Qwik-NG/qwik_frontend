@@ -7,7 +7,6 @@
 const TOKEN_KEY = "qwik_token";
 const ROLE_KEY = "qwik_role";
 const LOGIN_EMAIL_KEY = "qwik_login_email";
-const RESET_TOKEN_KEY = "qwik_reset_token";
 const DEV_TEST_TOKENS = new Set(["test-token", "dev-test-token"]);
 
 function decodeJwtPayload(token: string): Record<string, unknown> | null {
@@ -78,6 +77,16 @@ export function getRole() {
   return localStorage.getItem(ROLE_KEY);
 }
 
+export function getRoleFromToken() {
+  const token = getToken();
+  if (!token || isTokenExpired(token)) {
+    return null;
+  }
+
+  const payload = decodeJwtPayload(token);
+  return typeof payload?.role === "string" ? payload.role : null;
+}
+
 export function setRole(role: string) {
   localStorage.setItem(ROLE_KEY, role);
 }
@@ -99,18 +108,6 @@ export function clearLoginEmail() {
   localStorage.removeItem(LOGIN_EMAIL_KEY);
 }
 
-export function setResetToken(token: string) {
-  localStorage.setItem(RESET_TOKEN_KEY, token);
-}
-
-export function getResetToken() {
-  return localStorage.getItem(RESET_TOKEN_KEY) ?? "";
-}
-
-export function clearResetToken() {
-  localStorage.removeItem(RESET_TOKEN_KEY);
-}
-
 // ===== Session Management =====
 /**
  * Clear all authentication data from localStorage
@@ -120,5 +117,4 @@ export function clearAllAuthData() {
   clearToken();
   clearRole();
   clearLoginEmail();
-  clearResetToken();
 }

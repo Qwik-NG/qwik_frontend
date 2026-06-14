@@ -2,7 +2,6 @@ import { useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { api } from "../services/api";
 import { useToast } from "../context/ToastContext";
-import { setResetToken } from "../services/auth";
 import FormInput from "../components/ui/FormInput";
 import FormButton from "../components/ui/FormButton";
 
@@ -47,12 +46,8 @@ export default function RecoverPasswordPage() {
             onClick={async () => {
               try {
                 setIsSubmitting(true);
-                const res = await api.forgotPassword({ email: email.trim().toLowerCase() });
-                if (res.data?.resetToken) {
-                  setResetToken(res.data.resetToken);
-                }
-                info("Reset instructions are ready. Continue to create a new password.");
-                navigate("/create-password");
+                await api.forgotPassword({ email: email.trim().toLowerCase() });
+                info("If that email exists, a reset link has been sent.");
               } catch (error) {
                 showError(error instanceof Error ? error.message : "Unable to send reset request");
               } finally {

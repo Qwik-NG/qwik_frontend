@@ -2,7 +2,6 @@ import { useMemo, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { api } from "../services/api";
 import { useToast } from "../context/ToastContext";
-import { getResetToken } from "../services/auth";
 import FormInput from "../components/ui/FormInput";
 import FormButton from "../components/ui/FormButton";
 
@@ -12,6 +11,7 @@ export default function CreatePasswordPage() {
   const [newPassword, setNewPassword] = useState("");
   const [confirmPassword, setConfirmPassword] = useState("");
   const [isSubmitting, setIsSubmitting] = useState(false);
+  const resetToken = useMemo(() => new URLSearchParams(window.location.search).get("token") ?? "", []);
 
   const canSend = useMemo(() => {
     return newPassword.length >= 6 && confirmPassword.length >= 6 && newPassword === confirmPassword;
@@ -55,13 +55,12 @@ export default function CreatePasswordPage() {
             onClick={async () => {
               try {
                 setIsSubmitting(true);
-                const token = getResetToken();
-                if (!token) {
-                  showError("Reset session not found. Please request password reset again.");
+                if (!resetToken) {
+                  showError("Reset link not found. Please request password reset again.");
                   navigate("/recover-password");
                   return;
                 }
-                await api.resetPassword({ token, password: newPassword });
+                await api.resetPassword({ token: resetToken, password: newPassword });
                 success("Password updated successfully");
                 navigate("/signin");
               } catch (error) {

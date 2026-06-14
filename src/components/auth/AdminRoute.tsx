@@ -1,6 +1,6 @@
 import { ReactNode } from "react";
 import { Navigate } from "react-router-dom";
-import { getRole, getToken } from "../../services/auth";
+import { getRoleFromToken, getToken } from "../../services/auth";
 
 export interface AdminRouteProps {
   children: ReactNode;
@@ -8,7 +8,7 @@ export interface AdminRouteProps {
 
 export function AdminRoute({ children }: AdminRouteProps) {
   const token = getToken();
-  const role = getRole();
+  const role = getRoleFromToken();
 
   if (!token || role !== "ADMIN") {
     return <Navigate to="/admin/login" replace />;

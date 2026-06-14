@@ -171,7 +171,7 @@ export const api = {
     }),
 
   forgotPassword: (payload: ForgotPasswordPayload) =>
-    request<{ resetToken?: string }>("/auth/forgot-password", {
+    request<null>("/auth/forgot-password", {
       method: "POST",
       body: JSON.stringify(payload)
     }),
