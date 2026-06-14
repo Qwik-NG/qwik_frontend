@@ -14,7 +14,7 @@ export default function CreatePasswordPage() {
   const resetToken = useMemo(() => new URLSearchParams(window.location.search).get("token") ?? "", []);
 
   const canSend = useMemo(() => {
-    return newPassword.length >= 6 && confirmPassword.length >= 6 && newPassword === confirmPassword;
+    return newPassword.length >= 8 && confirmPassword.length >= 8 && newPassword === confirmPassword;
   }, [newPassword, confirmPassword]);
 
   return (
