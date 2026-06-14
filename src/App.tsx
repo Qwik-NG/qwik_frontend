@@ -38,6 +38,7 @@ import SavedPage from "./pages/SavedPage";
 import NewAdvertDetailsPage from "./pages/NewAdvertDetailsPage";
 import PlanPaymentPage from "./pages/PlanPaymentPage";
 import PremiumPlanPaymentPage from "./pages/PremiumPlanPaymentPage";
+import PaymentCallbackPage from "./pages/PaymentCallbackPage";
 import NotFoundPage from "./pages/NotFoundPage";
 import GetVerifiedPage from "./pages/GetVerifiedPage";
 import GetVerifiedBusinessInfoPage from "./pages/GetVerifiedBusinessInfoPage";
@@ -121,6 +122,7 @@ export default function App() {
       {/* Payment & Subscriptions */}
       <Route path={ROUTES.PLAN_PAYMENT} element={<ProtectedRoute><PlanPaymentPage /></ProtectedRoute>} />
       <Route path={ROUTES.PREMIUM_PLAN_PAYMENT} element={<ProtectedRoute><PremiumPlanPaymentPage /></ProtectedRoute>} />
+      <Route path={ROUTES.PAYMENT_CALLBACK} element={<ProtectedRoute><PaymentCallbackPage /></ProtectedRoute>} />
 
       {/* Admin Dashboard */}
       <Route path="/admin" element={<AdminRoute><AdminDashboard /></AdminRoute>} />

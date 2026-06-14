@@ -253,13 +253,12 @@ export default function GetVerifiedPaymentPage() {
         provider: method.provider,
         paymentMethod: method.id,
       });
-      if (checkout.data.checkoutUrl) {
-        window.location.href = checkout.data.checkoutUrl;
+      const checkoutUrl = checkout.data.checkoutUrl ?? checkout.data.authorization_url;
+      if (checkoutUrl) {
+        window.location.href = checkoutUrl;
         return;
       }
-      await api.submitVerification(verification.id);
-      setMessage("Payment record created. Provider checkout is not configured yet, so your verification was submitted for admin review.");
-      navigate(ROUTES.GET_VERIFIED_SUCCESSFUL);
+      setMessage("Payment checkout could not be opened. Please try again.");
     } catch (err) {
       setError(err instanceof Error ? err.message : "Failed to submit verification");
     } finally {

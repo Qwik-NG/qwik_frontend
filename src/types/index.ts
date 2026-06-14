@@ -78,7 +78,12 @@ export interface VerificationApplication {
 
 export interface PaymentCheckoutResponse {
   paymentId: string;
+  reference?: string | null;
+  purpose?: "VERIFICATION" | "AD_PROMOTION" | null;
+  adId?: string | null;
+  verificationId?: string | null;
   checkoutUrl: string | null;
+  authorization_url?: string | null;
   amount: number;
   currency: string;
   status: "PENDING" | "PAID" | "FAILED" | "CANCELLED";

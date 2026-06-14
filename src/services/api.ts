@@ -410,6 +410,12 @@ export const api = {
       body: JSON.stringify(payload),
     }),
 
+  verifyPayment: (reference: string) =>
+    request<PaymentCheckoutResponse>("/payments/verify", {
+      method: "POST",
+      body: JSON.stringify({ reference }),
+    }),
+
   paymentById: (id: string) => request<any>(`/payments/${id}`),
 
   // ===== Admin Endpoints =====

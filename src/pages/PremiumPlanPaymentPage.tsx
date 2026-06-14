@@ -50,12 +50,19 @@ export default function PremiumPlanPaymentPage() {
       setSubmitting(true);
       setError(null);
       setMessage(null);
-      const response = await api.promoteAd(adId, { plan: selectedOption.backendPlan });
-      if (response.data.checkoutUrl) {
-        window.location.assign(response.data.checkoutUrl);
+      const response = await api.checkoutPayment({
+        purpose: "AD_PROMOTION",
+        adId,
+        plan: selectedOption.backendPlan,
+        provider: "paystack",
+        paymentMethod: selectedPaymentMethod,
+      });
+      const checkoutUrl = response.data.checkoutUrl ?? response.data.authorization_url;
+      if (checkoutUrl) {
+        window.location.assign(checkoutUrl);
         return;
       }
-      setMessage("Payment checkout is not live yet. Your ad remains active without promotion.");
+      setMessage("Payment checkout could not be opened. Please try again.");
     } catch (err) {
       setError(err instanceof Error ? err.message : "Failed to prepare promotion checkout.");
     } finally {

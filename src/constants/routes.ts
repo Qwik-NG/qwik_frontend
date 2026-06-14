@@ -71,6 +71,7 @@ export const ROUTES = {
   // Payment
   PLAN_PAYMENT: "/plan-payment",
   PREMIUM_PLAN_PAYMENT: "/premium-plan-payment",
+  PAYMENT_CALLBACK: "/payment/callback",
   
   // Error pages
   ADMIN_VERIFICATION: "/admin/verification",
