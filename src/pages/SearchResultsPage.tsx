@@ -7,6 +7,7 @@ import {
 } from "../constants/routes";
 import { SiteFooter, SiteHeader } from "../components/AppShell";
 import BeautySearchResultsView from "../components/search/BeautySearchResultsView";
+import CategoryListingView, { CATEGORY_LISTING_CONFIGS } from "../components/search/CategoryListingView";
 import ElectronicsSearchResultsView from "../components/search/ElectronicsSearchResultsView";
 import FashionSearchResultsView from "../components/search/FashionSearchResultsView";
 import FurnituresSearchResultsView from "../components/search/FurnituresSearchResultsView";
@@ -284,6 +285,22 @@ export default function SearchResultsPage() {
       <div className="min-h-screen bg-page text-ink">
         <SiteHeader navigate={navigate} />
         <JobSearchResultsView query={query} navigate={navigate} view="grid" locationFilter={selectedLocation} />
+        <SiteFooter navigate={navigate} />
+      </div>
+    );
+  }
+
+  const categoryListingConfig = categorySlug ? CATEGORY_LISTING_CONFIGS[categorySlug] : undefined;
+  if (categoryListingConfig) {
+    return (
+      <div className="min-h-screen bg-page text-ink">
+        <SiteHeader navigate={navigate} />
+        <CategoryListingView
+          config={categoryListingConfig}
+          query={query}
+          navigate={navigate}
+          locationFilter={selectedLocation}
+        />
         <SiteFooter navigate={navigate} />
       </div>
     );
