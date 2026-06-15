@@ -41,6 +41,66 @@ function LocationPin({ className = "h-4 w-4" }: { className?: string }) {
   );
 }
 
+type ViewMode = "grid" | "list";
+const VIEW_MODE_STORAGE_KEY = "qwik:home:viewMode";
+
+function readStoredViewMode(): ViewMode {
+  if (typeof window === "undefined") return "grid";
+  try {
+    const stored = window.localStorage.getItem(VIEW_MODE_STORAGE_KEY);
+    return stored === "list" ? "list" : "grid";
+  } catch {
+    return "grid";
+  }
+}
+
+function GridIcon({ className = "h-5 w-5" }: { className?: string }) {
+  return (
+    <svg viewBox="0 0 20 20" fill="currentColor" className={className} aria-hidden="true">
+      <rect x="2" y="2" width="6" height="6" rx="1.4" />
+      <rect x="12" y="2" width="6" height="6" rx="1.4" />
+      <rect x="2" y="12" width="6" height="6" rx="1.4" />
+      <rect x="12" y="12" width="6" height="6" rx="1.4" />
+    </svg>
+  );
+}
+
+function ListIcon({ className = "h-5 w-5" }: { className?: string }) {
+  return (
+    <svg viewBox="0 0 20 20" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" className={className} aria-hidden="true">
+      <line x1="3" y1="5" x2="17" y2="5" />
+      <line x1="3" y1="10" x2="17" y2="10" />
+      <line x1="3" y1="15" x2="17" y2="15" />
+    </svg>
+  );
+}
+
+function ViewToggle({ mode, onChange }: { mode: ViewMode; onChange: (m: ViewMode) => void }) {
+  const baseBtn = "grid h-9 w-9 place-items-center rounded-[10px] transition focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#ff9715] focus-visible:ring-offset-2 focus-visible:ring-offset-page";
+  return (
+    <div className="flex items-center gap-1.5" role="group" aria-label="Toggle ads view">
+      <button
+        type="button"
+        onClick={() => onChange("grid")}
+        aria-pressed={mode === "grid"}
+        aria-label="Grid view"
+        className={`${baseBtn} ${mode === "grid" ? "text-[#ff9715]" : "text-[#1f1d27]/55 hover:text-[#1f1d27]"}`}
+      >
+        <GridIcon className="h-5 w-5" />
+      </button>
+      <button
+        type="button"
+        onClick={() => onChange("list")}
+        aria-pressed={mode === "list"}
+        aria-label="List view"
+        className={`${baseBtn} ${mode === "list" ? "text-[#ff9715]" : "text-[#1f1d27]/55 hover:text-[#1f1d27]"}`}
+      >
+        <ListIcon className="h-5 w-5" />
+      </button>
+    </div>
+  );
+}
+
 function ProductCardSkeleton() {
   return (
     <article className="rounded-[22px] bg-white p-2.5 sm:rounded-[26px] sm:p-4">
@@ -53,6 +113,23 @@ function ProductCardSkeleton() {
         <div className="h-4 w-4/5 animate-pulse rounded bg-[#f2f2f4]" />
         <div className="h-4 w-full animate-pulse rounded bg-[#f2f2f4]" />
         <div className="h-4 w-2/3 animate-pulse rounded bg-[#f2f2f4]" />
+      </div>
+    </article>
+  );
+}
+
+function ProductRowSkeleton() {
+  return (
+    <article className="flex gap-4 rounded-[22px] bg-white p-3 sm:gap-6 sm:rounded-[26px] sm:p-4">
+      <div className="h-[120px] w-[120px] shrink-0 animate-pulse rounded-[14px] bg-[#f2f2f4] sm:h-[200px] sm:w-[260px] sm:rounded-[18px]" />
+      <div className="flex flex-1 flex-col gap-3 py-1">
+        <div className="flex items-center gap-3">
+          <div className="h-5 w-32 animate-pulse rounded bg-[#f2f2f4]" />
+          <div className="h-7 w-12 animate-pulse rounded-[10px] bg-[#f2f2f4]" />
+        </div>
+        <div className="h-4 w-3/5 animate-pulse rounded bg-[#f2f2f4]" />
+        <div className="h-4 w-4/5 animate-pulse rounded bg-[#f2f2f4]" />
+        <div className="h-4 w-1/3 animate-pulse rounded bg-[#f2f2f4]" />
       </div>
     </article>
   );
@@ -99,6 +176,15 @@ export default function HomePage() {
   const [products, setProducts] = useState<Product[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
+  const [viewMode, setViewMode] = useState<ViewMode>(() => readStoredViewMode());
+
+  useEffect(() => {
+    try {
+      window.localStorage.setItem(VIEW_MODE_STORAGE_KEY, viewMode);
+    } catch {
+      /* ignore */
+    }
+  }, [viewMode]);
 
   const fetchAds = useCallback(async () => {
     try {
@@ -134,12 +220,22 @@ export default function HomePage() {
       </section>
 
       <main className="mx-auto w-full max-w-[1728px] px-4 pb-16 pt-8 sm:px-6 lg:px-12 lg:pb-24 lg:pt-14">
-        <h2 className="mb-5 text-[26px] font-medium sm:text-[32px]">Top Ads</h2>
-        
-        {loading && (
+        <div className="mb-5 flex items-center justify-between gap-4">
+          <h2 className="text-[26px] font-medium sm:text-[32px]">Top Ads</h2>
+          <ViewToggle mode={viewMode} onChange={setViewMode} />
+        </div>
+
+        {loading && viewMode === "grid" && (
           <div className="grid grid-cols-2 gap-4 xl:grid-cols-4">
             {Array.from({ length: 8 }).map((_, index) => (
               <ProductCardSkeleton key={index} />
+            ))}
+          </div>
+        )}
+        {loading && viewMode === "list" && (
+          <div className="flex flex-col gap-4">
+            {Array.from({ length: 5 }).map((_, index) => (
+              <ProductRowSkeleton key={index} />
             ))}
           </div>
         )}
@@ -155,10 +251,10 @@ export default function HomePage() {
             </button>
           </div>
         )}
-        
+
         {!loading && !error && products.length === 0 && <p className="text-center text-lg text-gray-500">No ads available</p>}
 
-        {!loading && !error && products.length > 0 && (
+        {!loading && !error && products.length > 0 && viewMode === "grid" && (
           <div className="grid grid-cols-2 gap-4 xl:grid-cols-4">
             {products.map((item) => (
               <article
@@ -188,6 +284,43 @@ export default function HomePage() {
                   <small className="flex items-center gap-1 text-[13px] text-[#4b4a54] sm:text-[15px]">
                     <LocationPin className="h-4 w-4" />
                     <span style={{ display: "-webkit-box", WebkitLineClamp: 1, WebkitBoxOrient: "vertical", overflow: "hidden" }}>{item.location}</span>
+                  </small>
+                </div>
+              </article>
+            ))}
+          </div>
+        )}
+
+        {!loading && !error && products.length > 0 && viewMode === "list" && (
+          <div className="flex flex-col gap-4">
+            {products.map((item) => (
+              <article
+                key={item.id}
+                className="flex cursor-pointer gap-3 overflow-hidden rounded-[22px] bg-white p-3 transition hover:shadow-[0_8px_24px_rgba(31,29,39,0.06)] sm:gap-6 sm:rounded-[26px] sm:p-4"
+                onClick={() => navigate(`/product-details/${item.id}`)}
+              >
+                <div className="h-[120px] w-[120px] shrink-0 overflow-hidden rounded-[14px] bg-[#f2f2f4] sm:h-[200px] sm:w-[260px] sm:rounded-[18px]">
+                  {item.images?.[0]?.url ? (
+                    <FallbackImage
+                      src={item.images[0].url}
+                      alt={item.title}
+                      className="h-full w-full"
+                      fallbackClassName="rounded-[14px] sm:rounded-[18px]"
+                    />
+                  ) : (
+                    <ImagePlaceholder className="rounded-[14px] sm:rounded-[18px]" />
+                  )}
+                </div>
+                <div className="flex min-w-0 flex-1 flex-col py-1 sm:py-3">
+                  <div className="flex flex-wrap items-center gap-2 sm:gap-3">
+                    <h3 className="m-0 whitespace-nowrap text-[16px] font-semibold leading-none sm:text-[20px]">₦ {item.price.toLocaleString()}</h3>
+                    <span className="rounded-[10px] bg-[#f5ebdc] px-2 py-1 text-[12px] text-[#ff9715] sm:rounded-[12px] sm:px-3 sm:py-1.5 sm:text-[15px]">New</span>
+                  </div>
+                  <h4 className="mb-1.5 mt-2 text-[15px] font-medium leading-[1.25] sm:mb-2 sm:mt-3 sm:text-[18px]" style={{ display: "-webkit-box", WebkitLineClamp: 1, WebkitBoxOrient: "vertical", overflow: "hidden" }}>{item.title}</h4>
+                  <p className="mb-2 text-[13px] leading-[1.4] text-muted sm:mb-3 sm:text-[15px]" style={{ display: "-webkit-box", WebkitLineClamp: 2, WebkitBoxOrient: "vertical", overflow: "hidden" }}>{item.description}</p>
+                  <small className="mt-auto flex items-center gap-1 text-[13px] text-[#4b4a54] sm:text-[15px]">
+                    <LocationPin className="h-4 w-4" />
+                    <span className="truncate">{item.location}</span>
                   </small>
                 </div>
               </article>
