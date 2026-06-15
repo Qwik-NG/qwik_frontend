@@ -7,6 +7,8 @@ import { setRole, setToken } from "../services/auth";
 import FormInput from "../components/ui/FormInput";
 import FormButton from "../components/ui/FormButton";
 import LegalConsentModal, { type LegalDocumentType } from "../components/auth/LegalConsentModal";
+import GoogleSignInButton from "../components/auth/GoogleSignInButton";
+import { FacebookIcon } from "../components/icons/SocialIcons";
 
 const LEGAL_CONSENT_VERSION = "2026-06-09";
 
@@ -43,6 +45,25 @@ export default function SignUpPage() {
           <h2 className="mb-[14px] text-center text-[24px] font-normal leading-[1.1] text-[#22222b]">
             Create a fresh account
           </h2>
+
+          <GoogleSignInButton />
+
+          <button
+            className="mb-[14px] flex h-[48px] w-full cursor-not-allowed items-center justify-center gap-2 rounded-[10px] bg-[#3f5db2] text-[14px] text-white opacity-55 transition-all duration-200"
+            type="button"
+            disabled
+            aria-disabled="true"
+            title="Coming soon"
+          >
+            <FacebookIcon />
+            <span>Continue with Facebook</span>
+          </button>
+
+          <div className="mb-[14px] flex items-center gap-3 text-[#7f7e88]">
+            <span className="h-px flex-1 bg-[#d1d1d6]" />
+            <span className="text-[12px]">or sign up with email</span>
+            <span className="h-px flex-1 bg-[#d1d1d6]" />
+          </div>
 
           <FormInput
             type="email"

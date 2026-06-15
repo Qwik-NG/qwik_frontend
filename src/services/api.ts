@@ -170,6 +170,12 @@ export const api = {
       body: JSON.stringify(payload)
     }),
 
+  googleAuth: (payload: { credential: string }) =>
+    request<AuthResponse>("/auth/google", {
+      method: "POST",
+      body: JSON.stringify(payload)
+    }),
+
   forgotPassword: (payload: ForgotPasswordPayload) =>
     request<null>("/auth/forgot-password", {
       method: "POST",
