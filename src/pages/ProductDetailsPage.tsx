@@ -331,6 +331,7 @@ export default function ProductDetailsPage() {
                     alt={ad.title}
                     className="h-full w-full"
                     fallbackClassName="rounded-[14px]"
+                    loading="eager"
                   />
                 ) : (
                   <ImagePlaceholder className="rounded-[14px]" />

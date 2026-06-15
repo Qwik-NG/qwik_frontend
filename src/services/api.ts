@@ -303,9 +303,18 @@ export const api = {
       return response;
     }),
 
-  isSaved: (id: string) => request<{ saved: boolean }>(`/ads/${id}/saved`),
+  isSaved: (id: string) =>
+    request<{ saved: boolean }>(`/ads/${id}/saved`, {
+      staleTime: SHORT_LIST_STALE_TIME,
+      cacheTime: SHORT_LIST_STALE_TIME * 2,
+    }),
 
-  getReviews: (id: string) => request<any[]>(`/ads/${id}/reviews`, { retry: 1 }),
+  getReviews: (id: string) =>
+    request<any[]>(`/ads/${id}/reviews`, {
+      staleTime: SHORT_LIST_STALE_TIME,
+      cacheTime: SHORT_LIST_STALE_TIME * 2,
+      retry: 1,
+    }),
 
   postReview: (id: string, payload: { rating: number; text: string }) =>
     request<any>(`/ads/${id}/reviews`, {
