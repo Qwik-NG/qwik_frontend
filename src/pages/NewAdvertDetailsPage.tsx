@@ -66,6 +66,19 @@ function Spinner() {
   return <span className="inline-block h-5 w-5 animate-spin rounded-full border-2 border-current border-t-transparent" aria-hidden="true" />;
 }
 
+function formatPriceDisplay(rawDigits: string): string {
+  if (!rawDigits) return "";
+  return Number(rawDigits).toLocaleString("en-NG");
+}
+
+function sanitizePriceInput(input: string): string {
+  // Keep digits only; strip leading zeros (but keep a single "0" while typing).
+  const digits = input.replace(/\D/g, "");
+  if (!digits) return "";
+  const stripped = digits.replace(/^0+/, "");
+  return stripped || "0";
+}
+
 export default function NewAdvertDetailsPage() {
   const navigate = useNavigate();
   const [price, setPrice] = useState("");
@@ -80,7 +93,7 @@ export default function NewAdvertDetailsPage() {
 
   useEffect(() => {
     const draft = readDraft();
-    setPrice(draft.price || "");
+    setPrice(sanitizePriceInput(draft.price || ""));
     setNegotiable(draft.negotiable ?? true);
     setCategoryId(draft.categoryId || "");
     setBrand(draft.brand || "");
@@ -140,12 +153,14 @@ export default function NewAdvertDetailsPage() {
             <label className="block">
               <span className="mb-2 block text-[15px] font-medium text-[#27242d]">Price</span>
               <input
-                type="number"
+                type="text"
                 inputMode="numeric"
+                autoComplete="off"
+                aria-label="Price in naira"
                 className="h-[54px] w-full rounded-[12px] border border-[#dddbe4] bg-white px-4 text-[16px] text-[#201d27] outline-none transition placeholder:text-[#a4a0aa] focus:border-orange focus:ring-2 focus:ring-orange/20"
-                placeholder="₦ 0.0"
-                value={price}
-                onChange={(event) => setPrice(event.target.value.replace(/[^\d.]/g, ""))}
+                placeholder="\u20A6 0"
+                value={formatPriceDisplay(price)}
+                onChange={(event) => setPrice(sanitizePriceInput(event.target.value))}
               />
             </label>
 

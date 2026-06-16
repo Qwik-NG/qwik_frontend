@@ -37,6 +37,8 @@ function ChevronDownIcon({ open }: { open: boolean }) {
 export default function DropdownSelect({ label, placeholder, value, options, onChange, disabled = false, helperText }: DropdownSelectProps) {
   const id = useId();
   const rootRef = useRef<HTMLDivElement>(null);
+  const listRef = useRef<HTMLDivElement>(null);
+  const selectedItemRef = useRef<HTMLButtonElement>(null);
   const [open, setOpen] = useState(false);
   const selectedOption = options.find((option) => option.value === value);
 
@@ -56,6 +58,20 @@ export default function DropdownSelect({ label, placeholder, value, options, onC
       document.removeEventListener("pointerdown", handlePointerDown);
       document.removeEventListener("keydown", handleKeyDown);
     };
+  }, [open]);
+
+  useEffect(() => {
+    if (!open) return;
+    // Scroll the currently selected option into view when the menu opens.
+    const node = selectedItemRef.current;
+    const list = listRef.current;
+    if (node && list) {
+      const nodeTop = node.offsetTop;
+      const nodeBottom = nodeTop + node.offsetHeight;
+      if (nodeTop < list.scrollTop || nodeBottom > list.scrollTop + list.clientHeight) {
+        list.scrollTo({ top: Math.max(0, nodeTop - 8), behavior: "auto" });
+      }
+    }
   }, [open]);
 
   const chooseOption = (nextValue: string) => {
@@ -96,15 +112,18 @@ export default function DropdownSelect({ label, placeholder, value, options, onC
       {open ? (
         <div
           id={`${id}-listbox`}
+          ref={listRef}
           role="listbox"
           aria-labelledby={`${id}-label`}
-          className="pointer-events-none absolute left-0 right-0 z-[120] mt-2 max-h-[240px] overflow-y-auto rounded-[14px] border border-[#eee3d6] bg-white p-1.5 shadow-[0_18px_44px_rgba(34,25,16,0.16)]"
+          style={{ scrollBehavior: "smooth", WebkitOverflowScrolling: "touch" }}
+          className="pointer-events-none absolute left-0 right-0 z-[120] mt-2 max-h-[280px] overflow-y-auto overscroll-contain rounded-[14px] border border-[#eee3d6] bg-white p-1.5 shadow-[0_18px_44px_rgba(34,25,16,0.16)]"
         >
           {options.map((option) => {
             const selected = option.value === value;
             return (
               <button
                 key={option.value}
+                ref={selected ? selectedItemRef : undefined}
                 type="button"
                 role="option"
                 aria-selected={selected}
