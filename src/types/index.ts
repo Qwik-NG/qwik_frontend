@@ -12,6 +12,8 @@ export interface User {
   fullName: string;
   phone?: string;
   location?: string;
+  locationState?: string;
+  locationArea?: string;
   role?: "USER" | "ADMIN";
   status?: "ACTIVE" | "BANNED";
   bannedAt?: string | null;

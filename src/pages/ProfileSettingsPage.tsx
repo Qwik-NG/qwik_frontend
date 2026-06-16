@@ -1,13 +1,15 @@
-import { useEffect, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { SiteFooter, SiteHeader } from "../components/AppShell";
 import SettingsSidebar, { MobileSettingsMenu } from "../components/settings/SettingsSidebar";
+import DropdownSelect from "../components/ui/DropdownSelect";
 import Toggle from "../components/ui/Toggle";
 import { UserAvatar } from "../components/ui/UserAvatar";
 import { useToast } from "../context/ToastContext";
 import { useCurrentUser } from "../hooks/useCurrentUser";
 import { api } from "../services/api";
 import { getSettingsNavItems } from "../lib/settings-nav-config";
+import { ALL_NIGERIA_LOCATION, NIGERIAN_AREAS, NIGERIAN_LOCATIONS } from "../lib/searchContext";
 
 type TabKey = "edit-profile" | "company-details" | "chat-settings";
 
@@ -30,7 +32,8 @@ export default function ProfileSettingsPage() {
   const [email, setEmail] = useState("");
   const [bio, setBio] = useState("");
   const [phone, setPhone] = useState("");
-  const [location, setLocation] = useState("");
+  const [locationState, setLocationState] = useState("");
+  const [locationArea, setLocationArea] = useState("");
   const [selectedLogoName, setSelectedLogoName] = useState("");
   const [selectedAvatarFile, setSelectedAvatarFile] = useState<File | null>(null);
   const [avatarPreviewUrl, setAvatarPreviewUrl] = useState("");
@@ -66,8 +69,35 @@ export default function ProfileSettingsPage() {
     setBio(user?.profile?.bio ?? display.bio);
     setPhone(user?.phone ?? display.phone);
     setAvatarUrl(user?.profile?.avatarUrl ?? display.avatarUrl);
-    setLocation(typeof profileFallback.location === "string" ? profileFallback.location : display.location);
+
+    // Prefer structured fields when present; otherwise parse legacy `location`.
+    const existingLocation = (user?.location ?? (typeof profileFallback.location === "string" ? profileFallback.location : display.location) ?? "").trim();
+    const explicitState = (user?.locationState ?? "").trim();
+    const explicitArea = (user?.locationArea ?? "").trim();
+    if (explicitState || explicitArea) {
+      setLocationState(explicitState);
+      setLocationArea(explicitArea);
+    } else if (existingLocation) {
+      // Try "Area, State" pattern first
+      const parts = existingLocation.split(",").map((s) => s.trim()).filter(Boolean);
+      if (parts.length >= 2 && NIGERIAN_LOCATIONS.includes(parts[parts.length - 1])) {
+        setLocationState(parts[parts.length - 1]);
+        setLocationArea(parts.slice(0, -1).join(", "));
+      } else if (NIGERIAN_LOCATIONS.includes(existingLocation)) {
+        setLocationState(existingLocation);
+        setLocationArea("");
+      } else {
+        setLocationState("");
+        setLocationArea(existingLocation);
+      }
+    } else {
+      setLocationState("");
+      setLocationArea("");
+    }
   }, [display.avatarUrl, display.bio, display.email, display.fullName, display.location, display.phone, profileFallback.location, user]);
+
+  const stateOptions = useMemo(() => NIGERIAN_LOCATIONS.filter((s) => s !== ALL_NIGERIA_LOCATION), []);
+  const areasForState = locationState ? NIGERIAN_AREAS[locationState] : undefined;
 
   return (
     <div className="min-h-screen bg-page text-ink">
@@ -180,8 +210,29 @@ export default function ProfileSettingsPage() {
                   <label className="mb-2 block text-[15px] text-[#94919d]">Phone</label>
                   <input type="tel" value={phone} onChange={(e) => setPhone(e.target.value)} className="mb-5 h-12 w-full rounded-[10px] border border-[#dedde4] bg-transparent px-3 text-[15px] outline-none" placeholder="0800 000 0000" />
 
-                  <label className="mb-2 block text-[15px] text-[#94919d]">Location</label>
-                  <input type="text" value={location} onChange={(e) => setLocation(e.target.value)} className="mb-5 h-12 w-full rounded-[10px] border border-[#dedde4] bg-transparent px-3 text-[15px] outline-none" placeholder="Business location" />
+                  <div className="mb-5 space-y-4">
+                    <DropdownSelect
+                      label="State"
+                      placeholder="Select your state"
+                      value={locationState}
+                      options={stateOptions.map((s) => ({ value: s, label: s }))}
+                      onChange={(val) => { setLocationState(val); setLocationArea(""); }}
+                    />
+                    {locationState && areasForState ? (
+                      <DropdownSelect
+                        label="Area"
+                        placeholder="Select your area"
+                        value={locationArea}
+                        options={areasForState.map((a) => ({ value: a, label: a }))}
+                        onChange={setLocationArea}
+                      />
+                    ) : locationState ? (
+                      <div>
+                        <label className="mb-2 block text-[15px] text-[#94919d]">Area</label>
+                        <input type="text" value={locationArea} onChange={(e) => setLocationArea(e.target.value)} className="h-12 w-full rounded-[10px] border border-[#dedde4] bg-transparent px-3 text-[15px] outline-none" placeholder="City or area (optional)" />
+                      </div>
+                    ) : null}
+                  </div>
 
                   <button className="h-[50px] w-full rounded-[10px] bg-gradient-to-r from-amber to-orange text-[16px] text-white shadow-glow transition-all duration-200 hover:opacity-95 active:scale-[0.99] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#ffb357] focus-visible:ring-offset-2 focus-visible:ring-offset-white" type="button" onClick={async () => {
                     try {
@@ -191,7 +242,12 @@ export default function ProfileSettingsPage() {
                         const uploadResponse = await api.uploadImages([selectedAvatarFile]);
                         nextAvatarUrl = uploadResponse.data.urls[0] || "";
                       }
-                      const response = await api.updateMe({ fullName, bio, phone, location, avatarUrl: nextAvatarUrl });
+                      const trimmedState = locationState.trim();
+                      const trimmedArea = locationArea.trim();
+                      const composedLocation = trimmedState
+                        ? (trimmedArea ? `${trimmedArea}, ${trimmedState}` : trimmedState)
+                        : trimmedArea;
+                      const response = await api.updateMe({ fullName, bio, phone, location: composedLocation, locationState: trimmedState || undefined, locationArea: trimmedArea || undefined, avatarUrl: nextAvatarUrl });
                       setUser(response.data);
                       setAvatarUrl(response.data.profile?.avatarUrl || "");
                       setSelectedAvatarFile(null);
