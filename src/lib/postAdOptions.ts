@@ -65,6 +65,16 @@ export function getCategorySlugById(categoryId: string, categories: Category[]) 
   return getOrderedPostCategories(categories).find((category) => category.id === categoryId)?.slug ?? "";
 }
 
+export function getCategoryById(categoryId: string, categories: Category[]) {
+  if (!categoryId) return null;
+  for (const c of categories) {
+    if (c.id === categoryId) return c;
+    const child = c.children?.find((k) => k.id === categoryId);
+    if (child) return child;
+  }
+  return null;
+}
+
 export function getBrandOptions(categorySlug: string) {
   return BRAND_OPTIONS_BY_SLUG[categorySlug] ?? DEFAULT_BRAND_OPTIONS;
 }

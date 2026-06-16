@@ -16,6 +16,7 @@ type PostDraft = {
   price?: string;
   negotiable?: boolean;
   categoryId?: string;
+  subcategoryId?: string;
   brand?: string;
   model?: string;
   condition?: string;
@@ -333,7 +334,7 @@ export default function PostDetailsPage() {
       setError(null);
 
       const response = await api.createAd({
-        categoryId: draft.categoryId,
+        categoryId: draft.subcategoryId || draft.categoryId,
         title: draft.title,
         description: draft.description,
         price: Number(draft.price),

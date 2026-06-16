@@ -1,8 +1,8 @@
-import { useEffect, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { SiteFooter, SiteHeader } from "../components/AppShell";
 import DropdownSelect from "../components/ui/DropdownSelect";
-import { getBrandOptions, getCategorySlugById, getModelOptions, getOrderedPostCategories } from "../lib/postAdOptions";
+import { getBrandOptions, getCategoryById, getCategorySlugById, getModelOptions, getOrderedPostCategories } from "../lib/postAdOptions";
 import { api } from "../services/api";
 import type { Category } from "../types";
 
@@ -15,6 +15,7 @@ type PostDraft = {
   price?: string;
   negotiable?: boolean;
   categoryId?: string;
+  subcategoryId?: string;
   brand?: string;
   model?: string;
   condition?: string;
@@ -86,6 +87,7 @@ export default function NewAdvertDetailsPage() {
   const [price, setPrice] = useState("");
   const [negotiable, setNegotiable] = useState(true);
   const [categoryId, setCategoryId] = useState("");
+  const [subcategoryId, setSubcategoryId] = useState("");
   const [brand, setBrand] = useState("");
   const [model, setModel] = useState("");
   const [categories, setCategories] = useState<Category[]>([]);
@@ -98,6 +100,7 @@ export default function NewAdvertDetailsPage() {
     setPrice(sanitizePriceInput(draft.price || ""));
     setNegotiable(draft.negotiable ?? true);
     setCategoryId(draft.categoryId || "");
+    setSubcategoryId(draft.subcategoryId || "");
     setBrand(draft.brand || "");
     setModel(draft.model || "");
 
@@ -115,9 +118,12 @@ export default function NewAdvertDetailsPage() {
 
   const orderedCategories = getOrderedPostCategories(categories);
   const categorySlug = getCategorySlugById(categoryId, categories);
+  const selectedCategory = useMemo(() => getCategoryById(categoryId, categories), [categoryId, categories]);
+  const subcategoryOptions = selectedCategory?.children ?? [];
+  const hasSubcategories = subcategoryOptions.length > 0;
   const brandOptions = getBrandOptions(categorySlug);
   const modelOptions = getModelOptions(brand);
-  const canProceed = Number(price) > 0 && categoryId && !navigating;
+  const canProceed = Number(price) > 0 && Boolean(categoryId) && (!hasSubcategories || Boolean(subcategoryId)) && !navigating;
 
   const handleNext = () => {
     if (!canProceed) return;
@@ -128,6 +134,7 @@ export default function NewAdvertDetailsPage() {
       price,
       negotiable,
       categoryId,
+      subcategoryId: hasSubcategories ? subcategoryId : "",
       brand: brand.trim(),
       model: model.trim(),
     });
@@ -188,15 +195,25 @@ export default function NewAdvertDetailsPage() {
                   helperText: category.available ? undefined : "Unavailable right now",
                 }))}
                 onChange={(value) => {
-                  const selectedCategory = orderedCategories.find((category) => category.id === value);
-                  if (!selectedCategory?.available) return;
+                  const selectedCategoryOption = orderedCategories.find((category) => category.id === value);
+                  if (!selectedCategoryOption?.available) return;
 
                   setCategoryId(value);
+                  setSubcategoryId("");
                   setBrand("");
                   setModel("");
                   setCategoryWarning(null);
                 }}
               />
+              {hasSubcategories ? (
+                <DropdownSelect
+                  label="Subcategory"
+                  placeholder="Pick a subcategory"
+                  value={subcategoryId}
+                  options={subcategoryOptions.map((sub) => ({ value: sub.id, label: sub.name }))}
+                  onChange={setSubcategoryId}
+                />
+              ) : null}
               {categoryWarning ? <p className="text-[13px] leading-snug text-[#d14343]">{categoryWarning}</p> : null}
               <DropdownSelect
                 label="Brand"

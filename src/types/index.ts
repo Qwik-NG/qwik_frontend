@@ -179,6 +179,7 @@ export interface Category {
   icon?: string;
   description?: string;
   parentId?: string;
+  children?: Category[];
 }
 
 /**
