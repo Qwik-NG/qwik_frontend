@@ -1,4 +1,4 @@
-import { useCallback, useEffect, useState, type ReactNode } from "react";
+import { useCallback, useEffect, useMemo, useState, type ReactNode } from "react";
 import { useNavigate, useSearchParams } from "react-router-dom";
 import {
   buildProductDetailsRoute,
@@ -16,10 +16,10 @@ import PhonesSearchResultsView from "../components/search/PhonesSearchResultsVie
 import ListingCard, { type ListingCardItem } from "../components/listings/ListingCard";
 import VehicleSearchResultsView from "../components/search/VehicleSearchResultsView";
 import BackButton from "../components/ui/BackButton";
-import { isBeautySearchQuery, isElectronicsSearchQuery, isFashionSearchQuery, isFurnitureSearchQuery, isJobSearchQuery, isPhonesSearchQuery, isVehicleSearchQuery, mockCategories } from "../lib/mockData";
-import { getCategorySearchContext, getLocationSearchParam } from "../lib/searchContext";
+import { isBeautySearchQuery, isElectronicsSearchQuery, isFashionSearchQuery, isFurnitureSearchQuery, isJobSearchQuery, isPhonesSearchQuery, isVehicleSearchQuery } from "../lib/mockData";
+import { getCategorySearchContext, getLocationSearchParam, NIGERIAN_LOCATIONS } from "../lib/searchContext";
 import { api } from "../services/api";
-import type { Ad } from "../types";
+import type { Ad, Category } from "../types";
 
 type SortValue = "newest" | "price-low" | "price-high";
 type VerifiedValue = "all" | "verified" | "unverified";
@@ -128,33 +128,65 @@ function sortAds(ads: Ad[], sortBy: SortValue) {
 }
 
 function SearchFilters({
+  categories,
   selectedCategory,
   onCategoryChange,
+  selectedSubcategory,
+  onSubcategoryChange,
+  selectedLocation,
+  onLocationChange,
   sortBy,
   onSortByChange,
+  selectedMinPrice,
+  onMinPriceChange,
+  selectedMaxPrice,
+  maxPrice,
+  onMaxPriceChange,
   verifiedFilter,
   onVerifiedFilterChange,
-  maxPrice,
-  selectedMaxPrice,
-  onSelectedMaxPriceChange,
+  condition,
+  onConditionChange,
 }: {
+  categories: Category[];
   selectedCategory: string;
   onCategoryChange: (value: string) => void;
+  selectedSubcategory: string;
+  onSubcategoryChange: (value: string) => void;
+  selectedLocation: string;
+  onLocationChange: (value: string) => void;
   sortBy: SortValue;
   onSortByChange: (value: SortValue) => void;
+  selectedMinPrice: number;
+  onMinPriceChange: (value: number) => void;
+  selectedMaxPrice: number;
+  maxPrice: number;
+  onMaxPriceChange: (value: number) => void;
   verifiedFilter: VerifiedValue;
   onVerifiedFilterChange: (value: VerifiedValue) => void;
-  maxPrice: number;
-  selectedMaxPrice: number;
-  onSelectedMaxPriceChange: (value: number) => void;
+  condition: string;
+  onConditionChange: (value: string) => void;
 }) {
+  const selectedCategoryObj = categories.find((c) => c.id === selectedCategory || c.slug === selectedCategory);
+  const subcategoryOptions = selectedCategoryObj?.children ?? [];
   return (
     <div className="space-y-4">
       <FilterPanel title="Region">
-        <button className="flex w-full items-center justify-between text-[15px] text-[#ff9715]" type="button">
-          <span>All Nigeria</span>
-          <span className="text-[#9794a1]">›</span>
-        </button>
+        <div className="relative">
+          <select
+            value={selectedLocation}
+            onChange={(event) => onLocationChange(event.target.value)}
+            className="w-full appearance-none bg-transparent pr-7 text-[15px] text-[#ff9715] outline-none"
+            aria-label="Filter by location"
+          >
+            <option value="">All Nigeria</option>
+            {NIGERIAN_LOCATIONS.filter((loc) => loc !== "All Nigeria").map((location) => (
+              <option key={location} value={location}>
+                {location}
+              </option>
+            ))}
+          </select>
+          <span className="pointer-events-none absolute right-0 top-1/2 -translate-y-1/2 text-[#9794a1]">›</span>
+        </div>
       </FilterPanel>
 
       <FilterPanel title="Sort by">
@@ -177,14 +209,75 @@ function SearchFilters({
 
       <FilterPanel title="Categories">
         <div className="space-y-3">
-          <FilterOption label="Show All" checked={selectedCategory === "all"} onClick={() => onCategoryChange("all")} />
-          {mockCategories.map((category) => (
+          <FilterOption label="Show All" checked={selectedCategory === ""} onClick={() => onCategoryChange("")} />
+          {categories.map((category) => (
             <FilterOption
-              key={category.slug}
-              label={category.name === "Properties" ? "Home" : category.name}
-              checked={selectedCategory === category.slug}
-              onClick={() => onCategoryChange(category.slug)}
+              key={category.id}
+              label={category.name}
+              checked={selectedCategory === category.id || selectedCategory === category.slug}
+              onClick={() => {
+                onCategoryChange(category.id);
+                onSubcategoryChange("");
+              }}
             />
+          ))}
+        </div>
+      </FilterPanel>
+
+      {subcategoryOptions.length > 0 ? (
+        <FilterPanel title="Subcategory">
+          <div className="space-y-3">
+            <FilterOption label="All" checked={selectedSubcategory === ""} onClick={() => onSubcategoryChange("")} />
+            {subcategoryOptions.map((sub) => (
+              <FilterOption key={sub.id} label={sub.name} checked={selectedSubcategory === sub.id} onClick={() => onSubcategoryChange(sub.id)} />
+            ))}
+          </div>
+        </FilterPanel>
+      ) : null}
+
+      <FilterPanel title="Price">
+        <div className="mb-4 flex items-center justify-between gap-3 text-[14px] text-[#5f5c68]">
+          <span>{formatNaira(selectedMinPrice)}</span>
+          <span>{formatNaira(selectedMaxPrice)}</span>
+        </div>
+        <div className="space-y-3">
+          <div>
+            <label className="text-[13px] text-[#5f5c68]">Min</label>
+            <input
+              type="number"
+              value={selectedMinPrice || ""}
+              onChange={(event) => onMinPriceChange(Number(event.target.value) || 0)}
+              className="w-full rounded border border-[#d6d2da] bg-white px-3 py-2 text-[14px] text-[#1f1d27]"
+              placeholder="Min price"
+            />
+          </div>
+          <div>
+            <label className="text-[13px] text-[#5f5c68]">Max</label>
+            <input
+              type="number"
+              value={selectedMaxPrice || ""}
+              onChange={(event) => onMaxPriceChange(Number(event.target.value) || maxPrice)}
+              className="w-full rounded border border-[#d6d2da] bg-white px-3 py-2 text-[14px] text-[#1f1d27]"
+              placeholder="Max price"
+            />
+          </div>
+        </div>
+      </FilterPanel>
+
+      <FilterPanel title="Condition">
+        <div className="space-y-2">
+          {["Brand New", "Foreign Used", "Local Used"].map((cond) => (
+            <button
+              key={cond}
+              type="button"
+              onClick={() => onConditionChange(condition === cond ? "" : cond)}
+              className="flex w-full items-center gap-3 text-left text-[15px] text-[#2f2d37]"
+            >
+              <span className={`grid h-7 w-7 place-items-center rounded-[8px] border ${condition === cond ? "border-[#9a989f] bg-[#6f6d75] text-white" : "border-[#d6d2da] bg-white"}`}>
+                {condition === cond ? <span className="text-[14px] leading-none">✓</span> : null}
+              </span>
+              <span>{cond}</span>
+            </button>
           ))}
         </div>
       </FilterPanel>
@@ -201,23 +294,6 @@ function SearchFilters({
           ))}
         </div>
       </FilterPanel>
-
-      <FilterPanel title="Price">
-        <div className="mb-4 flex items-center justify-between gap-3 text-[14px] text-[#5f5c68]">
-          <span>{formatNaira(0)}</span>
-          <span>{formatNaira(selectedMaxPrice)}</span>
-        </div>
-        <input
-          type="range"
-          min={0}
-          max={maxPrice}
-          step={Math.max(Math.round(maxPrice / 100), 1000)}
-          value={selectedMaxPrice}
-          onChange={(event) => onSelectedMaxPriceChange(Number(event.target.value))}
-          className="w-full accent-[#ff9715]"
-          aria-label="Maximum price"
-        />
-      </FilterPanel>
     </div>
   );
 }
@@ -228,13 +304,13 @@ export default function SearchResultsPage() {
   const query = searchParams.get("q")?.trim() || "";
   const categoryContext = getCategorySearchContext(`?${searchParams.toString()}`);
   const categorySlug = categoryContext?.slug;
-  const selectedLocation = getLocationSearchParam(`?${searchParams.toString()}`);
+  const categoryViewLocation = getLocationSearchParam(`?${searchParams.toString()}`);
 
   if (categorySlug === "vehicles" || isVehicleSearchQuery(query)) {
     return (
       <div className="min-h-screen bg-page text-ink">
         <SiteHeader navigate={navigate} />
-        <VehicleSearchResultsView query={query} navigate={navigate} view="grid" locationFilter={selectedLocation} />
+        <VehicleSearchResultsView query={query} navigate={navigate} view="grid" locationFilter={categoryViewLocation} />
         <SiteFooter navigate={navigate} />
       </div>
     );
@@ -244,7 +320,7 @@ export default function SearchResultsPage() {
     return (
       <div className="min-h-screen bg-page text-ink">
         <SiteHeader navigate={navigate} />
-        <ElectronicsSearchResultsView query={query} navigate={navigate} view="grid" locationFilter={selectedLocation} />
+        <ElectronicsSearchResultsView query={query} navigate={navigate} view="grid" locationFilter={categoryViewLocation} />
         <SiteFooter navigate={navigate} />
       </div>
     );
@@ -254,7 +330,7 @@ export default function SearchResultsPage() {
     return (
       <div className="min-h-screen bg-page text-ink">
         <SiteHeader navigate={navigate} />
-        <PhonesSearchResultsView query={query} navigate={navigate} view="grid" locationFilter={selectedLocation} />
+        <PhonesSearchResultsView query={query} navigate={navigate} view="grid" locationFilter={categoryViewLocation} />
         <SiteFooter navigate={navigate} />
       </div>
     );
@@ -264,7 +340,7 @@ export default function SearchResultsPage() {
     return (
       <div className="min-h-screen bg-page text-ink">
         <SiteHeader navigate={navigate} />
-        <BeautySearchResultsView query={query} navigate={navigate} view="grid" locationFilter={selectedLocation} />
+        <BeautySearchResultsView query={query} navigate={navigate} view="grid" locationFilter={categoryViewLocation} />
         <SiteFooter navigate={navigate} />
       </div>
     );
@@ -274,7 +350,7 @@ export default function SearchResultsPage() {
     return (
       <div className="min-h-screen bg-page text-ink">
         <SiteHeader navigate={navigate} />
-        <FashionSearchResultsView query={query} navigate={navigate} view="grid" locationFilter={selectedLocation} />
+        <FashionSearchResultsView query={query} navigate={navigate} view="grid" locationFilter={categoryViewLocation} />
         <SiteFooter navigate={navigate} />
       </div>
     );
@@ -284,7 +360,7 @@ export default function SearchResultsPage() {
     return (
       <div className="min-h-screen bg-page text-ink">
         <SiteHeader navigate={navigate} />
-        <JobSearchResultsView query={query} navigate={navigate} view="grid" locationFilter={selectedLocation} />
+        <JobSearchResultsView query={query} navigate={navigate} view="grid" locationFilter={categoryViewLocation} />
         <SiteFooter navigate={navigate} />
       </div>
     );
@@ -299,7 +375,7 @@ export default function SearchResultsPage() {
           config={categoryListingConfig}
           query={query}
           navigate={navigate}
-          locationFilter={selectedLocation}
+          locationFilter={categoryViewLocation}
         />
         <SiteFooter navigate={navigate} />
       </div>
@@ -310,31 +386,72 @@ export default function SearchResultsPage() {
     return (
       <div className="min-h-screen bg-page text-ink">
         <SiteHeader navigate={navigate} />
-        <FurnituresSearchResultsView query={query} navigate={navigate} view="grid" locationFilter={selectedLocation} />
+        <FurnituresSearchResultsView query={query} navigate={navigate} view="grid" locationFilter={categoryViewLocation} />
         <SiteFooter navigate={navigate} />
       </div>
     );
   }
 
   const resultsLabel = query || "All Ads";
-  const [selectedCategory, setSelectedCategory] = useState("all");
-  const [sortBy, setSortBy] = useState<SortValue>("newest");
-  const [verifiedFilter, setVerifiedFilter] = useState<VerifiedValue>("all");
+  const [categories, setCategories] = useState<Category[]>([]);
   const [matchedAds, setMatchedAds] = useState<Ad[]>([]);
   const [loadingAds, setLoadingAds] = useState(true);
   const [adsError, setAdsError] = useState<string | null>(null);
-  const maxPrice = Math.max(...matchedAds.map((ad) => ad.price), 100200000);
-  const [selectedMaxPrice, setSelectedMaxPrice] = useState(maxPrice);
   const [mobileFiltersOpen, setMobileFiltersOpen] = useState(false);
 
+  // Parse URL params (for generic search results only)
+  const sortBy = (searchParams.get("sort") as SortValue) || "newest";
+  const selectedCategory = searchParams.get("category") || "";
+  const selectedSubcategory = searchParams.get("subcategory") || "";
+  const filtersLocation = searchParams.get("location") || "";
+  const selectedMinPrice = Number(searchParams.get("minPrice")) || 0;
+  const selectedMaxPrice = Number(searchParams.get("maxPrice")) || 0;
+  const verifiedParam = searchParams.get("verified");
+  const verifiedFilter: VerifiedValue = verifiedParam === "true" ? "verified" : verifiedParam === "false" ? "unverified" : "all";
+  const condition = searchParams.get("condition") || "";
+
+  // Update URL params helper
+  const updateSearchParam = useCallback(
+    (key: string, value: string | undefined) => {
+      const newParams = new URLSearchParams(searchParams);
+      if (value === undefined || value === "") {
+        newParams.delete(key);
+      } else {
+        newParams.set(key, value);
+      }
+      navigate(`${window.location.pathname}?${newParams.toString()}`, { replace: true });
+    },
+    [searchParams, navigate],
+  );
+
+  // Fetch categories
+  useEffect(() => {
+    const fetchCategories = async () => {
+      try {
+        const response = await api.categories();
+        setCategories(response.data);
+      } catch {
+        setCategories([]);
+      }
+    };
+    void fetchCategories();
+  }, []);
+
+  // Fetch ads with all filter params
   const loadAds = useCallback(async () => {
     try {
       setLoadingAds(true);
       setAdsError(null);
       const params = new URLSearchParams({ pageSize: "24", imagesLimit: "1" });
       if (query) params.set("q", query);
-      if (categorySlug) params.set("category", categorySlug);
-      if (selectedLocation) params.set("location", selectedLocation);
+      if (selectedCategory) params.set("category", selectedCategory);
+      if (selectedSubcategory) params.set("subcategory", selectedSubcategory);
+      if (filtersLocation) params.set("location", filtersLocation);
+      if (selectedMinPrice > 0) params.set("minPrice", String(selectedMinPrice));
+      if (selectedMaxPrice > 0) params.set("maxPrice", String(selectedMaxPrice));
+      if (sortBy && sortBy !== "newest") params.set("sort", sortBy);
+      if (condition) params.set("condition", condition);
+
       const response = await api.ads(`?${params.toString()}`);
       setMatchedAds(response.data);
     } catch (err) {
@@ -343,34 +460,21 @@ export default function SearchResultsPage() {
     } finally {
       setLoadingAds(false);
     }
-  }, [categorySlug, query, selectedLocation]);
+  }, [query, selectedCategory, selectedSubcategory, filtersLocation, selectedMinPrice, selectedMaxPrice, sortBy, condition, verifiedFilter]);
 
   useEffect(() => {
     void loadAds();
   }, [loadAds]);
 
-  useEffect(() => {
-    setSelectedCategory("all");
-    setSortBy("newest");
-    setVerifiedFilter("all");
-    setSelectedMaxPrice(maxPrice);
-    setMobileFiltersOpen(false);
-  }, [query, maxPrice]);
-
-  const filteredAds = sortAds(
-    matchedAds.filter((ad) => {
-      const categoryMatches =
-        selectedCategory === "all" || ad.category.slug === selectedCategory;
+  // Client-side filter for verified sellers (backend doesn't support yet)
+  const filteredAds = useMemo(() => {
+    return matchedAds.filter((ad) => {
       const verified = Boolean(ad.user?.profile?.verified || ad.user?.profile?.verificationStatus === "verified");
-      const verifiedMatches =
-        verifiedFilter === "all" ||
-        (verifiedFilter === "verified" && verified) ||
-        (verifiedFilter === "unverified" && !verified);
-      const priceMatches = ad.price <= selectedMaxPrice;
-      return categoryMatches && verifiedMatches && priceMatches;
-    }),
-    sortBy,
-  );
+      if (verifiedFilter === "verified" && !verified) return false;
+      if (verifiedFilter === "unverified" && verified) return false;
+      return true;
+    });
+  }, [matchedAds, verifiedFilter]);
 
   const results = filteredAds.map(toListing);
 
@@ -392,15 +496,31 @@ export default function SearchResultsPage() {
                 </button>
               </div>
               <SearchFilters
+                categories={categories}
                 selectedCategory={selectedCategory}
-                onCategoryChange={setSelectedCategory}
+                onCategoryChange={(val) => {
+                  updateSearchParam("category", val || undefined);
+                  updateSearchParam("subcategory", undefined);
+                }}
+                selectedSubcategory={selectedSubcategory}
+                onSubcategoryChange={(val) => updateSearchParam("subcategory", val || undefined)}
+                selectedLocation={filtersLocation}
+                onLocationChange={(val) => updateSearchParam("location", val || undefined)}
                 sortBy={sortBy}
-                onSortByChange={setSortBy}
-                verifiedFilter={verifiedFilter}
-                onVerifiedFilterChange={setVerifiedFilter}
-                maxPrice={maxPrice}
+                onSortByChange={(val) => updateSearchParam("sort", val === "newest" ? undefined : val)}
+                selectedMinPrice={selectedMinPrice}
+                onMinPriceChange={(val) => updateSearchParam("minPrice", val > 0 ? String(val) : undefined)}
                 selectedMaxPrice={selectedMaxPrice}
-                onSelectedMaxPriceChange={setSelectedMaxPrice}
+                maxPrice={Math.max(...matchedAds.map((ad) => ad.price), 100200000)}
+                onMaxPriceChange={(val) => updateSearchParam("maxPrice", val > 0 ? String(val) : undefined)}
+                verifiedFilter={verifiedFilter}
+                onVerifiedFilterChange={(val) => {
+                  if (val === "verified") updateSearchParam("verified", "true");
+                  else if (val === "unverified") updateSearchParam("verified", "false");
+                  else updateSearchParam("verified", undefined);
+                }}
+                condition={condition}
+                onConditionChange={(val) => updateSearchParam("condition", val || undefined)}
               />
             </div>
           </div>
@@ -409,15 +529,31 @@ export default function SearchResultsPage() {
         <div className="grid grid-cols-1 gap-6 xl:grid-cols-[256px_minmax(0,1fr)] xl:items-start">
           <aside className="hidden space-y-4 xl:sticky xl:top-[98px] xl:block">
             <SearchFilters
+              categories={categories}
               selectedCategory={selectedCategory}
-              onCategoryChange={setSelectedCategory}
+              onCategoryChange={(val) => {
+                updateSearchParam("category", val || undefined);
+                updateSearchParam("subcategory", undefined);
+              }}
+              selectedSubcategory={selectedSubcategory}
+              onSubcategoryChange={(val) => updateSearchParam("subcategory", val || undefined)}
+              selectedLocation={filtersLocation}
+              onLocationChange={(val) => updateSearchParam("location", val || undefined)}
               sortBy={sortBy}
-              onSortByChange={setSortBy}
-              verifiedFilter={verifiedFilter}
-              onVerifiedFilterChange={setVerifiedFilter}
-              maxPrice={maxPrice}
+              onSortByChange={(val) => updateSearchParam("sort", val === "newest" ? undefined : val)}
+              selectedMinPrice={selectedMinPrice}
+              onMinPriceChange={(val) => updateSearchParam("minPrice", val > 0 ? String(val) : undefined)}
               selectedMaxPrice={selectedMaxPrice}
-              onSelectedMaxPriceChange={setSelectedMaxPrice}
+              maxPrice={Math.max(...matchedAds.map((ad) => ad.price), 100200000)}
+              onMaxPriceChange={(val) => updateSearchParam("maxPrice", val > 0 ? String(val) : undefined)}
+              verifiedFilter={verifiedFilter}
+              onVerifiedFilterChange={(val) => {
+                if (val === "verified") updateSearchParam("verified", "true");
+                else if (val === "unverified") updateSearchParam("verified", "false");
+                else updateSearchParam("verified", undefined);
+              }}
+              condition={condition}
+              onConditionChange={(val) => updateSearchParam("condition", val || undefined)}
             />
           </aside>
 
