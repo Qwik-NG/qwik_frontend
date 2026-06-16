@@ -20,6 +20,8 @@ type PostDraft = {
   condition?: string;
   color?: string;
   location?: string;
+  locationState?: string;
+  locationArea?: string;
   exchangeAvailable?: boolean;
 };
 

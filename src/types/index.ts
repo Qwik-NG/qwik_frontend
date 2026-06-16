@@ -194,6 +194,8 @@ export interface Ad {
   description: string;
   price: number;
   location: string;
+  locationState?: string;
+  locationArea?: string;
   userId?: string;
   categoryId?: string;
   brand?: string;
@@ -219,6 +221,8 @@ export interface AdCreatePayload {
   description: string;
   price: number;
   location: string;
+  locationState?: string;
+  locationArea?: string;
   imageUrls: string[];
   brand?: string;
   model?: string;

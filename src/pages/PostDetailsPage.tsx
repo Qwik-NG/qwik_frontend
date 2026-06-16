@@ -4,6 +4,7 @@ import { useNavigate } from "react-router-dom";
 import { SiteFooter, SiteHeader } from "../components/AppShell";
 import DropdownSelect from "../components/ui/DropdownSelect";
 import { CONDITION_OPTIONS } from "../lib/postAdOptions";
+import { ALL_NIGERIA_LOCATION, NIGERIAN_AREAS, NIGERIAN_LOCATIONS } from "../lib/searchContext";
 import { api } from "../services/api";
 
 const POST_DRAFT_KEY = "qwik_post_draft";
@@ -20,6 +21,8 @@ type PostDraft = {
   condition?: string;
   color?: string;
   location?: string;
+  locationState?: string;
+  locationArea?: string;
   exchangeAvailable?: boolean;
 };
 
@@ -300,7 +303,8 @@ export default function PostDetailsPage() {
   const navigate = useNavigate();
   const [condition, setCondition] = useState("");
   const [color, setColor] = useState("");
-  const [location, setLocation] = useState("");
+  const [locationState, setLocationState] = useState("");
+  const [locationArea, setLocationArea] = useState("");
   const [exchangeAvailable, setExchangeAvailable] = useState(true);
   const [submitting, setSubmitting] = useState(false);
   const [error, setError] = useState<string | null>(null);
@@ -309,7 +313,8 @@ export default function PostDetailsPage() {
     const draft = readDraft();
     setCondition(draft.condition || "");
     setColor(draft.color || "");
-    setLocation(draft.location || "");
+    setLocationState(draft.locationState || "");
+    setLocationArea(draft.locationArea || "");
     setExchangeAvailable(draft.exchangeAvailable ?? true);
   }, []);
 
@@ -332,7 +337,9 @@ export default function PostDetailsPage() {
         title: draft.title,
         description: draft.description,
         price: Number(draft.price),
-        location: location.trim(),
+        location: composedLocation,
+        locationState: locationState.trim() || undefined,
+        locationArea: locationArea.trim() || undefined,
         imageUrls: draft.imageUrls,
         brand: draft.brand,
         model: draft.model,
@@ -353,7 +360,12 @@ export default function PostDetailsPage() {
     }
   };
 
-  const canSubmit = condition.trim().length > 0 && color.trim().length > 0 && location.trim().length > 0 && !submitting;
+  const stateOptions = NIGERIAN_LOCATIONS.filter((loc) => loc !== ALL_NIGERIA_LOCATION);
+  const areasForState = NIGERIAN_AREAS[locationState] ?? null;
+  const composedLocation = locationArea.trim()
+    ? `${locationArea.trim()}, ${locationState}`
+    : locationState;
+  const canSubmit = condition.trim().length > 0 && color.trim().length > 0 && locationState.trim().length > 0 && !submitting;
 
   return (
     <div className="min-h-screen bg-page font-outfit text-ink">
@@ -384,7 +396,31 @@ export default function PostDetailsPage() {
               onChange={setCondition}
             />
             <TextField label="Colour" placeholder="What's the colour?" value={color} onChange={setColor} />
-            <TextField label="Location" placeholder="Where do you live?" value={location} onChange={setLocation} />
+            <div className="space-y-[16px]">
+              <DropdownSelect
+                label="State"
+                placeholder="Select your state"
+                value={locationState}
+                options={stateOptions.map((s) => ({ value: s, label: s }))}
+                onChange={(val) => { setLocationState(val); setLocationArea(""); }}
+              />
+              {locationState && areasForState ? (
+                <DropdownSelect
+                  label="Area"
+                  placeholder="Select your area"
+                  value={locationArea}
+                  options={areasForState.map((a) => ({ value: a, label: a }))}
+                  onChange={setLocationArea}
+                />
+              ) : locationState ? (
+                <TextField
+                  label="Area / LGA / Neighbourhood (optional)"
+                  placeholder="e.g. Port Harcourt, Enugu GRA..."
+                  value={locationArea}
+                  onChange={setLocationArea}
+                />
+              ) : null}
+            </div>
           </div>
 
           <div className="mt-[26px] flex items-center justify-between gap-4">
@@ -400,7 +436,15 @@ export default function PostDetailsPage() {
             type="button"
             onClick={() => {
               if (!canSubmit) return;
-              writeDraft({ ...readDraft(), condition: condition.trim(), color: color.trim(), location: location.trim(), exchangeAvailable });
+              writeDraft({
+                ...readDraft(),
+                condition: condition.trim(),
+                color: color.trim(),
+                location: composedLocation,
+                locationState: locationState.trim() || undefined,
+                locationArea: locationArea.trim() || undefined,
+                exchangeAvailable,
+              });
               void handleSubmit();
             }}
             className="mt-[26px] flex h-[56px] w-full items-center justify-center gap-2 rounded-[12px] bg-gradient-to-r from-amber to-orange text-[18px] font-semibold text-white shadow-glow transition hover:brightness-105 active:scale-[0.99] disabled:cursor-not-allowed disabled:bg-none disabled:bg-[#e1e1e6] disabled:text-[#aaa6b3] disabled:shadow-none"

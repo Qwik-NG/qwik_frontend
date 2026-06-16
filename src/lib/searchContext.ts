@@ -64,6 +64,19 @@ export const NIGERIAN_LOCATIONS = [
   "Zamfara",
 ];
 
+export const NIGERIAN_AREAS: Record<string, string[]> = {
+  "FCT Abuja": [
+    "AMAC", "Apo", "Asokoro", "Central Business District",
+    "Garki", "Gwagwalada", "Gwarinpa", "Jabi", "Kubwa",
+    "Lifecamp", "Maitama", "Nyanya", "Utako", "Wuse", "Wuse 2",
+  ],
+  Lagos: [
+    "Agege", "Ajah", "Alimosho", "Badagry", "Epe",
+    "Festac", "Ikorodu", "Ikeja", "Ikoyi", "Lekki",
+    "Mushin", "Oshodi", "Surulere", "Victoria Island", "Yaba",
+  ],
+};
+
 export function isSearchResultsPath(pathname: string) {
   return SEARCH_PATHS.includes(pathname);
 }
