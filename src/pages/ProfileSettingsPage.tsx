@@ -247,7 +247,7 @@ export default function ProfileSettingsPage() {
                       const composedLocation = trimmedState
                         ? (trimmedArea ? `${trimmedArea}, ${trimmedState}` : trimmedState)
                         : trimmedArea;
-                      const response = await api.updateMe({ fullName, bio, phone, location: composedLocation, locationState: trimmedState || undefined, locationArea: trimmedArea || undefined, avatarUrl: nextAvatarUrl });
+                      const response = await api.updateMe({ fullName, bio, phone, location: composedLocation, locationState: trimmedState || undefined, locationArea: trimmedArea || undefined, ...(nextAvatarUrl ? { avatarUrl: nextAvatarUrl } : {}) });
                       setUser(response.data);
                       setAvatarUrl(response.data.profile?.avatarUrl || "");
                       setSelectedAvatarFile(null);
