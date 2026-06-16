@@ -28,7 +28,6 @@ type JobSearchResultsViewProps = {
   locationFilter?: string;
 };
 
-const JOB_COUNT_LABEL = "23,029";
 const JOB_CATEGORIES: Array<"all" | JobCategoryType> = ["all", "Full Time", "Part Time", "Internship"];
 const JOB_STRIP_ITEMS: Array<{ name: JobStripType; image: string }> = [
   { name: "Full Time", image: "https://dummyimage.com/160x160/cfe3ff/2f74ff.png&text=JOBS" },
@@ -235,6 +234,7 @@ export default function JobSearchResultsView({ query, navigate, view, locationFi
   const [verifiedFilter, setVerifiedFilter] = useState<VerifiedValue>("all");
   const [selectedStripCategory, setSelectedStripCategory] = useState<JobStripType | "all">(initialStrip ?? "all");
   const [jobResults, setJobResults] = useState<MockJobListing[]>([]);
+  const [resultTotal, setResultTotal] = useState(0);
   const maxSalary = useMemo(() => Math.max(...jobResults.map((item) => item.ad.price), 100200000), [jobResults]);
   const [selectedMaxSalary, setSelectedMaxSalary] = useState(100200000);
   const [mobileFiltersOpen, setMobileFiltersOpen] = useState(false);
@@ -246,6 +246,7 @@ export default function JobSearchResultsView({ query, navigate, view, locationFi
       if (locationFilter) params.set("location", locationFilter);
       const response = await api.ads(`?${params.toString()}`);
       setJobResults(response.data.map(toJobResult));
+      setResultTotal(response.meta?.total ?? response.data.length);
     };
     void loadAds();
   }, [query, locationFilter]);
@@ -339,7 +340,7 @@ export default function JobSearchResultsView({ query, navigate, view, locationFi
               </button>
               <div>
                 <h1 className="text-[28px] font-medium tracking-[-0.02em] text-[#1f1d27] sm:text-[36px]">
-                  Found <span className="text-[#ff9715]">{JOB_COUNT_LABEL}</span> results for "Job"
+                  Found <span className="text-[#ff9715]">{resultTotal.toLocaleString()}</span> results for "Job"
                 </h1>
                 <p className="mt-3 text-[24px] font-medium text-[#1f1d27]">Jobs In Nigeria</p>
               </div>

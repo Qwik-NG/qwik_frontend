@@ -21,7 +21,6 @@ export type CategoryListingConfig = {
   slug: string;
   displayQuery: string;
   heading: string;
-  countLabel: string;
   rangeLabel: "Price" | "Salary";
   rangeMin: number;
   rangeMax: number;
@@ -233,6 +232,7 @@ export default function CategoryListingView({ config, query, navigate, locationF
   const [verifiedFilter, setVerifiedFilter] = useState<VerifiedValue>("all");
   const [selectedMaxPrice, setSelectedMaxPrice] = useState(config.rangeMax);
   const [ads, setAds] = useState<Ad[]>([]);
+  const [resultTotal, setResultTotal] = useState(0);
   const [loading, setLoading] = useState(true);
   const [errorMessage, setErrorMessage] = useState<string | null>(null);
   const [mobileFiltersOpen, setMobileFiltersOpen] = useState(false);
@@ -256,11 +256,15 @@ export default function CategoryListingView({ config, query, navigate, locationF
         if (query && !isCategoryMarkerQuery(query)) params.set("q", query);
         if (locationFilter) params.set("location", locationFilter);
         const response = await api.ads(`?${params.toString()}`);
-        if (!cancelled) setAds(response.data);
+        if (!cancelled) {
+          setAds(response.data);
+          setResultTotal(response.meta?.total ?? response.data.length);
+        }
       } catch (err) {
         if (!cancelled) {
           setErrorMessage(err instanceof Error ? err.message : "Failed to load ads");
           setAds([]);
+          setResultTotal(0);
         }
       } finally {
         if (!cancelled) setLoading(false);
@@ -362,7 +366,7 @@ export default function CategoryListingView({ config, query, navigate, locationF
               </button>
               <div>
                 <h1 className="text-[28px] font-medium tracking-[-0.02em] text-[#1f1d27] sm:text-[36px]">
-                  Found <span className="text-[#ff9715]">{config.countLabel}</span> results for "{headingQuery}"
+                  Found <span className="text-[#ff9715]">{resultTotal.toLocaleString()}</span> results for "{headingQuery}"
                 </h1>
                 <p className="mt-3 text-[24px] font-medium text-[#1f1d27]">{config.heading}</p>
               </div>
@@ -499,7 +503,6 @@ export const CATEGORY_LISTING_CONFIGS: Record<string, CategoryListingConfig> = {
     slug: "agriculture",
     displayQuery: "Agriculture",
     heading: "Agricultural Products In Nigeria",
-    countLabel: "12,480",
     rangeLabel: "Price",
     rangeMin: 0,
     rangeMax: 50000000,
@@ -517,7 +520,6 @@ export const CATEGORY_LISTING_CONFIGS: Record<string, CategoryListingConfig> = {
     slug: "art",
     displayQuery: "Art",
     heading: "Arts In Nigeria",
-    countLabel: "3,612",
     rangeLabel: "Price",
     rangeMin: 0,
     rangeMax: 20000000,
@@ -535,7 +537,6 @@ export const CATEGORY_LISTING_CONFIGS: Record<string, CategoryListingConfig> = {
     slug: "sports-leisure",
     displayQuery: "Sports & Leisure",
     heading: "Sports & Leisure In Nigeria",
-    countLabel: "8,754",
     rangeLabel: "Price",
     rangeMin: 0,
     rangeMax: 30000000,

@@ -29,7 +29,6 @@ type ElectronicsSearchResultsViewProps = {
   locationFilter?: string;
 };
 
-const ELECTRONICS_COUNT_LABEL = "23,029";
 const ELECTRONICS_FILTER_TYPES: Array<"all" | ElectronicsType> = [
   "all",
   "Laptops & Computers",
@@ -293,6 +292,7 @@ export default function ElectronicsSearchResultsView({ query, navigate, view, lo
   const [verifiedFilter, setVerifiedFilter] = useState<VerifiedValue>("all");
   const [selectedStripCategory, setSelectedStripCategory] = useState<StripCategory>("Laptops");
   const [electronicsResults, setElectronicsResults] = useState<MockElectronicsListing[]>([]);
+  const [resultTotal, setResultTotal] = useState(0);
   const maxPrice = useMemo(
     () => Math.max(...electronicsResults.map((item) => item.ad.price), 100200000),
     [electronicsResults],
@@ -308,6 +308,7 @@ export default function ElectronicsSearchResultsView({ query, navigate, view, lo
       if (locationFilter) params.set("location", locationFilter);
       const response = await api.ads(`?${params.toString()}`);
       setElectronicsResults(response.data.map(toElectronicsResult));
+      setResultTotal(response.meta?.total ?? response.data.length);
     };
     void loadAds();
   }, [query, locationFilter]);
@@ -413,7 +414,7 @@ export default function ElectronicsSearchResultsView({ query, navigate, view, lo
               </button>
               <div>
                 <h1 className="text-[28px] font-medium tracking-[-0.02em] text-[#1f1d27] sm:text-[36px]">
-                  Found <span className="text-[#ff9715]">{ELECTRONICS_COUNT_LABEL}</span> results for “Electronics”
+                  Found <span className="text-[#ff9715]">{resultTotal.toLocaleString()}</span> results for “Electronics”
                 </h1>
                 <p className="mt-3 text-[24px] font-medium text-[#1f1d27]">Laptops and Computer In Nigeria</p>
               </div>

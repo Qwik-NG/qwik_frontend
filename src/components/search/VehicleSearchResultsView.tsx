@@ -32,7 +32,6 @@ type VehicleSearchResultsViewProps = {
   locationFilter?: string;
 };
 
-const VEHICLE_COUNT_LABEL = "23,029";
 const VEHICLE_FILTER_TYPES: Array<"all" | VehicleType> = [
   "all",
   "Car",
@@ -342,6 +341,7 @@ export default function VehicleSearchResultsView({ query, navigate, view, locati
   const [selectedBrand, setSelectedBrand] = useState<"all" | VehicleBrand>("all");
   const [verifiedFilter, setVerifiedFilter] = useState<VerifiedValue>("all");
   const [vehicleResults, setVehicleResults] = useState<MockVehicleListing[]>([]);
+  const [resultTotal, setResultTotal] = useState(0);
   const maxPrice = useMemo(
     () => Math.max(...vehicleResults.map((item) => item.ad.price), 100200000),
     [vehicleResults],
@@ -357,6 +357,7 @@ export default function VehicleSearchResultsView({ query, navigate, view, locati
       if (locationFilter) params.set("location", locationFilter);
       const response = await api.ads(`?${params.toString()}`);
       setVehicleResults(response.data.map(toVehicleResult));
+      setResultTotal(response.meta?.total ?? response.data.length);
     };
     void loadAds();
   }, [query, locationFilter]);
@@ -461,7 +462,7 @@ export default function VehicleSearchResultsView({ query, navigate, view, locati
                 </button>
                 <div>
                   <h1 className="text-[28px] font-medium tracking-[-0.02em] text-[#1f1d27] sm:text-[36px]">
-                    Found <span className="text-[#ff9715]">{VEHICLE_COUNT_LABEL}</span> results for “Vehicles”
+                    Found <span className="text-[#ff9715]">{resultTotal.toLocaleString()}</span> results for “Vehicles”
                   </h1>
                   <p className="mt-3 text-[24px] font-medium text-[#1f1d27]">Cars in Nigeria</p>
                 </div>

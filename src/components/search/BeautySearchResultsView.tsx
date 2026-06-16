@@ -28,7 +28,6 @@ type BeautySearchResultsViewProps = {
   locationFilter?: string;
 };
 
-const BEAUTY_COUNT_LABEL = "23,029";
 const BEAUTY_CATEGORY_OPTIONS: Array<"all" | MockBeautyListing["categoryType"]> = [
   "all",
   "Body Care",
@@ -278,6 +277,7 @@ export default function BeautySearchResultsView({ query, navigate, view, locatio
   const [verifiedFilter, setVerifiedFilter] = useState<VerifiedValue>("all");
   const [selectedStripCategory, setSelectedStripCategory] = useState<BeautyType>("Body Lotion");
   const [beautyResults, setBeautyResults] = useState<MockBeautyListing[]>([]);
+  const [resultTotal, setResultTotal] = useState(0);
   const maxPrice = useMemo(() => Math.max(...beautyResults.map((item) => item.ad.price), 100200000), [beautyResults]);
   const [selectedMaxPrice, setSelectedMaxPrice] = useState(100200000);
   const [mobileFiltersOpen, setMobileFiltersOpen] = useState(false);
@@ -289,6 +289,7 @@ export default function BeautySearchResultsView({ query, navigate, view, locatio
       if (locationFilter) params.set("location", locationFilter);
       const response = await api.ads(`?${params.toString()}`);
       setBeautyResults(response.data.map(toBeautyResult));
+      setResultTotal(response.meta?.total ?? response.data.length);
     };
     void loadAds();
   }, [query, locationFilter]);
@@ -392,7 +393,7 @@ export default function BeautySearchResultsView({ query, navigate, view, locatio
               </button>
               <div>
                 <h1 className="text-[28px] font-medium tracking-[-0.02em] text-[#1f1d27] sm:text-[36px]">
-                  Found <span className="text-[#ff9715]">{BEAUTY_COUNT_LABEL}</span> results for “Beauty”
+                  Found <span className="text-[#ff9715]">{resultTotal.toLocaleString()}</span> results for “Beauty”
                 </h1>
                 <p className="mt-3 text-[24px] font-medium text-[#1f1d27]">Body Care In Nigeria</p>
               </div>

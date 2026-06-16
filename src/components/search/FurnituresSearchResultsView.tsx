@@ -27,7 +27,6 @@ type FurnituresSearchResultsViewProps = {
   locationFilter?: string;
 };
 
-const FURNITURE_COUNT_LABEL = "23,029";
 const FURNITURE_CATEGORY_OPTIONS: Array<"all" | MockFurnitureListing["categoryType"]> = [
   "all",
   "Furnitures",
@@ -306,6 +305,7 @@ export default function FurnituresSearchResultsView({ query, navigate, view, loc
   const [selectedStripCategory, setSelectedStripCategory] = useState<"all" | FurnitureType>("all");
   const [selectedCondition, setSelectedCondition] = useState<"all" | FurnitureCondition>("all");
   const [furnitureResults, setFurnitureResults] = useState<MockFurnitureListing[]>([]);
+  const [resultTotal, setResultTotal] = useState(0);
   const maxPrice = useMemo(() => Math.max(...furnitureResults.map((item) => item.ad.price), 100200000), [furnitureResults]);
   const [selectedMaxPrice, setSelectedMaxPrice] = useState(100200000);
   const [mobileFiltersOpen, setMobileFiltersOpen] = useState(false);
@@ -317,6 +317,7 @@ export default function FurnituresSearchResultsView({ query, navigate, view, loc
       if (locationFilter) params.set("location", locationFilter);
       const response = await api.ads(`?${params.toString()}`);
       setFurnitureResults(response.data.map(toFurnitureResult));
+      setResultTotal(response.meta?.total ?? response.data.length);
     };
     void loadAds();
   }, [query, locationFilter]);
@@ -426,7 +427,7 @@ export default function FurnituresSearchResultsView({ query, navigate, view, loc
               </button>
               <div>
                 <h1 className="text-[28px] font-medium tracking-[-0.02em] text-[#1f1d27] sm:text-[36px]">
-                  Found <span className="text-[#ff9715]">{FURNITURE_COUNT_LABEL}</span> results for “Furnitures & Appliances”
+                  Found <span className="text-[#ff9715]">{resultTotal.toLocaleString()}</span> results for “Furnitures & Appliances”
                 </h1>
                 <p className="mt-3 text-[24px] font-medium text-[#1f1d27]">Furnitures In Nigeria</p>
               </div>

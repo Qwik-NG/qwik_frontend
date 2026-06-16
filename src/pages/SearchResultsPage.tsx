@@ -16,6 +16,7 @@ import PhonesSearchResultsView from "../components/search/PhonesSearchResultsVie
 import ListingCard, { type ListingCardItem } from "../components/listings/ListingCard";
 import VehicleSearchResultsView from "../components/search/VehicleSearchResultsView";
 import BackButton from "../components/ui/BackButton";
+import DropdownSelect from "../components/ui/DropdownSelect";
 import { isBeautySearchQuery, isElectronicsSearchQuery, isFashionSearchQuery, isFurnitureSearchQuery, isJobSearchQuery, isPhonesSearchQuery, isVehicleSearchQuery } from "../lib/mockData";
 import { getCategorySearchContext, getLocationSearchParam, NIGERIAN_LOCATIONS } from "../lib/searchContext";
 import { api } from "../services/api";
@@ -171,22 +172,16 @@ function SearchFilters({
   return (
     <div className="space-y-4">
       <FilterPanel title="Region">
-        <div className="relative">
-          <select
-            value={selectedLocation}
-            onChange={(event) => onLocationChange(event.target.value)}
-            className="w-full appearance-none bg-transparent pr-7 text-[15px] text-[#ff9715] outline-none"
-            aria-label="Filter by location"
-          >
-            <option value="">All Nigeria</option>
-            {NIGERIAN_LOCATIONS.filter((loc) => loc !== "All Nigeria").map((location) => (
-              <option key={location} value={location}>
-                {location}
-              </option>
-            ))}
-          </select>
-          <span className="pointer-events-none absolute right-0 top-1/2 -translate-y-1/2 text-[#9794a1]">›</span>
-        </div>
+        <DropdownSelect
+          label="Region"
+          placeholder="All Nigeria"
+          value={selectedLocation}
+          options={[
+            { value: "", label: "All Nigeria" },
+            ...NIGERIAN_LOCATIONS.filter((loc) => loc !== "All Nigeria").map((location) => ({ value: location, label: location })),
+          ]}
+          onChange={onLocationChange}
+        />
       </FilterPanel>
 
       <FilterPanel title="Sort by">
@@ -395,6 +390,7 @@ export default function SearchResultsPage() {
   const resultsLabel = query || "All Ads";
   const [categories, setCategories] = useState<Category[]>([]);
   const [matchedAds, setMatchedAds] = useState<Ad[]>([]);
+  const [resultTotal, setResultTotal] = useState(0);
   const [loadingAds, setLoadingAds] = useState(true);
   const [adsError, setAdsError] = useState<string | null>(null);
   const [mobileFiltersOpen, setMobileFiltersOpen] = useState(false);
@@ -454,9 +450,11 @@ export default function SearchResultsPage() {
 
       const response = await api.ads(`?${params.toString()}`);
       setMatchedAds(response.data);
+      setResultTotal(response.meta?.total ?? response.data.length);
     } catch (err) {
       setAdsError(err instanceof Error ? err.message : "Failed to load ads");
       setMatchedAds([]);
+      setResultTotal(0);
     } finally {
       setLoadingAds(false);
     }
@@ -477,6 +475,7 @@ export default function SearchResultsPage() {
   }, [matchedAds, verifiedFilter]);
 
   const results = filteredAds.map(toListing);
+  const displayedResultCount = verifiedFilter === "all" ? resultTotal : results.length;
 
   return (
     <div className="min-h-screen bg-page text-ink">
@@ -571,7 +570,7 @@ export default function SearchResultsPage() {
                   Filters
                 </button>
                 <h1 className="text-[28px] font-medium tracking-[-0.02em] text-[#1f1d27] sm:text-[36px]">
-                  Found <span className="text-[#ff9715]">{results.length.toLocaleString()}</span> results for “{resultsLabel}”
+                  Found <span className="text-[#ff9715]">{displayedResultCount.toLocaleString()}</span> results for “{resultsLabel}”
                 </h1>
               </div>
               <div className="flex items-center gap-2 self-start">

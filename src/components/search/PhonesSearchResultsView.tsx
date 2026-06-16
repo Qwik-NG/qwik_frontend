@@ -29,7 +29,6 @@ type PhonesSearchResultsViewProps = {
   locationFilter?: string;
 };
 
-const PHONES_COUNT_LABEL = "23,029";
 const PHONES_FILTER_TYPES: Array<"all" | PhonesType> = [
   "all",
   "Mobile Phones",
@@ -197,7 +196,6 @@ function PhonesFilters({
               </option>
             ))}
           </select>
-          <span className="pointer-events-none absolute right-0 top-1/2 -translate-y-1/2 text-[#9794a1]">›</span>
         </div>
       </FilterPanel>
 
@@ -282,6 +280,7 @@ export default function PhonesSearchResultsView({ query, navigate, view, locatio
   const [verifiedFilter, setVerifiedFilter] = useState<VerifiedValue>("all");
   const [selectedStripBrand, setSelectedStripBrand] = useState<StripBrand>("Apple");
   const [phonesResults, setPhonesResults] = useState<MockPhonesListing[]>([]);
+  const [resultTotal, setResultTotal] = useState(0);
   const maxPrice = useMemo(() => Math.max(...phonesResults.map((item) => item.ad.price), 100200000), [phonesResults]);
   const [selectedMaxPrice, setSelectedMaxPrice] = useState(100200000);
   const [selectedCondition, setSelectedCondition] = useState<"all" | PhonesCondition>("all");
@@ -294,6 +293,7 @@ export default function PhonesSearchResultsView({ query, navigate, view, locatio
       if (locationFilter) params.set("location", locationFilter);
       const response = await api.ads(`?${params.toString()}`);
       setPhonesResults(response.data.map(toPhonesResult));
+      setResultTotal(response.meta?.total ?? response.data.length);
     };
     void loadAds();
   }, [query, locationFilter]);
@@ -397,7 +397,7 @@ export default function PhonesSearchResultsView({ query, navigate, view, locatio
               </button>
               <div>
                 <h1 className="text-[28px] font-medium tracking-[-0.02em] text-[#1f1d27] sm:text-[36px]">
-                  Found <span className="text-[#ff9715]">{PHONES_COUNT_LABEL}</span> results for “Phones & Tablet”
+                  Found <span className="text-[#ff9715]">{resultTotal.toLocaleString()}</span> results for “Phones & Tablet”
                 </h1>
                 <p className="mt-3 text-[24px] font-medium text-[#1f1d27]">Phones In Nigeria</p>
               </div>

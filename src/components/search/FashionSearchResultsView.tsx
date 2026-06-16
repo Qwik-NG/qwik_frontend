@@ -44,7 +44,6 @@ type FashionStateConfig = {
   defaultCategory: "all" | FashionCategory;
 };
 
-const FASHION_COUNT_LABEL = "23,029";
 const FASHION_CATEGORY_OPTIONS: Array<"all" | FashionCategory> = ["all", "Men's Fashion", "Women's Fashion", "Baby & Kids Fashion"];
 const FASHION_TYPE_OPTIONS: Array<"all" | FashionType> = ["all", "Clothings", "Bags", "Jewelry", "Shoe"];
 const FASHION_BRAND_OPTIONS: Array<"all" | FashionBrand> = ["all", "Nike", "Louis vitton", "Adidas"];
@@ -400,6 +399,7 @@ export default function FashionSearchResultsView({ query, navigate, view, locati
   const [sortBy, setSortBy] = useState<SortValue>("newest");
   const [selectedStripCategory, setSelectedStripCategory] = useState<FashionStripItem | "all">(stateConfig.defaultStrip);
   const [fashionResults, setFashionResults] = useState<MockFashionListing[]>([]);
+  const [resultTotal, setResultTotal] = useState(0);
   const maxPrice = useMemo(() => Math.max(...fashionResults.map((item) => item.ad.price), 100200000), [fashionResults]);
   const [selectedMaxPrice, setSelectedMaxPrice] = useState(100200000);
   const [mobileFiltersOpen, setMobileFiltersOpen] = useState(false);
@@ -411,6 +411,7 @@ export default function FashionSearchResultsView({ query, navigate, view, locati
       if (locationFilter) params.set("location", locationFilter);
       const response = await api.ads(`?${params.toString()}`);
       setFashionResults(response.data.map(toFashionResult));
+      setResultTotal(response.meta?.total ?? response.data.length);
     };
     void loadAds();
   }, [query, locationFilter]);
@@ -534,7 +535,7 @@ export default function FashionSearchResultsView({ query, navigate, view, locati
               </button>
               <div>
                 <h1 className="text-[28px] font-medium tracking-[-0.02em] text-[#1f1d27] sm:text-[36px]">
-                  Found <span className="text-[#ff9715]">{FASHION_COUNT_LABEL}</span> results for “{stateConfig.title}”
+                  Found <span className="text-[#ff9715]">{resultTotal.toLocaleString()}</span> results for “{stateConfig.title}”
                 </h1>
                 <p className="mt-3 text-[24px] font-medium text-[#1f1d27]">{stateConfig.subtitle}</p>
               </div>
