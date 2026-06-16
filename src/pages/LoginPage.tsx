@@ -1,11 +1,12 @@
 import { useState } from "react";
 import { useNavigate } from "react-router-dom";
-import { FacebookIcon, GoogleIcon } from "../components/icons/SocialIcons";
+import { FacebookIcon } from "../components/icons/SocialIcons";
 import AuthLayout from "../components/layout/AuthLayout";
 import FormInput from "../components/ui/FormInput";
 import FormButton from "../components/ui/FormButton";
 import { setLoginEmail } from "../services/auth";
 import LegalConsentModal, { type LegalDocumentType } from "../components/auth/LegalConsentModal";
+import GoogleSignInButton from "../components/auth/GoogleSignInButton";
 
 export default function LoginPage() {
   const navigate = useNavigate();
@@ -22,16 +23,7 @@ export default function LoginPage() {
       cardClassName="w-[430px]"
       titleClassName="whitespace-nowrap"
     >
-          <button
-            className="mb-[10px] flex h-[48px] w-full cursor-not-allowed items-center justify-center gap-2 rounded-[10px] bg-[#d9d9dc] text-[14px] text-[#8b8a94] opacity-70 transition-all duration-200"
-            type="button"
-            disabled
-            aria-disabled="true"
-            title="Coming soon"
-          >
-            <GoogleIcon />
-            <span>Continue with Google</span>
-          </button>
+          <GoogleSignInButton />
 
           <button
             className="mb-[16px] flex h-[48px] w-full cursor-not-allowed items-center justify-center gap-2 rounded-[10px] bg-[#3f5db2] text-[14px] text-white opacity-55 transition-all duration-200"

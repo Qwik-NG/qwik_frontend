@@ -1,4 +1,4 @@
-import { useEffect, useId, useRef, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { useToast } from "../../context/ToastContext";
 import { api } from "../../services/api";
@@ -7,6 +7,7 @@ import { GoogleIcon } from "../icons/SocialIcons";
 
 const GIS_SCRIPT_SRC = "https://accounts.google.com/gsi/client";
 const GOOGLE_CLIENT_ID = import.meta.env.VITE_GOOGLE_CLIENT_ID as string | undefined;
+const READY_TIMEOUT_MS = 8000;
 
 type GoogleCredentialResponse = { credential?: string };
 
@@ -26,6 +27,7 @@ declare global {
             parent: HTMLElement,
             options: { theme?: string; size?: string; type?: string; shape?: string; width?: number; text?: string; logo_alignment?: string }
           ) => void;
+          prompt: () => void;
           cancel: () => void;
         };
       };
@@ -43,9 +45,15 @@ function loadGoogleScript(): Promise<void> {
   scriptPromise = new Promise((resolve, reject) => {
     const existing = document.querySelector<HTMLScriptElement>(`script[src="${GIS_SCRIPT_SRC}"]`);
     if (existing) {
+      if (window.google?.accounts?.id) {
+        resolve();
+        return;
+      }
       existing.addEventListener("load", () => resolve(), { once: true });
-      existing.addEventListener("error", () => reject(new Error("Failed to load Google Identity script")), { once: true });
-      if (window.google?.accounts?.id) resolve();
+      existing.addEventListener("error", () => {
+        scriptPromise = null;
+        reject(new Error("Failed to load Google Identity script"));
+      }, { once: true });
       return;
     }
     const script = document.createElement("script");
@@ -53,7 +61,10 @@ function loadGoogleScript(): Promise<void> {
     script.async = true;
     script.defer = true;
     script.onload = () => resolve();
-    script.onerror = () => reject(new Error("Failed to load Google Identity script"));
+    script.onerror = () => {
+      scriptPromise = null;
+      reject(new Error("Failed to load Google Identity script"));
+    };
     document.head.appendChild(script);
   });
 
@@ -65,66 +76,100 @@ type Props = {
   disabledLabel?: string;
 };
 
+type Status = "loading" | "ready" | "error" | "submitting";
+
 export default function GoogleSignInButton({ disabledLabel = "Continue with Google" }: Props) {
   const containerRef = useRef<HTMLDivElement | null>(null);
   const navigate = useNavigate();
   const { error: showError, success } = useToast();
-  const [isReady, setIsReady] = useState(false);
-  const [isSubmitting, setIsSubmitting] = useState(false);
-  const buttonId = useId();
+
+  const navigateRef = useRef(navigate);
+  const showErrorRef = useRef(showError);
+  const successRef = useRef(success);
+  useEffect(() => { navigateRef.current = navigate; }, [navigate]);
+  useEffect(() => { showErrorRef.current = showError; }, [showError]);
+  useEffect(() => { successRef.current = success; }, [success]);
+
+  const [status, setStatus] = useState<Status>("loading");
   const isConfigured = Boolean(GOOGLE_CLIENT_ID);
 
   useEffect(() => {
-    if (!isConfigured || !containerRef.current) return;
+    if (!isConfigured) return;
     let cancelled = false;
+    let timeoutId: ReturnType<typeof setTimeout> | null = null;
+
+    timeoutId = setTimeout(() => {
+      if (!cancelled) setStatus((prev) => (prev === "loading" ? "error" : prev));
+    }, READY_TIMEOUT_MS);
 
     loadGoogleScript()
       .then(() => {
         if (cancelled || !window.google || !containerRef.current) return;
-        window.google.accounts.id.initialize({
-          client_id: GOOGLE_CLIENT_ID!,
-          callback: async (response: GoogleCredentialResponse) => {
-            if (!response.credential) {
-              showError("Google sign-in was cancelled");
-              return;
-            }
-            try {
-              setIsSubmitting(true);
-              const res = await api.googleAuth({ credential: response.credential });
-              setToken(res.data.token);
-              setRole(res.data.user.role);
-              success("Signed in with Google");
-              navigate(res.data.user.role === "ADMIN" ? "/admin" : "/welcome");
-            } catch (err) {
-              showError(err instanceof Error ? err.message : "Google sign-in failed");
-            } finally {
-              setIsSubmitting(false);
-            }
-          },
-          ux_mode: "popup",
-          use_fedcm_for_prompt: true,
-        });
-        const width = Math.min(containerRef.current.clientWidth || 411, 411);
-        window.google.accounts.id.renderButton(containerRef.current, {
-          theme: "outline",
-          size: "large",
-          type: "standard",
-          shape: "rectangular",
-          text: "continue_with",
-          logo_alignment: "left",
-          width,
-        });
-        setIsReady(true);
+        try {
+          window.google.accounts.id.initialize({
+            client_id: GOOGLE_CLIENT_ID!,
+            callback: async (response: GoogleCredentialResponse) => {
+              if (!response.credential) {
+                showErrorRef.current("Google sign-in was cancelled");
+                return;
+              }
+              try {
+                setStatus("submitting");
+                const res = await api.googleAuth({ credential: response.credential });
+                setToken(res.data.token);
+                setRole(res.data.user.role);
+                successRef.current("Signed in with Google");
+                navigateRef.current(res.data.user.role === "ADMIN" ? "/admin" : "/welcome");
+              } catch (err) {
+                showErrorRef.current(err instanceof Error ? err.message : "Google sign-in failed");
+                setStatus("ready");
+              }
+            },
+            ux_mode: "popup",
+            use_fedcm_for_prompt: true,
+          });
+          containerRef.current.innerHTML = "";
+          const width = Math.min(containerRef.current.clientWidth || 320, 400);
+          window.google.accounts.id.renderButton(containerRef.current, {
+            theme: "outline",
+            size: "large",
+            type: "standard",
+            shape: "rectangular",
+            text: "continue_with",
+            logo_alignment: "left",
+            width,
+          });
+          setStatus("ready");
+          if (timeoutId) clearTimeout(timeoutId);
+        } catch (err) {
+          console.error("Google button init failed", err);
+          setStatus("error");
+        }
       })
       .catch((err) => {
         if (cancelled) return;
         console.error(err);
+        setStatus("error");
       });
 
     return () => {
       cancelled = true;
+      if (timeoutId) clearTimeout(timeoutId);
     };
-  }, [isConfigured, navigate, showError, success]);
+  }, [isConfigured]);
+
+  const triggerGooglePrompt = () => {
+    if (window.google?.accounts?.id) {
+      try {
+        window.google.accounts.id.prompt();
+      } catch (err) {
+        console.error(err);
+        showErrorRef.current("Could not open Google sign-in. Please try again.");
+      }
+    } else {
+      showErrorRef.current("Google sign-in is still loading. Please try again in a moment.");
+    }
+  };
 
   if (!isConfigured) {
     return (
@@ -145,16 +190,35 @@ export default function GoogleSignInButton({ disabledLabel = "Continue with Goog
     <div className="mb-[10px] w-full">
       <div
         ref={containerRef}
-        id={buttonId}
         className="flex w-full justify-center"
-        aria-busy={isSubmitting}
-        style={{ minHeight: 48, opacity: isSubmitting ? 0.6 : 1, pointerEvents: isSubmitting ? "none" : "auto" }}
+        aria-busy={status === "submitting"}
+        style={{
+          display: status === "ready" || status === "submitting" ? "flex" : "none",
+          minHeight: 40,
+          opacity: status === "submitting" ? 0.6 : 1,
+          pointerEvents: status === "submitting" ? "none" : "auto",
+        }}
       />
-      {!isReady && (
-        <div className="flex h-[48px] w-full items-center justify-center gap-2 rounded-[10px] bg-[#ececee] text-[14px] text-[#8b8a94]">
+
+      {status === "loading" && (
+        <div
+          className="flex h-[48px] w-full items-center justify-center gap-2 rounded-[10px] bg-[#ececee] text-[14px] text-[#8b8a94]"
+          aria-live="polite"
+        >
           <GoogleIcon />
           <span>Loading Google sign-in…</span>
         </div>
+      )}
+
+      {status === "error" && (
+        <button
+          type="button"
+          onClick={triggerGooglePrompt}
+          className="flex h-[48px] w-full items-center justify-center gap-2 rounded-[10px] border border-[#dedee1] bg-white text-[14px] text-[#1f1f29] transition-colors hover:bg-[#fafafb] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#ffb357] focus-visible:ring-offset-2"
+        >
+          <GoogleIcon />
+          <span>Continue with Google</span>
+        </button>
       )}
     </div>
   );
