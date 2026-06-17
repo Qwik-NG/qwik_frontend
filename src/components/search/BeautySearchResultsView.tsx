@@ -13,7 +13,9 @@ import { api } from "../../services/api";
 import type { Ad } from "../../types";
 import ListingCard from "../listings/ListingCard";
 import BackButton from "../ui/BackButton";
+import { CategoryBubbleAvatar } from "./CategoryBubbleAvatar";
 import DropdownSelect from "../ui/DropdownSelect";
+import { getBubbleInitials, getCategoryBubbleImage } from "../../lib/categoryBubbleImages";
 
 type NavigateTo = (to: string) => void;
 type SortValue = "newest" | "price-low" | "price-high";
@@ -41,13 +43,13 @@ const BEAUTY_TYPE_OPTIONS: Array<"all" | BeautyType> = [
   "Body Wash & Soap",
   "Body Oils",
 ];
-const BEAUTY_STRIP_OPTIONS: Array<{ name: BeautyType; image: string }> = [
-  { name: "Body Lotion", image: "https://images.unsplash.com/photo-1620916566398-39f1143ab7be?w=240" },
-  { name: "Body Wash & Soap", image: "https://images.unsplash.com/photo-1556228578-8c89e6adf883?w=240" },
-  { name: "Body Oils", image: "https://images.unsplash.com/photo-1626784215021-2e39ccf971cd?w=240" },
-  { name: "Body Creams & Milks", image: "https://images.unsplash.com/photo-1619451334792-150fd785ee74?w=240" },
-  { name: "Body Scrubs", image: "https://images.unsplash.com/photo-1515377905703-c4788e51af15?w=240" },
-  { name: "Shower Gel", image: "https://images.unsplash.com/photo-1596755389378-c31d21fd1273?w=240" },
+const BEAUTY_STRIP_OPTIONS: Array<{ name: BeautyType; image?: string }> = [
+  { name: "Body Lotion", image: getCategoryBubbleImage("beauty", "Body Lotion") },
+  { name: "Body Wash & Soap", image: getCategoryBubbleImage("beauty", "Body Wash & Soap") },
+  { name: "Body Oils", image: getCategoryBubbleImage("beauty", "Body Oils") },
+  { name: "Body Creams & Milks", image: getCategoryBubbleImage("beauty", "Body Creams & Milks") },
+  { name: "Body Scrubs", image: getCategoryBubbleImage("beauty", "Body Scrubs") },
+  { name: "Shower Gel", image: getCategoryBubbleImage("beauty", "Shower Gel") },
 ];
 const BEAUTY_BRAND_OPTIONS: Array<"all" | BeautyBrand> = ["all", "Fresh", "Zoya", "Clean"];
 const BEAUTY_CONDITION_OPTIONS: Array<"all" | BeautyCondition> = ["all", "Brand New", "Refurbished", "Used"];
@@ -112,15 +114,18 @@ function StripBubble({
   onClick,
 }: {
   name: BeautyType;
-  image: string;
+  image?: string;
   active: boolean;
   onClick: () => void;
 }) {
   return (
     <button type="button" onClick={onClick} className="flex min-w-[116px] flex-col items-center gap-2 text-center">
-      <span className={`grid h-[72px] w-[72px] place-items-center overflow-hidden rounded-full border ${active ? "border-[#1f1d27]" : "border-[#ddd9d2]"}`}>
-        <img src={image} alt={name} className="h-full w-full object-cover" />
-      </span>
+      <CategoryBubbleAvatar
+        alt={name}
+        imageSrc={image}
+        fallbackText={getBubbleInitials(name)}
+        className={`grid h-[72px] w-[72px] place-items-center overflow-hidden rounded-full border ${active ? "border-[#1f1d27]" : "border-[#ddd9d2]"}`}
+      />
       <span className="text-[15px] font-medium text-[#1f1d27]">{name}</span>
     </button>
   );

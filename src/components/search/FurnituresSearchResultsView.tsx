@@ -13,7 +13,9 @@ import { api } from "../../services/api";
 import type { Ad } from "../../types";
 import ListingCard from "../listings/ListingCard";
 import BackButton from "../ui/BackButton";
+import { CategoryBubbleAvatar } from "./CategoryBubbleAvatar";
 import DropdownSelect from "../ui/DropdownSelect";
+import { getBubbleInitials, getCategoryBubbleImage } from "../../lib/categoryBubbleImages";
 
 type NavigateTo = (to: string) => void;
 type SortValue = "newest" | "price-low" | "price-high";
@@ -37,14 +39,14 @@ const FURNITURE_CATEGORY_OPTIONS: Array<"all" | MockFurnitureListing["categoryTy
 const FURNITURE_TYPE_OPTIONS: Array<"all" | FurnitureType> = ["all", "Chairs", "Tables", "Bed & Frames"];
 const FURNITURE_ROOM_OPTIONS: Array<"all" | MockFurnitureListing["room"]> = ["all", "Bedroom", "Kitchen", "Home Office / Study"];
 const FURNITURE_CONDITION_OPTIONS: Array<"all" | FurnitureCondition> = ["all", "Brand New", "Used"];
-const FURNITURE_STRIP_OPTIONS: Array<{ name: FurnitureType; image: string }> = [
-  { name: "Chairs", image: "/category-images/furniture.png" },
-  { name: "Tables", image: "/category-images/furniture.png" },
-  { name: "Bed & Frames", image: "/category-images/furniture.png" },
-  { name: "Sofas", image: "/category-images/furniture.png" },
-  { name: "TV Stand & Mount", image: "/category-images/furniture.png" },
-  { name: "Mattresses", image: "/category-images/furniture.png" },
-  { name: "Wardrobes", image: "/category-images/furniture.png" },
+const FURNITURE_STRIP_OPTIONS: Array<{ name: FurnitureType; image?: string }> = [
+  { name: "Chairs", image: getCategoryBubbleImage("furniture", "Chairs") },
+  { name: "Tables", image: getCategoryBubbleImage("furniture", "Tables") },
+  { name: "Bed & Frames", image: getCategoryBubbleImage("furniture", "Bed & Frames") },
+  { name: "Sofas", image: getCategoryBubbleImage("furniture", "Sofas") },
+  { name: "TV Stand & Mount", image: getCategoryBubbleImage("furniture", "TV Stand & Mount") },
+  { name: "Mattresses", image: getCategoryBubbleImage("furniture", "Mattresses") },
+  { name: "Wardrobes", image: getCategoryBubbleImage("furniture", "Wardrobes") },
 ];
 const VERIFIED_OPTIONS: Array<{ label: string; value: VerifiedValue }> = [
   { label: "Show All", value: "all" },
@@ -107,22 +109,18 @@ function StripBubble({
   onClick,
 }: {
   name: FurnitureType;
-  image: string;
+  image?: string;
   active: boolean;
   onClick: () => void;
 }) {
   return (
     <button type="button" onClick={onClick} className="flex min-w-[110px] flex-col items-center gap-2 text-center sm:min-w-[118px]">
-      <span className={`grid h-[74px] w-[74px] place-items-center overflow-hidden rounded-full border ${active ? "border-[#1f1d27]" : "border-[#ddd9d2]"}`}>
-        <img
-          src={image}
-          alt={name}
-          className="h-full w-full object-cover"
-          onError={(event) => {
-            event.currentTarget.src = "/category-images/image.png";
-          }}
-        />
-      </span>
+      <CategoryBubbleAvatar
+        alt={name}
+        imageSrc={image}
+        fallbackText={getBubbleInitials(name)}
+        className={`grid h-[74px] w-[74px] place-items-center overflow-hidden rounded-full border ${active ? "border-[#1f1d27]" : "border-[#ddd9d2]"}`}
+      />
       <span className="text-[15px] font-medium leading-[1.15] text-[#1f1d27]">{name}</span>
     </button>
   );

@@ -1,6 +1,8 @@
 import { useEffect, useMemo, useState, type ReactNode } from "react";
 import { buildProductDetailsRoute } from "../../constants/routes";
 import { ALL_NIGERIA_LOCATION, isCategoryMarkerQuery, NIGERIAN_LOCATIONS } from "../../lib/searchContext";
+import { CategoryBubbleAvatar } from "./CategoryBubbleAvatar";
+import { getCategoryBubbleImage, type CategoryBubbleGroup } from "../../lib/categoryBubbleImages";
 import { api } from "../../services/api";
 import type { Ad } from "../../types";
 import ListingCard from "../listings/ListingCard";
@@ -20,6 +22,7 @@ export type CategorySubtype = {
 
 export type CategoryListingConfig = {
   slug: string;
+  imageGroup: CategoryBubbleGroup;
   displayQuery: string;
   heading: string;
   rangeLabel: "Price" | "Salary";
@@ -101,22 +104,25 @@ function ListIcon({ active = false }: { active?: boolean }) {
 }
 
 function StripBubble({
+  image,
   subtype,
   active,
   onClick,
 }: {
+  image?: string;
   subtype: CategorySubtype;
   active: boolean;
   onClick: () => void;
 }) {
   return (
     <button type="button" onClick={onClick} className="flex min-w-[108px] flex-col items-center gap-2 text-center sm:min-w-[118px]">
-      <span
-        className={`grid h-[74px] w-[74px] place-items-center overflow-hidden rounded-full border text-[20px] font-semibold text-[#1f1d27] ${active ? "border-[#1f1d27]" : "border-[#ddd9d2]"}`}
-        style={{ background: subtype.tone }}
-      >
-        {subtype.initials}
-      </span>
+      <CategoryBubbleAvatar
+        alt={subtype.name}
+        imageSrc={image}
+        fallbackText={subtype.initials}
+        className={`grid h-[74px] w-[74px] place-items-center overflow-hidden rounded-full border ${active ? "border-[#1f1d27]" : "border-[#ddd9d2]"}`}
+        fallbackTextClassName="text-[#1f1d27]"
+      />
       <span className="text-[15px] font-medium leading-[1.15] text-[#1f1d27]">{subtype.name}</span>
     </button>
   );
@@ -432,6 +438,7 @@ export default function CategoryListingView({ config, query, navigate, locationF
               {config.subtypes.map((subtype) => (
                 <StripBubble
                   key={subtype.name}
+                  image={getCategoryBubbleImage(config.imageGroup, subtype.name)}
                   subtype={subtype}
                   active={selectedSubtype === subtype.name}
                   onClick={() => setSelectedSubtype((current) => (current === subtype.name ? "all" : subtype.name))}
@@ -533,6 +540,7 @@ export default function CategoryListingView({ config, query, navigate, locationF
 export const CATEGORY_LISTING_CONFIGS: Record<string, CategoryListingConfig> = {
   properties: {
     slug: "properties",
+    imageGroup: "properties",
     displayQuery: "Properties",
     heading: "Properties In Nigeria",
     rangeLabel: "Price",
@@ -550,6 +558,7 @@ export const CATEGORY_LISTING_CONFIGS: Record<string, CategoryListingConfig> = {
   },
   agriculture: {
     slug: "agriculture",
+    imageGroup: "agriculture",
     displayQuery: "Agriculture",
     heading: "Agricultural Products In Nigeria",
     rangeLabel: "Price",
@@ -567,6 +576,7 @@ export const CATEGORY_LISTING_CONFIGS: Record<string, CategoryListingConfig> = {
   },
   art: {
     slug: "art",
+    imageGroup: "art",
     displayQuery: "Art",
     heading: "Arts In Nigeria",
     rangeLabel: "Price",
@@ -584,6 +594,7 @@ export const CATEGORY_LISTING_CONFIGS: Record<string, CategoryListingConfig> = {
   },
   "sports-leisure": {
     slug: "sports-leisure",
+    imageGroup: "sports",
     displayQuery: "Sports & Leisure",
     heading: "Sports & Leisure In Nigeria",
     rangeLabel: "Price",

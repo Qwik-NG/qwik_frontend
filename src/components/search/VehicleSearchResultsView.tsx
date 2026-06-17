@@ -8,6 +8,7 @@ import { ALL_NIGERIA_LOCATION, NIGERIAN_LOCATIONS } from "../../lib/searchContex
 import ListingCard from "../listings/ListingCard";
 import { FallbackImage } from "../ui/FallbackImage";
 import BackButton from "../ui/BackButton";
+import { CategoryBubbleAvatar } from "./CategoryBubbleAvatar";
 import { LocationPin } from "../icons/LocationPin";
 import { ImagePlaceholder } from "../ui/ImagePlaceholder";
 import DropdownSelect from "../ui/DropdownSelect";
@@ -18,6 +19,7 @@ import {
 } from "../../lib/mockData";
 import { api } from "../../services/api";
 import type { Ad } from "../../types";
+import { getCategoryBubbleImage } from "../../lib/categoryBubbleImages";
 
 type NavigateTo = (to: string) => void;
 type SortValue = "newest" | "price-low" | "price-high";
@@ -134,15 +136,17 @@ function BrandBubble({
 }) {
   return (
     <button type="button" onClick={onClick} className="flex min-w-[78px] flex-col items-center gap-2">
-      <span
+      <CategoryBubbleAvatar
+        alt={name}
+        imageSrc={getCategoryBubbleImage("vehicles", name)}
+        fallbackText={mark}
         className={`grid h-[68px] w-[68px] place-items-center rounded-full border text-[17px] font-semibold tracking-[0.08em] shadow-[inset_0_1px_2px_rgba(255,255,255,0.9)] ${
           active
             ? "border-[#1f1d27] bg-[#1f1d27]"
             : "border-[#ddd9d2] bg-[radial-gradient(circle_at_top,_#ffffff,_#ece8e1)] text-[#1f1d27]"
         } ${textClassName ?? "text-[#1f1d27]"}`}
-      >
-        {mark}
-      </span>
+        fallbackTextClassName={`${active ? (textClassName ?? "!text-white") : (textClassName ?? "!text-[#1f1d27]")} !text-[17px] tracking-[0.08em]`}
+      />
       <span className="text-[14px] font-medium text-[#1f1d27]">{name}</span>
     </button>
   );

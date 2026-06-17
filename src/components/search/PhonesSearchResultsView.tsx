@@ -13,7 +13,9 @@ import { api } from "../../services/api";
 import type { Ad } from "../../types";
 import ListingCard from "../listings/ListingCard";
 import BackButton from "../ui/BackButton";
+import { CategoryBubbleAvatar } from "./CategoryBubbleAvatar";
 import DropdownSelect from "../ui/DropdownSelect";
+import { getBubbleInitials, getCategoryBubbleImage } from "../../lib/categoryBubbleImages";
 
 type NavigateTo = (to: string) => void;
 type SortValue = "newest" | "price-low" | "price-high";
@@ -48,12 +50,12 @@ const SORT_OPTIONS: Array<{ label: string; value: SortValue }> = [
   { label: "Price: Low to High", value: "price-low" },
   { label: "Price: High to Low", value: "price-high" },
 ];
-const STRIP_BRANDS: Array<{ name: StripBrand; label: string; image: string }> = [
-  { name: "Apple", label: "Apple", image: "https://images.unsplash.com/photo-1592899677977-9c10ca588bbd?w=240" },
-  { name: "Tecno", label: "Tecno", image: "https://images.unsplash.com/photo-1511707171634-5f897ff02aa9?w=240" },
-  { name: "Samsung", label: "Samsung", image: "https://images.unsplash.com/photo-1610945265064-0e34e5519bbf?w=240" },
-  { name: "Xiaomi", label: "Xiaomi", image: "https://images.unsplash.com/photo-1598327105666-5b89351aff97?w=240" },
-  { name: "Redmi", label: "Redmi", image: "https://images.unsplash.com/photo-1574944985070-8f3ebc6b79d2?w=240" },
+const STRIP_BRANDS: Array<{ name: StripBrand; label: string; image?: string }> = [
+  { name: "Apple", label: "Apple", image: getCategoryBubbleImage("phones", "Apple") },
+  { name: "Tecno", label: "Tecno", image: getCategoryBubbleImage("phones", "Tecno") },
+  { name: "Samsung", label: "Samsung", image: getCategoryBubbleImage("phones", "Samsung") },
+  { name: "Xiaomi", label: "Xiaomi", image: getCategoryBubbleImage("phones", "Xiaomi") },
+  { name: "Redmi", label: "Redmi", image: getCategoryBubbleImage("phones", "Redmi") },
 ];
 
 function formatNaira(value: number) {
@@ -114,15 +116,18 @@ function StripBubble({
   onClick,
 }: {
   label: string;
-  image: string;
+  image?: string;
   active: boolean;
   onClick: () => void;
 }) {
   return (
     <button type="button" onClick={onClick} className="flex min-w-[104px] flex-col items-center gap-2 text-center">
-      <span className={`grid h-[72px] w-[72px] place-items-center overflow-hidden rounded-full border ${active ? "border-[#1f1d27]" : "border-[#ddd9d2]"}`}>
-        <img src={image} alt={label} className="h-full w-full object-cover" />
-      </span>
+      <CategoryBubbleAvatar
+        alt={label}
+        imageSrc={image}
+        fallbackText={getBubbleInitials(label)}
+        className={`grid h-[72px] w-[72px] place-items-center overflow-hidden rounded-full border ${active ? "border-[#1f1d27]" : "border-[#ddd9d2]"}`}
+      />
       <span className="text-[15px] font-medium text-[#1f1d27]">{label}</span>
     </button>
   );

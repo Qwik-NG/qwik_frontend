@@ -21,7 +21,9 @@ import { api } from "../../services/api";
 import type { Ad } from "../../types";
 import ListingCard from "../listings/ListingCard";
 import BackButton from "../ui/BackButton";
+import { CategoryBubbleAvatar } from "./CategoryBubbleAvatar";
 import DropdownSelect from "../ui/DropdownSelect";
+import { getBubbleInitials, getCategoryBubbleImage } from "../../lib/categoryBubbleImages";
 
 type NavigateTo = (to: string) => void;
 type SortValue = "newest" | "price-low" | "price-high";
@@ -39,7 +41,7 @@ type FashionStateConfig = {
   canonicalQuery: string;
   title: string;
   subtitle: string;
-  stripItems: Array<{ name: FashionStripItem; image: string; routeQuery?: string }>;
+  stripItems: Array<{ name: FashionStripItem; image?: string; routeQuery?: string }>;
   defaultStrip: FashionStripItem | "all";
   defaultCategory: "all" | FashionCategory;
 };
@@ -69,9 +71,9 @@ const FASHION_STATE_CONFIG: Record<FashionSearchState, FashionStateConfig> = {
     defaultStrip: "all",
     defaultCategory: "all",
     stripItems: [
-      { name: "Men's Fashion", image: "https://images.unsplash.com/photo-1515886657613-9f3515b0c78f?w=240", routeQuery: "Men's Fashion" },
-      { name: "Women's Fashion", image: "https://images.unsplash.com/photo-1496747611176-843222e1e57c?w=240", routeQuery: "Women's Fashion" },
-      { name: "Baby & Kids Fashion", image: "https://images.unsplash.com/photo-1519238359922-989348752efb?w=240", routeQuery: "Baby & Kids Fashion" },
+      { name: "Men's Fashion", image: getCategoryBubbleImage("fashion", "Men's Fashion"), routeQuery: "Men's Fashion" },
+      { name: "Women's Fashion", image: getCategoryBubbleImage("fashion", "Women's Fashion"), routeQuery: "Women's Fashion" },
+      { name: "Baby & Kids Fashion", image: getCategoryBubbleImage("fashion", "Baby & Kids Fashion"), routeQuery: "Baby & Kids Fashion" },
     ],
   },
   men: {
@@ -81,13 +83,13 @@ const FASHION_STATE_CONFIG: Record<FashionSearchState, FashionStateConfig> = {
     defaultStrip: "Shirt",
     defaultCategory: "Men's Fashion",
     stripItems: [
-      { name: "Shirt", image: "https://images.unsplash.com/photo-1603252109303-2751441dd157?w=240" },
-      { name: "Suits", image: "https://images.unsplash.com/photo-1593032465171-8bd6d6f0a27c?w=240" },
-      { name: "T-shirt & Tanks", image: "https://images.unsplash.com/photo-1521572163474-6864f9cf17ab?w=240" },
-      { name: "Jeans", image: "https://images.unsplash.com/photo-1541099649105-f69ad21f3246?w=240" },
-      { name: "Active Wear", image: "https://images.unsplash.com/photo-1517836357463-d25dfeac3438?w=240" },
-      { name: "Bags", image: "https://images.unsplash.com/photo-1548036328-c9fa89d128fa?w=240" },
-      { name: "Jewelry", image: "https://images.unsplash.com/photo-1617038260897-41a1f14a8ca0?w=240" },
+      { name: "Shirt", image: getCategoryBubbleImage("fashion", "Shirt") },
+      { name: "Suits", image: getCategoryBubbleImage("fashion", "Suits") },
+      { name: "T-shirt & Tanks", image: getCategoryBubbleImage("fashion", "T-shirt & Tanks") },
+      { name: "Jeans", image: getCategoryBubbleImage("fashion", "Jeans") },
+      { name: "Active Wear", image: getCategoryBubbleImage("fashion", "Active Wear") },
+      { name: "Bags", image: getCategoryBubbleImage("fashion", "Bags") },
+      { name: "Jewelry", image: getCategoryBubbleImage("fashion", "Jewelry") },
     ],
   },
   women: {
@@ -97,13 +99,13 @@ const FASHION_STATE_CONFIG: Record<FashionSearchState, FashionStateConfig> = {
     defaultStrip: "Shirt",
     defaultCategory: "Women's Fashion",
     stripItems: [
-      { name: "Shirt", image: "https://images.unsplash.com/photo-1551232864-3f0890e580d9?w=240" },
-      { name: "Suits", image: "https://images.unsplash.com/photo-1483985988355-763728e1935b?w=240" },
-      { name: "Jeans", image: "https://images.unsplash.com/photo-1541099649105-f69ad21f3246?w=240" },
-      { name: "Dresses", image: "https://images.unsplash.com/photo-1496747611176-843222e1e57c?w=240" },
-      { name: "Active Wear", image: "https://images.unsplash.com/photo-1515886657613-9f3515b0c78f?w=240" },
-      { name: "Bags", image: "https://images.unsplash.com/photo-1584917865442-de89df76afd3?w=240" },
-      { name: "Jewelry", image: "https://images.unsplash.com/photo-1617038260897-41a1f14a8ca0?w=240" },
+      { name: "Shirt", image: getCategoryBubbleImage("fashion", "Shirt") },
+      { name: "Suits", image: getCategoryBubbleImage("fashion", "Suits") },
+      { name: "Jeans", image: getCategoryBubbleImage("fashion", "Jeans") },
+      { name: "Dresses", image: getCategoryBubbleImage("fashion", "Dresses") },
+      { name: "Active Wear", image: getCategoryBubbleImage("fashion", "Active Wear") },
+      { name: "Bags", image: getCategoryBubbleImage("fashion", "Bags") },
+      { name: "Jewelry", image: getCategoryBubbleImage("fashion", "Jewelry") },
     ],
   },
   "baby-kids": {
@@ -113,13 +115,13 @@ const FASHION_STATE_CONFIG: Record<FashionSearchState, FashionStateConfig> = {
     defaultStrip: "Clothing set",
     defaultCategory: "Baby & Kids Fashion",
     stripItems: [
-      { name: "Clothing set", image: "https://images.unsplash.com/photo-1519238359922-989348752efb?w=240" },
-      { name: "Ball Gowns", image: "https://images.unsplash.com/photo-1515886657613-9f3515b0c78f?w=240" },
-      { name: "Dresses", image: "https://images.unsplash.com/photo-1515372039744-b8f02a3ae446?w=240" },
-      { name: "Jeans", image: "https://images.unsplash.com/photo-1541099649105-f69ad21f3246?w=240" },
-      { name: "Shirt", image: "https://images.unsplash.com/photo-1551232864-3f0890e580d9?w=240" },
-      { name: "Shoes", image: "https://images.unsplash.com/photo-1542291026-7eec264c27ff?w=240" },
-      { name: "Caps", image: "https://images.unsplash.com/photo-1521369909029-2afed882baee?w=240" },
+      { name: "Clothing set", image: getCategoryBubbleImage("fashion", "Clothing set") },
+      { name: "Ball Gowns", image: getCategoryBubbleImage("fashion", "Ball Gowns") },
+      { name: "Dresses", image: getCategoryBubbleImage("fashion", "Dresses") },
+      { name: "Jeans", image: getCategoryBubbleImage("fashion", "Jeans") },
+      { name: "Shirt", image: getCategoryBubbleImage("fashion", "Shirt") },
+      { name: "Shoes", image: getCategoryBubbleImage("fashion", "Shoes") },
+      { name: "Caps", image: getCategoryBubbleImage("fashion", "Caps") },
     ],
   },
 };
@@ -174,15 +176,18 @@ function StripBubble({
   onClick,
 }: {
   name: FashionStripItem;
-  image: string;
+  image?: string;
   active: boolean;
   onClick: () => void;
 }) {
   return (
     <button type="button" onClick={onClick} className="flex min-w-[112px] flex-col items-center gap-2 text-center sm:min-w-[120px]">
-      <span className={`grid h-[74px] w-[74px] place-items-center overflow-hidden rounded-full border ${active ? "border-[#1f1d27]" : "border-[#ddd9d2]"}`}>
-        <img src={image} alt={name} className="h-full w-full object-cover" />
-      </span>
+      <CategoryBubbleAvatar
+        alt={name}
+        imageSrc={image}
+        fallbackText={getBubbleInitials(name)}
+        className={`grid h-[74px] w-[74px] place-items-center overflow-hidden rounded-full border ${active ? "border-[#1f1d27]" : "border-[#ddd9d2]"}`}
+      />
       <span className="text-[15px] font-medium leading-[1.15] text-[#1f1d27]">{name}</span>
     </button>
   );

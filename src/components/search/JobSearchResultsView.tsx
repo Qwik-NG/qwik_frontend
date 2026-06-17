@@ -14,7 +14,9 @@ import { api } from "../../services/api";
 import type { Ad } from "../../types";
 import ListingCard from "../listings/ListingCard";
 import BackButton from "../ui/BackButton";
+import { CategoryBubbleAvatar } from "./CategoryBubbleAvatar";
 import DropdownSelect from "../ui/DropdownSelect";
+import { getBubbleInitials, getCategoryBubbleImage } from "../../lib/categoryBubbleImages";
 
 type NavigateTo = (to: string) => void;
 type SortValue = "newest" | "price-low" | "price-high";
@@ -29,13 +31,13 @@ type JobSearchResultsViewProps = {
 };
 
 const JOB_CATEGORIES: Array<"all" | JobCategoryType> = ["all", "Full Time", "Part Time", "Internship"];
-const JOB_STRIP_ITEMS: Array<{ name: JobStripType; image: string }> = [
-  { name: "Full Time", image: "https://dummyimage.com/160x160/cfe3ff/2f74ff.png&text=JOBS" },
-  { name: "Part Time", image: "https://dummyimage.com/160x160/cfe3ff/2f74ff.png&text=JOBS" },
-  { name: "Internship", image: "https://dummyimage.com/160x160/cfe3ff/2f74ff.png&text=JOBS" },
-  { name: "Contract", image: "https://dummyimage.com/160x160/cfe3ff/2f74ff.png&text=JOBS" },
-  { name: "Remote", image: "https://dummyimage.com/160x160/cfe3ff/2f74ff.png&text=JOBS" },
-  { name: "Temporary", image: "https://dummyimage.com/160x160/cfe3ff/2f74ff.png&text=JOBS" },
+const JOB_STRIP_ITEMS: Array<{ name: JobStripType; image?: string }> = [
+  { name: "Full Time", image: getCategoryBubbleImage("jobs", "Full Time") },
+  { name: "Part Time", image: getCategoryBubbleImage("jobs", "Part Time") },
+  { name: "Internship", image: getCategoryBubbleImage("jobs", "Internship") },
+  { name: "Contract", image: getCategoryBubbleImage("jobs", "Contract") },
+  { name: "Remote", image: getCategoryBubbleImage("jobs", "Remote") },
+  { name: "Temporary", image: getCategoryBubbleImage("jobs", "Temporary") },
 ];
 const SORT_OPTIONS: Array<{ label: string; value: SortValue }> = [
   { label: "Newest first", value: "newest" },
@@ -106,15 +108,18 @@ function StripBubble({
   onClick,
 }: {
   name: JobStripType;
-  image: string;
+  image?: string;
   active: boolean;
   onClick: () => void;
 }) {
   return (
     <button type="button" onClick={onClick} className="flex min-w-[108px] flex-col items-center gap-2 text-center sm:min-w-[118px]">
-      <span className={`grid h-[74px] w-[74px] place-items-center overflow-hidden rounded-full border ${active ? "border-[#1f1d27]" : "border-[#ddd9d2]"}`}>
-        <img src={image} alt={name} className="h-full w-full object-cover" />
-      </span>
+      <CategoryBubbleAvatar
+        alt={name}
+        imageSrc={image}
+        fallbackText={getBubbleInitials(name)}
+        className={`grid h-[74px] w-[74px] place-items-center overflow-hidden rounded-full border ${active ? "border-[#1f1d27]" : "border-[#ddd9d2]"}`}
+      />
       <span className="text-[15px] font-medium leading-[1.15] text-[#1f1d27]">{name}</span>
     </button>
   );

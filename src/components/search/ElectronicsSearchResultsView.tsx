@@ -13,7 +13,9 @@ import {
 import { api } from "../../services/api";
 import type { Ad } from "../../types";
 import BackButton from "../ui/BackButton";
+import { CategoryBubbleAvatar } from "./CategoryBubbleAvatar";
 import DropdownSelect from "../ui/DropdownSelect";
+import { getBubbleInitials, getCategoryBubbleImage } from "../../lib/categoryBubbleImages";
 
 type NavigateTo = (to: string) => void;
 type SortValue = "newest" | "price-low" | "price-high";
@@ -53,10 +55,10 @@ const SORT_OPTIONS: Array<{ label: string; value: SortValue }> = [
   { label: "Price: Low to High", value: "price-low" },
   { label: "Price: High to Low", value: "price-high" },
 ];
-const STRIP_CATEGORIES: Array<{ name: StripCategory; image: string }> = [
-  { name: "Laptops", image: "/category-images/electronics.png" },
-  { name: "Desktop", image: "/category-images/electronics.png" },
-  { name: "Server", image: "/category-images/electronics.png" },
+const STRIP_CATEGORIES: Array<{ name: StripCategory; image?: string }> = [
+  { name: "Laptops", image: getCategoryBubbleImage("electronics", "Laptops") },
+  { name: "Desktop", image: getCategoryBubbleImage("electronics", "Desktop") },
+  { name: "Server", image: getCategoryBubbleImage("electronics", "Server") },
 ];
 
 function formatNaira(value: number) {
@@ -117,22 +119,18 @@ function StripBubble({
   onClick,
 }: {
   name: StripCategory;
-  image: string;
+  image?: string;
   active: boolean;
   onClick: () => void;
 }) {
   return (
     <button type="button" onClick={onClick} className="flex min-w-[120px] flex-col items-center gap-2 text-center">
-      <span className={`grid h-[72px] w-[72px] place-items-center overflow-hidden rounded-full border ${active ? "border-[#1f1d27]" : "border-[#ddd9d2]"}`}>
-        <img
-          src={image}
-          alt={name}
-          className="h-full w-full object-cover"
-          onError={(event) => {
-            event.currentTarget.src = "/category-images/image.png";
-          }}
-        />
-      </span>
+      <CategoryBubbleAvatar
+        alt={name}
+        imageSrc={image}
+        fallbackText={getBubbleInitials(name)}
+        className={`grid h-[72px] w-[72px] place-items-center overflow-hidden rounded-full border ${active ? "border-[#1f1d27]" : "border-[#ddd9d2]"}`}
+      />
       <span className="text-[15px] font-medium text-[#1f1d27]">{name}</span>
     </button>
   );
