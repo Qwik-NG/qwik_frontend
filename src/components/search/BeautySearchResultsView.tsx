@@ -178,7 +178,7 @@ function BeautyFilters({
     <div className="space-y-4">
       <FilterPanel title="Region">
         <DropdownSelect
-          label="Select region"
+          label=""
           placeholder={ALL_NIGERIA_LOCATION}
           value={selectedLocation}
           options={[

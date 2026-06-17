@@ -171,9 +171,9 @@ function SearchFilters({
   const subcategoryOptions = selectedCategoryObj?.children ?? [];
   return (
     <div className="space-y-4">
-      <div className="rounded-[22px] bg-white px-4 py-5 shadow-[0_10px_26px_rgba(31,29,39,0.04)] sm:px-5">
+      <FilterPanel title="Region">
         <DropdownSelect
-          label="Region"
+          label=""
           placeholder="All Nigeria"
           value={selectedLocation}
           options={[
@@ -182,7 +182,7 @@ function SearchFilters({
           ]}
           onChange={onLocationChange}
         />
-      </div>
+      </FilterPanel>
 
       <FilterPanel title="Sort by">
         <div className="relative">

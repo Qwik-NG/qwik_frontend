@@ -8,7 +8,7 @@ export type DropdownOption = {
 };
 
 type DropdownSelectProps = {
-  label: string;
+  label?: string;
   placeholder: string;
   value: string;
   options: DropdownOption[];
@@ -79,14 +79,20 @@ export default function DropdownSelect({ label, placeholder, value, options, onC
     setOpen(false);
   };
 
+  const hasLabel = Boolean(label && label.trim().length > 0);
+  const labelId = `${id}-label`;
+
   return (
     <div ref={rootRef} className="relative block">
-      <label id={`${id}-label`} className="mb-2 block text-[15px] font-medium text-[#27242d]">
-        {label}
-      </label>
+      {hasLabel ? (
+        <label id={labelId} className="mb-2 block text-[15px] font-medium text-[#27242d]">
+          {label}
+        </label>
+      ) : null}
       <button
         type="button"
-        aria-labelledby={`${id}-label`}
+        aria-labelledby={hasLabel ? labelId : undefined}
+        aria-label={hasLabel ? undefined : placeholder}
         aria-haspopup="listbox"
         aria-expanded={open}
         aria-controls={`${id}-listbox`}
@@ -114,7 +120,8 @@ export default function DropdownSelect({ label, placeholder, value, options, onC
           id={`${id}-listbox`}
           ref={listRef}
           role="listbox"
-          aria-labelledby={`${id}-label`}
+          aria-labelledby={hasLabel ? labelId : undefined}
+          aria-label={hasLabel ? undefined : placeholder}
           style={{ scrollBehavior: "smooth", WebkitOverflowScrolling: "touch" }}
           className="pointer-events-none absolute left-0 right-0 z-[120] mt-2 max-h-[280px] overflow-y-auto overscroll-contain rounded-[14px] border border-[#eee3d6] bg-white p-1.5 shadow-[0_18px_44px_rgba(34,25,16,0.16)]"
         >
