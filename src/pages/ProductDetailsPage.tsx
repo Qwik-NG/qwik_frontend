@@ -63,6 +63,17 @@ function Spinner({ className = "h-4 w-4" }: { className?: string }) {
   return <span className={`${className} inline-block animate-spin rounded-full border-2 border-current border-t-transparent`} aria-hidden="true" />;
 }
 
+function formatPhoneForDisplay(phone: string) {
+  const digits = phone.replace(/\D/g, "");
+  if (digits.length === 11 && digits.startsWith("0")) {
+    return `${digits.slice(0, 4)} ${digits.slice(4, 7)} ${digits.slice(7)}`;
+  }
+  if (digits.length === 13 && digits.startsWith("234")) {
+    return `+${digits.slice(0, 3)} ${digits.slice(3, 6)} ${digits.slice(6, 9)} ${digits.slice(9)}`;
+  }
+  return phone;
+}
+
 function ProductDetailsSkeleton({ navigate }: { navigate: (to: string) => void }) {
   return (
     <div className="min-h-screen bg-page text-ink">
@@ -126,6 +137,7 @@ export default function ProductDetailsPage() {
   const [reporting, setReporting] = useState(false);
   const [markingUnavailable, setMarkingUnavailable] = useState(false);
   const [touchStartX, setTouchStartX] = useState<number | null>(null);
+  const [isPhoneRevealed, setIsPhoneRevealed] = useState(false);
 
   const fetchAd = useCallback(async () => {
       try {
@@ -173,6 +185,10 @@ export default function ProductDetailsPage() {
   useEffect(() => {
     fetchAd();
   }, [fetchAd]);
+
+  useEffect(() => {
+    setIsPhoneRevealed(false);
+  }, [id]);
 
   const handlePostReview = async () => {
     if (!reviewText.trim()) return;
@@ -274,6 +290,36 @@ export default function ProductDetailsPage() {
     });
 
     navigate(`/messages?${params.toString()}`);
+  };
+
+  const sellerPhoneRaw = ad?.user?.phone?.trim() ?? "";
+  const sellerPhoneDigits = sellerPhoneRaw.replace(/\D/g, "");
+  const sellerPhoneDisplay = sellerPhoneRaw ? formatPhoneForDisplay(sellerPhoneRaw) : "Phone not available";
+  const sellerPhoneDial = sellerPhoneDigits
+    ? sellerPhoneDigits.startsWith("0")
+      ? `+234${sellerPhoneDigits.slice(1)}`
+      : sellerPhoneDigits.startsWith("234")
+        ? `+${sellerPhoneDigits}`
+        : `+${sellerPhoneDigits}`
+    : "";
+
+  const handleCallSeller = () => {
+    if (!sellerPhoneRaw) {
+      showError("Seller phone number is unavailable");
+      return;
+    }
+
+    if (!isPhoneRevealed) {
+      setIsPhoneRevealed(true);
+      return;
+    }
+
+    if (!sellerPhoneDial) {
+      showError("Seller phone number is invalid");
+      return;
+    }
+
+    window.location.href = `tel:${sellerPhoneDial}`;
   };
 
   const showPreviousImage = () => {
@@ -558,7 +604,16 @@ export default function ProductDetailsPage() {
               >
                 Make an offer
               </button>
-              <button className="h-10 rounded-[8px] bg-badge-bg px-4 text-[#ff9715] transition-colors duration-200 hover:bg-[#ffe2c5] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#ffb357] focus-visible:ring-offset-2 focus-visible:ring-offset-white" type="button">Call</button>
+              <div className="flex items-center gap-2">
+                {isPhoneRevealed ? <p className="text-[14px] text-[#5f5c68]">{sellerPhoneDisplay}</p> : null}
+                <button
+                  className="h-10 rounded-[8px] bg-badge-bg px-4 text-[#ff9715] transition-colors duration-200 hover:bg-[#ffe2c5] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#ffb357] focus-visible:ring-offset-2 focus-visible:ring-offset-white"
+                  onClick={handleCallSeller}
+                  type="button"
+                >
+                  {isPhoneRevealed ? "Call Now" : "Show Number"}
+                </button>
+              </div>
             </div>
           </div>
 
