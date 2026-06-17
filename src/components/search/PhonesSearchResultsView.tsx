@@ -121,14 +121,14 @@ function StripBubble({
   onClick: () => void;
 }) {
   return (
-    <button type="button" onClick={onClick} className="flex min-w-[104px] flex-col items-center gap-2 text-center">
+    <button type="button" onClick={onClick} className="flex min-w-[92px] flex-col items-center gap-1.5 text-center">
       <CategoryBubbleAvatar
         alt={label}
         imageSrc={image}
         fallbackText={getBubbleInitials(label)}
-        className={`grid h-[72px] w-[72px] place-items-center overflow-hidden rounded-full border ${active ? "border-[#1f1d27]" : "border-[#ddd9d2]"}`}
+        className={`grid h-[60px] w-[60px] place-items-center overflow-hidden rounded-full border ${active ? "border-[#1f1d27]" : "border-[#ddd9d2]"}`}
       />
-      <span className="text-[15px] font-medium text-[#1f1d27]">{label}</span>
+      <span className="text-[13px] font-medium text-[#1f1d27]">{label}</span>
     </button>
   );
 }

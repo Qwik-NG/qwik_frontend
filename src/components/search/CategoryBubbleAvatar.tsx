@@ -17,7 +17,7 @@ export function CategoryBubbleAvatar({
   className,
   imageSrc,
   fallbackText,
-  fallbackTextClassName = "text-[#1f1d27]",
+  fallbackTextClassName = "text-[15px] font-semibold text-[#1f1d27]",
   imageClassName = "h-full w-full object-cover",
 }: CategoryBubbleAvatarProps) {
   const normalizedSrc = normalizeImageUrl(imageSrc);

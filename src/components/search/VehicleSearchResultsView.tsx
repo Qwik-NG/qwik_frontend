@@ -135,12 +135,12 @@ function BrandBubble({
   textClassName?: string;
 }) {
   return (
-    <button type="button" onClick={onClick} className="flex min-w-[78px] flex-col items-center gap-2">
+    <button type="button" onClick={onClick} className="flex min-w-[92px] flex-col items-center gap-1.5">
       <CategoryBubbleAvatar
         alt={name}
         imageSrc={getCategoryBubbleImage("vehicles", name)}
         fallbackText={mark}
-        className={`grid h-[68px] w-[68px] place-items-center rounded-full border text-[17px] font-semibold tracking-[0.08em] shadow-[inset_0_1px_2px_rgba(255,255,255,0.9)] ${
+        className={`grid h-[60px] w-[60px] place-items-center rounded-full border text-[17px] font-semibold tracking-[0.08em] shadow-[inset_0_1px_2px_rgba(255,255,255,0.9)] ${
           active
             ? "border-[#1f1d27] bg-[#1f1d27]"
             : "border-[#ddd9d2] bg-[radial-gradient(circle_at_top,_#ffffff,_#ece8e1)] text-[#1f1d27]"
