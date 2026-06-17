@@ -1,8 +1,6 @@
 import { useEffect, useState } from "react";
 import { normalizeImageUrl } from "../../lib/imageUrls";
 
-const failedImageUrls = new Set<string>();
-
 type CategoryBubbleAvatarProps = {
   alt: string;
   className: string;
@@ -24,7 +22,7 @@ export function CategoryBubbleAvatar({
   const [failed, setFailed] = useState(false);
 
   useEffect(() => {
-    setFailed(Boolean(normalizedSrc && failedImageUrls.has(normalizedSrc)));
+    setFailed(false);
   }, [normalizedSrc]);
 
   const showImage = Boolean(normalizedSrc && !failed);
@@ -37,9 +35,6 @@ export function CategoryBubbleAvatar({
           alt={alt}
           className={imageClassName}
           onError={() => {
-            if (normalizedSrc) {
-              failedImageUrls.add(normalizedSrc);
-            }
             setFailed(true);
           }}
         />
