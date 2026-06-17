@@ -6,6 +6,7 @@ import DropdownSelect from "../components/ui/DropdownSelect";
 import { CONDITION_OPTIONS } from "../lib/postAdOptions";
 import { ALL_NIGERIA_LOCATION, NIGERIAN_AREAS, NIGERIAN_LOCATIONS } from "../lib/searchContext";
 import { api } from "../services/api";
+import { useToast } from "../context/ToastContext";
 
 const POST_DRAFT_KEY = "qwik_post_draft";
 
@@ -302,6 +303,7 @@ function Spinner() {
 
 export default function PostDetailsPage() {
   const navigate = useNavigate();
+  const { success } = useToast();
   const [condition, setCondition] = useState("");
   const [color, setColor] = useState("");
   const [locationState, setLocationState] = useState("");
@@ -353,6 +355,7 @@ export default function PostDetailsPage() {
       });
 
       clearDraft();
+      success("Ad created successfully. You can now promote it or manage it in My Ads.");
       navigate(`/promote-ad?adId=${encodeURIComponent(response.data.id)}`);
     } catch (err) {
       setError(err instanceof Error ? err.message : "Failed to create advert");

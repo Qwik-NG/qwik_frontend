@@ -354,6 +354,8 @@ export const api = {
     request<Message>("/messages", { method: "POST", body: JSON.stringify(payload) }),
 
   // ===== Notification Endpoints =====
+  getUnreadNotificationCount: () => request<{ count: number }>("/notifications/unread-count", { retry: 1 }),
+
   getNotifications: (unreadOnly?: boolean) =>
     request<Notification[]>(`/notifications${unreadOnly ? "?unread=true" : ""}`, {
       staleTime: SHORT_LIST_STALE_TIME,

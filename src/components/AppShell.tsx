@@ -139,9 +139,9 @@ export function SiteHeader({
         return;
       }
 
-      void api.getNotifications(true)
+      void api.getUnreadNotificationCount()
         .then((response) => {
-          if (!cancelled) setUnreadNotificationCount(response.data.length);
+          if (!cancelled) setUnreadNotificationCount(response.data.count);
         })
         .catch(() => {
           if (!cancelled) setUnreadNotificationCount(0);
