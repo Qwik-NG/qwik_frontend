@@ -125,6 +125,7 @@ export default function ProductDetailsPage() {
   const [saving, setSaving] = useState(false);
   const [reporting, setReporting] = useState(false);
   const [markingUnavailable, setMarkingUnavailable] = useState(false);
+  const [touchStartX, setTouchStartX] = useState<number | null>(null);
 
   const fetchAd = useCallback(async () => {
       try {
@@ -275,6 +276,37 @@ export default function ProductDetailsPage() {
     navigate(`/messages?${params.toString()}`);
   };
 
+  const showPreviousImage = () => {
+    if (gallery.length <= 1) return;
+    setActiveImage((current) => (current - 1 + gallery.length) % gallery.length);
+  };
+
+  const showNextImage = () => {
+    if (gallery.length <= 1) return;
+    setActiveImage((current) => (current + 1) % gallery.length);
+  };
+
+  const handleTouchStart = (event: React.TouchEvent<HTMLDivElement>) => {
+    setTouchStartX(event.changedTouches[0]?.clientX ?? null);
+  };
+
+  const handleTouchEnd = (event: React.TouchEvent<HTMLDivElement>) => {
+    if (touchStartX === null || gallery.length <= 1) return;
+    const endX = event.changedTouches[0]?.clientX;
+    if (typeof endX !== "number") {
+      setTouchStartX(null);
+      return;
+    }
+    const deltaX = endX - touchStartX;
+    const SWIPE_THRESHOLD = 40;
+    if (deltaX <= -SWIPE_THRESHOLD) {
+      showNextImage();
+    } else if (deltaX >= SWIPE_THRESHOLD) {
+      showPreviousImage();
+    }
+    setTouchStartX(null);
+  };
+
   if (loading) return <ProductDetailsSkeleton navigate={navigate} />;
   if (error || !ad) return (
     <div className="min-h-screen bg-page text-ink">
@@ -324,7 +356,11 @@ export default function ProductDetailsPage() {
           <div className="grid grid-cols-1 gap-8 xl:grid-cols-[430px_1fr]">
             {/* Image Gallery */}
             <div>
-              <div className="h-[430px] w-full overflow-hidden rounded-[14px] bg-white">
+              <div
+                className="relative h-[430px] w-full overflow-hidden rounded-[14px] bg-white"
+                onTouchStart={handleTouchStart}
+                onTouchEnd={handleTouchEnd}
+              >
                 {selected ? (
                   <FallbackImage
                     src={selected}
@@ -336,6 +372,26 @@ export default function ProductDetailsPage() {
                 ) : (
                   <ImagePlaceholder className="rounded-[14px]" />
                 )}
+                {gallery.length > 1 ? (
+                  <>
+                    <button
+                      type="button"
+                      aria-label="Show previous image"
+                      onClick={showPreviousImage}
+                      className="absolute left-3 top-1/2 z-10 -translate-y-1/2 rounded-full bg-black/55 px-2.5 py-2 text-white transition hover:bg-black/70"
+                    >
+                      ‹
+                    </button>
+                    <button
+                      type="button"
+                      aria-label="Show next image"
+                      onClick={showNextImage}
+                      className="absolute right-3 top-1/2 z-10 -translate-y-1/2 rounded-full bg-black/55 px-2.5 py-2 text-white transition hover:bg-black/70"
+                    >
+                      ›
+                    </button>
+                  </>
+                ) : null}
               </div>
               {gallery.length > 0 ? (
                 <div className="mt-3 grid grid-cols-10 gap-1.5">
