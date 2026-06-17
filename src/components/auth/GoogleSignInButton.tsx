@@ -36,6 +36,8 @@ declare global {
 }
 
 let scriptPromise: Promise<void> | null = null;
+let initializedClientId: string | null = null;
+let activeCredentialHandler: ((response: GoogleCredentialResponse) => void) | null = null;
 
 function loadGoogleScript(): Promise<void> {
   if (typeof window === "undefined") return Promise.reject(new Error("No window"));
@@ -69,6 +71,27 @@ function loadGoogleScript(): Promise<void> {
   });
 
   return scriptPromise;
+}
+
+function ensureGoogleInitialized(clientId: string) {
+  if (!window.google?.accounts?.id) {
+    throw new Error("Google Identity script is not ready");
+  }
+
+  if (initializedClientId === clientId) {
+    return;
+  }
+
+  window.google.accounts.id.initialize({
+    client_id: clientId,
+    callback: (response: GoogleCredentialResponse) => {
+      activeCredentialHandler?.(response);
+    },
+    ux_mode: "popup",
+    use_fedcm_for_prompt: true,
+  });
+
+  initializedClientId = clientId;
 }
 
 type Props = {
@@ -106,28 +129,24 @@ export default function GoogleSignInButton({ disabledLabel = "Continue with Goog
       .then(() => {
         if (cancelled || !window.google || !containerRef.current) return;
         try {
-          window.google.accounts.id.initialize({
-            client_id: GOOGLE_CLIENT_ID!,
-            callback: async (response: GoogleCredentialResponse) => {
-              if (!response.credential) {
-                showErrorRef.current("Google sign-in was cancelled");
-                return;
-              }
-              try {
-                setStatus("submitting");
-                const res = await api.googleAuth({ credential: response.credential });
-                setToken(res.data.token);
-                setRole(res.data.user.role);
-                successRef.current("Signed in with Google");
-                navigateRef.current(res.data.user.role === "ADMIN" ? "/admin" : "/welcome");
-              } catch (err) {
-                showErrorRef.current(err instanceof Error ? err.message : "Google sign-in failed");
-                setStatus("ready");
-              }
-            },
-            ux_mode: "popup",
-            use_fedcm_for_prompt: true,
-          });
+          activeCredentialHandler = async (response: GoogleCredentialResponse) => {
+            if (!response.credential) {
+              showErrorRef.current("Google sign-in was cancelled");
+              return;
+            }
+            try {
+              setStatus("submitting");
+              const res = await api.googleAuth({ credential: response.credential });
+              setToken(res.data.token);
+              setRole(res.data.user.role);
+              successRef.current("Signed in with Google");
+              navigateRef.current(res.data.user.role === "ADMIN" ? "/admin" : "/welcome");
+            } catch (err) {
+              showErrorRef.current(err instanceof Error ? err.message : "Google sign-in failed");
+              setStatus("ready");
+            }
+          };
+          ensureGoogleInitialized(GOOGLE_CLIENT_ID!);
           containerRef.current.innerHTML = "";
           const width = Math.min(containerRef.current.clientWidth || 320, 400);
           window.google.accounts.id.renderButton(containerRef.current, {
@@ -154,6 +173,7 @@ export default function GoogleSignInButton({ disabledLabel = "Continue with Goog
 
     return () => {
       cancelled = true;
+      activeCredentialHandler = null;
       if (timeoutId) clearTimeout(timeoutId);
     };
   }, [isConfigured]);
