@@ -157,6 +157,9 @@ function CategoryFilters({
   selectedMaxPrice: number;
   onSelectedMaxPriceChange: (value: number) => void;
 }) {
+  const [showAllSubtypes, setShowAllSubtypes] = useState(false);
+  const visibleSubtypes = showAllSubtypes ? config.subtypes : config.subtypes.slice(0, 4);
+
   return (
     <div className="space-y-4">
       <FilterPanel title="Region">
@@ -193,7 +196,7 @@ function CategoryFilters({
       <FilterPanel title="Categories">
         <div className="space-y-3">
           <FilterOption label="Show All" checked={selectedSubtype === "all"} onClick={() => onSelectedSubtypeChange("all")} />
-          {config.subtypes.map((subtype) => (
+          {visibleSubtypes.map((subtype) => (
             <FilterOption
               key={subtype.name}
               label={subtype.name}
@@ -201,6 +204,11 @@ function CategoryFilters({
               onClick={() => onSelectedSubtypeChange(subtype.name)}
             />
           ))}
+          {config.subtypes.length > 4 ? (
+            <button type="button" className="pt-1 text-left text-[15px] text-[#3f3c46]" onClick={() => setShowAllSubtypes((current) => !current)}>
+              {showAllSubtypes ? "Show less" : "Show more"}
+            </button>
+          ) : null}
         </div>
       </FilterPanel>
 
@@ -357,8 +365,8 @@ export default function CategoryListingView({ config, query, navigate, locationF
         </div>
       ) : null}
 
-      <div className="grid grid-cols-1 gap-6 xl:grid-cols-[256px_minmax(0,1fr)] xl:items-start">
-        <aside className="hidden space-y-4 xl:sticky xl:top-[98px] xl:block">
+      <div className="grid grid-cols-1 gap-6 xl:grid-cols-[256px_minmax(0,1fr)] xl:items-start xl:h-[calc(100vh-112px)] xl:overflow-hidden">
+        <aside className="hidden space-y-4 xl:block xl:h-full xl:overflow-y-auto xl:pr-1">
           <CategoryFilters
             config={config}
             selectedSubtype={selectedSubtype}
@@ -374,7 +382,7 @@ export default function CategoryListingView({ config, query, navigate, locationF
           />
         </aside>
 
-        <section className="min-w-0">
+        <section className="min-w-0 xl:h-full xl:overflow-y-auto xl:pr-1">
           <div className="mb-5 flex flex-wrap items-center gap-3">
             <BackButton />
           </div>
@@ -523,6 +531,23 @@ export default function CategoryListingView({ config, query, navigate, locationF
 }
 
 export const CATEGORY_LISTING_CONFIGS: Record<string, CategoryListingConfig> = {
+  properties: {
+    slug: "properties",
+    displayQuery: "Properties",
+    heading: "Properties In Nigeria",
+    rangeLabel: "Price",
+    rangeMin: 0,
+    rangeMax: 1000000000,
+    storageKey: "qwik:category:properties:viewMode",
+    subtypes: [
+      { name: "Houses & Apartments", initials: "HA", tone: "#e2f1e9" },
+      { name: "Land", initials: "Ld", tone: "#f3ead8" },
+      { name: "Commercial Property", initials: "Cp", tone: "#dde8f5" },
+      { name: "Short Let", initials: "Sl", tone: "#f1e4ee" },
+      { name: "Event Centers", initials: "Ec", tone: "#e9edff" },
+      { name: "Property Services", initials: "Ps", tone: "#f2e8dd" },
+    ],
+  },
   agriculture: {
     slug: "agriculture",
     displayQuery: "Agriculture",

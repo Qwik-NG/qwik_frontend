@@ -342,8 +342,8 @@ export default function JobSearchResultsView({ query, navigate, view, locationFi
         </div>
       ) : null}
 
-      <div className="grid grid-cols-1 gap-6 xl:grid-cols-[256px_minmax(0,1fr)] xl:items-start">
-        <aside className="hidden space-y-4 xl:sticky xl:top-[98px] xl:block">
+      <div className="grid grid-cols-1 gap-6 xl:grid-cols-[256px_minmax(0,1fr)] xl:items-start xl:h-[calc(100vh-112px)] xl:overflow-hidden">
+        <aside className="hidden space-y-4 xl:block xl:h-full xl:overflow-y-auto xl:pr-1">
           <JobFilters
             selectedCategory={selectedCategory}
             onSelectedCategoryChange={setSelectedCategory}
@@ -359,7 +359,7 @@ export default function JobSearchResultsView({ query, navigate, view, locationFi
           />
         </aside>
 
-        <section className="min-w-0">
+        <section className="min-w-0 xl:h-full xl:overflow-y-auto xl:pr-1">
           <div className="mb-5 flex flex-wrap items-center gap-3">
             <BackButton />
           </div>
