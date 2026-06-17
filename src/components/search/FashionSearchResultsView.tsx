@@ -2,10 +2,9 @@ import { useEffect, useMemo, useState, type ReactNode } from "react";
 import {
   buildProductDetailsRoute,
   buildSearchRoute,
-  buildSearchResultsListRoute,
-  buildSearchResultsRoute,
+  ROUTES,
 } from "../../constants/routes";
-import { isCategoryMarkerQuery } from "../../lib/searchContext";
+import { ALL_NIGERIA_LOCATION, isCategoryMarkerQuery, NIGERIAN_LOCATIONS } from "../../lib/searchContext";
 import {
   getFashionSearchState,
   type FashionBrand,
@@ -22,6 +21,7 @@ import { api } from "../../services/api";
 import type { Ad } from "../../types";
 import ListingCard from "../listings/ListingCard";
 import BackButton from "../ui/BackButton";
+import DropdownSelect from "../ui/DropdownSelect";
 
 type NavigateTo = (to: string) => void;
 type SortValue = "newest" | "price-low" | "price-high";
@@ -233,6 +233,8 @@ function FashionFilters({
   onSelectedConditionChange,
   sortBy,
   onSortByChange,
+  selectedLocation,
+  onSelectedLocationChange,
   maxPrice,
 }: {
   selectedCategory: "all" | FashionCategory;
@@ -253,10 +255,25 @@ function FashionFilters({
   onSelectedConditionChange: (value: "all" | FashionCondition) => void;
   sortBy: SortValue;
   onSortByChange: (value: SortValue) => void;
+  selectedLocation: string;
+  onSelectedLocationChange: (value: string) => void;
   maxPrice: number;
 }) {
   return (
     <div className="space-y-4">
+      <FilterPanel title="Region">
+        <DropdownSelect
+          label="Select region"
+          placeholder={ALL_NIGERIA_LOCATION}
+          value={selectedLocation}
+          options={[
+            { value: "", label: ALL_NIGERIA_LOCATION },
+            ...NIGERIAN_LOCATIONS.filter((loc) => loc !== ALL_NIGERIA_LOCATION).map((location) => ({ value: location, label: location })),
+          ]}
+          onChange={onSelectedLocationChange}
+        />
+      </FilterPanel>
+
       <FilterPanel title="Sort by">
         <div className="relative">
           <select
@@ -404,6 +421,23 @@ export default function FashionSearchResultsView({ query, navigate, view, locati
   const [selectedMaxPrice, setSelectedMaxPrice] = useState(100200000);
   const [mobileFiltersOpen, setMobileFiltersOpen] = useState(false);
 
+  const onLocationChange = (value: string) => {
+    if (typeof window === "undefined") return;
+    const params = new URLSearchParams(window.location.search);
+    if (value) params.set("location", value);
+    else params.delete("location");
+    const search = params.toString();
+    navigate(`${window.location.pathname}${search ? `?${search}` : ""}`);
+  };
+
+  const navigateToView = (path: string) => {
+    if (typeof window === "undefined") {
+      navigate(path);
+      return;
+    }
+    navigate(`${path}${window.location.search}`);
+  };
+
   useEffect(() => {
     const loadAds = async () => {
       const params = new URLSearchParams({ category: "fashion", pageSize: "24", imagesLimit: "1" });
@@ -454,8 +488,6 @@ export default function FashionSearchResultsView({ query, navigate, view, locati
     [fashionResults, selectedBrand, selectedCategory, selectedColor, selectedCondition, selectedMaxPrice, selectedStripCategory, selectedStyle, selectedType, sortBy, verifiedFilter],
   );
 
-  const activeRouteQuery = stateConfig.canonicalQuery;
-
   return (
     <main className="mx-auto w-full max-w-[1728px] overflow-x-clip px-4 pb-20 pt-8 sm:px-6 lg:px-12">
       {mobileFiltersOpen ? (
@@ -489,6 +521,8 @@ export default function FashionSearchResultsView({ query, navigate, view, locati
               onSelectedConditionChange={setSelectedCondition}
               sortBy={sortBy}
               onSortByChange={setSortBy}
+              selectedLocation={locationFilter ?? ""}
+              onSelectedLocationChange={onLocationChange}
               maxPrice={maxPrice}
             />
           </div>
@@ -516,6 +550,8 @@ export default function FashionSearchResultsView({ query, navigate, view, locati
             onSelectedConditionChange={setSelectedCondition}
             sortBy={sortBy}
             onSortByChange={setSortBy}
+            selectedLocation={locationFilter ?? ""}
+            onSelectedLocationChange={onLocationChange}
             maxPrice={maxPrice}
           />
         </aside>
@@ -543,7 +579,7 @@ export default function FashionSearchResultsView({ query, navigate, view, locati
             <div className="flex items-center gap-2 self-start pt-1">
               <button
                 type="button"
-                onClick={() => navigate(buildSearchResultsRoute(activeRouteQuery))}
+                onClick={() => navigateToView(ROUTES.SEARCH_RESULTS)}
                 className={`grid h-10 w-10 place-items-center rounded-[10px] ${view === "grid" ? "bg-[#fff3e5]" : "bg-transparent hover:bg-[#f4f1eb]"}`}
                 aria-label="Grid view"
                 title="Grid view"
@@ -552,7 +588,7 @@ export default function FashionSearchResultsView({ query, navigate, view, locati
               </button>
               <button
                 type="button"
-                onClick={() => navigate(buildSearchResultsListRoute(activeRouteQuery))}
+                onClick={() => navigateToView(ROUTES.SEARCH_RESULTS_LIST)}
                 className={`grid h-10 w-10 place-items-center rounded-[10px] ${view === "list" ? "bg-[#fff3e5]" : "bg-transparent hover:bg-[#f4f1eb]"}`}
                 aria-label="List view"
                 title="List view"

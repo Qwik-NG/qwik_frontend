@@ -1,10 +1,9 @@
 import { useEffect, useMemo, useState, type ReactNode } from "react";
 import {
   buildProductDetailsRoute,
-  buildSearchResultsListRoute,
-  buildSearchResultsRoute,
+  ROUTES,
 } from "../../constants/routes";
-import { isCategoryMarkerQuery } from "../../lib/searchContext";
+import { ALL_NIGERIA_LOCATION, isCategoryMarkerQuery, NIGERIAN_LOCATIONS } from "../../lib/searchContext";
 import {
   type MockPhonesListing,
   type PhonesCondition,
@@ -14,6 +13,7 @@ import { api } from "../../services/api";
 import type { Ad } from "../../types";
 import ListingCard from "../listings/ListingCard";
 import BackButton from "../ui/BackButton";
+import DropdownSelect from "../ui/DropdownSelect";
 
 type NavigateTo = (to: string) => void;
 type SortValue = "newest" | "price-low" | "price-high";
@@ -149,6 +149,8 @@ function PhonesFilters({
   onSelectedTypeChange,
   sortBy,
   onSortByChange,
+  selectedLocation,
+  onSelectedLocationChange,
   selectedBrand,
   onSelectedBrandChange,
   verifiedFilter,
@@ -163,6 +165,8 @@ function PhonesFilters({
   onSelectedTypeChange: (value: "all" | PhonesType) => void;
   sortBy: SortValue;
   onSortByChange: (value: SortValue) => void;
+  selectedLocation: string;
+  onSelectedLocationChange: (value: string) => void;
   selectedBrand: "all" | PhonesBrand;
   onSelectedBrandChange: (value: "all" | PhonesBrand) => void;
   verifiedFilter: VerifiedValue;
@@ -173,13 +177,24 @@ function PhonesFilters({
   selectedCondition: "all" | PhonesCondition;
   onSelectedConditionChange: (value: "all" | PhonesCondition) => void;
 }) {
+  const [showAllTypes, setShowAllTypes] = useState(false);
+  const [showAllBrands, setShowAllBrands] = useState(false);
+  const visibleTypeOptions = showAllTypes ? PHONES_FILTER_TYPES : PHONES_FILTER_TYPES.slice(0, 4);
+  const visibleBrandOptions = showAllBrands ? PHONES_FILTER_BRANDS : PHONES_FILTER_BRANDS.slice(0, 3);
+
   return (
     <div className="space-y-4">
       <FilterPanel title="Region">
-        <button className="flex w-full items-center justify-between text-[15px] text-[#ff9715]" type="button">
-          <span>All Nigeria</span>
-          <span className="text-[#9794a1]">›</span>
-        </button>
+        <DropdownSelect
+          label="Select region"
+          placeholder={ALL_NIGERIA_LOCATION}
+          value={selectedLocation}
+          options={[
+            { value: "", label: ALL_NIGERIA_LOCATION },
+            ...NIGERIAN_LOCATIONS.filter((loc) => loc !== ALL_NIGERIA_LOCATION).map((location) => ({ value: location, label: location })),
+          ]}
+          onChange={onSelectedLocationChange}
+        />
       </FilterPanel>
 
       <FilterPanel title="Sort by">
@@ -201,7 +216,7 @@ function PhonesFilters({
 
       <FilterPanel title="Categories">
         <div className="space-y-3">
-          {PHONES_FILTER_TYPES.map((option) => (
+          {visibleTypeOptions.map((option) => (
             <FilterOption
               key={option}
               label={option === "all" ? "Show All" : option}
@@ -209,13 +224,17 @@ function PhonesFilters({
               onClick={() => onSelectedTypeChange(option)}
             />
           ))}
-          <button type="button" className="pt-1 text-[15px] text-[#1f1d27]">Show more</button>
+          {PHONES_FILTER_TYPES.length > 4 ? (
+            <button type="button" className="pt-1 text-[15px] text-[#1f1d27]" onClick={() => setShowAllTypes((current) => !current)}>
+              {showAllTypes ? "Show less" : "Show more"}
+            </button>
+          ) : null}
         </div>
       </FilterPanel>
 
       <FilterPanel title="Brand">
         <div className="space-y-3">
-          {PHONES_FILTER_BRANDS.map((option) => (
+          {visibleBrandOptions.map((option) => (
             <FilterOption
               key={option}
               label={option === "all" ? "Show All" : option}
@@ -223,7 +242,11 @@ function PhonesFilters({
               onClick={() => onSelectedBrandChange(option)}
             />
           ))}
-          <button type="button" className="pt-1 text-[15px] text-[#1f1d27]">Show More</button>
+          {PHONES_FILTER_BRANDS.length > 3 ? (
+            <button type="button" className="pt-1 text-[15px] text-[#1f1d27]" onClick={() => setShowAllBrands((current) => !current)}>
+              {showAllBrands ? "Show less" : "Show more"}
+            </button>
+          ) : null}
         </div>
       </FilterPanel>
 
@@ -285,6 +308,23 @@ export default function PhonesSearchResultsView({ query, navigate, view, locatio
   const [selectedMaxPrice, setSelectedMaxPrice] = useState(100200000);
   const [selectedCondition, setSelectedCondition] = useState<"all" | PhonesCondition>("all");
   const [mobileFiltersOpen, setMobileFiltersOpen] = useState(false);
+
+  const onLocationChange = (value: string) => {
+    if (typeof window === "undefined") return;
+    const params = new URLSearchParams(window.location.search);
+    if (value) params.set("location", value);
+    else params.delete("location");
+    const search = params.toString();
+    navigate(`${window.location.pathname}${search ? `?${search}` : ""}`);
+  };
+
+  const navigateToView = (path: string) => {
+    if (typeof window === "undefined") {
+      navigate(path);
+      return;
+    }
+    navigate(`${path}${window.location.search}`);
+  };
 
   useEffect(() => {
     const loadAds = async () => {
@@ -349,6 +389,8 @@ export default function PhonesSearchResultsView({ query, navigate, view, locatio
               onSelectedTypeChange={setSelectedType}
               sortBy={sortBy}
               onSortByChange={setSortBy}
+              selectedLocation={locationFilter ?? ""}
+              onSelectedLocationChange={onLocationChange}
               selectedBrand={selectedBrand}
               onSelectedBrandChange={setSelectedBrand}
               verifiedFilter={verifiedFilter}
@@ -370,6 +412,8 @@ export default function PhonesSearchResultsView({ query, navigate, view, locatio
             onSelectedTypeChange={setSelectedType}
             sortBy={sortBy}
             onSortByChange={setSortBy}
+            selectedLocation={locationFilter ?? ""}
+            onSelectedLocationChange={onLocationChange}
             selectedBrand={selectedBrand}
             onSelectedBrandChange={setSelectedBrand}
             verifiedFilter={verifiedFilter}
@@ -405,7 +449,7 @@ export default function PhonesSearchResultsView({ query, navigate, view, locatio
             <div className="flex items-center gap-2 self-start pt-1">
               <button
                 type="button"
-                onClick={() => navigate(buildSearchResultsRoute("Phones"))}
+                onClick={() => navigateToView(ROUTES.SEARCH_RESULTS)}
                 className={`grid h-10 w-10 place-items-center rounded-[10px] ${view === "grid" ? "bg-[#fff3e5]" : "bg-transparent hover:bg-[#f4f1eb]"}`}
                 aria-label="Grid view"
                 title="Grid view"
@@ -414,7 +458,7 @@ export default function PhonesSearchResultsView({ query, navigate, view, locatio
               </button>
               <button
                 type="button"
-                onClick={() => navigate(buildSearchResultsListRoute("Phones"))}
+                onClick={() => navigateToView(ROUTES.SEARCH_RESULTS_LIST)}
                 className={`grid h-10 w-10 place-items-center rounded-[10px] ${view === "list" ? "bg-[#fff3e5]" : "bg-transparent hover:bg-[#f4f1eb]"}`}
                 aria-label="List view"
                 title="List view"

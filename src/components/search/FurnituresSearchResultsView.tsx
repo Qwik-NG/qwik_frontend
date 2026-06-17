@@ -1,10 +1,9 @@
 import { useEffect, useMemo, useState, type ReactNode } from "react";
 import {
   buildProductDetailsRoute,
-  buildSearchResultsListRoute,
-  buildSearchResultsRoute,
+  ROUTES,
 } from "../../constants/routes";
-import { isCategoryMarkerQuery } from "../../lib/searchContext";
+import { ALL_NIGERIA_LOCATION, isCategoryMarkerQuery, NIGERIAN_LOCATIONS } from "../../lib/searchContext";
 import {
   type FurnitureCondition,
   type FurnitureType,
@@ -14,6 +13,7 @@ import { api } from "../../services/api";
 import type { Ad } from "../../types";
 import ListingCard from "../listings/ListingCard";
 import BackButton from "../ui/BackButton";
+import DropdownSelect from "../ui/DropdownSelect";
 
 type NavigateTo = (to: string) => void;
 type SortValue = "newest" | "price-low" | "price-high";
@@ -156,6 +156,8 @@ function FurnitureFilters({
   onSelectedCategoryChange,
   sortBy,
   onSortByChange,
+  selectedLocation,
+  onSelectedLocationChange,
   selectedType,
   onSelectedTypeChange,
   selectedRoom,
@@ -172,6 +174,8 @@ function FurnitureFilters({
   onSelectedCategoryChange: (value: "all" | MockFurnitureListing["categoryType"]) => void;
   sortBy: SortValue;
   onSortByChange: (value: SortValue) => void;
+  selectedLocation: string;
+  onSelectedLocationChange: (value: string) => void;
   selectedType: "all" | FurnitureType;
   onSelectedTypeChange: (value: "all" | FurnitureType) => void;
   selectedRoom: "all" | MockFurnitureListing["room"];
@@ -187,10 +191,16 @@ function FurnitureFilters({
   return (
     <div className="space-y-4">
       <FilterPanel title="Region">
-        <button className="flex w-full items-center justify-between text-[15px] text-[#ff9715]" type="button">
-          <span>All Nigeria</span>
-          <span className="text-[#9794a1]">›</span>
-        </button>
+        <DropdownSelect
+          label="Select region"
+          placeholder={ALL_NIGERIA_LOCATION}
+          value={selectedLocation}
+          options={[
+            { value: "", label: ALL_NIGERIA_LOCATION },
+            ...NIGERIAN_LOCATIONS.filter((loc) => loc !== ALL_NIGERIA_LOCATION).map((location) => ({ value: location, label: location })),
+          ]}
+          onChange={onSelectedLocationChange}
+        />
       </FilterPanel>
 
       <FilterPanel title="Sort by">
@@ -310,6 +320,23 @@ export default function FurnituresSearchResultsView({ query, navigate, view, loc
   const [selectedMaxPrice, setSelectedMaxPrice] = useState(100200000);
   const [mobileFiltersOpen, setMobileFiltersOpen] = useState(false);
 
+  const onLocationChange = (value: string) => {
+    if (typeof window === "undefined") return;
+    const params = new URLSearchParams(window.location.search);
+    if (value) params.set("location", value);
+    else params.delete("location");
+    const search = params.toString();
+    navigate(`${window.location.pathname}${search ? `?${search}` : ""}`);
+  };
+
+  const navigateToView = (path: string) => {
+    if (typeof window === "undefined") {
+      navigate(path);
+      return;
+    }
+    navigate(`${path}${window.location.search}`);
+  };
+
   useEffect(() => {
     const loadAds = async () => {
       const params = new URLSearchParams({ category: "furniture-appliances", pageSize: "24", imagesLimit: "1" });
@@ -375,6 +402,8 @@ export default function FurnituresSearchResultsView({ query, navigate, view, loc
               onSelectedCategoryChange={setSelectedCategory}
               sortBy={sortBy}
               onSortByChange={setSortBy}
+              selectedLocation={locationFilter ?? ""}
+              onSelectedLocationChange={onLocationChange}
               selectedType={selectedType}
               onSelectedTypeChange={setSelectedType}
               selectedRoom={selectedRoom}
@@ -398,6 +427,8 @@ export default function FurnituresSearchResultsView({ query, navigate, view, loc
             onSelectedCategoryChange={setSelectedCategory}
             sortBy={sortBy}
             onSortByChange={setSortBy}
+            selectedLocation={locationFilter ?? ""}
+            onSelectedLocationChange={onLocationChange}
             selectedType={selectedType}
             onSelectedTypeChange={setSelectedType}
             selectedRoom={selectedRoom}
@@ -435,7 +466,7 @@ export default function FurnituresSearchResultsView({ query, navigate, view, loc
             <div className="flex items-center gap-2 self-start pt-1">
               <button
                 type="button"
-                onClick={() => navigate(buildSearchResultsRoute("Furniture"))}
+                onClick={() => navigateToView(ROUTES.SEARCH_RESULTS)}
                 className={`grid h-10 w-10 place-items-center rounded-[10px] ${view === "grid" ? "bg-[#fff3e5]" : "bg-transparent hover:bg-[#f4f1eb]"}`}
                 aria-label="Grid view"
                 title="Grid view"
@@ -444,7 +475,7 @@ export default function FurnituresSearchResultsView({ query, navigate, view, loc
               </button>
               <button
                 type="button"
-                onClick={() => navigate(buildSearchResultsListRoute("Furniture"))}
+                onClick={() => navigateToView(ROUTES.SEARCH_RESULTS_LIST)}
                 className={`grid h-10 w-10 place-items-center rounded-[10px] ${view === "list" ? "bg-[#fff3e5]" : "bg-transparent hover:bg-[#f4f1eb]"}`}
                 aria-label="List view"
                 title="List view"

@@ -109,9 +109,27 @@ export const buildSearchResultsRoute = (query?: string) => {
 };
 
 /**
+ * Helper function to build search results route with category params
+ */
+export const buildSearchResultsCategoryRoute = (category: string, subcategory?: string) => {
+  const params = new URLSearchParams({ category });
+  if (subcategory) params.set("subcategory", subcategory);
+  return `${ROUTES.SEARCH_RESULTS}?${params.toString()}`;
+};
+
+/**
  * Helper function to build search results list route with query params
  */
 export const buildSearchResultsListRoute = (query?: string) => {
   if (!query) return ROUTES.SEARCH_RESULTS_LIST;
   return `${ROUTES.SEARCH_RESULTS_LIST}?q=${encodeURIComponent(query)}`;
+};
+
+/**
+ * Helper function to build search results list route with category params
+ */
+export const buildSearchResultsListCategoryRoute = (category: string, subcategory?: string) => {
+  const params = new URLSearchParams({ category });
+  if (subcategory) params.set("subcategory", subcategory);
+  return `${ROUTES.SEARCH_RESULTS_LIST}?${params.toString()}`;
 };

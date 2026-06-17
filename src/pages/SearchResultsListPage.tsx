@@ -2,8 +2,7 @@ import { useCallback, useEffect, useState, type ReactNode } from "react";
 import { useLocation, useNavigate, useSearchParams } from "react-router-dom";
 import {
   buildProductDetailsRoute,
-  buildSearchResultsRoute,
-  buildSearchRoute,
+  ROUTES,
 } from "../constants/routes";
 import { SiteFooter, SiteHeader } from "../components/AppShell";
 import BeautySearchResultsView from "../components/search/BeautySearchResultsView";
@@ -15,10 +14,11 @@ import PhonesSearchResultsView from "../components/search/PhonesSearchResultsVie
 import VehicleSearchResultsView from "../components/search/VehicleSearchResultsView";
 import { LocationPin } from "../components/icons/LocationPin";
 import BackButton from "../components/ui/BackButton";
+import DropdownSelect from "../components/ui/DropdownSelect";
 import { FallbackImage } from "../components/ui/FallbackImage";
 import { ImagePlaceholder } from "../components/ui/ImagePlaceholder";
 import { isBeautySearchQuery, isElectronicsSearchQuery, isFashionSearchQuery, isFurnitureSearchQuery, isJobSearchQuery, isPhonesSearchQuery, isVehicleSearchQuery, mockCategories } from "../lib/mockData";
-import { getCategorySearchContext, getLocationSearchParam } from "../lib/searchContext";
+import { ALL_NIGERIA_LOCATION, getCategorySearchContext, getLocationSearchParam, NIGERIAN_LOCATIONS } from "../lib/searchContext";
 import { api } from "../services/api";
 import type { Ad } from "../types";
 
@@ -141,6 +141,8 @@ function sortAds(ads: Ad[], sortBy: SortValue) {
 function SearchFilters({
   selectedCategory,
   onCategoryChange,
+  selectedLocation,
+  onLocationChange,
   sortBy,
   onSortByChange,
   verifiedFilter,
@@ -151,6 +153,8 @@ function SearchFilters({
 }: {
   selectedCategory: string;
   onCategoryChange: (value: string) => void;
+  selectedLocation: string;
+  onLocationChange: (value: string) => void;
   sortBy: SortValue;
   onSortByChange: (value: SortValue) => void;
   verifiedFilter: VerifiedValue;
@@ -162,10 +166,16 @@ function SearchFilters({
   return (
     <div className="space-y-4">
       <FilterPanel title="Region">
-        <button className="flex w-full items-center justify-between text-[15px] text-[#ff9715]" type="button">
-          <span>All Nigeria</span>
-          <span className="text-[#9794a1]">›</span>
-        </button>
+        <DropdownSelect
+          label="Select region"
+          placeholder={ALL_NIGERIA_LOCATION}
+          value={selectedLocation}
+          options={[
+            { value: "", label: ALL_NIGERIA_LOCATION },
+            ...NIGERIAN_LOCATIONS.filter((loc) => loc !== ALL_NIGERIA_LOCATION).map((location) => ({ value: location, label: location })),
+          ]}
+          onChange={onLocationChange}
+        />
       </FilterPanel>
 
       <FilterPanel title="Sort by">
@@ -283,6 +293,14 @@ export default function SearchResultsListPage() {
   const categoryContext = getCategorySearchContext(`?${searchParams.toString()}`);
   const categorySlug = categoryContext?.slug;
   const selectedLocation = getLocationSearchParam(`?${searchParams.toString()}`);
+
+  const updateSearchParam = (key: string, value?: string) => {
+    const params = new URLSearchParams(searchParams);
+    if (!value) params.delete(key);
+    else params.set(key, value);
+    const nextSearch = params.toString();
+    navigate(`${location.pathname}${nextSearch ? `?${nextSearch}` : ""}`);
+  };
 
   if (categorySlug === "vehicles" || isVehicleSearchQuery(query)) {
     return (
@@ -466,6 +484,8 @@ export default function SearchResultsListPage() {
               <SearchFilters
                 selectedCategory={selectedCategory}
                 onCategoryChange={setSelectedCategory}
+                selectedLocation={selectedLocation}
+                onLocationChange={(val) => updateSearchParam("location", val || undefined)}
                 sortBy={sortBy}
                 onSortByChange={setSortBy}
                 verifiedFilter={verifiedFilter}
@@ -483,6 +503,8 @@ export default function SearchResultsListPage() {
             <SearchFilters
               selectedCategory={selectedCategory}
               onCategoryChange={setSelectedCategory}
+              selectedLocation={selectedLocation}
+              onLocationChange={(val) => updateSearchParam("location", val || undefined)}
               sortBy={sortBy}
               onSortByChange={setSortBy}
               verifiedFilter={verifiedFilter}
@@ -513,7 +535,7 @@ export default function SearchResultsListPage() {
               <div className="flex items-center gap-2 self-start">
                 <button
                   type="button"
-                  onClick={() => navigate(buildSearchResultsRoute(query || undefined))}
+                  onClick={() => navigate(`${ROUTES.SEARCH_RESULTS}${location.search}`)}
                   className="grid h-10 w-10 place-items-center rounded-[10px] bg-transparent hover:bg-[#f4f1eb]"
                   aria-label="Grid view"
                   title="Grid view"
@@ -522,7 +544,7 @@ export default function SearchResultsListPage() {
                 </button>
                 <button
                   type="button"
-                  onClick={() => navigate(buildSearchRoute(query || undefined))}
+                  onClick={() => navigate(`${ROUTES.SEARCH_RESULTS_LIST}${location.search}`)}
                   className="grid h-10 w-10 place-items-center rounded-[10px] bg-[#fff3e5]"
                   aria-label="List view"
                   title="List view"

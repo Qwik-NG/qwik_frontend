@@ -2,7 +2,7 @@ import type { ComponentType } from "react";
 import { useCallback, useEffect, useState } from "react";
 import { useLocation, useNavigate } from "react-router-dom";
 import { SiteFooter, SiteHeader } from "../components/AppShell";
-import { buildSearchResultsRoute, buildSearchRoute } from "../constants/routes";
+import { buildSearchResultsCategoryRoute } from "../constants/routes";
 import { FallbackImage } from "../components/ui/FallbackImage";
 import { ImagePlaceholder } from "../components/ui/ImagePlaceholder";
 import { getLocationSearchParam } from "../lib/searchContext";
@@ -19,17 +19,17 @@ type Category = {
 type Product = { id: string; price: number; title: string; description: string; location: string; images: Array<{ url: string }> };
 
 const categories: Category[] = [
-  { name: "Vehicles", shortName: "Cars", image: "/category-images/vehicles.png", tone: "#f8ebe4", route: buildSearchRoute("Vehicles") },
-  { name: "Phones & Tablets", shortName: "Phones", image: "/category-images/phone.png", tone: "#e9edff", route: buildSearchRoute("Phones") },
-  { name: "Jobs", shortName: "Jobs", image: "/category-images/image.png", tone: "#f2e8dd", route: buildSearchRoute("Job") },
-  { name: "Agriculture & Food", shortName: "Agriculture & Food", image: "/category-images/agriculture.png", tone: "#e5f1df", route: buildSearchRoute("Agriculture") },
-  { name: "Sports & Leisure", shortName: "Sports", image: "/category-images/sports.png", tone: "#e7eefb", route: buildSearchRoute("Sports & Leisure") },
-  { name: "Fashion", shortName: "Fashion", image: "/category-images/fashion.png", tone: "#f6eadc", route: buildSearchRoute("Fashion") },
-  { name: "Art", shortName: "Art", image: "/category-images/art.png", tone: "#f0e8f7", route: buildSearchRoute("Art") },
-  { name: "Properties", shortName: "Properties", image: "/category-images/properties.png", tone: "#e2f1e9", route: buildSearchResultsRoute("Home") },
-  { name: "Furniture & Appliances", shortName: "Furniture", image: "/category-images/furniture.png", tone: "#f4e3f4", route: buildSearchRoute("Furniture") },
-  { name: "Electronics", shortName: "Electronics", image: "/category-images/electronics.png", tone: "#ebeef3", route: buildSearchRoute("Electronics") },
-  { name: "Beauty", shortName: "Beauty", image: "/category-images/beauty.png", tone: "#f1e4ee", route: buildSearchRoute("Beauty") }
+  { name: "Vehicles", shortName: "Cars", image: "/category-images/vehicles.png", tone: "#f8ebe4", route: buildSearchResultsCategoryRoute("vehicles") },
+  { name: "Phones & Tablets", shortName: "Phones", image: "/category-images/phone.png", tone: "#e9edff", route: buildSearchResultsCategoryRoute("phones-tablets") },
+  { name: "Jobs", shortName: "Jobs", image: "/category-images/image.png", tone: "#f2e8dd", route: buildSearchResultsCategoryRoute("jobs") },
+  { name: "Agriculture & Food", shortName: "Agriculture & Food", image: "/category-images/agriculture.png", tone: "#e5f1df", route: buildSearchResultsCategoryRoute("agriculture") },
+  { name: "Sports & Leisure", shortName: "Sports", image: "/category-images/sports.png", tone: "#e7eefb", route: buildSearchResultsCategoryRoute("sports-leisure") },
+  { name: "Fashion", shortName: "Fashion", image: "/category-images/fashion.png", tone: "#f6eadc", route: buildSearchResultsCategoryRoute("fashion") },
+  { name: "Art", shortName: "Art", image: "/category-images/art.png", tone: "#f0e8f7", route: buildSearchResultsCategoryRoute("art") },
+  { name: "Properties", shortName: "Properties", image: "/category-images/properties.png", tone: "#e2f1e9", route: buildSearchResultsCategoryRoute("properties") },
+  { name: "Furniture & Appliances", shortName: "Furniture", image: "/category-images/furniture.png", tone: "#f4e3f4", route: buildSearchResultsCategoryRoute("furniture-appliances") },
+  { name: "Electronics", shortName: "Electronics", image: "/category-images/electronics.png", tone: "#ebeef3", route: buildSearchResultsCategoryRoute("electronics") },
+  { name: "Beauty", shortName: "Beauty", image: "/category-images/beauty.png", tone: "#f1e4ee", route: buildSearchResultsCategoryRoute("beauty") }
 ];
 
 function LocationPin({ className = "h-4 w-4" }: { className?: string }) {

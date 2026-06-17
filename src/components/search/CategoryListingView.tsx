@@ -1,10 +1,11 @@
 import { useEffect, useMemo, useState, type ReactNode } from "react";
 import { buildProductDetailsRoute } from "../../constants/routes";
-import { isCategoryMarkerQuery } from "../../lib/searchContext";
+import { ALL_NIGERIA_LOCATION, isCategoryMarkerQuery, NIGERIAN_LOCATIONS } from "../../lib/searchContext";
 import { api } from "../../services/api";
 import type { Ad } from "../../types";
 import ListingCard from "../listings/ListingCard";
 import BackButton from "../ui/BackButton";
+import DropdownSelect from "../ui/DropdownSelect";
 
 type NavigateTo = (to: string) => void;
 type SortValue = "newest" | "price-low" | "price-high";
@@ -137,6 +138,8 @@ function CategoryFilters({
   onSelectedSubtypeChange,
   sortBy,
   onSortByChange,
+  selectedLocation,
+  onSelectedLocationChange,
   verifiedFilter,
   onVerifiedFilterChange,
   selectedMaxPrice,
@@ -147,6 +150,8 @@ function CategoryFilters({
   onSelectedSubtypeChange: (value: string) => void;
   sortBy: SortValue;
   onSortByChange: (value: SortValue) => void;
+  selectedLocation: string;
+  onSelectedLocationChange: (value: string) => void;
   verifiedFilter: VerifiedValue;
   onVerifiedFilterChange: (value: VerifiedValue) => void;
   selectedMaxPrice: number;
@@ -155,10 +160,16 @@ function CategoryFilters({
   return (
     <div className="space-y-4">
       <FilterPanel title="Region">
-        <button className="flex w-full items-center justify-between text-[15px] text-[#ff9715]" type="button">
-          <span>All Nigeria</span>
-          <span className="text-[#9794a1]">›</span>
-        </button>
+        <DropdownSelect
+          label="Select region"
+          placeholder={ALL_NIGERIA_LOCATION}
+          value={selectedLocation}
+          options={[
+            { value: "", label: ALL_NIGERIA_LOCATION },
+            ...NIGERIAN_LOCATIONS.filter((loc) => loc !== ALL_NIGERIA_LOCATION).map((location) => ({ value: location, label: location })),
+          ]}
+          onChange={onSelectedLocationChange}
+        />
       </FilterPanel>
 
       <FilterPanel title="Sort by">
@@ -237,6 +248,15 @@ export default function CategoryListingView({ config, query, navigate, locationF
   const [errorMessage, setErrorMessage] = useState<string | null>(null);
   const [mobileFiltersOpen, setMobileFiltersOpen] = useState(false);
   const [view, setView] = useState<ViewMode>(() => readStoredView(config.storageKey));
+
+  const onLocationChange = (value: string) => {
+    if (typeof window === "undefined") return;
+    const params = new URLSearchParams(window.location.search);
+    if (value) params.set("location", value);
+    else params.delete("location");
+    const search = params.toString();
+    navigate(`${window.location.pathname}${search ? `?${search}` : ""}`);
+  };
 
   useEffect(() => {
     try {
@@ -326,6 +346,8 @@ export default function CategoryListingView({ config, query, navigate, locationF
               onSelectedSubtypeChange={setSelectedSubtype}
               sortBy={sortBy}
               onSortByChange={setSortBy}
+              selectedLocation={locationFilter ?? ""}
+              onSelectedLocationChange={onLocationChange}
               verifiedFilter={verifiedFilter}
               onVerifiedFilterChange={setVerifiedFilter}
               selectedMaxPrice={selectedMaxPrice}
@@ -343,6 +365,8 @@ export default function CategoryListingView({ config, query, navigate, locationF
             onSelectedSubtypeChange={setSelectedSubtype}
             sortBy={sortBy}
             onSortByChange={setSortBy}
+            selectedLocation={locationFilter ?? ""}
+            onSelectedLocationChange={onLocationChange}
             verifiedFilter={verifiedFilter}
             onVerifiedFilterChange={setVerifiedFilter}
             selectedMaxPrice={selectedMaxPrice}
