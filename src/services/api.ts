@@ -1,4 +1,5 @@
 import { clearAllAuthData, getToken, isTokenExpired } from "./auth";
+import { disconnectRealtimeSocket } from "./realtime";
 import type {
   User,
   AuthResponse,
@@ -110,6 +111,11 @@ async function request<T>(path: string, init?: ApiRequestInit): Promise<ApiRespo
         const res = await fetch(`${API_BASE_URL}${path}`, { ...fetchInit, headers });
         const body = (await res.json().catch(() => ({}))) as ApiResponse<T>;
         if (!res.ok || !body.success) {
+          if (authToken && (res.status === 401 || res.status === 403)) {
+            clearAllAuthData();
+            disconnectRealtimeSocket();
+            GET_CACHE.clear();
+          }
           const error = new Error(friendlyRequestError(res.status, body.message));
           if (attempt < retry && res.status >= 500) {
             lastError = error;

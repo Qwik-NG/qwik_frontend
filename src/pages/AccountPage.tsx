@@ -7,6 +7,7 @@ import { useCurrentUser } from "../hooks/useCurrentUser";
 import type { CurrentUserDisplay } from "../lib/currentUser";
 import { api } from "../services/api";
 import { clearAllAuthData } from "../services/auth";
+import { disconnectRealtimeSocket } from "../services/realtime";
 import { QwikLogo } from "../components/ui/QwikLogo";
 import { IconButton } from "../components/ui/IconButton";
 import Toggle from "../components/ui/Toggle";
@@ -616,7 +617,7 @@ export default function AccountPage() {
     { label: "Notification", icon: <BellIcon />, to: "/notification-settings" },
     { label: "Help", icon: <PhoneIcon />, to: "/messages" },
     { label: "About", icon: <InfoIcon />, to: "/" },
-    { label: "Log out", icon: <LogoutIcon />, to: "/signin" }
+    { label: "Log out", icon: <LogoutIcon />, to: "/login" }
   ];
 
   const mobileItems = menuItems.map((item) => ({
@@ -627,6 +628,7 @@ export default function AccountPage() {
       if (item.to) {
         if (item.label === "Log out") {
           clearAllAuthData();
+            disconnectRealtimeSocket();
         }
         navigate(item.to);
       }
@@ -651,6 +653,7 @@ export default function AccountPage() {
 
                   if (item.label === "Log out") {
                     clearAllAuthData();
+                    disconnectRealtimeSocket();
                   }
 
                   navigate(item.to);

@@ -1,5 +1,6 @@
 import { useNavigate, useLocation } from 'react-router-dom';
 import { clearAllAuthData } from '../../services/auth';
+import { disconnectRealtimeSocket } from '../../services/realtime';
 import { 
   BarChart3, 
   Users, 
@@ -34,6 +35,7 @@ export default function AdminSidebar({ className = '' }: AdminSidebarProps) {
   const handleLogout = () => {
     if (confirm('Are you sure you want to logout?')) {
       clearAllAuthData();
+      disconnectRealtimeSocket();
       navigate('/admin/login');
     }
   };

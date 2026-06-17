@@ -6,7 +6,7 @@ import { useCurrentUser } from "../hooks/useCurrentUser";
 import { UserAvatar } from "./ui/UserAvatar";
 import { ALL_NIGERIA_LOCATION, NIGERIAN_LOCATIONS, getCategorySearchContext, isSearchResultsPath } from "../lib/searchContext";
 import { api } from "../services/api";
-import { getRealtimeSocket, UNREAD_MESSAGES_REFRESH_EVENT } from "../services/realtime";
+import { getRealtimeSocket, UNREAD_MESSAGES_REFRESH_EVENT, UNREAD_NOTIFICATIONS_REFRESH_EVENT } from "../services/realtime";
 
 type NavigateTo = (to: string) => void;
 type HeaderIcon = "bell" | "bookmark" | "mail";
@@ -85,6 +85,7 @@ export function SiteHeader({
   const location = useLocation();
   const { user: currentUserRecord, display: currentUser } = useCurrentUser();
   const [unreadMessageCount, setUnreadMessageCount] = useState(0);
+  const [unreadNotificationCount, setUnreadNotificationCount] = useState(0);
   const categoryContext = getCategorySearchContext(location.search);
   const showMarketplaceSearch = location.pathname === ROUTES.HOME || isSearchResultsPath(location.pathname);
   const showDesktopSearch = showMarketplaceSearch || isProductDetailsPath(location.pathname);
@@ -132,9 +133,25 @@ export function SiteHeader({
   useEffect(() => {
     let cancelled = false;
 
+    const refreshUnreadNotifications = () => {
+      if (!currentUserRecord?.id) {
+        setUnreadNotificationCount(0);
+        return;
+      }
+
+      void api.getNotifications(true)
+        .then((response) => {
+          if (!cancelled) setUnreadNotificationCount(response.data.length);
+        })
+        .catch(() => {
+          if (!cancelled) setUnreadNotificationCount(0);
+        });
+    };
+
     const refreshUnreadCount = () => {
       if (!currentUserRecord?.id) {
         setUnreadMessageCount(0);
+        setUnreadNotificationCount(0);
         return;
       }
 
@@ -148,21 +165,35 @@ export function SiteHeader({
     };
 
     refreshUnreadCount();
+    refreshUnreadNotifications();
 
     const socket = getRealtimeSocket();
     const handleUnreadCount = ({ count }: { count: number }) => setUnreadMessageCount(count);
     const handleNewMessage = () => refreshUnreadCount();
     const handleRefresh = () => refreshUnreadCount();
+    const handleNotificationRefresh = (event: Event) => {
+      const notificationEvent = event as CustomEvent<{ count?: number }>;
+      if (typeof notificationEvent.detail?.count === "number") {
+        setUnreadNotificationCount(notificationEvent.detail.count);
+        return;
+      }
+      refreshUnreadNotifications();
+    };
+    const handleNewNotification = () => refreshUnreadNotifications();
 
     socket?.on("messages:unread-count", handleUnreadCount);
     socket?.on("message:new", handleNewMessage);
+    socket?.on("notification:new", handleNewNotification);
     window.addEventListener(UNREAD_MESSAGES_REFRESH_EVENT, handleRefresh);
+    window.addEventListener(UNREAD_NOTIFICATIONS_REFRESH_EVENT, handleNotificationRefresh as EventListener);
 
     return () => {
       cancelled = true;
       socket?.off("messages:unread-count", handleUnreadCount);
       socket?.off("message:new", handleNewMessage);
+      socket?.off("notification:new", handleNewNotification);
       window.removeEventListener(UNREAD_MESSAGES_REFRESH_EVENT, handleRefresh);
+      window.removeEventListener(UNREAD_NOTIFICATIONS_REFRESH_EVENT, handleNotificationRefresh as EventListener);
     };
   }, [currentUserRecord?.id]);
 
@@ -296,23 +327,30 @@ export function SiteHeader({
 
         <div className="relative z-30 ml-auto flex flex-nowrap items-center justify-end gap-1.5 pointer-events-auto lg:order-3 lg:w-auto lg:gap-2">
         <IconBox
-          onClick={() => navigate("/notification-empty")}
+          onClick={() => navigate(ROUTES.NOTIFICATIONS)}
           active={activeIcon === "bell"}
-          ariaLabel="Notifications"
+          ariaLabel={unreadNotificationCount > 0 ? `Notifications, ${unreadNotificationCount > 9 ? "9+" : unreadNotificationCount} unread` : "Notifications"}
         >
-          <svg
-            viewBox="0 0 24 24"
-            className="h-5 w-5"
-            fill="none"
-            stroke="currentColor"
-            strokeLinecap="round"
-            strokeLinejoin="round"
-            strokeWidth="2"
-            aria-hidden="true"
-          >
-            <path d="M18 9.5a6 6 0 0 0-12 0c0 7-2.6 7.5-2.6 7.5h17.2S18 16.5 18 9.5" />
-            <path d="M14.2 20a2.4 2.4 0 0 1-4.4 0" />
-          </svg>
+          <span className="relative grid h-5 w-5 place-items-center">
+            <svg
+              viewBox="0 0 24 24"
+              className="h-5 w-5"
+              fill="none"
+              stroke="currentColor"
+              strokeLinecap="round"
+              strokeLinejoin="round"
+              strokeWidth="2"
+              aria-hidden="true"
+            >
+              <path d="M18 9.5a6 6 0 0 0-12 0c0 7-2.6 7.5-2.6 7.5h17.2S18 16.5 18 9.5" />
+              <path d="M14.2 20a2.4 2.4 0 0 1-4.4 0" />
+            </svg>
+            {unreadNotificationCount > 0 ? (
+              <span className="absolute -right-2.5 -top-2.5 grid min-h-[18px] min-w-[18px] place-items-center rounded-full bg-[#f04438] px-1 text-[10px] font-semibold leading-none text-white shadow-[0_4px_10px_rgba(240,68,56,0.32)] ring-2 ring-page">
+                {unreadNotificationCount > 9 ? "9+" : unreadNotificationCount}
+              </span>
+            ) : null}
+          </span>
         </IconBox>
         <IconBox
           onClick={() => navigate("/saved")}

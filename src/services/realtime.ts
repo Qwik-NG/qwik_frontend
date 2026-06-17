@@ -18,6 +18,7 @@ let socket: Socket<ServerToClientEvents, ClientToServerEvents> | null = null;
 let socketToken: string | null = null;
 
 export const UNREAD_MESSAGES_REFRESH_EVENT = "qwik:messages-unread-refresh";
+export const UNREAD_NOTIFICATIONS_REFRESH_EVENT = "qwik:notifications-unread-refresh";
 
 function socketUrl() {
   return (import.meta.env.VITE_SOCKET_URL ?? API_BASE_URL.replace(/\/api\/?$/, "")).replace(/\/$/, "");

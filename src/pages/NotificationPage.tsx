@@ -3,7 +3,7 @@ import type { ReactNode } from "react";
 import { useNavigate } from "react-router-dom";
 import { SiteFooter, SiteHeader } from "../components/AppShell";
 import { api } from "../services/api";
-import { getRealtimeSocket } from "../services/realtime";
+import { getRealtimeSocket, UNREAD_NOTIFICATIONS_REFRESH_EVENT } from "../services/realtime";
 import type { Notification } from "../types";
 
 function BellIcon({ small = false }: { small?: boolean }) {
@@ -47,6 +47,10 @@ export default function NotificationPage() {
 
   const unreadCount = notifications.filter((notification) => !notification.read).length;
 
+  const broadcastUnreadNotificationCount = (count: number) => {
+    window.dispatchEvent(new CustomEvent(UNREAD_NOTIFICATIONS_REFRESH_EVENT, { detail: { count } }));
+  };
+
   const loadNotifications = async () => {
     try {
       setLoading(true);
@@ -63,6 +67,10 @@ export default function NotificationPage() {
   useEffect(() => {
     void loadNotifications();
   }, []);
+
+  useEffect(() => {
+    broadcastUnreadNotificationCount(unreadCount);
+  }, [unreadCount]);
 
   useEffect(() => {
     const socket = getRealtimeSocket();

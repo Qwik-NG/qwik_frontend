@@ -2,6 +2,8 @@ import type { ReactNode } from "react";
 import { useNavigate } from "react-router-dom";
 import { BellIcon, BoxIcon, InfoIcon, LogoutIcon, PhoneIcon, ShieldCheckIcon, TicketIcon, UserIcon } from "../components/icons/SettingsIcons";
 import { clearAllAuthData } from "../services/auth";
+import { disconnectRealtimeSocket } from "../services/realtime";
+import { ROUTES } from "../constants/routes";
 
 export type SettingsMenuItem = {
   label: string;
@@ -19,6 +21,6 @@ export function getSettingsNavItems(navigate: ReturnType<typeof useNavigate>, ac
     { label: "Notification", icon: <BellIcon />, active: activePage === "notification", onClick: () => navigate("/notification-settings") },
     { label: "Help", icon: <PhoneIcon />, active: activePage === "help", onClick: () => navigate("/messages") },
     { label: "About", icon: <InfoIcon />, active: activePage === "about", onClick: () => navigate("/") },
-    { label: "Log out", icon: <LogoutIcon />, onClick: () => { clearAllAuthData(); navigate("/signin"); } },
+    { label: "Log out", icon: <LogoutIcon />, onClick: () => { clearAllAuthData(); disconnectRealtimeSocket(); navigate(ROUTES.LOGIN); } },
   ];
 }
