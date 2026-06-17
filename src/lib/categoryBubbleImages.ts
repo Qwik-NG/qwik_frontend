@@ -38,8 +38,8 @@ const CATEGORY_BUBBLE_IMAGE_MAP: Record<CategoryBubbleGroup, Record<string, stri
   },
   electronics: {
     laptops: "/electronics-categories/laptop-48.png",
-    desktop: "/electronics-categories/desktop-48.png",
-    "desktop-computers": "/electronics-categories/desktop-48.png",
+    desktop: "/electronics-categories/idesktop2-48.png",
+    "desktop-computers": "/electronics-categories/idesktop2-48.png",
     server: "/electronics-categories/server-100.png",
   },
   fashion: {
