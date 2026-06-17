@@ -138,6 +138,9 @@ export default function ProductDetailsPage() {
   const [markingUnavailable, setMarkingUnavailable] = useState(false);
   const [touchStartX, setTouchStartX] = useState<number | null>(null);
   const [isPhoneRevealed, setIsPhoneRevealed] = useState(false);
+  const [isFollowingSeller, setIsFollowingSeller] = useState(false);
+  const [followersCount, setFollowersCount] = useState<number | null>(null);
+  const [followLoading, setFollowLoading] = useState(false);
 
   const fetchAd = useCallback(async () => {
       try {
@@ -152,14 +155,24 @@ export default function ProductDetailsPage() {
         const token = getToken();
         const categoryId = result.data.categoryId;
         const authRequest = token
-          ? Promise.all([api.isSaved(id), api.me()])
-              .then(([savedResponse, meResponse]) => {
+          ? Promise.all([
+              api.isSaved(id),
+              api.me(),
+              result.data.user?.id ? api.getFollowStatus(result.data.user.id).catch(() => null) : Promise.resolve(null),
+            ])
+              .then(([savedResponse, meResponse, followStatus]) => {
                 setIsSaved(savedResponse.data.saved);
                 setCurrentUser(meResponse.data);
+                if (followStatus?.data) {
+                  setIsFollowingSeller(followStatus.data.isFollowing);
+                  setFollowersCount(followStatus.data.followersCount);
+                }
               })
               .catch(() => {
                 setIsSaved(false);
                 setCurrentUser(null);
+                setIsFollowingSeller(false);
+                setFollowersCount(null);
               })
           : Promise.resolve();
         const similarRequest = api
@@ -188,6 +201,12 @@ export default function ProductDetailsPage() {
 
   useEffect(() => {
     setIsPhoneRevealed(false);
+  }, [id]);
+
+  useEffect(() => {
+    setIsFollowingSeller(false);
+    setFollowersCount(null);
+    setFollowLoading(false);
   }, [id]);
 
   const handlePostReview = async () => {
@@ -290,6 +309,54 @@ export default function ProductDetailsPage() {
     });
 
     navigate(`/messages?${params.toString()}`);
+  };
+
+  const handleToggleFollowSeller = async () => {
+    const token = getToken();
+    if (!token) {
+      showError("Please log in to follow sellers");
+      return;
+    }
+
+    if (!ad?.user?.id) {
+      showError("Seller information is unavailable");
+      return;
+    }
+
+    if (currentUser?.id && currentUser.id === ad.user.id) {
+      showError("You cannot follow yourself");
+      return;
+    }
+
+    const previousFollowing = isFollowingSeller;
+    const previousCount = followersCount;
+    setFollowLoading(true);
+
+    if (previousFollowing) {
+      setIsFollowingSeller(false);
+      setFollowersCount((current) => (typeof current === "number" ? Math.max(0, current - 1) : current));
+    } else {
+      setIsFollowingSeller(true);
+      setFollowersCount((current) => (typeof current === "number" ? current + 1 : 1));
+    }
+
+    try {
+      if (previousFollowing) {
+        await api.unfollowUser(ad.user.id);
+      } else {
+        await api.followUser(ad.user.id);
+      }
+
+      const statusResponse = await api.getFollowStatus(ad.user.id);
+      setIsFollowingSeller(statusResponse.data.isFollowing);
+      setFollowersCount(statusResponse.data.followersCount);
+    } catch (err) {
+      setIsFollowingSeller(previousFollowing);
+      setFollowersCount(previousCount);
+      showError(err instanceof Error ? err.message : "Unable to update follow status right now");
+    } finally {
+      setFollowLoading(false);
+    }
   };
 
   const sellerPhoneRaw = ad?.user?.phone?.trim() ?? "";
@@ -588,13 +655,26 @@ export default function ProductDetailsPage() {
         <section className="mt-8 grid grid-cols-1 gap-5 xl:grid-cols-2">
           {/* Seller Card */}
           <div className="rounded-[18px] bg-[#efefef] p-6">
-            <div className="flex items-center gap-3">
-              <UserAvatar name={sellerName} imageUrl={sellerAvatarUrl} alt={sellerName} className="h-12 w-12 rounded-full object-cover text-[12px]" />
-              <div>
-                <p className="text-[14px] text-[#8f8b98]">{sellerName}</p>
-                <p className="text-[18px]">{sellerMeta}</p>
-                <button className="text-[14px] text-[#ff9715]" type="button">See all ads</button>
+            <div className="flex items-center justify-between gap-3">
+              <div className="flex items-center gap-3">
+                <UserAvatar name={sellerName} imageUrl={sellerAvatarUrl} alt={sellerName} className="h-12 w-12 rounded-full object-cover text-[12px]" />
+                <div>
+                  <p className="text-[14px] text-[#8f8b98]">{sellerName}</p>
+                  <p className="text-[18px]">{sellerMeta}</p>
+                  {typeof followersCount === "number" ? <p className="text-[13px] text-[#8f8b98]">{followersCount} follower{followersCount === 1 ? "" : "s"}</p> : null}
+                  <button className="text-[14px] text-[#ff9715]" type="button">See all ads</button>
+                </div>
               </div>
+              {!isOwner ? (
+                <button
+                  className={`h-10 rounded-[8px] px-4 text-[14px] transition-colors duration-200 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#ffb357] focus-visible:ring-offset-2 focus-visible:ring-offset-white ${isFollowingSeller ? "bg-[#e9f4ec] text-[#2f8f53]" : "bg-badge-bg text-[#ff9715] hover:bg-[#ffe2c5]"}`}
+                  onClick={handleToggleFollowSeller}
+                  disabled={followLoading}
+                  type="button"
+                >
+                  {followLoading ? "Updating..." : isFollowingSeller ? "Following" : "Follow"}
+                </button>
+              ) : null}
             </div>
             <div className="mt-4 flex gap-2">
               <button

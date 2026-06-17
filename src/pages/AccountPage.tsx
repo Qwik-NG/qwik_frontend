@@ -14,6 +14,7 @@ import Toggle from "../components/ui/Toggle";
 import { UserAvatar } from "../components/ui/UserAvatar";
 import { getSettingsNavItems } from "../lib/settings-nav-config";
 import { useToast } from "../context/ToastContext";
+import type { FollowingSeller } from "../types";
 
 type TabKey = "profile" | "company" | "chat";
 type MenuItem = { label: string; icon: ReactNode; active?: boolean; to?: string };
@@ -524,6 +525,65 @@ function Footer() {
   );
 }
 
+function FollowingSellersSection({
+  sellers,
+  loading,
+  unfollowingId,
+  onViewProfile,
+  onUnfollow,
+}: {
+  sellers: FollowingSeller[];
+  loading: boolean;
+  unfollowingId: string | null;
+  onViewProfile: (id: string) => void;
+  onUnfollow: (sellerId: string) => void;
+}) {
+  return (
+    <div className="mt-10 w-full max-w-[720px] rounded-[22px] bg-white p-5 shadow-[0_18px_48px_rgba(24,20,31,0.06)] sm:p-6">
+      <h3 className="text-[22px] font-medium text-ink">Following Sellers</h3>
+      {loading ? <p className="mt-3 text-[14px] text-[#7d7986]">Loading...</p> : null}
+      {!loading && sellers.length === 0 ? <p className="mt-3 text-[14px] text-[#7d7986]">You are not following any sellers yet.</p> : null}
+      {!loading && sellers.length > 0 ? (
+        <div className="mt-4 space-y-3">
+          {sellers.map((seller) => (
+            <div key={seller.id} className="flex items-center justify-between gap-3 rounded-[12px] border border-[#eceaf0] bg-[#faf9fc] px-4 py-3">
+              <div className="flex min-w-0 items-center gap-3">
+                <UserAvatar
+                  name={seller.fullName}
+                  imageUrl={seller.profile?.avatarUrl}
+                  alt={seller.fullName}
+                  className="h-11 w-11 shrink-0 rounded-full object-cover text-[11px]"
+                />
+                <div className="min-w-0">
+                  <p className="truncate text-[15px] font-medium text-ink">{seller.fullName}</p>
+                  <p className="truncate text-[13px] text-[#7d7986]">{seller.followersCount} follower{seller.followersCount === 1 ? "" : "s"}</p>
+                </div>
+              </div>
+              <div className="flex items-center gap-2">
+                <button
+                  type="button"
+                  onClick={() => onViewProfile(seller.id)}
+                  className="h-9 rounded-[8px] border border-[#eceaf0] px-3 text-[13px] text-ink transition hover:border-orange hover:text-orange"
+                >
+                  View profile
+                </button>
+                <button
+                  type="button"
+                  onClick={() => onUnfollow(seller.id)}
+                  disabled={unfollowingId === seller.id}
+                  className="h-9 rounded-[8px] bg-badge-bg px-3 text-[13px] text-[#ff9715] transition-colors hover:bg-[#ffe2c5] disabled:cursor-not-allowed disabled:opacity-60"
+                >
+                  {unfollowingId === seller.id ? "Updating..." : "Unfollow"}
+                </button>
+              </div>
+            </div>
+          ))}
+        </div>
+      ) : null}
+    </div>
+  );
+}
+
 export default function AccountPage() {
   const navigate = useNavigate();
   const [activeTab, setActiveTab] = useState<TabKey>("profile");
@@ -539,6 +599,9 @@ export default function AccountPage() {
   const [avatarPreviewUrl, setAvatarPreviewUrl] = useState("");
   const [savingAvatar, setSavingAvatar] = useState(false);
   const [savingProfile, setSavingProfile] = useState(false);
+  const [followingSellers, setFollowingSellers] = useState<FollowingSeller[]>([]);
+  const [loadingFollowing, setLoadingFollowing] = useState(false);
+  const [unfollowingSellerId, setUnfollowingSellerId] = useState<string | null>(null);
 
   useEffect(() => {
     setFullName(display.fullName === "Qwik User" ? "" : display.fullName);
@@ -562,6 +625,40 @@ export default function AccountPage() {
 
     return () => URL.revokeObjectURL(previewUrl);
   }, [selectedAvatarFile]);
+
+  const loadFollowing = async () => {
+    try {
+      setLoadingFollowing(true);
+      const response = await api.getMyFollowing();
+      setFollowingSellers(response.data);
+    } catch (error) {
+      showError(error instanceof Error ? error.message : "Failed to load following sellers");
+    } finally {
+      setLoadingFollowing(false);
+    }
+  };
+
+  useEffect(() => {
+    loadFollowing();
+  }, []);
+
+  const handleUnfollowSeller = async (sellerId: string) => {
+    try {
+      setUnfollowingSellerId(sellerId);
+      const previous = followingSellers;
+      setFollowingSellers((current) => current.filter((seller) => seller.id !== sellerId));
+      await api.unfollowUser(sellerId);
+      await loadFollowing();
+      success("Seller unfollowed");
+      return previous;
+    } catch (error) {
+      showError(error instanceof Error ? error.message : "Failed to unfollow seller");
+      await loadFollowing();
+      return null;
+    } finally {
+      setUnfollowingSellerId(null);
+    }
+  };
 
   const saveAvatar = async () => {
     if (!selectedAvatarFile || savingAvatar) return;
@@ -706,6 +803,13 @@ export default function AccountPage() {
             ) : null}
             {activeTab === "company" ? <CompanyDetailsForm display={display} /> : null}
             {activeTab === "chat" ? <ChatSettingsForm /> : null}
+            <FollowingSellersSection
+              sellers={followingSellers}
+              loading={loadingFollowing}
+              unfollowingId={unfollowingSellerId}
+              onViewProfile={(sellerId) => navigate(`/users/${sellerId}`)}
+              onUnfollow={handleUnfollowSeller}
+            />
           </div>
         </section>
       </main>

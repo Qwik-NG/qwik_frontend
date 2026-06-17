@@ -41,6 +41,20 @@ export interface PublicUserProfile extends User {
   isFollowing?: boolean;
 }
 
+export interface FollowStatus {
+  isFollowing: boolean;
+  followersCount: number;
+}
+
+export interface FollowingSeller {
+  id: string;
+  fullName: string;
+  location?: string;
+  profile?: UserProfile;
+  followersCount: number;
+  followedAt: string;
+}
+
 export type VerificationStatus = "DRAFT" | "SUBMITTED" | "IN_REVIEW" | "APPROVED" | "REJECTED";
 export type VerificationPaymentStatus = "UNPAID" | "PENDING" | "PAID" | "FAILED";
 

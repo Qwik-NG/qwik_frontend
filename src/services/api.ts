@@ -30,6 +30,8 @@ import type {
   AdminStats,
   AdminReport,
   AdminAd,
+  FollowStatus,
+  FollowingSeller,
   PublicUserProfile
 } from "../types/index";
 
@@ -224,6 +226,17 @@ export const api = {
   unfollowUser: (id: string) => request<{ following: boolean; stats: { followers: number; following: number } }>(`/users/${id}/follow`, { method: "DELETE" }).then((response) => {
     GET_CACHE.clear();
     return response;
+  }),
+
+  getFollowStatus: (sellerId: string) => request<FollowStatus>(`/users/${sellerId}/follow-status`, {
+    staleTime: SHORT_LIST_STALE_TIME,
+    cacheTime: SHORT_LIST_STALE_TIME * 2,
+  }),
+
+  getMyFollowing: () => request<FollowingSeller[]>("/users/me/following", {
+    staleTime: SHORT_LIST_STALE_TIME,
+    cacheTime: SHORT_LIST_STALE_TIME * 2,
+    retry: 1,
   }),
 
   // TODO: updateProfile - update user profile (bio, avatar, etc.)
