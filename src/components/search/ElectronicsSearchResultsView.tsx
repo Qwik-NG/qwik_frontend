@@ -4,6 +4,7 @@ import {
   ROUTES,
 } from "../../constants/routes";
 import { ALL_NIGERIA_LOCATION, isCategoryMarkerQuery, NIGERIAN_LOCATIONS } from "../../lib/searchContext";
+import { isSellerVerified } from "../../lib/sellerVerification";
 import ListingCard from "../listings/ListingCard";
 import {
   type ElectronicsCondition,
@@ -366,9 +367,7 @@ export default function ElectronicsSearchResultsView({ query, navigate, view, lo
     () =>
       sortElectronicsResults(
         electronicsResults.filter((item) => {
-          const verified = Boolean(
-            item.ad.user?.profile?.verified || item.ad.user?.profile?.verificationStatus === "verified",
-          );
+          const verified = isSellerVerified(item.ad.user);
           const typeMatches = selectedType === "all" || item.electronicsType === selectedType;
           const stripMatches = item.stripCategory === selectedStripCategory;
           const brandMatches = selectedBrand === "all" || item.brand === selectedBrand;
@@ -515,9 +514,7 @@ export default function ElectronicsSearchResultsView({ query, navigate, view, lo
                     description: item.ad.description,
                     location: item.ad.location,
                     image: item.ad.images?.[0]?.url,
-                    verifiedSeller: Boolean(
-                      item.ad.user?.profile?.verified || item.ad.user?.profile?.verificationStatus === "verified",
-                    ),
+                    verifiedSeller: isSellerVerified(item.ad.user),
                   }}
                   interactive
                   clampTitleLines={2}
@@ -539,9 +536,7 @@ export default function ElectronicsSearchResultsView({ query, navigate, view, lo
                     description: item.ad.description,
                     location: item.ad.location,
                     image: item.ad.images?.[0]?.url,
-                    verifiedSeller: Boolean(
-                      item.ad.user?.profile?.verified || item.ad.user?.profile?.verificationStatus === "verified",
-                    ),
+                    verifiedSeller: isSellerVerified(item.ad.user),
                   }}
                   interactive
                   clampTitleLines={2}

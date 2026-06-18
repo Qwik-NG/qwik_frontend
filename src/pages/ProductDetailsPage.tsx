@@ -6,6 +6,7 @@ import { ImagePlaceholder } from "../components/ui/ImagePlaceholder";
 import { UserAvatar } from "../components/ui/UserAvatar";
 import { useToast } from "../context/ToastContext";
 import { formatMemberSince } from "../lib/currentUser";
+import { isSellerVerified } from "../lib/sellerVerification";
 import { getToken } from "../services/auth";
 import { api } from "../services/api";
 import type { Ad, User } from "../types";
@@ -303,11 +304,7 @@ export default function ProductDetailsPage() {
   const sellerAvatarUrl = ad.user?.profile?.avatarUrl || "";
   const sellerMeta = formatMemberSince(ad.user?.createdAt);
   const isOwner = Boolean(currentUser?.id && ad.user?.id === currentUser.id);
-  const sellerVerified = Boolean(
-    ad.user?.verification?.approved ||
-      ad.user?.verification?.status === "APPROVED" ||
-      ad.user?.verificationApplications?.[0]?.status === "APPROVED",
-  );
+  const sellerVerified = isSellerVerified(ad.user);
   const sellerAllAdsPath = ad.user?.id ? `/users/${encodeURIComponent(ad.user.id)}` : "/search";
 
   const showPreviousImage = () => {

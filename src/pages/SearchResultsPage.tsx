@@ -19,6 +19,7 @@ import BackButton from "../components/ui/BackButton";
 import DropdownSelect from "../components/ui/DropdownSelect";
 import { isBeautySearchQuery, isElectronicsSearchQuery, isFashionSearchQuery, isFurnitureSearchQuery, isJobSearchQuery, isPhonesSearchQuery, isVehicleSearchQuery } from "../lib/mockData";
 import { getCategorySearchContext, getLocationSearchParam, NIGERIAN_LOCATIONS } from "../lib/searchContext";
+import { isSellerVerified } from "../lib/sellerVerification";
 import { api } from "../services/api";
 import type { Ad, Category } from "../types";
 
@@ -114,7 +115,7 @@ function toListing(ad: Ad): SearchListing {
     description: ad.description,
     location: ad.location,
     image: ad.images?.[0]?.url,
-    verifiedSeller: Boolean(ad.user?.profile?.verified || ad.user?.profile?.verificationStatus === "verified"),
+    verifiedSeller: isSellerVerified(ad.user),
   };
 }
 
@@ -467,7 +468,7 @@ export default function SearchResultsPage() {
   // Client-side filter for verified sellers (backend doesn't support yet)
   const filteredAds = useMemo(() => {
     return matchedAds.filter((ad) => {
-      const verified = Boolean(ad.user?.profile?.verified || ad.user?.profile?.verificationStatus === "verified");
+      const verified = isSellerVerified(ad.user);
       if (verifiedFilter === "verified" && !verified) return false;
       if (verifiedFilter === "unverified" && verified) return false;
       return true;
