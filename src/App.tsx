@@ -17,6 +17,7 @@ const SignUpPage = lazy(() => import("./pages/SignUpPage"));
 const WelcomePage = lazy(() => import("./pages/WelcomePage"));
 const LoginPage = lazy(() => import("./pages/LoginPage"));
 const LoginPasswordPage = lazy(() => import("./pages/LoginPasswordPage"));
+const VerifyEmailPage = lazy(() => import("./pages/VerifyEmailPage"));
 const RecoverPasswordPage = lazy(() => import("./pages/RecoverPasswordPage"));
 const CreatePasswordPage = lazy(() => import("./pages/CreatePasswordPage"));
 const PromoteAdPage = lazy(() => import("./pages/PromoteAdPage"));
@@ -76,6 +77,7 @@ export default function App() {
       <Route path={ROUTES.SUPPORT} element={lazyRoute(<SupportPage />)} />
       <Route path={ROUTES.FAQS} element={lazyRoute(<FaqsPage />)} />
       <Route path={ROUTES.WELCOME} element={lazyRoute(<WelcomePage />)} />
+      <Route path={ROUTES.VERIFY_EMAIL} element={lazyRoute(<VerifyEmailPage />)} />
 
       {/* Authentication & Access Control */}
       <Route path={ROUTES.SIGNIN} element={lazyRoute(<SignInPage />)} />

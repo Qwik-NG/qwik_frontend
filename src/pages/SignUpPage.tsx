@@ -139,7 +139,9 @@ export default function SignUpPage() {
                 setToken(res.data.token);
                 setRole(res.data.user.role);
                 success("Account created successfully");
-                navigate("/welcome");
+                // Redirect to email verification if email not verified, otherwise to welcome
+                const isEmailVerified = res.data.user.emailVerifiedAt !== null && res.data.user.emailVerifiedAt !== undefined;
+                navigate(isEmailVerified ? "/welcome" : "/verify-email");
               } catch (error) {
                 showError(error instanceof Error ? error.message : "Sign up failed");
               } finally {

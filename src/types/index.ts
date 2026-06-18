@@ -16,6 +16,7 @@ export interface User {
   locationArea?: string;
   role?: "USER" | "ADMIN";
   status?: "ACTIVE" | "BANNED";
+  emailVerifiedAt?: string | null;
   bannedAt?: string | null;
   banReason?: string | null;
   termsAcceptedAt?: string | null;

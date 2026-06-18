@@ -25,6 +25,7 @@ export const ROUTES = {
   
   // Onboarding
   WELCOME: "/welcome",
+  VERIFY_EMAIL: "/verify-email",
   
   // Products & Listings
   PRODUCT_DETAILS: "/product-details",

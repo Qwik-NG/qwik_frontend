@@ -196,6 +196,24 @@ export const api = {
       body: JSON.stringify(payload)
     }),
 
+  sendVerificationOtp: () =>
+    request<{ message: string }>("/auth/send-verification-otp", {
+      method: "POST",
+      body: JSON.stringify({})
+    }),
+
+  resendVerificationOtp: () =>
+    request<{ message: string }>("/auth/resend-verification-otp", {
+      method: "POST",
+      body: JSON.stringify({})
+    }),
+
+  verifyEmailOtp: (otp: string) =>
+    request<AuthResponse>("/auth/verify-email-otp", {
+      method: "POST",
+      body: JSON.stringify({ otp })
+    }),
+
   // TODO: logout endpoint if needed (frontend only clears token)
   // logout: () => request<null>("/auth/logout", { method: "POST" }),
 

@@ -68,11 +68,13 @@ export default function LoginPasswordPage() {
                 setToken(res.data.token);
                 setRole(res.data.user.role);
                 
-                // Redirect based on user role
+                // Redirect based on user role and email verification status
                 if (res.data.user.role === 'ADMIN') {
                   navigate("/admin");
                 } else {
-                  navigate("/welcome");
+                  // Redirect to email verification if email not verified, otherwise to welcome
+                  const isEmailVerified = res.data.user.emailVerifiedAt !== null && res.data.user.emailVerifiedAt !== undefined;
+                  navigate(isEmailVerified ? "/welcome" : "/verify-email");
                 }
               } catch (error) {
                 showError(error instanceof Error ? error.message : "Login failed");
