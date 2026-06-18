@@ -8,7 +8,7 @@ import { useToast } from "../context/ToastContext";
 import { formatMemberSince } from "../lib/currentUser";
 import { isSellerVerified } from "../lib/sellerVerification";
 import { getToken } from "../services/auth";
-import { api } from "../services/api";
+import { api, isEmailVerificationRequiredError } from "../services/api";
 import type { Ad, User } from "../types";
 
 function LocationPin({ className = "h-5 w-5" }: { className?: string }) {
@@ -178,6 +178,12 @@ export default function ProductDetailsPage() {
       return;
     }
 
+    if (!currentUser?.emailVerifiedAt) {
+      showError("Please verify your email to continue.");
+      navigate("/verify-email");
+      return;
+    }
+
     if (!ad?.user?.id) {
       alert("Seller information is unavailable for this ad");
       return;
@@ -191,6 +197,24 @@ export default function ProductDetailsPage() {
     });
 
     navigate(`/messages?${params.toString()}`);
+  };
+
+  const handleStartOffer = () => {
+    const token = getToken();
+    if (!token) {
+      showError("Please log in to send an offer.");
+      navigate("/login");
+      return;
+    }
+
+    if (!currentUser?.emailVerifiedAt) {
+      showError("Please verify your email to continue.");
+      navigate("/verify-email");
+      return;
+    }
+
+    if (!ad) return;
+    navigate(`/make-offer?adId=${encodeURIComponent(ad.id)}`);
   };
 
   const handleToggleFollowSeller = async () => {
@@ -488,7 +512,7 @@ export default function ProductDetailsPage() {
               <div className="mt-4 space-y-2">
                 <button
                   className="h-10 w-full rounded-[8px] border border-[#ffb46a] bg-[#fff7ef] px-4 text-[14px] font-medium text-[#d97706] transition-colors duration-200 hover:bg-[#ffefdc] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#ffb357] focus-visible:ring-offset-2 focus-visible:ring-offset-white"
-                  onClick={() => navigate(`/make-offer?adId=${encodeURIComponent(ad.id)}`)}
+                  onClick={handleStartOffer}
                   type="button"
                 >
                   Make Offer

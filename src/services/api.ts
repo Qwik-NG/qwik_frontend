@@ -113,7 +113,7 @@ async function request<T>(path: string, init?: ApiRequestInit): Promise<ApiRespo
         const res = await fetch(`${API_BASE_URL}${path}`, { ...fetchInit, headers });
         const body = (await res.json().catch(() => ({}))) as ApiResponse<T>;
         if (!res.ok || !body.success) {
-          if (authToken && (res.status === 401 || res.status === 403)) {
+          if (authToken && res.status === 401) {
             clearAllAuthData();
             disconnectRealtimeSocket();
             GET_CACHE.clear();
@@ -163,6 +163,11 @@ async function request<T>(path: string, init?: ApiRequestInit): Promise<ApiRespo
 }
 
 export { type ApiResponse };
+
+export function isEmailVerificationRequiredError(error: unknown) {
+  if (!(error instanceof Error)) return false;
+  return error.message.trim().toLowerCase() === "email verification required";
+}
 
 export const api = {
   // ===== Authentication Endpoints =====

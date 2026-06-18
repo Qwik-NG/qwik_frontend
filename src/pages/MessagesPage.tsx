@@ -2,7 +2,8 @@ import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { useLocation, useNavigate } from "react-router-dom";
 import { SiteFooter, SiteHeader } from "../components/AppShell";
 import { UserAvatar } from "../components/ui/UserAvatar";
-import { api } from "../services/api";
+import { useToast } from "../context/ToastContext";
+import { api, isEmailVerificationRequiredError } from "../services/api";
 import { getRealtimeSocket, joinConversation, UNREAD_MESSAGES_REFRESH_EVENT } from "../services/realtime";
 import type { Conversation, Message } from "../types";
 
@@ -157,6 +158,7 @@ function mergeMessage(messages: Message[] | undefined, incoming: Message) {
 
 export default function MessagesPage() {
   const navigate = useNavigate();
+  const { error: showError } = useToast();
   const location = useLocation();
   const searchParams = useMemo(() => new URLSearchParams(location.search), [location.search]);
   const requestedConversationId = searchParams.get("conversation");
@@ -318,6 +320,11 @@ export default function MessagesPage() {
       mergeMessageIntoConversation(selectedConversationId, response.data);
     } catch (err) {
       mergeMessageIntoConversation(selectedConversationId, { ...optimisticMessage, deliveryStatus: "failed" });
+      if (isEmailVerificationRequiredError(err)) {
+        showError("Please verify your email to continue.");
+        navigate("/verify-email");
+        return;
+      }
       setError(err instanceof Error ? err.message : "Failed to send message");
     } finally {
       setSending(false);
@@ -352,6 +359,11 @@ export default function MessagesPage() {
         navigate(`/messages?conversation=${response.data.id}`, { replace: true });
       } catch (err) {
         setDraftMessage(text);
+        if (isEmailVerificationRequiredError(err)) {
+          showError("Please verify your email to continue.");
+          navigate("/verify-email");
+          return;
+        }
         setError(err instanceof Error ? err.message : "Failed to send message");
       } finally {
         setSending(false);

@@ -2,7 +2,7 @@ import { useEffect, useMemo, useState } from "react";
 import { useNavigate, useSearchParams } from "react-router-dom";
 import { useToast } from "../context/ToastContext";
 import { buildProductDetailsRoute } from "../constants/routes";
-import { api } from "../services/api";
+import { api, isEmailVerificationRequiredError } from "../services/api";
 import { getToken } from "../services/auth";
 import type { Ad } from "../types";
 
@@ -107,6 +107,11 @@ export default function MakeOfferPage() {
       success("Offer sent to the seller.");
       navigate(`/messages?conversation=${response.data.id}`);
     } catch (err) {
+      if (isEmailVerificationRequiredError(err)) {
+        showError("Please verify your email to continue.");
+        navigate("/verify-email");
+        return;
+      }
       const message = err instanceof Error ? err.message : "Unable to send your offer right now.";
       setError(message);
       showError(message);
