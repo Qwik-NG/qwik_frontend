@@ -272,6 +272,9 @@ export interface Message {
   senderId: string;
   sender?: User;
   text: string;
+  messageType?: "text" | "offer";
+  offerAmount?: number | null;
+  offerStatus?: "pending" | "accepted" | "rejected" | null;
   readAt?: string | null;
   createdAt: string;
   clientId?: string;

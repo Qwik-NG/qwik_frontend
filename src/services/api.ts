@@ -389,6 +389,12 @@ export const api = {
   sendMessage: (payload: MessageSendPayload) =>
     request<Message>("/messages", { method: "POST", body: JSON.stringify(payload) }),
 
+  updateOfferStatus: (messageId: string, status: "accepted" | "rejected") =>
+    request<Message>(`/messages/${messageId}/offer-status`, { 
+      method: "PATCH", 
+      body: JSON.stringify({ status }) 
+    }),
+
   // ===== Notification Endpoints =====
   getUnreadNotificationCount: () => request<{ count: number }>("/notifications/unread-count", { retry: 1 }),
 

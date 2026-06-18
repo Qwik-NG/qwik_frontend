@@ -113,7 +113,11 @@ function ConversationItem({
   );
 }
 
-function ChatBubble({ message, mine, onRetry }: { message: Message; mine: boolean; onRetry?: (message: Message) => void }) {
+function ChatBubble({ message, mine, ad, onRetry, onAcceptOffer, onRejectOffer }: { message: Message; mine: boolean; ad?: Conversation["ad"]; onRetry?: (message: Message) => void; onAcceptOffer?: (messageId: string) => void; onRejectOffer?: (messageId: string) => void }) {
+  if (message.messageType === "offer") {
+    return <OfferCard message={message} ad={ad} mine={mine} onAcceptOffer={onAcceptOffer} onRejectOffer={onRejectOffer} />;
+  }
+
   return (
     <div className={`flex ${mine ? "justify-end" : "justify-start"}`}>
       <div
@@ -132,6 +136,76 @@ function ChatBubble({ message, mine, onRetry }: { message: Message; mine: boolea
             ) : null}
           </div>
         ) : null}
+      </div>
+    </div>
+  );
+}
+
+function OfferCard({ message, ad, mine, onAcceptOffer, onRejectOffer }: { message: Message; ad?: Conversation["ad"]; mine: boolean; onAcceptOffer?: (messageId: string) => void; onRejectOffer?: (messageId: string) => void }) {
+  const statusStyles: Record<string, string> = {
+    pending: "bg-yellow/10 text-yellow border border-yellow/30",
+    accepted: "bg-green/10 text-green border border-green/30",
+    rejected: "bg-red/10 text-red border border-red/30",
+  };
+  const statusLabels: Record<string, string> = {
+    pending: "Pending",
+    accepted: "Accepted",
+    rejected: "Rejected",
+  };
+
+  return (
+    <div className={`flex ${mine ? "justify-end" : "justify-start"}`}>
+      <div className="max-w-[85%] overflow-hidden rounded-lg border border-orange/20 bg-white shadow-[0_4px_12px_rgba(255,151,15,0.08)]">
+        {/* Product Section */}
+        {ad && (
+          <div className="border-b border-orange/10 bg-orange/2 p-3 sm:p-4">
+            <div className="flex gap-3">
+              {ad.images && ad.images.length > 0 && (
+                <img
+                  src={ad.images[0].url}
+                  alt={ad.title}
+                  className="h-14 w-14 shrink-0 rounded object-cover"
+                />
+              )}
+              <div className="min-w-0 flex-1">
+                <p className="truncate text-sm font-medium text-ink">{ad.title}</p>
+              </div>
+            </div>
+          </div>
+        )}
+
+        {/* Offer Section */}
+        <div className="p-3 sm:p-4">
+          <p className="text-xs text-muted">{mine ? "Your offer" : "Offer received"}</p>
+          <p className="mt-2 text-2xl font-bold text-orange">₦{(message.offerAmount || 0).toLocaleString()}</p>
+          
+          {/* Status Badge */}
+          <div className="mt-3">
+            <span className={`inline-block rounded px-3 py-1 text-xs font-medium ${statusStyles[message.offerStatus || "pending"] || statusStyles.pending}`}>
+              {statusLabels[message.offerStatus || "pending"] || "Pending"}
+            </span>
+          </div>
+
+          {/* Action Buttons */}
+          {!mine && message.offerStatus === "pending" && (
+            <div className="mt-4 flex gap-2">
+              <button
+                type="button"
+                onClick={() => onAcceptOffer?.(message.id)}
+                className="flex-1 rounded-lg bg-green/10 px-3 py-2 text-sm font-semibold text-green transition hover:bg-green/20"
+              >
+                Accept
+              </button>
+              <button
+                type="button"
+                onClick={() => onRejectOffer?.(message.id)}
+                className="flex-1 rounded-lg bg-red/10 px-3 py-2 text-sm font-semibold text-red transition hover:bg-red/20"
+              >
+                Reject
+              </button>
+            </div>
+          )}
+        </div>
       </div>
     </div>
   );
@@ -376,6 +450,26 @@ export default function MessagesPage() {
     void sendExistingConversationMessage(message.text, message.clientId);
   };
 
+  const handleAcceptOffer = async (messageId: string) => {
+    try {
+      const response = await api.updateOfferStatus(messageId, "accepted");
+      mergeMessageIntoConversation(selectedConversationId || "", response.data);
+      // Using success toast from destructured useToast
+    } catch (err) {
+      showError(err instanceof Error ? err.message : "Failed to accept offer");
+    }
+  };
+
+  const handleRejectOffer = async (messageId: string) => {
+    try {
+      const response = await api.updateOfferStatus(messageId, "rejected");
+      mergeMessageIntoConversation(selectedConversationId || "", response.data);
+      // Using success toast from destructured useToast
+    } catch (err) {
+      showError(err instanceof Error ? err.message : "Failed to reject offer");
+    }
+  };
+
   const handleSelectConversation = (id: string) => {
     setSelectedConversationId(id);
     setError(null);
@@ -566,9 +660,34 @@ export default function MessagesPage() {
                   </div>
                 ) : null}
 
+                {selectedConversation?.ad ? (
+                  <div className="border-b border-orange/10 bg-orange/2 px-[12px] py-[10px] sm:px-[14px] lg:px-[28px] lg:py-[14px]">
+                    <div className="flex gap-3">
+                      {selectedConversation.ad.images && selectedConversation.ad.images.length > 0 && (
+                        <img
+                          src={selectedConversation.ad.images[0].url}
+                          alt={selectedConversation.ad.title}
+                          className="h-12 w-12 shrink-0 rounded object-cover"
+                        />
+                      )}
+                      <div className="min-w-0 flex-1">
+                        <p className="truncate text-sm font-medium text-ink">{selectedConversation.ad.title}</p>
+                      </div>
+                    </div>
+                  </div>
+                ) : null}
+
                 <div className="flex flex-1 flex-col gap-[14px] overflow-auto bg-[#fbfaf8] px-[12px] py-[18px] sm:px-[14px] lg:px-[34px] lg:py-[24px]">
                   {(selectedConversation?.messages || []).map((message) => (
-                    <ChatBubble key={message.clientId || message.id} message={message} mine={message.senderId === currentUserId} onRetry={retryMessage} />
+                    <ChatBubble 
+                      key={message.clientId || message.id} 
+                      message={message} 
+                      mine={message.senderId === currentUserId} 
+                      ad={selectedConversation?.ad}
+                      onRetry={retryMessage}
+                      onAcceptOffer={handleAcceptOffer}
+                      onRejectOffer={handleRejectOffer}
+                    />
                   ))}
                   {!selectedConversation?.messages?.length ? (
                     <div className="m-auto max-w-[300px] rounded-[20px] bg-white px-[20px] py-[18px] text-center shadow-[0_14px_34px_rgba(10,10,24,0.05)]">
