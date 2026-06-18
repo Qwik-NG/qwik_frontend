@@ -122,8 +122,9 @@ export default function DropdownSelect({ label, placeholder, value, options, onC
           role="listbox"
           aria-labelledby={hasLabel ? labelId : undefined}
           aria-label={hasLabel ? undefined : placeholder}
+          onPointerDown={(event) => event.stopPropagation()}
           style={{ scrollBehavior: "smooth", WebkitOverflowScrolling: "touch" }}
-          className="pointer-events-none absolute left-0 right-0 z-[120] mt-2 max-h-[280px] overflow-y-auto overscroll-contain rounded-[14px] border border-[#eee3d6] bg-white p-1.5 shadow-[0_18px_44px_rgba(34,25,16,0.16)]"
+          className="absolute left-0 right-0 z-[120] mt-2 max-h-[240px] touch-pan-y overflow-y-auto overscroll-contain rounded-[14px] border border-[#eee3d6] bg-white p-1.5 shadow-[0_18px_44px_rgba(34,25,16,0.16)] sm:max-h-[280px]"
         >
           {options.map((option) => {
             const selected = option.value === value;
@@ -137,7 +138,7 @@ export default function DropdownSelect({ label, placeholder, value, options, onC
                 aria-disabled={option.disabled}
                 disabled={option.disabled}
                 onClick={() => chooseOption(option.value)}
-                className={`pointer-events-auto flex min-h-[42px] w-full items-center justify-between gap-3 rounded-[10px] px-3 text-left text-[15px] transition ${
+                className={`flex min-h-[42px] w-full touch-pan-y items-center justify-between gap-3 rounded-[10px] px-3 text-left text-[15px] transition ${
                   option.disabled
                     ? "cursor-not-allowed text-[#b2aeba] opacity-70"
                     : selected
