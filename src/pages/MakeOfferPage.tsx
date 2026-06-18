@@ -2,6 +2,7 @@ import { useEffect, useMemo, useState } from "react";
 import { useNavigate, useSearchParams } from "react-router-dom";
 import { useToast } from "../context/ToastContext";
 import { buildProductDetailsRoute } from "../constants/routes";
+import { reconcileVerificationRequiredError } from "../lib/emailVerification";
 import { api, isEmailVerificationRequiredError } from "../services/api";
 import { getToken } from "../services/auth";
 import type { Ad } from "../types";
@@ -96,7 +97,7 @@ export default function MakeOfferPage() {
     try {
       setSubmitting(true);
       setError(null);
-      const response = await api.createConversation({
+      const createOfferConversation = () => api.createConversation({
         recipientId: ad.user.id,
         adId: ad.id,
         message: formatOfferMessage(ad, amount),
@@ -104,12 +105,40 @@ export default function MakeOfferPage() {
         messageType: "offer",
         offerAmount: amount,
       });
+
+      const response = await createOfferConversation();
       success("Offer sent to the seller.");
       navigate(`/messages?conversation=${response.data.id}`);
     } catch (err) {
       if (isEmailVerificationRequiredError(err)) {
-        showError("Please verify your email to continue.");
-        navigate("/verify-email");
+        const verified = await reconcileVerificationRequiredError({
+          error: err,
+          navigate,
+          nextPath: `/make-offer?adId=${encodeURIComponent(ad.id)}`,
+          onUnverified: () => showError("Please verify your email to continue."),
+        });
+
+        if (verified) {
+          try {
+            const retryResponse = await api.createConversation({
+              recipientId: ad.user.id,
+              adId: ad.id,
+              message: formatOfferMessage(ad, amount),
+              clientId: crypto.randomUUID(),
+              messageType: "offer",
+              offerAmount: amount,
+            });
+            success("Offer sent to the seller.");
+            navigate(`/messages?conversation=${retryResponse.data.id}`);
+            return;
+          } catch (retryErr) {
+            const retryMessage = retryErr instanceof Error ? retryErr.message : "Unable to send your offer right now.";
+            setError(retryMessage);
+            showError(retryMessage);
+            return;
+          }
+        }
+
         return;
       }
       const message = err instanceof Error ? err.message : "Unable to send your offer right now.";

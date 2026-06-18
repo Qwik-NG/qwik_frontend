@@ -2,9 +2,12 @@ import { useEffect, useRef, useState, type ReactNode } from "react";
 import { useLocation } from "react-router-dom";
 import { LocationPin } from "./icons/LocationPin";
 import { ROUTES } from "../constants/routes";
+import { useToast } from "../context/ToastContext";
 import { useCurrentUser } from "../hooks/useCurrentUser";
+import { ensureFreshVerifiedEmail } from "../lib/emailVerification";
 import { UserAvatar } from "./ui/UserAvatar";
 import { ALL_NIGERIA_LOCATION, NIGERIAN_LOCATIONS, getCategorySearchContext, isSearchResultsPath } from "../lib/searchContext";
+import { getToken } from "../services/auth";
 import { api } from "../services/api";
 import { getRealtimeSocket, UNREAD_MESSAGES_REFRESH_EVENT, UNREAD_NOTIFICATIONS_REFRESH_EVENT } from "../services/realtime";
 
@@ -83,6 +86,7 @@ export function SiteHeader({
   const desktopLocationRef = useRef<HTMLDivElement | null>(null);
   const mobileLocationRef = useRef<HTMLDivElement | null>(null);
   const location = useLocation();
+  const { error: showError } = useToast();
   const { user: currentUserRecord, display: currentUser } = useCurrentUser();
   const [unreadMessageCount, setUnreadMessageCount] = useState(0);
   const [unreadNotificationCount, setUnreadNotificationCount] = useState(0);
@@ -97,6 +101,25 @@ export function SiteHeader({
       : "Search all categories";
   const hideOnMobile = MOBILE_CHROME_HIDDEN_PATHS.includes(location.pathname);
   const locationLabel = selectedLocation === ALL_NIGERIA_LOCATION ? "Nig." : selectedLocation;
+
+  const handlePostAdClick = async () => {
+    const token = getToken();
+    if (!token) {
+      showError("Please log in to post an ad.");
+      navigate(ROUTES.LOGIN);
+      return;
+    }
+
+    const canContinue = await ensureFreshVerifiedEmail({
+      navigate,
+      nextPath: ROUTES.POST,
+      fallbackUser: currentUserRecord,
+      onUnverified: () => showError("Please verify your email to continue."),
+    });
+    if (!canContinue) return;
+
+    navigate(ROUTES.POST);
+  };
 
   const handleSearchSubmit = (event: React.FormEvent<HTMLFormElement>) => {
     event.preventDefault();
@@ -410,7 +433,7 @@ export function SiteHeader({
         </button>
         <button
           className="h-10 cursor-pointer rounded-[11px] bg-gradient-to-r from-amber to-orange px-3 text-[13px] text-white shadow-glow lg:h-[42px] lg:rounded-[8px] lg:px-[16px] lg:text-[16px]"
-          onClick={() => navigate(ROUTES.POST)}
+          onClick={() => void handlePostAdClick()}
         >
           Post a free ad
         </button>

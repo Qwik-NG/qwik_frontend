@@ -3,6 +3,7 @@ import { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { SiteFooter, SiteHeader } from "../components/AppShell";
 import DropdownSelect from "../components/ui/DropdownSelect";
+import { reconcileVerificationRequiredError } from "../lib/emailVerification";
 import { CONDITION_OPTIONS } from "../lib/postAdOptions";
 import { ALL_NIGERIA_LOCATION, NIGERIAN_AREAS, NIGERIAN_LOCATIONS } from "../lib/searchContext";
 import { api, isEmailVerificationRequiredError } from "../services/api";
@@ -359,8 +360,17 @@ export default function PostDetailsPage() {
       navigate(`/promote-ad?adId=${encodeURIComponent(response.data.id)}`);
     } catch (err) {
       if (isEmailVerificationRequiredError(err)) {
-        showError("Please verify your email to continue.");
-        navigate("/verify-email");
+        const verified = await reconcileVerificationRequiredError({
+          error: err,
+          navigate,
+          nextPath: "/post-details",
+          onUnverified: () => showError("Please verify your email to continue."),
+        });
+
+        if (verified) {
+          showError("Verification state was refreshed. Please submit your advert again.");
+        }
+
         return;
       }
       setError(err instanceof Error ? err.message : "Failed to create advert");

@@ -1,17 +1,20 @@
 import { useEffect, useState } from "react";
-import { useNavigate } from "react-router-dom";
+import { useLocation, useNavigate } from "react-router-dom";
 import { ROUTES } from "../constants/routes";
+import { isAlreadyVerifiedError, resolveSafeNextPath } from "../lib/emailVerification";
 import { api } from "../services/api";
 import { useToast } from "../context/ToastContext";
 
 export default function VerifyEmailPage() {
   const navigate = useNavigate();
-  const { error: showError, success } = useToast();
+  const location = useLocation();
+  const { error: showError, success, info } = useToast();
   const [otp, setOtp] = useState("");
   const [isVerifying, setIsVerifying] = useState(false);
   const [isSending, setIsSending] = useState(false);
   const [resendCooldown, setResendCooldown] = useState(0);
   const [isInitializing, setIsInitializing] = useState(true);
+  const redirectTarget = resolveSafeNextPath(new URLSearchParams(location.search).get("next"), ROUTES.HOME);
 
   const resolveRetrySeconds = (message: string) => {
     const match = message.match(/(\d+)\s*seconds?/i);
@@ -25,9 +28,23 @@ export default function VerifyEmailPage() {
     const sendInitialOtp = async () => {
       try {
         setIsInitializing(true);
+
+        const me = await api.me();
+        if (me.data.emailVerifiedAt) {
+          info("Your email is already verified.");
+          navigate(redirectTarget, { replace: true });
+          return;
+        }
+
         await api.sendVerificationOtp();
         success("Verification code sent to your email");
       } catch (error) {
+        if (isAlreadyVerifiedError(error)) {
+          info("Your email is already verified.");
+          navigate(redirectTarget, { replace: true });
+          return;
+        }
+
         if (error instanceof Error) {
           const seconds = resolveRetrySeconds(error.message);
           if (seconds > 0) {
@@ -41,8 +58,8 @@ export default function VerifyEmailPage() {
       }
     };
 
-    sendInitialOtp();
-  }, []);
+    void sendInitialOtp();
+  }, [info, navigate, redirectTarget, success, showError]);
 
   // Cooldown timer
   useEffect(() => {
@@ -61,10 +78,9 @@ export default function VerifyEmailPage() {
 
     try {
       setIsVerifying(true);
-      const res = await api.verifyEmailOtp(otp);
+      await api.verifyEmailOtp(otp);
       success("Email verified successfully!");
-      // User is still logged in, redirect to welcome or home
-      navigate(ROUTES.WELCOME);
+      navigate(redirectTarget || ROUTES.WELCOME, { replace: true });
     } catch (error) {
       if (error instanceof Error) {
         const message = error.message;
@@ -92,6 +108,12 @@ export default function VerifyEmailPage() {
       setResendCooldown(60);
       setOtp("");
     } catch (error) {
+      if (isAlreadyVerifiedError(error)) {
+        info("Your email is already verified.");
+        navigate(redirectTarget, { replace: true });
+        return;
+      }
+
       if (error instanceof Error) {
         const message = error.message;
         const seconds = resolveRetrySeconds(message);

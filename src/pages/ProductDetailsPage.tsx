@@ -6,9 +6,10 @@ import { ImagePlaceholder } from "../components/ui/ImagePlaceholder";
 import { UserAvatar } from "../components/ui/UserAvatar";
 import { useToast } from "../context/ToastContext";
 import { formatMemberSince } from "../lib/currentUser";
+import { ensureFreshVerifiedEmail } from "../lib/emailVerification";
 import { isSellerVerified } from "../lib/sellerVerification";
 import { getToken } from "../services/auth";
-import { api, isEmailVerificationRequiredError } from "../services/api";
+import { api } from "../services/api";
 import type { Ad, User } from "../types";
 
 function LocationPin({ className = "h-5 w-5" }: { className?: string }) {
@@ -171,16 +172,10 @@ export default function ProductDetailsPage() {
     }
   };
 
-  const handleChatSeller = () => {
+  const handleChatSeller = async () => {
     const token = getToken();
     if (!token) {
       alert("Please log in to chat with the seller");
-      return;
-    }
-
-    if (!currentUser?.emailVerifiedAt) {
-      showError("Please verify your email to continue.");
-      navigate("/verify-email");
       return;
     }
 
@@ -196,10 +191,19 @@ export default function ProductDetailsPage() {
       title: ad.title,
     });
 
-    navigate(`/messages?${params.toString()}`);
+    const nextPath = `/messages?${params.toString()}`;
+    const canContinue = await ensureFreshVerifiedEmail({
+      navigate,
+      nextPath,
+      fallbackUser: currentUser,
+      onUnverified: () => showError("Please verify your email to continue."),
+    });
+    if (!canContinue) return;
+
+    navigate(nextPath);
   };
 
-  const handleStartOffer = () => {
+  const handleStartOffer = async () => {
     const token = getToken();
     if (!token) {
       showError("Please log in to send an offer.");
@@ -207,14 +211,18 @@ export default function ProductDetailsPage() {
       return;
     }
 
-    if (!currentUser?.emailVerifiedAt) {
-      showError("Please verify your email to continue.");
-      navigate("/verify-email");
-      return;
-    }
-
     if (!ad) return;
-    navigate(`/make-offer?adId=${encodeURIComponent(ad.id)}`);
+
+    const nextPath = `/make-offer?adId=${encodeURIComponent(ad.id)}`;
+    const canContinue = await ensureFreshVerifiedEmail({
+      navigate,
+      nextPath,
+      fallbackUser: currentUser,
+      onUnverified: () => showError("Please verify your email to continue."),
+    });
+    if (!canContinue) return;
+
+    navigate(nextPath);
   };
 
   const handleToggleFollowSeller = async () => {
@@ -444,7 +452,7 @@ export default function ProductDetailsPage() {
                 <div className="mt-4 grid grid-cols-[minmax(0,1fr)_auto] items-center gap-2.5">
                   <button
                     className="h-[42px] w-full rounded-[8px] bg-gradient-to-r from-amber to-orange px-4 text-[14px] font-medium text-white shadow-glow transition-all duration-200 hover:opacity-95 active:scale-[0.99] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#ffb357] focus-visible:ring-offset-2 focus-visible:ring-offset-white"
-                    onClick={handleChatSeller}
+                    onClick={() => void handleChatSeller()}
                     type="button"
                   >
                     Chat Seller
@@ -512,7 +520,7 @@ export default function ProductDetailsPage() {
               <div className="mt-4 space-y-2">
                 <button
                   className="h-10 w-full rounded-[8px] border border-[#ffb46a] bg-[#fff7ef] px-4 text-[14px] font-medium text-[#d97706] transition-colors duration-200 hover:bg-[#ffefdc] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#ffb357] focus-visible:ring-offset-2 focus-visible:ring-offset-white"
-                  onClick={handleStartOffer}
+                  onClick={() => void handleStartOffer()}
                   type="button"
                 >
                   Make Offer
