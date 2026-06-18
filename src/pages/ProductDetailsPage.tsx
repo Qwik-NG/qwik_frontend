@@ -1,4 +1,4 @@
-import { useCallback, useEffect, useMemo, useState } from "react";
+import { useCallback, useEffect, useState } from "react";
 import { useNavigate, useParams } from "react-router-dom";
 import { SiteFooter, SiteHeader } from "../components/AppShell";
 import { FallbackImage } from "../components/ui/FallbackImage";
@@ -308,10 +308,7 @@ export default function ProductDetailsPage() {
       ad.user?.verification?.status === "APPROVED" ||
       ad.user?.verificationApplications?.[0]?.status === "APPROVED",
   );
-  const sellerAllAdsPath = useMemo(() => {
-    if (!ad.user?.id) return "/search";
-    return `/search?sellerId=${encodeURIComponent(ad.user.id)}`;
-  }, [ad.user?.id]);
+  const sellerAllAdsPath = ad.user?.id ? `/users/${encodeURIComponent(ad.user.id)}` : "/search";
 
   const showPreviousImage = () => {
     if (gallery.length <= 1) return;
@@ -570,13 +567,13 @@ export default function ProductDetailsPage() {
                     {markingUnavailable ? "Marking..." : "Mark Unavailable"}
                   </button>
                 ) : null}
-                <span className="text-[12px] text-[#9f9ba8]">Report ad coming soon</span>
+                <span className="text-[12px] text-[#9f9ba8]">Reporting tools coming soon</span>
               </div>
             </div>
 
             <div className="rounded-[14px] border border-[#e5e3e9] bg-white p-4 sm:p-5">
               <h4 className="text-[18px] font-semibold">Reviews</h4>
-              <p className="mt-1 text-[13px] text-[#8f8b98]">Reviews will be available soon.</p>
+              <p className="mt-1 text-[13px] text-[#8f8b98]">Reviews coming soon</p>
             </div>
 
             <div className="rounded-[14px] border border-dashed border-[#ddd9e4] bg-[#fbfafc] p-4 sm:p-5">
