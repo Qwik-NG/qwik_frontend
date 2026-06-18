@@ -417,27 +417,13 @@ export default function ProductDetailsPage() {
                   <span className="rounded-[8px] bg-badge-bg px-2 py-1 text-[12px] font-medium text-[#ff9715]">New</span>
                 </div>
                 <p className="mt-1.5 text-[13px] text-[#57b77a]">Check market price</p>
-                <div className="mt-4 flex flex-wrap items-center gap-2.5">
+                <div className="mt-4 grid grid-cols-[minmax(0,1fr)_auto] items-center gap-2.5">
                   <button
-                    className="h-[42px] rounded-[8px] bg-gradient-to-r from-amber to-orange px-4 text-[14px] font-medium text-white shadow-glow transition-all duration-200 hover:opacity-95 active:scale-[0.99] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#ffb357] focus-visible:ring-offset-2 focus-visible:ring-offset-white"
+                    className="h-[42px] w-full rounded-[8px] bg-gradient-to-r from-amber to-orange px-4 text-[14px] font-medium text-white shadow-glow transition-all duration-200 hover:opacity-95 active:scale-[0.99] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#ffb357] focus-visible:ring-offset-2 focus-visible:ring-offset-white"
                     onClick={handleChatSeller}
                     type="button"
                   >
                     Chat Seller
-                  </button>
-                  <button
-                    className="h-[42px] rounded-[8px] bg-white px-4 text-[14px] font-medium text-[#3d3a46] transition-colors duration-200 hover:bg-[#f8f8fa] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#ffb357] focus-visible:ring-offset-2 focus-visible:ring-offset-white"
-                    onClick={() => navigate(`/make-offer?adId=${encodeURIComponent(ad.id)}`)}
-                    type="button"
-                  >
-                    Make Offer
-                  </button>
-                  <button
-                    className="h-[42px] rounded-[8px] bg-badge-bg px-4 text-[14px] font-medium text-[#ff9715] transition-colors duration-200 hover:bg-[#ffe2c5] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#ffb357] focus-visible:ring-offset-2 focus-visible:ring-offset-white"
-                    onClick={handleCallSeller}
-                    type="button"
-                  >
-                    {isPhoneRevealed ? "Call Now" : "Show Number"}
                   </button>
                   <button
                     aria-label={isSaved ? "Remove product from saved items" : "Save product"}
@@ -464,7 +450,6 @@ export default function ProductDetailsPage() {
                     )}
                   </button>
                 </div>
-                {isPhoneRevealed ? <p className="mt-2 text-[13px] text-[#5f5c68]">{sellerPhoneDisplay}</p> : null}
               </div>
             </div>
 
@@ -502,13 +487,6 @@ export default function ProductDetailsPage() {
 
               <div className="mt-4 space-y-2">
                 <button
-                  className="h-10 w-full rounded-[8px] bg-gradient-to-r from-amber to-orange px-4 text-[14px] font-medium text-white shadow-glow transition-all duration-200 hover:opacity-95 active:scale-[0.99] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#ffb357] focus-visible:ring-offset-2 focus-visible:ring-offset-white"
-                  onClick={handleChatSeller}
-                  type="button"
-                >
-                  Message Seller
-                </button>
-                <button
                   className="h-10 w-full rounded-[8px] border border-[#ffb46a] bg-[#fff7ef] px-4 text-[14px] font-medium text-[#d97706] transition-colors duration-200 hover:bg-[#ffefdc] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#ffb357] focus-visible:ring-offset-2 focus-visible:ring-offset-white"
                   onClick={() => navigate(`/make-offer?adId=${encodeURIComponent(ad.id)}`)}
                   type="button"
@@ -520,7 +498,7 @@ export default function ProductDetailsPage() {
                   onClick={handleCallSeller}
                   type="button"
                 >
-                  {isPhoneRevealed ? "Call Now" : "Show Number"}
+                  {isPhoneRevealed ? sellerPhoneDisplay : "View Number"}
                 </button>
               </div>
             </aside>
