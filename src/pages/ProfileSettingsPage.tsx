@@ -105,6 +105,18 @@ export default function ProfileSettingsPage() {
         <SiteHeader navigate={navigate} />
       </div>
 
+      <div className="px-4 pb-2 pt-5 sm:px-6 md:hidden">
+        <button
+          type="button"
+          onClick={() => navigate("/")}
+          aria-label="Go to homepage"
+          className="inline-flex items-center rounded-[10px] bg-transparent p-1 text-[#ff8300] transition-opacity duration-200 hover:opacity-80 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#ffb357] focus-visible:ring-offset-2 focus-visible:ring-offset-page"
+        >
+          <img src="/images/logo-header.png" alt="Qwik" className="h-[34px] w-[34px] object-contain" />
+          <span className="ml-2 text-[28px] font-normal leading-none">qwik</span>
+        </button>
+      </div>
+
       <main className="mx-auto w-full max-w-[1728px] px-4 pb-20 pt-8 sm:px-6 lg:px-12">
         <div className="grid grid-cols-1 gap-6 xl:grid-cols-[310px_1fr]">
           <SettingsSidebar
