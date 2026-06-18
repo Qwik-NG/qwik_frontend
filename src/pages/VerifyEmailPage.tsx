@@ -13,6 +13,13 @@ export default function VerifyEmailPage() {
   const [resendCooldown, setResendCooldown] = useState(0);
   const [isInitializing, setIsInitializing] = useState(true);
 
+  const resolveRetrySeconds = (message: string) => {
+    const match = message.match(/(\d+)\s*seconds?/i);
+    if (match) return parseInt(match[1], 10);
+    if (message.toLowerCase().includes("wait") || message.toLowerCase().includes("too many")) return 60;
+    return 0;
+  };
+
   // Initialize by sending OTP on page load
   useEffect(() => {
     const sendInitialOtp = async () => {
@@ -21,9 +28,13 @@ export default function VerifyEmailPage() {
         await api.sendVerificationOtp();
         success("Verification code sent to your email");
       } catch (error) {
-        // Only show error if it's not a rate limit (cooldown already in progress)
-        if (error instanceof Error && !error.message.includes("wait")) {
-          showError(error.message);
+        if (error instanceof Error) {
+          const seconds = resolveRetrySeconds(error.message);
+          if (seconds > 0) {
+            setResendCooldown(seconds);
+          } else {
+            showError(error.message);
+          }
         }
       } finally {
         setIsInitializing(false);
@@ -83,10 +94,8 @@ export default function VerifyEmailPage() {
     } catch (error) {
       if (error instanceof Error) {
         const message = error.message;
-        // Extract retrySeconds if available
-        const match = message.match(/(\d+)\s*seconds?/);
-        if (match) {
-          const seconds = parseInt(match[1], 10);
+        const seconds = resolveRetrySeconds(message);
+        if (seconds > 0) {
           setResendCooldown(seconds);
           showError(`Please wait ${seconds} seconds before requesting a new code`);
         } else {
