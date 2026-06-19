@@ -137,6 +137,41 @@ function SafetyItem({
   );
 }
 
+function UserCircleIcon({ className = "h-5 w-5" }: { className?: string }) {
+  return (
+    <svg viewBox="0 0 24 24" className={className} fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
+      <circle cx="12" cy="8" r="3.3" />
+      <path d="M5.2 19.2c1.6-3.1 4-4.7 6.8-4.7s5.2 1.6 6.8 4.7" />
+    </svg>
+  );
+}
+
+function TrendUpIcon({ className = "h-5 w-5" }: { className?: string }) {
+  return (
+    <svg viewBox="0 0 24 24" className={className} fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
+      <path d="M4 16 10 10l4 4 6-6" />
+      <path d="M15 8h5v5" />
+    </svg>
+  );
+}
+
+function VerifiedBenefit({
+  title,
+  icon,
+  className = "",
+}: {
+  title: string;
+  icon: ReactNode;
+  className?: string;
+}) {
+  return (
+    <div className={`flex items-center gap-3 rounded-[16px] border border-[#eceaf1] bg-white px-3 py-2.5 shadow-[0_10px_24px_rgba(17,12,46,0.08)] ${className}`}>
+      <span className="flex h-9 w-9 shrink-0 items-center justify-center rounded-full bg-[#fff3e3] text-[#f08a1d]">{icon}</span>
+      <span className="text-[13px] font-medium leading-[1.35] text-[#1f1d27]">{title}</span>
+    </div>
+  );
+}
+
 export default function AboutPage() {
   const navigate = useNavigate();
 
@@ -358,8 +393,43 @@ export default function AboutPage() {
             <ArrowIcon />
           </button>
         </div>
-        <div className="overflow-hidden rounded-[28px] border border-[#efeaf3] bg-[linear-gradient(180deg,#fff9f0_0%,#ffffff_100%)] p-4 sm:p-6">
-          <img src="/about-images/verify-logo.PNG" alt="Verified seller logo" className="h-full w-full object-contain" />
+        <div className="relative overflow-hidden rounded-[28px] border border-[#efeaf3] bg-[linear-gradient(180deg,#fff9f0_0%,#ffffff_100%)] p-4 sm:p-6 lg:min-h-[440px]">
+          <div className="grid gap-3 sm:grid-cols-2 lg:hidden">
+            <VerifiedBenefit title="Verified Seller Badge" icon={<ShieldIcon className="h-4 w-4" />} />
+            <VerifiedBenefit title="Increased Customer Trust" icon={<UserCircleIcon className="h-4 w-4" />} />
+          </div>
+
+          <div className="relative mx-auto my-4 w-full max-w-[350px] sm:max-w-[380px] lg:my-0 lg:mt-5">
+            <img src="/about-images/verify-logo.PNG" alt="Verified seller logo" className="h-auto w-full object-contain" />
+
+            <div className="pointer-events-none absolute inset-0 hidden lg:block">
+              <VerifiedBenefit
+                title="Verified Seller Badge"
+                icon={<ShieldIcon className="h-4 w-4" />}
+                className="absolute left-2 top-[14%] max-w-[168px]"
+              />
+              <VerifiedBenefit
+                title="Increased Customer Trust"
+                icon={<UserCircleIcon className="h-4 w-4" />}
+                className="absolute right-2 top-[14%] max-w-[182px]"
+              />
+              <VerifiedBenefit
+                title="Priority Support"
+                icon={<PinIcon className="h-4 w-4" />}
+                className="absolute bottom-[9%] left-2 max-w-[155px]"
+              />
+              <VerifiedBenefit
+                title="Higher Search Visibility"
+                icon={<TrendUpIcon className="h-4 w-4" />}
+                className="absolute bottom-[9%] right-2 max-w-[182px]"
+              />
+            </div>
+          </div>
+
+          <div className="grid gap-3 sm:grid-cols-2 lg:hidden">
+            <VerifiedBenefit title="Priority Support" icon={<PinIcon className="h-4 w-4" />} />
+            <VerifiedBenefit title="Higher Search Visibility" icon={<TrendUpIcon className="h-4 w-4" />} />
+          </div>
         </div>
       </section>
 
