@@ -1,5 +1,10 @@
 import { useCallback, useEffect, useState } from "react";
 import { useNavigate, useParams } from "react-router-dom";
+import Lightbox from "yet-another-react-lightbox";
+import Counter from "yet-another-react-lightbox/plugins/counter";
+import Zoom from "yet-another-react-lightbox/plugins/zoom";
+import "yet-another-react-lightbox/styles.css";
+import "yet-another-react-lightbox/plugins/counter.css";
 import { SiteFooter, SiteHeader } from "../components/AppShell";
 import { FallbackImage } from "../components/ui/FallbackImage";
 import { ImagePlaceholder } from "../components/ui/ImagePlaceholder";
@@ -79,6 +84,7 @@ export default function ProductDetailsPage() {
   const [saving, setSaving] = useState(false);
   const [markingUnavailable, setMarkingUnavailable] = useState(false);
   const [touchStartX, setTouchStartX] = useState<number | null>(null);
+  const [isLightboxOpen, setIsLightboxOpen] = useState(false);
   const [isPhoneRevealed, setIsPhoneRevealed] = useState(false);
   const [isFollowingSeller, setIsFollowingSeller] = useState(false);
   const [followersCount, setFollowersCount] = useState<number | null>(null);
@@ -326,6 +332,7 @@ export default function ProductDetailsPage() {
   }
 
   const gallery = ad.images?.map((img: any) => img.url).filter(Boolean) || [];
+  const lightboxSlides = gallery.map((src: string) => ({ src }));
   const selected = gallery[activeImage] ?? gallery[0];
   const specs = ad.specifications || {};
   const specArray = Object.entries(specs).map(([k, v]) => [
@@ -384,13 +391,20 @@ export default function ProductDetailsPage() {
                 onTouchEnd={handleTouchEnd}
               >
                 {selected ? (
-                  <FallbackImage
-                    src={selected}
-                    alt={ad.title}
-                    className="h-full w-full"
-                    fallbackClassName="rounded-[14px]"
-                    loading="eager"
-                  />
+                  <button
+                    type="button"
+                    onClick={() => setIsLightboxOpen(true)}
+                    aria-label="Open product image viewer"
+                    className="h-full w-full cursor-zoom-in"
+                  >
+                    <FallbackImage
+                      src={selected}
+                      alt={ad.title}
+                      className="h-full w-full"
+                      fallbackClassName="rounded-[14px]"
+                      loading="eager"
+                    />
+                  </button>
                 ) : (
                   <ImagePlaceholder className="rounded-[14px]" />
                 )}
@@ -591,6 +605,18 @@ export default function ProductDetailsPage() {
       </main>
 
       <SiteFooter navigate={navigate} />
+
+      <Lightbox
+        open={isLightboxOpen}
+        close={() => setIsLightboxOpen(false)}
+        index={activeImage}
+        slides={lightboxSlides}
+        plugins={[Counter, Zoom]}
+        zoom={{ maxZoomPixelRatio: 4, zoomInMultiplier: 2, doubleTapDelay: 300, scrollToZoom: true }}
+        controller={{ closeOnBackdropClick: true }}
+        carousel={{ finite: gallery.length <= 1 }}
+        on={{ view: ({ index }) => setActiveImage(index) }}
+      />
     </div>
   );
 }
