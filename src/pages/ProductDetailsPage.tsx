@@ -85,6 +85,7 @@ export default function ProductDetailsPage() {
   const [markingUnavailable, setMarkingUnavailable] = useState(false);
   const [touchStartX, setTouchStartX] = useState<number | null>(null);
   const [isLightboxOpen, setIsLightboxOpen] = useState(false);
+  const [sharePending, setSharePending] = useState(false);
   const [isPhoneRevealed, setIsPhoneRevealed] = useState(false);
   const [isFollowingSeller, setIsFollowingSeller] = useState(false);
   const [followersCount, setFollowersCount] = useState<number | null>(null);
@@ -309,6 +310,30 @@ export default function ProductDetailsPage() {
     window.location.href = `tel:${sellerPhoneDial}`;
   };
 
+  const handleShareAd = async () => {
+    if (!ad) return;
+    const shareUrl = window.location.href;
+    const sharePayload = {
+      title: ad.title,
+      text: `Check out this listing on Qwik: ${ad.title}`,
+      url: shareUrl,
+    };
+
+    try {
+      setSharePending(true);
+      if (navigator.share) {
+        await navigator.share(sharePayload);
+        return;
+      }
+      await navigator.clipboard.writeText(shareUrl);
+      success("Listing link copied");
+    } catch {
+      showError("Unable to share this listing right now");
+    } finally {
+      setSharePending(false);
+    }
+  };
+
   if (loading) return <ProductDetailsSkeleton navigate={navigate} />;
   if (error || !ad) {
     return (
@@ -377,16 +402,20 @@ export default function ProductDetailsPage() {
     setTouchStartX(null);
   };
 
+  const detailRows = specArray.length > 0
+    ? specArray
+    : [["Condition", ad.condition ?? "Not specified"], ["Availability", ad.status ?? "Available"]] as Array<[string, unknown]>;
+
   return (
     <div className="min-h-screen bg-page text-ink">
       <SiteHeader navigate={navigate} />
 
       <main className="mx-auto w-full max-w-[1360px] px-4 pb-12 pt-4 sm:px-6 sm:pb-16 sm:pt-6 lg:px-10">
-        <section className="rounded-[18px] bg-[#efefef] p-4 sm:p-6">
-          <div className="grid grid-cols-1 gap-6 xl:grid-cols-[420px_1fr_320px] xl:items-start">
-            <div>
+        <section className="rounded-[20px] bg-[#ececef] p-4 sm:p-6 lg:p-8">
+          <div className="grid grid-cols-1 gap-5 xl:grid-cols-[440px_minmax(0,1fr)] xl:gap-12">
+            <div className="min-w-0">
               <div
-                className="relative h-[320px] w-full overflow-hidden rounded-[14px] bg-white sm:h-[430px]"
+                className="relative h-[300px] w-full overflow-hidden rounded-[14px] bg-white sm:h-[420px]"
                 onTouchStart={handleTouchStart}
                 onTouchEnd={handleTouchEnd}
               >
@@ -430,7 +459,7 @@ export default function ProductDetailsPage() {
                 ) : null}
               </div>
               {gallery.length > 0 ? (
-                <div className="mt-3 grid grid-cols-5 gap-1.5 sm:grid-cols-8 xl:grid-cols-10">
+                <div className="mt-3 grid grid-cols-5 gap-1.5 overflow-x-auto pb-1 sm:grid-cols-8 xl:grid-cols-10">
                   {gallery.map((src: string, idx: number) => (
                     <button
                       key={`${src}-${idx}`}
@@ -451,21 +480,21 @@ export default function ProductDetailsPage() {
             </div>
 
             <div className="space-y-4">
-              <div className="rounded-[14px] border border-[#e1dfe6] bg-white p-4 sm:p-5">
+              <div className="rounded-[14px] bg-transparent p-0.5">
                 {sellerVerified ? <p className="mb-2 text-[14px] font-medium text-[#57b77a]">Verified Seller</p> : null}
-                <h1 className="text-[24px] font-semibold leading-tight text-[#2c2a31] sm:text-[30px]">{ad.title}</h1>
+                <h1 className="text-[30px] font-medium leading-tight text-[#2c2a31]">{ad.title}</h1>
                 <p className="mt-1.5 flex items-center gap-1 text-[14px] text-[#6d6a74] sm:text-[15px]">
                   <LocationPin className="h-4 w-4" />
                   <span>{ad.location}</span>
                 </p>
                 <div className="mt-3 flex items-center gap-2.5">
-                  <h2 className="text-[32px] font-semibold leading-none text-[#1f1d27] sm:text-[38px]">₦ {ad.price.toLocaleString()}</h2>
+                  <h2 className="text-[44px] font-semibold leading-none text-[#161420]">₦ {ad.price.toLocaleString()}</h2>
                   <span className="rounded-[8px] bg-badge-bg px-2 py-1 text-[12px] font-medium text-[#ff9715]">New</span>
                 </div>
                 <p className="mt-1.5 text-[13px] text-[#57b77a]">Check market price</p>
-                <div className="mt-4 grid grid-cols-[minmax(0,1fr)_auto] items-center gap-2.5">
+                <div className="mt-5 grid grid-cols-[minmax(0,1fr)_auto_auto] items-center gap-2.5 sm:w-fit">
                   <button
-                    className="h-[42px] w-full rounded-[8px] bg-gradient-to-r from-amber to-orange px-4 text-[14px] font-medium text-white shadow-glow transition-all duration-200 hover:opacity-95 active:scale-[0.99] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#ffb357] focus-visible:ring-offset-2 focus-visible:ring-offset-white"
+                    className="h-[44px] w-full rounded-[8px] bg-gradient-to-r from-amber to-orange px-5 text-[14px] font-medium text-white shadow-glow transition-all duration-200 hover:opacity-95 active:scale-[0.99] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#ffb357] focus-visible:ring-offset-2 focus-visible:ring-offset-white"
                     onClick={() => void handleChatSeller()}
                     type="button"
                   >
@@ -495,112 +524,129 @@ export default function ProductDetailsPage() {
                       </svg>
                     )}
                   </button>
+                    <button
+                      aria-label="Share listing"
+                      className="flex h-[42px] w-[42px] items-center justify-center rounded-[8px] border border-[#d9d7de] bg-white text-[#7e7b86] transition-all duration-200 hover:border-[#b9b6c2] hover:bg-[#f8f8fa] active:scale-[0.97] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#ffb357] focus-visible:ring-offset-2 focus-visible:ring-offset-white"
+                      onClick={() => void handleShareAd()}
+                      disabled={sharePending}
+                      type="button"
+                    >
+                      {sharePending ? (
+                        <Spinner className="h-5 w-5" />
+                      ) : (
+                        <svg viewBox="0 0 24 24" className="h-5 w-5" fill="none" stroke="currentColor" strokeWidth="1.9" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
+                          <circle cx="18" cy="5" r="2.5" />
+                          <circle cx="6" cy="12" r="2.5" />
+                          <circle cx="18" cy="19" r="2.5" />
+                          <path d="m8.4 10.8 7.2-4.2" />
+                          <path d="m8.4 13.2 7.2 4.2" />
+                        </svg>
+                      )}
+                    </button>
                 </div>
               </div>
-            </div>
+                <div className="grid gap-4 sm:grid-cols-2 xl:grid-cols-1">
+                  <aside className="rounded-[14px] border border-[#e1dfe6] bg-white p-4 sm:p-5">
+                    <div className="flex items-start justify-between gap-2">
+                      <div className="flex items-start gap-3">
+                        <UserAvatar name={sellerName} imageUrl={sellerAvatarUrl} alt={sellerName} className="h-11 w-11 rounded-full object-cover text-[12px]" />
+                        <div>
+                          <p className="text-[15px] font-medium text-[#2f2d38]">{sellerName}</p>
+                          <p className="text-[12px] text-[#8f8b98]">{sellerMeta}</p>
+                          {typeof followersCount === "number" ? (
+                            <p className="text-[12px] text-[#8f8b98]">{followersCount} follower{followersCount === 1 ? "" : "s"}</p>
+                          ) : null}
+                        </div>
+                      </div>
+                      {!isOwner ? (
+                        <button
+                          className={`h-8 rounded-[7px] px-2.5 text-[12px] font-medium transition-colors duration-200 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#ffb357] focus-visible:ring-offset-2 focus-visible:ring-offset-white ${isFollowingSeller ? "bg-[#e9f4ec] text-[#2f8f53]" : "bg-badge-bg text-[#ff9715] hover:bg-[#ffe2c5]"}`}
+                          onClick={handleToggleFollowSeller}
+                          disabled={followLoading}
+                          type="button"
+                        >
+                          {followLoading ? "..." : isFollowingSeller ? "Following" : "Follow"}
+                        </button>
+                      ) : null}
+                    </div>
 
-            <aside className="rounded-[14px] border border-[#e1dfe6] bg-white p-4 sm:p-5">
-              <div className="flex items-start justify-between gap-2">
-                <div className="flex items-start gap-3">
-                  <UserAvatar name={sellerName} imageUrl={sellerAvatarUrl} alt={sellerName} className="h-11 w-11 rounded-full object-cover text-[12px]" />
-                  <div>
-                    <p className="text-[15px] font-medium text-[#2f2d38]">{sellerName}</p>
-                    <p className="text-[12px] text-[#8f8b98]">{sellerMeta}</p>
-                    {typeof followersCount === "number" ? (
-                      <p className="text-[12px] text-[#8f8b98]">{followersCount} follower{followersCount === 1 ? "" : "s"}</p>
-                    ) : null}
+                    <button
+                      className="mt-2 text-[13px] font-medium text-[#ff9715]"
+                      type="button"
+                      onClick={() => navigate(sellerAllAdsPath)}
+                    >
+                      See all ads
+                    </button>
+
+                    <div className="mt-4 space-y-2">
+                      <button
+                        className="h-10 w-full rounded-[8px] border border-[#ffb46a] bg-[#fff7ef] px-4 text-[14px] font-medium text-[#d97706] transition-colors duration-200 hover:bg-[#ffefdc] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#ffb357] focus-visible:ring-offset-2 focus-visible:ring-offset-white"
+                        onClick={() => void handleStartOffer()}
+                        type="button"
+                      >
+                        Make Offer
+                      </button>
+                      <button
+                        className="h-10 w-full rounded-[8px] bg-badge-bg px-4 text-[14px] font-medium text-[#ff9715] transition-colors duration-200 hover:bg-[#ffe2c5] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#ffb357] focus-visible:ring-offset-2 focus-visible:ring-offset-white"
+                        onClick={handleCallSeller}
+                        type="button"
+                      >
+                        {isPhoneRevealed ? sellerPhoneDisplay : "View Number"}
+                      </button>
+                    </div>
+                  </aside>
+
+                  <div className="rounded-[14px] border border-[#e5e3e9] bg-white p-4 sm:p-5">
+                    <h4 className="mb-2 text-[18px] font-semibold">Safety tips</h4>
+                    <ul className="space-y-1.5 text-[13px] text-[#6f6b77]">
+                      <li className="flex items-start gap-2"><span className="mt-0.5 text-[#57b77a]">•</span><span>Inspect the item before payment</span></li>
+                      <li className="flex items-start gap-2"><span className="mt-0.5 text-[#57b77a]">•</span><span>Meet seller in a safe public place</span></li>
+                      <li className="flex items-start gap-2"><span className="mt-0.5 text-[#57b77a]">•</span><span>Do not send advance payment</span></li>
+                      <li className="flex items-start gap-2"><span className="mt-0.5 text-[#57b77a]">•</span><span>Verify item condition and documents</span></li>
+                      <li className="flex items-start gap-2"><span className="mt-0.5 text-[#57b77a]">•</span><span>Report suspicious listings</span></li>
+                    </ul>
+                    <div className="mt-3 flex items-center gap-2">
+                      {isOwner ? (
+                        <button
+                          className="rounded-[8px] bg-badge-bg px-3 py-2 text-[13px] text-[#ff9715] transition-colors duration-200 hover:bg-[#ffe2c5] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#ffb357] focus-visible:ring-offset-2 focus-visible:ring-offset-white"
+                          onClick={handleMarkUnavailable}
+                          disabled={markingUnavailable}
+                          type="button"
+                        >
+                          {markingUnavailable ? "Marking..." : "Mark Unavailable"}
+                        </button>
+                      ) : null}
+                      <span className="text-[12px] text-[#9f9ba8]">Reporting tools coming soon</span>
+                    </div>
                   </div>
                 </div>
-                {!isOwner ? (
-                  <button
-                    className={`h-8 rounded-[7px] px-2.5 text-[12px] font-medium transition-colors duration-200 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#ffb357] focus-visible:ring-offset-2 focus-visible:ring-offset-white ${isFollowingSeller ? "bg-[#e9f4ec] text-[#2f8f53]" : "bg-badge-bg text-[#ff9715] hover:bg-[#ffe2c5]"}`}
-                    onClick={handleToggleFollowSeller}
-                    disabled={followLoading}
-                    type="button"
-                  >
-                    {followLoading ? "..." : isFollowingSeller ? "Following" : "Follow"}
-                  </button>
-                ) : null}
               </div>
-
-              <button
-                className="mt-2 text-[13px] font-medium text-[#ff9715]"
-                type="button"
-                onClick={() => navigate(sellerAllAdsPath)}
-              >
-                See all ads
-              </button>
-
-              <div className="mt-4 space-y-2">
-                <button
-                  className="h-10 w-full rounded-[8px] border border-[#ffb46a] bg-[#fff7ef] px-4 text-[14px] font-medium text-[#d97706] transition-colors duration-200 hover:bg-[#ffefdc] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#ffb357] focus-visible:ring-offset-2 focus-visible:ring-offset-white"
-                  onClick={() => void handleStartOffer()}
-                  type="button"
-                >
-                  Make Offer
-                </button>
-                <button
-                  className="h-10 w-full rounded-[8px] bg-badge-bg px-4 text-[14px] font-medium text-[#ff9715] transition-colors duration-200 hover:bg-[#ffe2c5] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#ffb357] focus-visible:ring-offset-2 focus-visible:ring-offset-white"
-                  onClick={handleCallSeller}
-                  type="button"
-                >
-                  {isPhoneRevealed ? sellerPhoneDisplay : "View Number"}
-                </button>
-              </div>
-            </aside>
           </div>
         </section>
 
-        <section className="mt-6 grid grid-cols-1 gap-4 xl:grid-cols-[1.2fr_0.8fr] xl:gap-6">
-          <div className="rounded-[14px] border border-[#e5e3e9] bg-white p-4 sm:p-5">
-            <h3 className="mb-3 text-[24px] font-semibold">Product details</h3>
-            <p className="mb-5 max-w-[680px] text-[15px] leading-[1.5] text-[#5f5c68]">{ad.description}</p>
-            {specArray.length > 0 && (
+          <section className="mt-6 grid grid-cols-1 gap-4 lg:grid-cols-[1.08fr_0.92fr] lg:gap-6">
+            <div className="rounded-[14px] border border-[#e5e3e9] bg-white p-4 sm:p-5">
+              <h3 className="mb-3 text-[36px] font-normal leading-none">Product Details</h3>
+              <p className="mb-5 max-w-[680px] text-[15px] leading-[1.45] text-[#5f5c68]">{ad.description}</p>
               <div className="grid grid-cols-1 gap-x-8 gap-y-4 text-[14px] sm:grid-cols-2">
-                {specArray.map(([k, v]: [string, unknown]) => (
+                {detailRows.map(([k, v]: [string, unknown]) => (
                   <div key={k}>
                     <p className="text-[#8f8b98]">{k}</p>
                     <p className="font-medium text-[#2d2b33]">{String(v)}</p>
                   </div>
                 ))}
               </div>
-            )}
-          </div>
-
-          <div className="space-y-4">
-            <div className="rounded-[14px] border border-[#e5e3e9] bg-white p-4 sm:p-5">
-              <h4 className="mb-2 text-[18px] font-semibold">Safety tips</h4>
-              <ul className="space-y-1.5 text-[13px] text-[#6f6b77]">
-                <li className="flex items-start gap-2"><span className="mt-0.5 text-[#57b77a]">•</span><span>Inspect the item before payment</span></li>
-                <li className="flex items-start gap-2"><span className="mt-0.5 text-[#57b77a]">•</span><span>Meet seller in a safe public place</span></li>
-                <li className="flex items-start gap-2"><span className="mt-0.5 text-[#57b77a]">•</span><span>Do not send advance payment</span></li>
-                <li className="flex items-start gap-2"><span className="mt-0.5 text-[#57b77a]">•</span><span>Verify item condition and documents</span></li>
-                <li className="flex items-start gap-2"><span className="mt-0.5 text-[#57b77a]">•</span><span>Report suspicious listings</span></li>
-              </ul>
-              <div className="mt-3 flex items-center gap-2">
-                {isOwner ? (
-                  <button
-                    className="rounded-[8px] bg-badge-bg px-3 py-2 text-[13px] text-[#ff9715] transition-colors duration-200 hover:bg-[#ffe2c5] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#ffb357] focus-visible:ring-offset-2 focus-visible:ring-offset-white"
-                    onClick={handleMarkUnavailable}
-                    disabled={markingUnavailable}
-                    type="button"
-                  >
-                    {markingUnavailable ? "Marking..." : "Mark Unavailable"}
-                  </button>
-                ) : null}
-                <span className="text-[12px] text-[#9f9ba8]">Reporting tools coming soon</span>
-              </div>
             </div>
 
             <div className="rounded-[14px] border border-[#e5e3e9] bg-white p-4 sm:p-5">
-              <h4 className="text-[18px] font-semibold">Reviews</h4>
-              <p className="mt-1 text-[13px] text-[#8f8b98]">Reviews coming soon</p>
+              <h4 className="text-[36px] font-normal leading-none">Reviews</h4>
+              <p className="mt-5 text-[14px] text-[#8f8b98]">Reviews coming soon</p>
             </div>
+          </section>
 
-            <div className="rounded-[14px] border border-dashed border-[#ddd9e4] bg-[#fbfafc] p-4 sm:p-5">
-              <h4 className="text-[16px] font-semibold text-[#3a3742]">Related ads coming soon</h4>
-            </div>
-          </div>
+          <section className="mt-6 rounded-[14px] border border-dashed border-[#ddd9e4] bg-[#fbfafc] p-4 sm:p-5">
+            <h4 className="text-[28px] font-normal">Similar Ads</h4>
+            <p className="mt-2 text-[14px] text-[#7f7b87]">Similar ads coming soon</p>
         </section>
       </main>
 
