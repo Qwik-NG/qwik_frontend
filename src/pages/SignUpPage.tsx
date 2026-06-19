@@ -4,6 +4,7 @@ import { ROUTES } from "../constants/routes";
 import { api } from "../services/api";
 import { useToast } from "../context/ToastContext";
 import { persistLegalConsentFromUser, setAcceptedLegalConsentSnapshot, setRole, setToken } from "../services/auth";
+import { clearUserCache } from "../hooks/useUserCache";
 import FormInput from "../components/ui/FormInput";
 import FormButton from "../components/ui/FormButton";
 import LegalConsentModal, { type LegalDocumentType } from "../components/auth/LegalConsentModal";
@@ -144,6 +145,7 @@ export default function SignUpPage() {
                 setRole(res.data.user.role);
                 setAcceptedLegalConsentSnapshot(true);
                 persistLegalConsentFromUser(res.data.user);
+                clearUserCache(); // Clear cache for new user
                 success("Account created successfully");
                 // Redirect to email verification if email not verified, otherwise to welcome
                 const isEmailVerified = res.data.user.emailVerifiedAt !== null && res.data.user.emailVerifiedAt !== undefined;

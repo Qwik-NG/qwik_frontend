@@ -2,6 +2,7 @@ import { useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { api } from "../services/api";
 import { setRole, setToken } from "../services/auth";
+import { clearUserCache } from "../hooks/useUserCache";
 import FormInput from "../components/ui/FormInput";
 import FormButton from "../components/ui/FormButton";
 
@@ -27,6 +28,7 @@ export default function AdminLogin() {
       
       setToken(res.data.token);
       setRole(res.data.user.role);
+      clearUserCache(); // Clear cache on admin login
       navigate("/admin");
     } catch (err) {
       setError(err instanceof Error ? err.message : "Login failed");
