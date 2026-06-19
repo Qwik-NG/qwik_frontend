@@ -725,21 +725,21 @@ Perform end-to-end verification before declaring admin implementation complete.
 - Confirmed table-heavy admin pages use mobile-safe patterns (mobile card layouts and desktop overflow-safe tables).
 - Confirmed no admin placeholder/dead-link content (`coming soon`, `TODO`, `fake`, `lorem`, `/admin/settings`, `/admin/analytics`) remains in audited admin module files.
 - Build validation passed:
-	- Frontend: `npm run build`
-	- Backend: `npm run build`
+  - Frontend: `npm run build`
+  - Backend: `npm run build`
 - API access protection smoke checks passed:
-	- Unauthenticated request to `/api/admin/stats` returns `401 Unauthorized`.
-	- Invalid token request to `/api/admin/stats` returns `401 Invalid token`.
-	- Non-admin enforcement remains implemented in middleware path (`requireAdmin`) and returns `403` by code-path review.
+  - Unauthenticated request to `/api/admin/stats` returns `401 Unauthorized`.
+  - Invalid token request to `/api/admin/stats` returns `401 Invalid token`.
+  - Non-admin enforcement remains implemented in middleware path (`requireAdmin`) and returns `403` by code-path review.
 - Browser smoke checks passed at `375`, `390`, `768`, and `1280` for:
-	- `/admin`
-	- `/admin/users`
-	- `/admin/ads`
-	- `/admin/reports`
-	- `/admin/reviews`
-	- `/admin/verification`
-	- `/admin/audit-log`
-	- In unauthenticated state, all routes safely redirect to `/admin/login`, with no crashes and no horizontal overflow detected.
+  - `/admin`
+  - `/admin/users`
+  - `/admin/ads`
+  - `/admin/reports`
+  - `/admin/reviews`
+  - `/admin/verification`
+  - `/admin/audit-log`
+  - In unauthenticated state, all routes safely redirect to `/admin/login`, with no crashes and no horizontal overflow detected.
 
 ---
 
