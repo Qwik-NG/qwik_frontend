@@ -83,7 +83,7 @@ export default function DropdownSelect({ label, placeholder, value, options, onC
   const labelId = `${id}-label`;
 
   return (
-    <div ref={rootRef} className="relative block">
+    <div ref={rootRef} className={`relative block ${open ? "z-[150]" : ""}`}>
       {hasLabel ? (
         <label id={labelId} className="mb-2 block text-[15px] font-medium text-[#27242d]">
           {label}
@@ -123,8 +123,14 @@ export default function DropdownSelect({ label, placeholder, value, options, onC
           aria-labelledby={hasLabel ? labelId : undefined}
           aria-label={hasLabel ? undefined : placeholder}
           onPointerDown={(event) => event.stopPropagation()}
-          style={{ scrollBehavior: "smooth", WebkitOverflowScrolling: "touch" }}
-          className="absolute left-0 right-0 z-[120] mt-2 max-h-[240px] touch-pan-y overflow-y-auto overscroll-contain rounded-[14px] border border-[#eee3d6] bg-white p-1.5 shadow-[0_18px_44px_rgba(34,25,16,0.16)] sm:max-h-[280px]"
+          onTouchMove={(event) => event.stopPropagation()}
+          style={{
+            scrollBehavior: "smooth",
+            WebkitOverflowScrolling: "touch",
+            touchAction: "pan-y",
+            overscrollBehaviorY: "contain",
+          }}
+          className="absolute left-0 right-0 z-[120] mt-2 max-h-[min(44dvh,260px)] overflow-x-hidden overflow-y-scroll rounded-[14px] border border-[#eee3d6] bg-white p-1.5 shadow-[0_18px_44px_rgba(34,25,16,0.16)] sm:max-h-[280px] sm:overflow-y-auto"
         >
           {options.map((option) => {
             const selected = option.value === value;
