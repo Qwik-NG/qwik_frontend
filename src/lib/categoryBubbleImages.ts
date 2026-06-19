@@ -13,20 +13,16 @@ export type CategoryBubbleGroup =
 
 const CATEGORY_BUBBLE_IMAGE_MAP: Record<CategoryBubbleGroup, Record<string, string>> = {
   agriculture: {
-    vegetables: "/agriculture-categories/vegetables-64.png",
-    fruits: "/agriculture-categories/fruits-60.png",
-    grains: "/agriculture-categories/grains-64.png",
-    livestock: "/agriculture-categories/livestock-64.png",
-    dairy: "/agriculture-categories/dairy-50.png",
-    seafood: "/agriculture-categories/seafood-100.png",
+    "food-and-beverages": "/agriculture-categories/food-beverages.png",
+    "farm-animals": "/agriculture-categories/farm-animals.png",
+    "seeds-and-fertilizers": "/agriculture-categories/fruits-60.png",
+    "farm-machinery-and-equipment": "/agriculture-categories/farm-machinery.png",
+    "farm-animal-feed-and-supplement": "/agriculture-categories/dairy-50.png",
   },
   art: {
-    paintings: "/art-categories/paintings-64.png",
-    sculptures: "/art-categories/sculptures-67.png",
-    photography: "/art-categories/photography-50.png",
-    drawings: "/art-categories/drawings-100.png",
-    crafts: "/art-categories/crafts-48.png",
-    digital: "/art-categories/digital-50.png",
+    paintings: "/art-categories/paintings.png",
+    "canva-design": "/art-categories/canva-design.png",
+    awards: "/art-categories/awards.png",
   },
   beauty: {
     "body-lotion": "/beauty-categories/body-lotion-64.png",
@@ -81,12 +77,11 @@ const CATEGORY_BUBBLE_IMAGE_MAP: Record<CategoryBubbleGroup, Record<string, stri
     "property-services": "/properties-categories/property-service-50.png",
   },
   sports: {
-    football: "/sport-categories/football-48.png",
-    basketball: "/sport-categories/basketball-94.png",
-    gym: "/sport-categories/gym-50.png",
-    outdoor: "/sport-categories/outdoor-64.png",
-    cycling: "/sport-categories/cycling-48.png",
-    swimming: "/sport-categories/swimming-100.png",
+    "personal-mobility": "/sport-categories/personal-mobility.png",
+    "sports-equipment": "/sport-categories/basketball-94.png",
+    massagers: "/sport-categories/massagers.png",
+    "musical-instrument": "/sport-categories/musical-instruments.png",
+    "fitness-and-personal-training-services": "/sport-categories/fitness-personal.png",
   },
   vehicles: {
     benz: "/vehicle-categories/mercedes-benz-24.png",
