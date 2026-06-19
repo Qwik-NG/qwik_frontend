@@ -56,6 +56,7 @@ const AdminAds = lazy(() => import("./pages/AdminAds"));
 const AdminReports = lazy(() => import("./pages/AdminReports"));
 const AdminReviews = lazy(() => import("./pages/AdminReviews"));
 const AdminVerification = lazy(() => import("./pages/AdminVerification"));
+const AdminAuditLog = lazy(() => import("./pages/AdminAuditLog"));
 
 function RouteFallback() {
   return <div aria-hidden="true" className="min-h-screen bg-page" />;
@@ -144,6 +145,7 @@ export default function App() {
       <Route path="/admin/reports" element={lazyRoute(<AdminRoute><AdminReports /></AdminRoute>)} />
       <Route path="/admin/reviews" element={lazyRoute(<AdminRoute><AdminReviews /></AdminRoute>)} />
       <Route path={ROUTES.ADMIN_VERIFICATION} element={lazyRoute(<AdminRoute><AdminVerification /></AdminRoute>)} />
+      <Route path="/admin/audit-log" element={lazyRoute(<AdminRoute><AdminAuditLog /></AdminRoute>)} />
 
       {/* Error Pages */}
       <Route path={ROUTES.NOT_FOUND} element={lazyRoute(<NotFoundPage />)} />

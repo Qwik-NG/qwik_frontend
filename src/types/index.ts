@@ -156,6 +156,21 @@ export interface AdminAd extends Ad {
   };
 }
 
+export interface AdminAuditLogEntry {
+  id: string;
+  adminId: string;
+  action: string;
+  targetType: string;
+  targetId: string | null;
+  metadata: Record<string, unknown> | null;
+  createdAt: string;
+  admin: {
+    id: string;
+    fullName: string;
+    email?: string;
+  };
+}
+
 export interface AdminReview {
   id: string;
   rating: number;

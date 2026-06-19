@@ -504,7 +504,7 @@ Add moderation controls for marketplace reviews and abuse handling.
 
 ---
 
-## Phase 9 [ ] Audit Log UI
+## Phase 9 [x] Audit Log UI
 
 ### Goal
 
@@ -533,9 +533,9 @@ Expose existing backend audit log endpoint to admins for accountability.
 
 ### Validation checklist
 
-- [ ] Audit log is reachable only by admin routes.
-- [ ] Logs are paginated and sorted by time.
-- [ ] Metadata rendering is safe and readable.
+- [x] Audit log is reachable only by admin routes.
+- [x] Logs are paginated and sorted by time.
+- [x] Metadata rendering is safe and readable.
 
 ### Risk notes
 
@@ -544,6 +544,14 @@ Expose existing backend audit log endpoint to admins for accountability.
 ### Completion criteria
 
 - Admin operations are transparently traceable in UI.
+
+### Implementation summary
+
+- Extended existing `/admin/audit-log` backend endpoint with optional server-side filters: `action`, `targetType`, and date range (`from`/`to`). Pagination and newest-first ordering preserved. Backend RBAC unchanged.
+- Added `AdminAuditLogEntry` TypeScript type and `adminAuditLog(params?)` API client method with pagination and filter param support.
+- Created `AdminAuditLog.tsx` page with: action/targetType/date-range server-side filters, client-side text search across admin/action/targetId, paginated results, defensive key-value metadata rendering for all known action shapes, mobile card layout, and desktop table layout with loading/empty/error states.
+- Added protected `/admin/audit-log` route (wrapped by `AdminRoute`) and lazy import in `App.tsx`.
+- Added "Audit Log" nav item with `ClipboardList` icon to `AdminSidebar.tsx` after route/page existed.
 
 ---
 

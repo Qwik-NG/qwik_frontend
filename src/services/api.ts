@@ -32,6 +32,7 @@ import type {
   AdminReport,
   AdminAd,
   AdminReview,
+  AdminAuditLogEntry,
   FollowStatus,
   FollowingSeller,
   PublicUserProfile
@@ -563,6 +564,18 @@ export const api = {
       method: "PATCH",
       body: JSON.stringify(payload),
     }),
+
+  adminAuditLog: (params?: { page?: number; pageSize?: number; action?: string; targetType?: string; from?: string; to?: string }) => {
+    const searchParams = new URLSearchParams();
+    if (params?.page) searchParams.set("page", String(params.page));
+    if (params?.pageSize) searchParams.set("pageSize", String(params.pageSize));
+    if (params?.action) searchParams.set("action", params.action);
+    if (params?.targetType) searchParams.set("targetType", params.targetType);
+    if (params?.from) searchParams.set("from", params.from);
+    if (params?.to) searchParams.set("to", params.to);
+    const query = searchParams.toString();
+    return request<AdminAuditLogEntry[]>(`/admin/audit-log${query ? `?${query}` : ""}`, { retry: 1 });
+  },
 
   // ===== Offer Endpoints (Future) =====
   // TODO: createOffer - make offer on ad
