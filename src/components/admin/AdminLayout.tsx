@@ -47,12 +47,12 @@ export default function AdminLayout({ children, title, description, headerAction
           </nav>
         </div>
 
-        <div className="min-h-screen p-4 sm:p-6 lg:p-8">
+        <div className="min-h-screen p-4 sm:p-6 lg:p-7">
           {/* Header */}
-          <div className="max-w-7xl mx-auto mb-8">
+          <div className="max-w-7xl mx-auto mb-6 sm:mb-7">
             <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
               <div className="min-w-0">
-                <h1 className="text-3xl font-normal text-[#1f1f29] mb-2 sm:text-4xl">{title}</h1>
+                <h1 className="mb-1.5 text-[28px] font-normal leading-tight text-[#1f1f29] sm:text-[34px]">{title}</h1>
                 {description && (
                   <p className="text-[#7f7e88] text-sm">{description}</p>
                 )}

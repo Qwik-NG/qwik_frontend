@@ -6,9 +6,7 @@ import {
   Users, 
   Package, 
   AlertCircle, 
-  CheckCircle, 
-  Settings, 
-  TrendingUp, 
+  CheckCircle,
   LogOut 
 } from 'lucide-react';
 
@@ -26,8 +24,6 @@ export default function AdminSidebar({ className = '' }: AdminSidebarProps) {
     { label: 'Ads', icon: Package, path: '/admin/ads' },
     { label: 'Reports', icon: AlertCircle, path: '/admin/reports' },
     { label: 'Verification', icon: CheckCircle, path: '/admin/verification' },
-    { label: 'Settings', icon: Settings, path: '/admin/settings' },
-    { label: 'Analytics', icon: TrendingUp, path: '/admin/analytics' },
   ];
 
   const isActive = (path: string) => location.pathname === path;
