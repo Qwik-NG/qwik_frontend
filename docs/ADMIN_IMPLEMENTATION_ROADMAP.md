@@ -447,7 +447,7 @@ Improve admin verification operations and remove confusing overlap signals.
 
 ---
 
-## Phase 8 [ ] Reviews Moderation
+## Phase 8 [x] Reviews Moderation
 
 ### Goal
 
@@ -480,9 +480,9 @@ Add moderation controls for marketplace reviews and abuse handling.
 
 ### Validation checklist
 
-- [ ] Admin can list and moderate reviews safely.
-- [ ] Moderation actions are logged/auditable.
-- [ ] Existing review posting protections still work.
+- [x] Admin can list and moderate reviews safely.
+- [x] Moderation actions are logged/auditable.
+- [x] Existing review posting protections still work.
 
 ### Risk notes
 
@@ -491,6 +491,16 @@ Add moderation controls for marketplace reviews and abuse handling.
 ### Completion criteria
 
 - Reviews have enforceable, auditable admin moderation controls.
+
+### Implementation summary
+
+- Added backend admin reviews listing endpoint with reviewer, ad, and seller context for moderation decisions.
+- Added safe admin review moderation endpoint using required reason + hard remove, with admin audit log entries for every moderation action.
+- Kept existing review posting protections unchanged (no self-review, one review per user/ad, rating bounds, and active-user enforcement).
+- Added `AdminReviews` page with responsive mobile cards + desktop table showing reviewer/ad/seller/rating/text/date/action state.
+- Added modal-driven review removal flow using `AdminModerationModal` with required moderation reason and standardized toast feedback.
+- Added protected `/admin/reviews` route and admin sidebar navigation entry after page implementation.
+- Retained public review display behavior and did not modify future roadmap phases.
 
 ---
 

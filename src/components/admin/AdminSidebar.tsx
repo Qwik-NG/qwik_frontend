@@ -7,6 +7,7 @@ import {
   Package, 
   AlertCircle, 
   CheckCircle,
+  MessageSquare,
   LogOut 
 } from 'lucide-react';
 
@@ -23,17 +24,16 @@ export default function AdminSidebar({ className = '' }: AdminSidebarProps) {
     { label: 'Users', icon: Users, path: '/admin/users' },
     { label: 'Ads', icon: Package, path: '/admin/ads' },
     { label: 'Reports', icon: AlertCircle, path: '/admin/reports' },
+    { label: 'Reviews', icon: MessageSquare, path: '/admin/reviews' },
     { label: 'Verification', icon: CheckCircle, path: '/admin/verification' },
   ];
 
   const isActive = (path: string) => location.pathname === path;
 
   const handleLogout = () => {
-    if (confirm('Are you sure you want to logout?')) {
-      clearAllAuthData();
-      disconnectRealtimeSocket();
-      navigate('/admin/login');
-    }
+    clearAllAuthData();
+    disconnectRealtimeSocket();
+    navigate('/admin/login');
   };
 
   return (

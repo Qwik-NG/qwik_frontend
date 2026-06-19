@@ -156,6 +156,30 @@ export interface AdminAd extends Ad {
   };
 }
 
+export interface AdminReview {
+  id: string;
+  rating: number;
+  text: string;
+  createdAt: string;
+  adId: string;
+  userId: string;
+  ad: {
+    id: string;
+    title: string;
+    status?: "ACTIVE" | "SOLD" | "DRAFT" | "ARCHIVED";
+    user: {
+      id: string;
+      fullName: string;
+      email?: string;
+    };
+  };
+  user: {
+    id: string;
+    fullName: string;
+    email?: string;
+  };
+}
+
 export interface UserProfile {
   bio?: string;
   avatarUrl?: string;

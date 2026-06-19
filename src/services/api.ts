@@ -31,6 +31,7 @@ import type {
   AdminStats,
   AdminReport,
   AdminAd,
+  AdminReview,
   FollowStatus,
   FollowingSeller,
   PublicUserProfile
@@ -524,6 +525,20 @@ export const api = {
     request<null>(`/admin/ads/${id}`, {
       method: "DELETE",
       body: JSON.stringify(reason ? { reason } : {}),
+    }),
+
+  adminReviews: (params?: { page?: number; pageSize?: number }) => {
+    const searchParams = new URLSearchParams();
+    if (params?.page) searchParams.set("page", String(params.page));
+    if (params?.pageSize) searchParams.set("pageSize", String(params.pageSize));
+    const query = searchParams.toString();
+    return request<AdminReview[]>(`/admin/reviews${query ? `?${query}` : ""}`, { retry: 1 });
+  },
+
+  deleteAdminReview: (id: string, reason: string) =>
+    request<null>(`/admin/reviews/${id}`, {
+      method: "DELETE",
+      body: JSON.stringify({ reason }),
     }),
 
   adminReports: () => request<AdminReport[]>("/admin/reports", { retry: 1 }),
