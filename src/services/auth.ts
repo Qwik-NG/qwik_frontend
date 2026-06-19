@@ -7,6 +7,7 @@
 const TOKEN_KEY = "qwik_token";
 const ROLE_KEY = "qwik_role";
 const LOGIN_EMAIL_KEY = "qwik_login_email";
+const LEGAL_CONSENT_ACCEPTED_KEY = "qwik_legal_consent_accepted";
 const DEV_TEST_TOKENS = new Set(["test-token", "dev-test-token"]);
 
 function decodeJwtPayload(token: string): Record<string, unknown> | null {
@@ -106,6 +107,24 @@ export function getLoginEmail() {
 
 export function clearLoginEmail() {
   localStorage.removeItem(LOGIN_EMAIL_KEY);
+}
+
+export function hasAcceptedLegalConsentSnapshot() {
+  return localStorage.getItem(LEGAL_CONSENT_ACCEPTED_KEY) === "1";
+}
+
+export function setAcceptedLegalConsentSnapshot(accepted: boolean) {
+  if (accepted) {
+    localStorage.setItem(LEGAL_CONSENT_ACCEPTED_KEY, "1");
+    return;
+  }
+
+  localStorage.removeItem(LEGAL_CONSENT_ACCEPTED_KEY);
+}
+
+export function persistLegalConsentFromUser(user: { termsAcceptedAt?: string | null; privacyAcceptedAt?: string | null } | null | undefined) {
+  const accepted = Boolean(user?.termsAcceptedAt && user?.privacyAcceptedAt);
+  setAcceptedLegalConsentSnapshot(accepted);
 }
 
 // ===== Session Management =====

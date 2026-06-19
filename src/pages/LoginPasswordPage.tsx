@@ -2,7 +2,7 @@ import { useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { api } from "../services/api";
 import { useToast } from "../context/ToastContext";
-import { getLoginEmail, setRole, setToken } from "../services/auth";
+import { getLoginEmail, persistLegalConsentFromUser, setRole, setToken } from "../services/auth";
 import FormInput from "../components/ui/FormInput";
 import FormCheckbox from "../components/ui/FormCheckbox";
 import FormButton from "../components/ui/FormButton";
@@ -67,6 +67,7 @@ export default function LoginPasswordPage() {
                 const res = await api.login({ email, password });
                 setToken(res.data.token);
                 setRole(res.data.user.role);
+                persistLegalConsentFromUser(res.data.user);
                 
                 // Redirect based on user role and email verification status
                 if (res.data.user.role === 'ADMIN') {

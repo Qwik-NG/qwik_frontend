@@ -3,14 +3,14 @@ import { useNavigate } from "react-router-dom";
 import { ROUTES } from "../constants/routes";
 import { FacebookIcon } from "../components/icons/SocialIcons";
 import AuthLayout from "../components/layout/AuthLayout";
-import { setLoginEmail } from "../services/auth";
+import { hasAcceptedLegalConsentSnapshot, setAcceptedLegalConsentSnapshot, setLoginEmail } from "../services/auth";
 import LegalConsentModal, { type LegalDocumentType } from "../components/auth/LegalConsentModal";
 import GoogleSignInButton from "../components/auth/GoogleSignInButton";
 
 export default function SignInPage() {
   const navigate = useNavigate();
   const [email, setEmail] = useState("");
-  const [acceptedLegal, setAcceptedLegal] = useState(false);
+  const [acceptedLegal, setAcceptedLegal] = useState(() => hasAcceptedLegalConsentSnapshot());
   const [legalModal, setLegalModal] = useState<LegalDocumentType | null>(null);
   const isEmailValid = /\S+@\S+\.\S+/.test(email);
   const canContinue = isEmailValid && acceptedLegal;
@@ -23,7 +23,10 @@ export default function SignInPage() {
       cardClassName="w-[455px] rounded-[22px] px-[22px] pb-[22px] pt-[16px]"
       titleClassName="mb-[12px] text-[30px]"
     >
-          <GoogleSignInButton />
+          <GoogleSignInButton
+            requiresLegalConsent
+            hasAcceptedLegal={acceptedLegal}
+          />
 
           <button
             className="mb-[16px] flex h-[48px] w-full cursor-not-allowed items-center justify-center gap-2 rounded-[10px] bg-[#3f5db2] text-[14px] text-white opacity-55 transition-all duration-200"
@@ -54,7 +57,10 @@ export default function SignInPage() {
             <input
               type="checkbox"
               checked={acceptedLegal}
-              onChange={(e) => setAcceptedLegal(e.target.checked)}
+              onChange={(e) => {
+                setAcceptedLegal(e.target.checked);
+                setAcceptedLegalConsentSnapshot(e.target.checked);
+              }}
               className="mt-[1px] h-[16px] w-[16px] shrink-0 rounded-[4px] border border-[#acabb6] bg-transparent accent-[#ff8f00]"
             />
             <span>
@@ -82,7 +88,14 @@ export default function SignInPage() {
           >
             Next
           </button>
-          <LegalConsentModal documentType={legalModal} onClose={() => setLegalModal(null)} onAgree={() => setAcceptedLegal(true)} />
+          <LegalConsentModal
+            documentType={legalModal}
+            onClose={() => setLegalModal(null)}
+            onAgree={() => {
+              setAcceptedLegal(true);
+              setAcceptedLegalConsentSnapshot(true);
+            }}
+          />
     </AuthLayout>
   );
 }

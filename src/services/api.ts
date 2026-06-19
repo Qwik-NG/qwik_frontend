@@ -183,7 +183,7 @@ export const api = {
       body: JSON.stringify(payload)
     }),
 
-  googleAuth: (payload: { credential: string }) =>
+  googleAuth: (payload: { credential: string; termsAccepted: boolean; privacyAccepted: boolean }) =>
     request<AuthResponse>("/auth/google", {
       method: "POST",
       body: JSON.stringify(payload)

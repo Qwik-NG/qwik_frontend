@@ -4,14 +4,14 @@ import { FacebookIcon } from "../components/icons/SocialIcons";
 import AuthLayout from "../components/layout/AuthLayout";
 import FormInput from "../components/ui/FormInput";
 import FormButton from "../components/ui/FormButton";
-import { setLoginEmail } from "../services/auth";
+import { hasAcceptedLegalConsentSnapshot, setAcceptedLegalConsentSnapshot, setLoginEmail } from "../services/auth";
 import LegalConsentModal, { type LegalDocumentType } from "../components/auth/LegalConsentModal";
 import GoogleSignInButton from "../components/auth/GoogleSignInButton";
 
 export default function LoginPage() {
   const navigate = useNavigate();
   const [email, setEmail] = useState("");
-  const [acceptedLegal, setAcceptedLegal] = useState(false);
+  const [acceptedLegal, setAcceptedLegal] = useState(() => hasAcceptedLegalConsentSnapshot());
   const [legalModal, setLegalModal] = useState<LegalDocumentType | null>(null);
   const canContinue = /\S+@\S+\.\S+/.test(email) && acceptedLegal;
 
@@ -23,7 +23,10 @@ export default function LoginPage() {
       cardClassName="w-[430px]"
       titleClassName="whitespace-nowrap"
     >
-          <GoogleSignInButton />
+          <GoogleSignInButton
+            requiresLegalConsent
+            hasAcceptedLegal={acceptedLegal}
+          />
 
           <button
             className="mb-[16px] flex h-[48px] w-full cursor-not-allowed items-center justify-center gap-2 rounded-[10px] bg-[#3f5db2] text-[14px] text-white opacity-55 transition-all duration-200"
@@ -54,7 +57,10 @@ export default function LoginPage() {
             <input
               type="checkbox"
               checked={acceptedLegal}
-              onChange={(e) => setAcceptedLegal(e.target.checked)}
+              onChange={(e) => {
+                setAcceptedLegal(e.target.checked);
+                setAcceptedLegalConsentSnapshot(e.target.checked);
+              }}
               className="mt-[1px] h-[16px] w-[16px] shrink-0 rounded-[4px] border border-[#acabb6] bg-transparent accent-[#ff8f00] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#ffb357] focus-visible:ring-offset-2 focus-visible:ring-offset-white"
             />
             <span>
@@ -86,7 +92,14 @@ export default function LoginPage() {
           >
             Next
           </FormButton>
-          <LegalConsentModal documentType={legalModal} onClose={() => setLegalModal(null)} onAgree={() => setAcceptedLegal(true)} />
+          <LegalConsentModal
+            documentType={legalModal}
+            onClose={() => setLegalModal(null)}
+            onAgree={() => {
+              setAcceptedLegal(true);
+              setAcceptedLegalConsentSnapshot(true);
+            }}
+          />
     </AuthLayout>
   );
 }

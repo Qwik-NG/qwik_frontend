@@ -3,7 +3,7 @@ import { useNavigate } from "react-router-dom";
 import { ROUTES } from "../constants/routes";
 import { api } from "../services/api";
 import { useToast } from "../context/ToastContext";
-import { setRole, setToken } from "../services/auth";
+import { persistLegalConsentFromUser, setAcceptedLegalConsentSnapshot, setRole, setToken } from "../services/auth";
 import FormInput from "../components/ui/FormInput";
 import FormButton from "../components/ui/FormButton";
 import LegalConsentModal, { type LegalDocumentType } from "../components/auth/LegalConsentModal";
@@ -46,7 +46,11 @@ export default function SignUpPage() {
             Create a fresh account
           </h2>
 
-          <GoogleSignInButton />
+          <GoogleSignInButton
+            requiresLegalConsent
+            hasAcceptedLegal={acceptedLegal}
+            onLegalConsentRequired={() => showError("Please accept the Terms of Use and Privacy Policy to continue.")}
+          />
 
           <button
             className="mb-[14px] flex h-[48px] w-full cursor-not-allowed items-center justify-center gap-2 rounded-[10px] bg-[#3f5db2] text-[14px] text-white opacity-55 transition-all duration-200"
@@ -138,6 +142,8 @@ export default function SignUpPage() {
                 });
                 setToken(res.data.token);
                 setRole(res.data.user.role);
+                setAcceptedLegalConsentSnapshot(true);
+                persistLegalConsentFromUser(res.data.user);
                 success("Account created successfully");
                 // Redirect to email verification if email not verified, otherwise to welcome
                 const isEmailVerified = res.data.user.emailVerifiedAt !== null && res.data.user.emailVerifiedAt !== undefined;

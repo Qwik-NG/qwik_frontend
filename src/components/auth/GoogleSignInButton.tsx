@@ -2,7 +2,7 @@ import { useEffect, useRef, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { useToast } from "../../context/ToastContext";
 import { api } from "../../services/api";
-import { setRole, setToken } from "../../services/auth";
+import { persistLegalConsentFromUser, setRole, setToken } from "../../services/auth";
 import { GoogleIcon } from "../icons/SocialIcons";
 
 const GIS_SCRIPT_SRC = "https://accounts.google.com/gsi/client";
@@ -97,11 +97,19 @@ function ensureGoogleInitialized(clientId: string) {
 type Props = {
   /** Label shown when Google is not configured (button stays disabled). */
   disabledLabel?: string;
+  requiresLegalConsent?: boolean;
+  hasAcceptedLegal?: boolean;
+  onLegalConsentRequired?: () => void;
 };
 
 type Status = "loading" | "ready" | "error" | "submitting";
 
-export default function GoogleSignInButton({ disabledLabel = "Continue with Google" }: Props) {
+export default function GoogleSignInButton({
+  disabledLabel = "Continue with Google",
+  requiresLegalConsent = false,
+  hasAcceptedLegal = false,
+  onLegalConsentRequired,
+}: Props) {
   const containerRef = useRef<HTMLDivElement | null>(null);
   const navigate = useNavigate();
   const { error: showError, success } = useToast();
@@ -112,6 +120,24 @@ export default function GoogleSignInButton({ disabledLabel = "Continue with Goog
   useEffect(() => { navigateRef.current = navigate; }, [navigate]);
   useEffect(() => { showErrorRef.current = showError; }, [showError]);
   useEffect(() => { successRef.current = success; }, [success]);
+
+  const consentAccepted = !requiresLegalConsent || hasAcceptedLegal;
+  const consentAcceptedRef = useRef(consentAccepted);
+  useEffect(() => {
+    consentAcceptedRef.current = consentAccepted;
+  }, [consentAccepted]);
+
+  const requireLegalConsent = () => {
+    if (consentAcceptedRef.current) return true;
+
+    if (onLegalConsentRequired) {
+      onLegalConsentRequired();
+    } else {
+      showErrorRef.current("Please accept the Terms of Use and Privacy Policy to continue.");
+    }
+
+    return false;
+  };
 
   const [status, setStatus] = useState<Status>("loading");
   const isConfigured = Boolean(GOOGLE_CLIENT_ID);
@@ -130,15 +156,25 @@ export default function GoogleSignInButton({ disabledLabel = "Continue with Goog
         if (cancelled || !window.google || !containerRef.current) return;
         try {
           activeCredentialHandler = async (response: GoogleCredentialResponse) => {
+            if (!requireLegalConsent()) {
+              setStatus("ready");
+              return;
+            }
+
             if (!response.credential) {
               showErrorRef.current("Google sign-in was cancelled");
               return;
             }
             try {
               setStatus("submitting");
-              const res = await api.googleAuth({ credential: response.credential });
+              const res = await api.googleAuth({
+                credential: response.credential,
+                termsAccepted: true,
+                privacyAccepted: true,
+              });
               setToken(res.data.token);
               setRole(res.data.user.role);
+              persistLegalConsentFromUser(res.data.user);
               successRef.current("Signed in with Google");
               navigateRef.current(res.data.user.role === "ADMIN" ? "/admin" : "/welcome");
             } catch (err) {
@@ -179,6 +215,8 @@ export default function GoogleSignInButton({ disabledLabel = "Continue with Goog
   }, [isConfigured]);
 
   const triggerGooglePrompt = () => {
+    if (!requireLegalConsent()) return;
+
     if (window.google?.accounts?.id) {
       try {
         window.google.accounts.id.prompt();
@@ -213,12 +251,23 @@ export default function GoogleSignInButton({ disabledLabel = "Continue with Goog
         className="flex w-full justify-center"
         aria-busy={status === "submitting"}
         style={{
-          display: status === "ready" || status === "submitting" ? "flex" : "none",
+          display: (status === "ready" || status === "submitting") && consentAccepted ? "flex" : "none",
           minHeight: 40,
           opacity: status === "submitting" ? 0.6 : 1,
           pointerEvents: status === "submitting" ? "none" : "auto",
         }}
       />
+
+      {(status === "ready" || status === "submitting") && !consentAccepted && (
+        <button
+          type="button"
+          onClick={triggerGooglePrompt}
+          className="flex h-[48px] w-full items-center justify-center gap-2 rounded-[10px] border border-[#dedee1] bg-white text-[14px] text-[#1f1f29] transition-colors hover:bg-[#fafafb] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#ffb357] focus-visible:ring-offset-2"
+        >
+          <GoogleIcon />
+          <span>Continue with Google</span>
+        </button>
+      )}
 
       {status === "loading" && (
         <div
