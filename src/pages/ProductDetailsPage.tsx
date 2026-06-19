@@ -75,6 +75,74 @@ function ReviewListSkeleton() {
   );
 }
 
+function ReportModal({
+  open,
+  reason,
+  onReasonChange,
+  onClose,
+  onSubmit,
+  submitting,
+}: {
+  open: boolean;
+  reason: string;
+  onReasonChange: (value: string) => void;
+  onClose: () => void;
+  onSubmit: () => void;
+  submitting: boolean;
+}) {
+  if (!open) return null;
+
+  return (
+    <div className="fixed inset-0 z-[120] flex items-end justify-center bg-black/45 p-4 sm:items-center" role="dialog" aria-modal="true" aria-label="Report listing">
+      <div className="w-full max-w-[520px] rounded-[16px] bg-white p-4 shadow-xl sm:p-5">
+        <div className="flex items-start justify-between gap-3">
+          <div>
+            <h3 className="text-[20px] font-semibold text-[#2f2d38]">Report listing</h3>
+            <p className="mt-1 text-[13px] text-[#7a7684]">Tell us why this listing should be reviewed.</p>
+          </div>
+          <button
+            type="button"
+            onClick={onClose}
+            className="rounded-[8px] px-2 py-1.5 text-[13px] text-[#7a7684] transition hover:bg-[#f4f3f6]"
+            disabled={submitting}
+          >
+            Close
+          </button>
+        </div>
+
+        <textarea
+          value={reason}
+          onChange={(event) => onReasonChange(event.target.value)}
+          rows={5}
+          maxLength={500}
+          placeholder="Describe the issue with this listing"
+          className="mt-4 w-full resize-y rounded-[10px] border border-[#d8d4de] px-3 py-2 text-[14px] text-[#2f2d38] outline-none transition focus:border-[#ffb46a] focus:ring-2 focus:ring-[#ffb46a]/25"
+        />
+        <p className="mt-1 text-right text-[12px] text-[#9f9ba8]">{reason.trim().length}/500</p>
+
+        <div className="mt-4 flex flex-wrap items-center justify-end gap-2">
+          <button
+            type="button"
+            onClick={onClose}
+            className="h-[40px] rounded-[9px] border border-[#d8d4de] px-4 text-[14px] text-[#6f6b77] transition hover:bg-[#f4f3f6]"
+            disabled={submitting}
+          >
+            Cancel
+          </button>
+          <button
+            type="button"
+            onClick={onSubmit}
+            disabled={submitting}
+            className="h-[40px] rounded-[9px] bg-gradient-to-r from-amber to-orange px-4 text-[14px] font-medium text-white shadow-glow disabled:cursor-not-allowed disabled:opacity-60"
+          >
+            {submitting ? "Submitting..." : "Submit Report"}
+          </button>
+        </div>
+      </div>
+    </div>
+  );
+}
+
 function formatPhoneForDisplay(phone: string) {
   const digits = phone.replace(/\D/g, "");
   if (digits.length === 11 && digits.startsWith("0")) {
@@ -140,6 +208,12 @@ export default function ProductDetailsPage() {
   const [reviews, setReviews] = useState<AdReview[]>([]);
   const [reviewsLoading, setReviewsLoading] = useState(false);
   const [reviewsError, setReviewsError] = useState<string | null>(null);
+  const [selectedRating, setSelectedRating] = useState(5);
+  const [reviewText, setReviewText] = useState("");
+  const [submittingReview, setSubmittingReview] = useState(false);
+  const [reportOpen, setReportOpen] = useState(false);
+  const [reportReason, setReportReason] = useState("");
+  const [submittingReport, setSubmittingReport] = useState(false);
 
   // Sync cached user updates
   useEffect(() => {
@@ -223,34 +297,115 @@ export default function ProductDetailsPage() {
     setReviews([]);
     setReviewsLoading(false);
     setReviewsError(null);
+    setSelectedRating(5);
+    setReviewText("");
+    setSubmittingReview(false);
+    setReportOpen(false);
+    setReportReason("");
+    setSubmittingReport(false);
   }, [id]);
+
+  const fetchReviews = useCallback(async (adId: string) => {
+    setReviewsLoading(true);
+    setReviewsError(null);
+    try {
+      const response = await api.getReviews(adId);
+      if (!mountedRef.current) return;
+      setReviews(response.data);
+    } catch (err) {
+      if (!mountedRef.current) return;
+      setReviews([]);
+      setReviewsError(err instanceof Error ? err.message : "Unable to load reviews right now.");
+    } finally {
+      if (!mountedRef.current) return;
+      setReviewsLoading(false);
+    }
+  }, []);
 
   useEffect(() => {
     if (!ad?.id) return;
+    void fetchReviews(ad.id);
+  }, [ad?.id, fetchReviews]);
 
-    let active = true;
-    setReviewsLoading(true);
-    setReviewsError(null);
+  const handleOpenReportModal = () => {
+    if (!ad) return;
+    const token = getToken();
+    if (!token) {
+      showError("Please log in to report this listing");
+      navigate("/login");
+      return;
+    }
+    if (currentUser?.id && ad.user?.id === currentUser.id) {
+      showError("You cannot report your own ad");
+      return;
+    }
+    setReportOpen(true);
+  };
 
-    api.getReviews(ad.id)
-      .then((response) => {
-        if (!active || !mountedRef.current) return;
-        setReviews(response.data);
-      })
-      .catch((err) => {
-        if (!active || !mountedRef.current) return;
-        setReviews([]);
-        setReviewsError(err instanceof Error ? err.message : "Unable to load reviews right now.");
-      })
-      .finally(() => {
-        if (!active || !mountedRef.current) return;
-        setReviewsLoading(false);
-      });
+  const handleSubmitReport = async () => {
+    if (!ad) return;
+    const token = getToken();
+    if (!token) {
+      showError("Please log in to report this listing");
+      navigate("/login");
+      return;
+    }
+    if (currentUser?.id && ad.user?.id === currentUser.id) {
+      showError("You cannot report your own ad");
+      return;
+    }
 
-    return () => {
-      active = false;
-    };
-  }, [ad?.id]);
+    const reason = reportReason.trim();
+    if (reason.length < 5) {
+      showError("Please provide at least 5 characters.");
+      return;
+    }
+
+    try {
+      setSubmittingReport(true);
+      await api.reportAd(ad.id, { reason });
+      setReportOpen(false);
+      setReportReason("");
+      success("Report submitted");
+    } catch (err) {
+      showError(err instanceof Error ? err.message : "Unable to submit report right now");
+    } finally {
+      setSubmittingReport(false);
+    }
+  };
+
+  const handleSubmitReview = async () => {
+    if (!ad) return;
+    const token = getToken();
+    if (!token) {
+      showError("Please log in to leave a review");
+      navigate("/login");
+      return;
+    }
+    if (currentUser?.id && ad.user?.id === currentUser.id) {
+      showError("You cannot review your own ad");
+      return;
+    }
+
+    const text = reviewText.trim();
+    if (!text) {
+      showError("Please write a short review.");
+      return;
+    }
+
+    try {
+      setSubmittingReview(true);
+      await api.postReview(ad.id, { rating: selectedRating, text });
+      setReviewText("");
+      setSelectedRating(5);
+      success("Review submitted");
+      await fetchReviews(ad.id);
+    } catch (err) {
+      showError(err instanceof Error ? err.message : "Unable to submit review right now");
+    } finally {
+      setSubmittingReview(false);
+    }
+  };
 
   const handleSave = async () => {
     try {
@@ -477,6 +632,9 @@ export default function ProductDetailsPage() {
   const sellerAvatarUrl = ad.user?.profile?.avatarUrl || "";
   const sellerMeta = formatMemberSince(ad.user?.createdAt);
   const isOwner = Boolean(currentUser?.id && ad.user?.id === currentUser.id);
+  const isAuthenticated = Boolean(getToken());
+  const canLeaveReview = isAuthenticated && !isOwner;
+  const canReportListing = isAuthenticated && !isOwner;
   const sellerVerified = isSellerVerified(ad.user);
   const sellerAllAdsPath = ad.user?.id ? `/users/${encodeURIComponent(ad.user.id)}` : "/search";
 
@@ -725,7 +883,24 @@ export default function ProductDetailsPage() {
                           {markingUnavailable ? "Marking..." : "Mark Unavailable"}
                         </button>
                       ) : null}
-                      <span className="text-[12px] text-[#9f9ba8]">Reporting tools coming soon</span>
+                      {!isOwner ? (
+                        <button
+                          type="button"
+                          onClick={handleOpenReportModal}
+                          className="rounded-[8px] border border-[#ffb46a] bg-[#fff7ef] px-3 py-2 text-[13px] font-medium text-[#d97706] transition-colors duration-200 hover:bg-[#ffefdc] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#ffb357] focus-visible:ring-offset-2 focus-visible:ring-offset-white"
+                        >
+                          Report listing
+                        </button>
+                      ) : null}
+                      {!isAuthenticated ? (
+                        <button
+                          type="button"
+                          onClick={() => navigate("/login")}
+                          className="text-[12px] text-[#9f9ba8] underline-offset-2 transition hover:text-[#7f7b87] hover:underline"
+                        >
+                          Login to report
+                        </button>
+                      ) : null}
                     </div>
                   </div>
                 </div>
@@ -749,6 +924,59 @@ export default function ProductDetailsPage() {
 
             <div className="rounded-[14px] border border-[#e5e3e9] bg-white p-4 sm:p-5">
               <h4 className="text-[36px] font-normal leading-none">Reviews</h4>
+              {canLeaveReview ? (
+                <div className="mt-4 rounded-[12px] border border-[#efedf2] p-4">
+                  <p className="text-[14px] font-medium text-[#2f2d38]">Leave a review</p>
+                  <div className="mt-2 flex flex-wrap items-center gap-1.5" role="radiogroup" aria-label="Select rating">
+                    {Array.from({ length: 5 }).map((_, index) => {
+                      const value = index + 1;
+                      return (
+                        <button
+                          key={value}
+                          type="button"
+                          role="radio"
+                          aria-checked={selectedRating === value}
+                          onClick={() => setSelectedRating(value)}
+                          className={`text-[22px] leading-none transition ${value <= selectedRating ? "text-[#ff9715]" : "text-[#d8d4dd]"}`}
+                        >
+                          ★
+                        </button>
+                      );
+                    })}
+                  </div>
+                  <textarea
+                    value={reviewText}
+                    onChange={(event) => setReviewText(event.target.value)}
+                    rows={3}
+                    maxLength={500}
+                    placeholder="Share your experience with this listing"
+                    className="mt-3 w-full resize-y rounded-[10px] border border-[#d8d4de] px-3 py-2 text-[14px] text-[#2f2d38] outline-none transition focus:border-[#ffb46a] focus:ring-2 focus:ring-[#ffb46a]/25"
+                  />
+                  <div className="mt-3 flex items-center justify-between gap-3">
+                    <span className="text-[12px] text-[#9f9ba8]">{reviewText.trim().length}/500</span>
+                    <button
+                      type="button"
+                      onClick={() => void handleSubmitReview()}
+                      disabled={submittingReview}
+                      className="h-[38px] rounded-[9px] bg-gradient-to-r from-amber to-orange px-4 text-[13px] font-medium text-white shadow-glow disabled:cursor-not-allowed disabled:opacity-60"
+                    >
+                      {submittingReview ? "Submitting..." : "Submit review"}
+                    </button>
+                  </div>
+                </div>
+              ) : !isAuthenticated ? (
+                <div className="mt-4 rounded-[12px] border border-[#efedf2] p-4">
+                  <p className="text-[13px] text-[#7f7b87]">Log in to leave a review for this listing.</p>
+                  <button
+                    type="button"
+                    onClick={() => navigate("/login")}
+                    className="mt-3 h-[36px] rounded-[8px] border border-[#d8d4de] px-3 text-[13px] text-[#6f6b77] transition hover:bg-[#f4f3f6]"
+                  >
+                    Go to login
+                  </button>
+                </div>
+              ) : null}
+
               {reviewsLoading ? (
                 <ReviewListSkeleton />
               ) : reviewsError ? (
@@ -803,6 +1031,17 @@ export default function ProductDetailsPage() {
         controller={{ closeOnBackdropClick: true }}
         carousel={{ finite: gallery.length <= 1 }}
         on={{ view: ({ index }) => setActiveImage(index) }}
+      />
+      <ReportModal
+        open={reportOpen && canReportListing}
+        reason={reportReason}
+        onReasonChange={setReportReason}
+        onClose={() => {
+          if (submittingReport) return;
+          setReportOpen(false);
+        }}
+        onSubmit={handleSubmitReport}
+        submitting={submittingReport}
       />
     </div>
   );
