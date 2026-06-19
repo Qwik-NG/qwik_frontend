@@ -12,6 +12,9 @@ export default function AdminReports() {
   const [reports, setReports] = useState<AdminReport[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState('');
+  const [page, setPage] = useState(1);
+  const [pageSize, setPageSize] = useState(20);
+  const [totalReports, setTotalReports] = useState(0);
   const [searchTerm, setSearchTerm] = useState('');
   const [statusFilter, setStatusFilter] = useState<'ALL' | 'PENDING' | 'RESOLVED' | 'DISMISSED'>('ALL');
   const [selectedReport, setSelectedReport] = useState<AdminReport | null>(null);
@@ -21,14 +24,15 @@ export default function AdminReports() {
 
   useEffect(() => {
     void fetchReports();
-  }, []);
+  }, [page, pageSize]);
 
   const fetchReports = async () => {
     try {
       setLoading(true);
       setError('');
-      const response = await api.adminReports();
+      const response = await api.adminReports({ page, pageSize });
       setReports(response.data);
+      setTotalReports(response.meta?.total ?? response.data.length);
     } catch (err) {
       setError(err instanceof Error ? err.message : 'Unable to load reports');
     } finally {
@@ -50,6 +54,7 @@ export default function AdminReports() {
   }, [reports, searchTerm, statusFilter]);
 
   const pendingReports = reports.filter((report) => report.status === 'PENDING').length;
+  const pageCount = Math.max(1, Math.ceil(totalReports / pageSize));
 
   const openActionModal = (report: AdminReport, action: ReportAction) => {
     setSelectedReport(report);
@@ -188,8 +193,8 @@ export default function AdminReports() {
   }
 
   return (
-    <AdminLayout title="Handle Reports" description={`${pendingReports} pending, ${reports.length} total`}>
-      <div className="mb-4 grid grid-cols-1 gap-3 rounded-[14px] border border-[#e8e8ea] bg-white p-4 md:grid-cols-[1fr_auto] md:items-center">
+    <AdminLayout title="Handle Reports" description={`${pendingReports} pending, ${totalReports.toLocaleString()} total`}>
+      <div className="mb-4 grid grid-cols-1 gap-3 rounded-[14px] border border-[#e8e8ea] bg-white p-4 md:grid-cols-[1fr_auto_auto] md:items-center">
         <input
           type="search"
           value={searchTerm}
@@ -207,6 +212,24 @@ export default function AdminReports() {
           <option value="RESOLVED">Resolved</option>
           <option value="DISMISSED">Dismissed</option>
         </select>
+        <select
+          value={String(pageSize)}
+          onChange={(event) => {
+            setPage(1);
+            setPageSize(Number(event.target.value));
+          }}
+          className="h-[38px] rounded-[9px] border border-[#d8d5de] px-3 text-[13px] text-[#4f4b59] outline-none focus:border-[#ffb46a]"
+        >
+          <option value="10">10 / page</option>
+          <option value="20">20 / page</option>
+          <option value="50">50 / page</option>
+          <option value="100">100 / page</option>
+        </select>
+      </div>
+
+      <div className="mb-3 flex items-center justify-between gap-3 text-[13px] text-[#6f6b77]">
+        <span>Showing {filteredReports.length} report{filteredReports.length !== 1 ? 's' : ''} on this page</span>
+        <span>Page {page} of {pageCount}</span>
       </div>
 
       {filteredReports.length === 0 ? (
@@ -350,6 +373,26 @@ export default function AdminReports() {
         reasonPlaceholder={modalConfig?.reasonPlaceholder || 'Enter note'}
         onReasonChange={setNote}
       />
+
+      <div className="mt-4 flex flex-wrap items-center justify-between gap-3 rounded-[12px] border border-[#e8e8ea] bg-white px-4 py-3">
+        <button
+          type="button"
+          onClick={() => setPage((prev) => Math.max(1, prev - 1))}
+          disabled={page === 1}
+          className="h-[36px] rounded-[8px] border border-[#d8d5de] px-3 text-[13px] text-[#4f4b59] transition hover:bg-[#f4f3f6] disabled:cursor-not-allowed disabled:opacity-50"
+        >
+          Previous
+        </button>
+        <div className="text-[13px] text-[#6f6b77]">{totalReports.toLocaleString()} total reports</div>
+        <button
+          type="button"
+          onClick={() => setPage((prev) => Math.min(pageCount, prev + 1))}
+          disabled={page >= pageCount}
+          className="h-[36px] rounded-[8px] border border-[#d8d5de] px-3 text-[13px] text-[#4f4b59] transition hover:bg-[#f4f3f6] disabled:cursor-not-allowed disabled:opacity-50"
+        >
+          Next
+        </button>
+      </div>
     </AdminLayout>
   );
 }

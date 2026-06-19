@@ -33,6 +33,9 @@ export default function AdminVerification() {
   const [verifications, setVerifications] = useState<VerificationApplication[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState('');
+  const [page, setPage] = useState(1);
+  const [pageSize, setPageSize] = useState(20);
+  const [totalVerifications, setTotalVerifications] = useState(0);
   const [statusFilter, setStatusFilter] = useState<'ALL' | VerificationStatus>('ALL');
   const [searchTerm, setSearchTerm] = useState('');
   const [fromDate, setFromDate] = useState('');
@@ -45,14 +48,19 @@ export default function AdminVerification() {
 
   useEffect(() => {
     void fetchVerifications();
-  }, [statusFilter]);
+  }, [statusFilter, page, pageSize]);
 
   const fetchVerifications = async () => {
     try {
       setLoading(true);
       setError('');
-      const response = await api.adminVerifications({ status: statusFilter === 'ALL' ? undefined : statusFilter, pageSize: 100 });
+      const response = await api.adminVerifications({
+        status: statusFilter === 'ALL' ? undefined : statusFilter,
+        page,
+        pageSize,
+      });
       setVerifications(response.data);
+      setTotalVerifications(response.meta?.total ?? response.data.length);
     } catch (err) {
       setError(err instanceof Error ? err.message : 'Error loading verifications');
     } finally {
@@ -128,6 +136,7 @@ export default function AdminVerification() {
   };
 
   const pendingCount = verifications.filter((item) => item.status === 'SUBMITTED' || item.status === 'IN_REVIEW').length;
+  const pageCount = Math.max(1, Math.ceil(totalVerifications / pageSize));
 
   if (loading) {
     return (
@@ -164,7 +173,7 @@ export default function AdminVerification() {
   }
 
   return (
-    <AdminLayout title="Verification Review" description={`${pendingCount} pending, ${verifications.length} total`}>
+    <AdminLayout title="Verification Review" description={`${pendingCount} pending, ${totalVerifications.toLocaleString()} total`}>
       <div className="mb-4 grid grid-cols-1 gap-3 rounded-[14px] border border-[#e8e8ea] bg-white p-4 md:grid-cols-2 xl:grid-cols-4">
         <input
           type="search"
@@ -175,7 +184,10 @@ export default function AdminVerification() {
         />
         <select
           value={statusFilter}
-          onChange={(event) => setStatusFilter(event.target.value as 'ALL' | VerificationStatus)}
+          onChange={(event) => {
+            setStatusFilter(event.target.value as 'ALL' | VerificationStatus);
+            setPage(1);
+          }}
           className="h-[38px] rounded-[9px] border border-[#d8d5de] px-3 text-[13px] text-[#4f4b59] outline-none focus:border-[#ffb46a]"
         >
           <option value="ALL">All status</option>
@@ -197,6 +209,26 @@ export default function AdminVerification() {
           onChange={(event) => setToDate(event.target.value)}
           className="h-[38px] rounded-[9px] border border-[#d8d5de] px-3 text-[13px] text-[#4f4b59] outline-none focus:border-[#ffb46a]"
         />
+      </div>
+
+      <div className="mb-3 flex items-center justify-between gap-3 text-[13px] text-[#6f6b77]">
+        <span>Showing {filteredVerifications.length} application{filteredVerifications.length !== 1 ? 's' : ''} on this page</span>
+        <div className="flex items-center gap-3">
+          <span>Page {page} of {pageCount}</span>
+          <select
+            value={String(pageSize)}
+            onChange={(event) => {
+              setPage(1);
+              setPageSize(Number(event.target.value));
+            }}
+            className="h-[32px] rounded-[8px] border border-[#d8d5de] px-2 text-[12px] text-[#4f4b59] outline-none focus:border-[#ffb46a]"
+          >
+            <option value="10">10 / page</option>
+            <option value="20">20 / page</option>
+            <option value="50">50 / page</option>
+            <option value="100">100 / page</option>
+          </select>
+        </div>
       </div>
 
       {filteredVerifications.length === 0 ? (
@@ -338,6 +370,26 @@ export default function AdminVerification() {
         reasonPlaceholder={nextStatus === 'REJECTED' ? 'Explain why this application was rejected' : 'Optional decision note for audit context'}
         onReasonChange={nextStatus === 'REJECTED' ? setRejectionReason : setDecisionNote}
       />
+
+      <div className="mt-4 flex flex-wrap items-center justify-between gap-3 rounded-[12px] border border-[#e8e8ea] bg-white px-4 py-3">
+        <button
+          type="button"
+          onClick={() => setPage((prev) => Math.max(1, prev - 1))}
+          disabled={page === 1}
+          className="h-[36px] rounded-[8px] border border-[#d8d5de] px-3 text-[13px] text-[#4f4b59] transition hover:bg-[#f4f3f6] disabled:cursor-not-allowed disabled:opacity-50"
+        >
+          Previous
+        </button>
+        <div className="text-[13px] text-[#6f6b77]">{totalVerifications.toLocaleString()} total applications</div>
+        <button
+          type="button"
+          onClick={() => setPage((prev) => Math.min(pageCount, prev + 1))}
+          disabled={page >= pageCount}
+          className="h-[36px] rounded-[8px] border border-[#d8d5de] px-3 text-[13px] text-[#4f4b59] transition hover:bg-[#f4f3f6] disabled:cursor-not-allowed disabled:opacity-50"
+        >
+          Next
+        </button>
+      </div>
     </AdminLayout>
   );
 }

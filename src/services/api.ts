@@ -69,6 +69,19 @@ const ADS_STALE_TIME = 30_000;
 const AD_DETAILS_STALE_TIME = 60_000;
 const CATEGORIES_STALE_TIME = 5 * 60_000;
 const SHORT_LIST_STALE_TIME = 15_000;
+const ADMIN_STALE_TIME = 20_000;
+const ADMIN_CACHE_TIME = 45_000;
+const ADMIN_AUDIT_STALE_TIME = 5_000;
+const ADMIN_AUDIT_CACHE_TIME = 12_000;
+
+function clearAdminApiCache() {
+  for (const key of GET_CACHE.keys()) {
+    if (key.includes(":/admin/")) {
+      GET_CACHE.delete(key);
+      IN_FLIGHT_GETS.delete(key);
+    }
+  }
+}
 
 function sleep(ms: number) {
   return new Promise((resolve) => window.setTimeout(resolve, ms));
@@ -487,25 +500,39 @@ export const api = {
   paymentById: (id: string) => request<any>(`/payments/${id}`),
 
   // ===== Admin Endpoints =====
-  adminStats: () => request<AdminStats>("/admin/stats", { retry: 1 }),
+  adminStats: () => request<AdminStats>("/admin/stats", {
+    staleTime: ADMIN_STALE_TIME,
+    cacheTime: ADMIN_CACHE_TIME,
+    retry: 1,
+  }),
 
   adminUsers: (params?: { page?: number; pageSize?: number }) => {
     const searchParams = new URLSearchParams();
     if (params?.page) searchParams.set("page", String(params.page));
     if (params?.pageSize) searchParams.set("pageSize", String(params.pageSize));
     const query = searchParams.toString();
-    return request<User[]>(`/admin/users${query ? `?${query}` : ""}`, { retry: 1 });
+    return request<User[]>(`/admin/users${query ? `?${query}` : ""}`, {
+      staleTime: ADMIN_STALE_TIME,
+      cacheTime: ADMIN_CACHE_TIME,
+      retry: 1,
+    });
   },
 
   banAdminUser: (id: string, reason?: string) =>
     request<User>(`/admin/users/${id}/ban`, {
       method: "POST",
       body: JSON.stringify({ reason }),
+    }).then((response) => {
+      clearAdminApiCache();
+      return response;
     }),
 
   unbanAdminUser: (id: string) =>
     request<User>(`/admin/users/${id}/unban`, {
       method: "POST",
+    }).then((response) => {
+      clearAdminApiCache();
+      return response;
     }),
 
   adminAds: (params?: { page?: number; pageSize?: number }) => {
@@ -513,19 +540,29 @@ export const api = {
     if (params?.page) searchParams.set("page", String(params.page));
     if (params?.pageSize) searchParams.set("pageSize", String(params.pageSize));
     const query = searchParams.toString();
-    return request<AdminAd[]>(`/admin/ads${query ? `?${query}` : ""}`, { retry: 1 });
+    return request<AdminAd[]>(`/admin/ads${query ? `?${query}` : ""}`, {
+      staleTime: ADMIN_STALE_TIME,
+      cacheTime: ADMIN_CACHE_TIME,
+      retry: 1,
+    });
   },
 
   moderateAdminAdStatus: (id: string, payload: { status: "ACTIVE" | "ARCHIVED"; reason?: string }) =>
     request<AdminAd>(`/admin/ads/${id}/status`, {
       method: "PATCH",
       body: JSON.stringify(payload),
+    }).then((response) => {
+      clearAdminApiCache();
+      return response;
     }),
 
   deleteAdminAd: (id: string, reason?: string) =>
     request<null>(`/admin/ads/${id}`, {
       method: "DELETE",
       body: JSON.stringify(reason ? { reason } : {}),
+    }).then((response) => {
+      clearAdminApiCache();
+      return response;
     }),
 
   adminReviews: (params?: { page?: number; pageSize?: number }) => {
@@ -533,21 +570,41 @@ export const api = {
     if (params?.page) searchParams.set("page", String(params.page));
     if (params?.pageSize) searchParams.set("pageSize", String(params.pageSize));
     const query = searchParams.toString();
-    return request<AdminReview[]>(`/admin/reviews${query ? `?${query}` : ""}`, { retry: 1 });
+    return request<AdminReview[]>(`/admin/reviews${query ? `?${query}` : ""}`, {
+      staleTime: ADMIN_STALE_TIME,
+      cacheTime: ADMIN_CACHE_TIME,
+      retry: 1,
+    });
   },
 
   deleteAdminReview: (id: string, reason: string) =>
     request<null>(`/admin/reviews/${id}`, {
       method: "DELETE",
       body: JSON.stringify({ reason }),
+    }).then((response) => {
+      clearAdminApiCache();
+      return response;
     }),
 
-  adminReports: () => request<AdminReport[]>("/admin/reports", { retry: 1 }),
+  adminReports: (params?: { page?: number; pageSize?: number }) => {
+    const searchParams = new URLSearchParams();
+    if (params?.page) searchParams.set("page", String(params.page));
+    if (params?.pageSize) searchParams.set("pageSize", String(params.pageSize));
+    const query = searchParams.toString();
+    return request<AdminReport[]>(`/admin/reports${query ? `?${query}` : ""}`, {
+      staleTime: ADMIN_STALE_TIME,
+      cacheTime: ADMIN_CACHE_TIME,
+      retry: 1,
+    });
+  },
 
   updateAdminReport: (id: string, payload: { status: AdminReport["status"]; note?: string; unlistAd?: boolean }) =>
     request<AdminReport>(`/admin/reports/${id}`, {
       method: "PATCH",
       body: JSON.stringify(payload),
+    }).then((response) => {
+      clearAdminApiCache();
+      return response;
     }),
 
   adminVerifications: (params?: { page?: number; pageSize?: number; status?: string }) => {
@@ -556,13 +613,20 @@ export const api = {
     if (params?.pageSize) searchParams.set("pageSize", String(params.pageSize));
     if (params?.status) searchParams.set("status", params.status);
     const query = searchParams.toString();
-    return request<VerificationApplication[]>(`/admin/verifications${query ? `?${query}` : ""}`, { retry: 1 });
+    return request<VerificationApplication[]>(`/admin/verifications${query ? `?${query}` : ""}`, {
+      staleTime: ADMIN_STALE_TIME,
+      cacheTime: ADMIN_CACHE_TIME,
+      retry: 1,
+    });
   },
 
   updateAdminVerification: (id: string, payload: { status: "IN_REVIEW" | "APPROVED" | "REJECTED"; rejectionReason?: string; decisionNote?: string }) =>
     request<VerificationApplication>(`/admin/verifications/${id}`, {
       method: "PATCH",
       body: JSON.stringify(payload),
+    }).then((response) => {
+      clearAdminApiCache();
+      return response;
     }),
 
   adminAuditLog: (params?: { page?: number; pageSize?: number; action?: string; targetType?: string; from?: string; to?: string }) => {
@@ -574,7 +638,22 @@ export const api = {
     if (params?.from) searchParams.set("from", params.from);
     if (params?.to) searchParams.set("to", params.to);
     const query = searchParams.toString();
-    return request<AdminAuditLogEntry[]>(`/admin/audit-log${query ? `?${query}` : ""}`, { retry: 1 });
+    return request<AdminAuditLogEntry[]>(`/admin/audit-log${query ? `?${query}` : ""}`, {
+      staleTime: ADMIN_AUDIT_STALE_TIME,
+      cacheTime: ADMIN_AUDIT_CACHE_TIME,
+      retry: 1,
+    });
+  },
+
+  prefetchAdminPages: async () => {
+    await Promise.allSettled([
+      api.adminUsers({ page: 1, pageSize: 20 }),
+      api.adminAds({ page: 1, pageSize: 20 }),
+      api.adminReports({ page: 1, pageSize: 20 }),
+      api.adminReviews({ page: 1, pageSize: 20 }),
+      api.adminVerifications({ page: 1, pageSize: 20 }),
+      api.adminAuditLog({ page: 1, pageSize: 25 }),
+    ]);
   },
 
   // ===== Offer Endpoints (Future) =====

@@ -68,6 +68,7 @@ export default function AdminDashboard() {
       setError('');
       const response = await api.adminStats();
       setStats(response.data);
+      void api.prefetchAdminPages();
     } catch (err) {
       setError(err instanceof Error ? err.message : 'Unable to load admin stats');
     } finally {
