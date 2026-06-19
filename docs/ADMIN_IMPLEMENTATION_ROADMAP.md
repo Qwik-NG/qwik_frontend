@@ -555,7 +555,7 @@ Expose existing backend audit log endpoint to admins for accountability.
 
 ---
 
-## Phase 10 [ ] Settings/Analytics Decision
+## Phase 10 [x] Settings/Analytics Decision
 
 ### Goal
 
@@ -584,9 +584,9 @@ Make an explicit product decision for currently dead nav modules.
 
 ### Validation checklist
 
-- [ ] Dead links are not visible.
-- [ ] Any enabled nav item has a working route and data source.
-- [ ] Product decision documented.
+- [x] Dead links are not visible.
+- [x] Any enabled nav item has a working route and data source.
+- [x] Product decision documented.
 
 ### Risk notes
 
@@ -595,6 +595,21 @@ Make an explicit product decision for currently dead nav modules.
 ### Completion criteria
 
 - Settings/Analytics are either implemented fully or intentionally hidden.
+
+### Decision
+
+**Settings — Deferred.**
+No admin settings page, route, API endpoint, or sidebar link exists anywhere in the codebase. There are no partially-built settings surfaces to clean up. Settings will remain hidden until concrete requirements are defined and a real page, route, and backend endpoint are ready.
+
+**Analytics — Deferred.**
+No admin analytics page, route, API endpoint, or sidebar link exists anywhere in the codebase. The `/admin/stats` endpoint (used by AdminDashboard) is the only metrics surface, and it is already fully wired. Dedicated analytics will remain hidden until real aggregated metrics are defined and a real page, route, and backend endpoint are ready.
+
+### Implementation summary
+
+- Audited all relevant files: `AdminSidebar.tsx`, `App.tsx`, `api.ts`, `admin/routes.ts`, `prisma/schema.prisma`, `AdminDashboard.tsx`, and `ROUTES` constants.
+- Confirmed zero dead links: no `/admin/settings` or `/admin/analytics` route, page, sidebar entry, API method, or route constant exists anywhere in the codebase.
+- All 7 current sidebar nav items (`Dashboard`, `Users`, `Ads`, `Reports`, `Reviews`, `Verification`, `Audit Log`) have real backing pages and protected routes.
+- No code changes were required. Decision is documented here as the authoritative product record.
 
 ---
 
