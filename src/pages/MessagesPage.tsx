@@ -152,6 +152,12 @@ function OfferCard({ message, ad, mine, onAcceptOffer, onRejectOffer }: { messag
     accepted: "Accepted",
     rejected: "Rejected",
   };
+  const listedPrice = (() => {
+    const typedAd = ad as { price?: number } | undefined;
+    if (typeof typedAd?.price === "number") return `₦${typedAd.price.toLocaleString()}`;
+    const match = message.text.match(/listed\s*price:\s*(.+)$/im);
+    return match?.[1]?.trim() || null;
+  })();
 
   return (
     <div className={`flex ${mine ? "justify-end" : "justify-start"}`}>
@@ -178,6 +184,7 @@ function OfferCard({ message, ad, mine, onAcceptOffer, onRejectOffer }: { messag
         <div className="p-3 sm:p-4">
           <p className="text-xs text-muted">{mine ? "Your offer" : "Offer received"}</p>
           <p className="mt-2 text-2xl font-bold text-orange">₦{(message.offerAmount || 0).toLocaleString()}</p>
+          {listedPrice ? <p className="mt-1 text-xs text-muted">Listed price: {listedPrice}</p> : null}
           
           {/* Status Badge */}
           <div className="mt-3">
