@@ -1,28 +1,38 @@
-import { useEffect, useState } from 'react';
+import { useEffect, useMemo, useState } from 'react';
 import AdminLayout from '../components/admin/AdminLayout';
 import AdminModerationModal from '../components/admin/AdminModerationModal';
 import { useToast } from '../context/ToastContext';
 import { api } from '../services/api';
 import type { AdminAd } from '../types';
 
+type ModerationAction = 'unlist' | 'reinstate' | 'delete';
+
 export default function AdminAds() {
   const { error: showError, success } = useToast();
   const [ads, setAds] = useState<AdminAd[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState('');
+  const [page, setPage] = useState(1);
+  const [pageSize, setPageSize] = useState(20);
+  const [totalAds, setTotalAds] = useState(0);
+  const [searchTerm, setSearchTerm] = useState('');
+  const [statusFilter, setStatusFilter] = useState<'ALL' | 'ACTIVE' | 'ARCHIVED' | 'SOLD' | 'DRAFT'>('ALL');
   const [selectedAd, setSelectedAd] = useState<AdminAd | null>(null);
-  const [deletingAd, setDeletingAd] = useState(false);
+  const [actionType, setActionType] = useState<ModerationAction | null>(null);
+  const [reason, setReason] = useState('');
+  const [submittingAction, setSubmittingAction] = useState(false);
 
   useEffect(() => {
-    fetchAds();
-  }, []);
+    void fetchAds();
+  }, [page, pageSize]);
 
   const fetchAds = async () => {
     try {
       setLoading(true);
       setError('');
-      const response = await api.adminAds();
+      const response = await api.adminAds({ page, pageSize });
       setAds(response.data);
+      setTotalAds(response.meta?.total ?? response.data.length);
     } catch (err) {
       setError(err instanceof Error ? err.message : 'Unable to load ads');
     } finally {
@@ -30,116 +40,361 @@ export default function AdminAds() {
     }
   };
 
-  const handleDeleteAd = async () => {
-    if (!selectedAd) return;
+  const filteredAds = useMemo(() => {
+    const query = searchTerm.trim().toLowerCase();
+    return ads.filter((ad) => {
+      const status = ad.status || 'ACTIVE';
+      const matchesSearch = !query
+        || ad.title.toLowerCase().includes(query)
+        || ad.user.fullName.toLowerCase().includes(query)
+        || ad.category.name.toLowerCase().includes(query);
+      const matchesStatus = statusFilter === 'ALL' || status === statusFilter;
+      return matchesSearch && matchesStatus;
+    });
+  }, [ads, searchTerm, statusFilter]);
+
+  const pageCount = Math.max(1, Math.ceil(totalAds / pageSize));
+
+  const openActionModal = (ad: AdminAd, action: ModerationAction) => {
+    setSelectedAd(ad);
+    setActionType(action);
+    if (action === 'unlist') {
+      setReason('Policy violation');
+      return;
+    }
+    if (action === 'delete') {
+      setReason('Severe policy violation');
+      return;
+    }
+    setReason('');
+  };
+
+  const closeModal = () => {
+    if (submittingAction) return;
+    setSelectedAd(null);
+    setActionType(null);
+    setReason('');
+  };
+
+  const handleModerationAction = async () => {
+    if (!selectedAd || !actionType) return;
+
     try {
-      setDeletingAd(true);
-      await api.deleteAdminAd(selectedAd.id);
-      success('Ad deleted successfully');
-      setSelectedAd(null);
+      setSubmittingAction(true);
+
+      if (actionType === 'unlist') {
+        await api.moderateAdminAdStatus(selectedAd.id, {
+          status: 'ARCHIVED',
+          reason: reason.trim() || undefined,
+        });
+        success('Ad unlisted successfully');
+      }
+
+      if (actionType === 'reinstate') {
+        await api.moderateAdminAdStatus(selectedAd.id, {
+          status: 'ACTIVE',
+          reason: reason.trim() || undefined,
+        });
+        success('Ad reinstated successfully');
+      }
+
+      if (actionType === 'delete') {
+        await api.deleteAdminAd(selectedAd.id, reason.trim() || undefined);
+        success('Ad deleted permanently');
+      }
+
+      closeModal();
       await fetchAds();
     } catch (err) {
-      showError(err instanceof Error ? err.message : 'Error deleting ad');
+      showError(err instanceof Error ? err.message : 'Error updating ad moderation state');
     } finally {
-      setDeletingAd(false);
+      setSubmittingAction(false);
     }
   };
 
-  if (loading) return (
-    <AdminLayout title="Moderate Ads">
-      <div className="flex items-center justify-center h-64">
-        <div className="text-lg text-[#7f7e88]">Loading...</div>
-      </div>
-    </AdminLayout>
-  );
-  if (error) return (
-    <AdminLayout title="Moderate Ads">
-      <div className="flex h-64 flex-col items-center justify-center gap-4">
-        <div className="text-lg text-red-600">Error: {error}</div>
-        <button
-          type="button"
-          onClick={fetchAds}
-          className="rounded-lg bg-[#ff9715] px-4 py-2 text-sm font-medium text-white"
-        >
-          Retry
-        </button>
-      </div>
-    </AdminLayout>
-  );
+  const modalConfig = (() => {
+    if (!selectedAd || !actionType) return null;
+
+    if (actionType === 'unlist') {
+      return {
+        title: 'Unlist ad',
+        description: `This will hide ${selectedAd.title} from all public listings until it is reinstated.`,
+        confirmLabel: 'Unlist Ad',
+        tone: 'neutral' as const,
+        reasonRequired: true,
+        reasonLabel: 'Unlist reason',
+        reasonPlaceholder: 'Describe why this listing is being unlisted',
+      };
+    }
+
+    if (actionType === 'reinstate') {
+      return {
+        title: 'Reinstate ad',
+        description: `This will make ${selectedAd.title} visible in public listings again.`,
+        confirmLabel: 'Reinstate Ad',
+        tone: 'success' as const,
+        reasonRequired: false,
+        reasonLabel: 'Reinstate note (optional)',
+        reasonPlaceholder: 'Optional note for audit context',
+      };
+    }
+
+    return {
+      title: 'Permanently delete ad',
+      description: `This is irreversible. ${selectedAd.title} and its related listing data will be permanently removed.`,
+      confirmLabel: 'Delete Permanently',
+      tone: 'danger' as const,
+      reasonRequired: true,
+      reasonLabel: 'Delete reason',
+      reasonPlaceholder: 'Provide the policy reason for permanent deletion',
+    };
+  })();
+
+  if (loading) {
+    return (
+      <AdminLayout title="Moderate Ads" description="Unlist, reinstate, or permanently remove listings">
+        <div className="space-y-4">
+          {Array.from({ length: 4 }).map((_, index) => (
+            <div key={index} className="rounded-[14px] border border-[#e8e8ea] bg-white p-4">
+              <div className="h-4 w-36 animate-pulse rounded bg-[#efedf2]" />
+              <div className="mt-3 h-3 w-44 animate-pulse rounded bg-[#efedf2]" />
+              <div className="mt-2 h-3 w-56 animate-pulse rounded bg-[#efedf2]" />
+            </div>
+          ))}
+        </div>
+      </AdminLayout>
+    );
+  }
+
+  if (error) {
+    return (
+      <AdminLayout title="Moderate Ads" description="Unlist, reinstate, or permanently remove listings">
+        <div className="flex min-h-[280px] flex-col items-center justify-center gap-4 rounded-[14px] border border-[#f2d4d4] bg-white p-6 text-center">
+          <div className="text-[16px] font-medium text-red-600">Unable to load ads</div>
+          <div className="max-w-[440px] text-[14px] text-[#7f7e88]">{error}</div>
+          <button
+            type="button"
+            onClick={() => void fetchAds()}
+            className="rounded-lg bg-[#ff9715] px-4 py-2 text-sm font-medium text-white"
+          >
+            Retry
+          </button>
+        </div>
+      </AdminLayout>
+    );
+  }
 
   return (
-    <AdminLayout title="Moderate Ads" description={`Total: ${ads.length} ad${ads.length !== 1 ? 's' : ''}`}>
-      {ads.length === 0 ? (
+    <AdminLayout title="Moderate Ads" description={`Total ads: ${totalAds.toLocaleString()}`}>
+      <div className="mb-4 grid grid-cols-1 gap-3 rounded-[14px] border border-[#e8e8ea] bg-white p-4 md:grid-cols-[1fr_auto_auto] md:items-center">
+        <input
+          type="search"
+          value={searchTerm}
+          onChange={(event) => setSearchTerm(event.target.value)}
+          placeholder="Search by title, seller, or category"
+          className="h-[38px] rounded-[9px] border border-[#d8d5de] px-3 text-[14px] text-[#1f1f29] outline-none focus:border-[#ffb46a] focus:ring-2 focus:ring-[#ffb46a]/25"
+        />
+        <select
+          value={statusFilter}
+          onChange={(event) => setStatusFilter(event.target.value as 'ALL' | 'ACTIVE' | 'ARCHIVED' | 'SOLD' | 'DRAFT')}
+          className="h-[38px] rounded-[9px] border border-[#d8d5de] px-3 text-[13px] text-[#4f4b59] outline-none focus:border-[#ffb46a]"
+        >
+          <option value="ALL">All status</option>
+          <option value="ACTIVE">Active</option>
+          <option value="ARCHIVED">Archived</option>
+          <option value="SOLD">Sold</option>
+          <option value="DRAFT">Draft</option>
+        </select>
+        <select
+          value={String(pageSize)}
+          onChange={(event) => {
+            setPage(1);
+            setPageSize(Number(event.target.value));
+          }}
+          className="h-[38px] rounded-[9px] border border-[#d8d5de] px-3 text-[13px] text-[#4f4b59] outline-none focus:border-[#ffb46a]"
+        >
+          <option value="10">10 / page</option>
+          <option value="20">20 / page</option>
+          <option value="50">50 / page</option>
+          <option value="100">100 / page</option>
+        </select>
+      </div>
+
+      <div className="mb-3 flex items-center justify-between gap-3 text-[13px] text-[#6f6b77]">
+        <span>Showing {filteredAds.length} listing{filteredAds.length !== 1 ? 's' : ''} on this page</span>
+        <span>Page {page} of {pageCount}</span>
+      </div>
+
+      {filteredAds.length === 0 ? (
         <div className="rounded-[16px] border border-[#e8e8ea] bg-white p-10 text-center text-[#7f7e88]">
-          No ads found.
+          No ads match the current filters.
         </div>
       ) : (
-      <div className="bg-white rounded-[16px] shadow-sm border border-[#e8e8ea] overflow-x-auto">
-        <table className="min-w-full divide-y divide-gray-200">
-          <thead className="bg-gray-50">
-            <tr>
-              <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Title</th>
-              <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Seller</th>
-                <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Category</th>
-                <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Price</th>
-                <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Status</th>
-                <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Reports</th>
-                <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Posted</th>
-                <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Actions</th>
-              </tr>
-            </thead>
-            <tbody className="divide-y divide-gray-200">
-              {ads.map((ad) => (
-                <tr key={ad.id} className={`hover:bg-gray-50 ${ad._count.reports > 0 ? 'bg-red-50' : ''}`}>
-                  <td className="px-6 py-4 text-sm font-medium text-gray-900">{ad.title}</td>
-                  <td className="px-6 py-4 text-sm text-gray-600">{ad.user.fullName}</td>
-                  <td className="px-6 py-4 text-sm text-gray-600">{ad.category.name}</td>
-                  <td className="px-6 py-4 text-sm text-gray-900">₦{(ad.price).toLocaleString()}</td>
-                  <td className="px-6 py-4 text-sm">
-                    <span className={`px-2 py-1 rounded text-xs font-medium ${
-                      ad.status === 'ACTIVE' ? 'bg-green-100 text-green-800' : 'bg-gray-100 text-gray-800'
+        <>
+          <div className="space-y-3 lg:hidden">
+            {filteredAds.map((ad) => {
+              const status = ad.status || 'ACTIVE';
+              return (
+                <article key={ad.id} className={`rounded-[14px] border bg-white p-4 shadow-sm ${ad._count.reports > 0 ? 'border-[#f2d4d4]' : 'border-[#e8e8ea]'}`}>
+                  <div className="flex items-start justify-between gap-3">
+                    <div>
+                      <p className="text-[15px] font-semibold text-[#1f1f29]">{ad.title}</p>
+                      <p className="mt-1 text-[13px] text-[#6f6b77]">{ad.user.fullName}</p>
+                    </div>
+                    <span className={`rounded px-2 py-1 text-[11px] font-medium ${
+                      status === 'ACTIVE' ? 'bg-green-100 text-green-800' : status === 'ARCHIVED' ? 'bg-yellow-100 text-yellow-800' : 'bg-gray-100 text-gray-800'
                     }`}>
-                      {ad.status}
+                      {status}
                     </span>
-                  </td>
-                  <td className="px-6 py-4 text-sm">
-                    {ad._count.reports > 0 && (
-                      <span className="px-2 py-1 rounded text-xs font-medium bg-red-100 text-red-800">
-                        {ad._count.reports}
-                      </span>
-                    )}
-                  </td>
-                  <td className="px-6 py-4 text-sm text-gray-600">
-                    {ad.createdAt ? new Date(ad.createdAt).toLocaleDateString() : '-'}
-                  </td>
-                  <td className="px-6 py-4 text-sm">
+                  </div>
+                  <div className="mt-3 grid grid-cols-2 gap-2 text-[12px] text-[#6f6b77]">
+                    <div><span className="font-medium text-[#3f3b47]">Category:</span> {ad.category.name}</div>
+                    <div><span className="font-medium text-[#3f3b47]">Price:</span> ₦{ad.price.toLocaleString()}</div>
+                    <div><span className="font-medium text-[#3f3b47]">Reports:</span> {ad._count.reports}</div>
+                    <div><span className="font-medium text-[#3f3b47]">Posted:</span> {ad.createdAt ? new Date(ad.createdAt).toLocaleDateString() : '-'}</div>
+                  </div>
+                  <div className="mt-3 flex flex-wrap gap-2">
+                    {status === 'ACTIVE' ? (
+                      <button
+                        onClick={() => openActionModal(ad, 'unlist')}
+                        className="rounded-[8px] border border-yellow-200 px-3 py-1.5 text-[12px] font-medium text-yellow-700 transition hover:bg-yellow-50"
+                        type="button"
+                      >
+                        Unlist
+                      </button>
+                    ) : null}
+                    {status === 'ARCHIVED' ? (
+                      <button
+                        onClick={() => openActionModal(ad, 'reinstate')}
+                        className="rounded-[8px] border border-green-200 px-3 py-1.5 text-[12px] font-medium text-green-700 transition hover:bg-green-50"
+                        type="button"
+                      >
+                        Reinstate
+                      </button>
+                    ) : null}
                     <button
-                      onClick={() => setSelectedAd(ad)}
-                      className="font-medium text-red-600 transition-colors duration-200 hover:text-red-800 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#ffb357] focus-visible:ring-offset-2 focus-visible:ring-offset-white"
+                      onClick={() => openActionModal(ad, 'delete')}
+                      className="rounded-[8px] border border-red-200 px-3 py-1.5 text-[12px] font-medium text-red-700 transition hover:bg-red-50"
                       type="button"
                     >
-                      Delete
+                      Delete Permanently
                     </button>
-                  </td>
+                  </div>
+                </article>
+              );
+            })}
+          </div>
+
+          <div className="hidden overflow-x-auto rounded-[16px] border border-[#e8e8ea] bg-white shadow-sm lg:block">
+            <table className="min-w-full divide-y divide-gray-200">
+              <thead className="bg-gray-50">
+                <tr>
+                  <th className="px-6 py-3 text-left text-xs font-medium uppercase text-gray-500">Title</th>
+                  <th className="px-6 py-3 text-left text-xs font-medium uppercase text-gray-500">Seller</th>
+                  <th className="px-6 py-3 text-left text-xs font-medium uppercase text-gray-500">Category</th>
+                  <th className="px-6 py-3 text-left text-xs font-medium uppercase text-gray-500">Price</th>
+                  <th className="px-6 py-3 text-left text-xs font-medium uppercase text-gray-500">Status</th>
+                  <th className="px-6 py-3 text-left text-xs font-medium uppercase text-gray-500">Reports</th>
+                  <th className="px-6 py-3 text-left text-xs font-medium uppercase text-gray-500">Posted</th>
+                  <th className="px-6 py-3 text-left text-xs font-medium uppercase text-gray-500">Actions</th>
                 </tr>
-              ))}
-            </tbody>
-          </table>
-      </div>
+              </thead>
+              <tbody className="divide-y divide-gray-200">
+                {filteredAds.map((ad) => {
+                  const status = ad.status || 'ACTIVE';
+                  return (
+                    <tr key={ad.id} className={`hover:bg-gray-50 ${ad._count.reports > 0 ? 'bg-red-50/40' : ''}`}>
+                      <td className="px-6 py-4 text-sm font-medium text-gray-900">{ad.title}</td>
+                      <td className="px-6 py-4 text-sm text-gray-600">{ad.user.fullName}</td>
+                      <td className="px-6 py-4 text-sm text-gray-600">{ad.category.name}</td>
+                      <td className="px-6 py-4 text-sm text-gray-900">₦{ad.price.toLocaleString()}</td>
+                      <td className="px-6 py-4 text-sm">
+                        <span className={`rounded px-2 py-1 text-xs font-medium ${
+                          status === 'ACTIVE' ? 'bg-green-100 text-green-800' : status === 'ARCHIVED' ? 'bg-yellow-100 text-yellow-800' : 'bg-gray-100 text-gray-800'
+                        }`}>
+                          {status}
+                        </span>
+                      </td>
+                      <td className="px-6 py-4 text-sm text-gray-700">
+                        {ad._count.reports > 0 ? (
+                          <span className="rounded bg-red-100 px-2 py-1 text-xs font-medium text-red-800">{ad._count.reports}</span>
+                        ) : '0'}
+                      </td>
+                      <td className="px-6 py-4 text-sm text-gray-600">
+                        {ad.createdAt ? new Date(ad.createdAt).toLocaleDateString() : '-'}
+                      </td>
+                      <td className="px-6 py-4 text-sm">
+                        <div className="flex flex-wrap gap-3">
+                          {status === 'ACTIVE' ? (
+                            <button
+                              onClick={() => openActionModal(ad, 'unlist')}
+                              className="font-medium text-yellow-700 transition-colors duration-200 hover:text-yellow-800 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#ffb357] focus-visible:ring-offset-2 focus-visible:ring-offset-white"
+                              type="button"
+                            >
+                              Unlist
+                            </button>
+                          ) : null}
+                          {status === 'ARCHIVED' ? (
+                            <button
+                              onClick={() => openActionModal(ad, 'reinstate')}
+                              className="font-medium text-green-700 transition-colors duration-200 hover:text-green-800 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#ffb357] focus-visible:ring-offset-2 focus-visible:ring-offset-white"
+                              type="button"
+                            >
+                              Reinstate
+                            </button>
+                          ) : null}
+                          <button
+                            onClick={() => openActionModal(ad, 'delete')}
+                            className="font-medium text-red-600 transition-colors duration-200 hover:text-red-800 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#ffb357] focus-visible:ring-offset-2 focus-visible:ring-offset-white"
+                            type="button"
+                          >
+                            Delete Permanently
+                          </button>
+                        </div>
+                      </td>
+                    </tr>
+                  );
+                })}
+              </tbody>
+            </table>
+          </div>
+        </>
       )}
 
+      <div className="mt-4 flex flex-wrap items-center justify-between gap-3 rounded-[12px] border border-[#e8e8ea] bg-white px-4 py-3">
+        <button
+          type="button"
+          onClick={() => setPage((prev) => Math.max(1, prev - 1))}
+          disabled={page === 1}
+          className="h-[36px] rounded-[8px] border border-[#d8d5de] px-3 text-[13px] text-[#4f4b59] transition hover:bg-[#f4f3f6] disabled:cursor-not-allowed disabled:opacity-50"
+        >
+          Previous
+        </button>
+        <div className="text-[13px] text-[#6f6b77]">{totalAds.toLocaleString()} total ads</div>
+        <button
+          type="button"
+          onClick={() => setPage((prev) => Math.min(pageCount, prev + 1))}
+          disabled={page >= pageCount}
+          className="h-[36px] rounded-[8px] border border-[#d8d5de] px-3 text-[13px] text-[#4f4b59] transition hover:bg-[#f4f3f6] disabled:cursor-not-allowed disabled:opacity-50"
+        >
+          Next
+        </button>
+      </div>
+
       <AdminModerationModal
-        open={Boolean(selectedAd)}
-        title="Delete listing"
-        description={`This will permanently remove ${selectedAd?.title || 'this listing'} from the marketplace.`}
-        confirmLabel="Delete Listing"
-        onConfirm={handleDeleteAd}
-        onClose={() => {
-          if (deletingAd) return;
-          setSelectedAd(null);
-        }}
-        loading={deletingAd}
-        tone="danger"
+        open={Boolean(selectedAd && actionType && modalConfig)}
+        title={modalConfig?.title || 'Moderate listing'}
+        description={modalConfig?.description || ''}
+        confirmLabel={modalConfig?.confirmLabel || 'Confirm'}
+        onConfirm={handleModerationAction}
+        onClose={closeModal}
+        loading={submittingAction}
+        tone={modalConfig?.tone || 'danger'}
+        reason={reason}
+        reasonRequired={modalConfig?.reasonRequired || false}
+        reasonLabel={modalConfig?.reasonLabel || 'Reason'}
+        reasonPlaceholder={modalConfig?.reasonPlaceholder || 'Enter reason'}
+        onReasonChange={setReason}
       />
     </AdminLayout>
   );

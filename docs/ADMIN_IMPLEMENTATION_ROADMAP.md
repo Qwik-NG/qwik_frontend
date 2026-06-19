@@ -278,7 +278,7 @@ Upgrade admin user operations beyond basic ban/unban while preserving safety con
 
 ---
 
-## Phase 5 [ ] Ads Moderation Improvements
+## Phase 5 [x] Ads Moderation Improvements
 
 ### Goal
 
@@ -312,10 +312,10 @@ Move from delete-only moderation to safer, reversible listing controls.
 
 ### Validation checklist
 
-- [ ] Admin can disable and reinstate ads without deleting data.
-- [ ] Hard delete is explicit and guarded.
-- [ ] Moderation reason is captured.
-- [ ] Ad state transitions reflect in public listing visibility.
+- [x] Admin can disable and reinstate ads without deleting data.
+- [x] Hard delete is explicit and guarded.
+- [x] Moderation reason is captured.
+- [x] Ad state transitions reflect in public listing visibility.
 
 ### Risk notes
 
@@ -324,6 +324,15 @@ Move from delete-only moderation to safer, reversible listing controls.
 ### Completion criteria
 
 - Ads moderation supports reversible controls and clear policy actions.
+
+### Implementation summary
+
+- Added backend admin ad moderation endpoint for reversible state transitions (`ACTIVE` <-> `ARCHIVED`) with optional reason capture.
+- Kept hard delete behavior and strengthened moderation context capture by accepting optional delete reason in backend audit metadata.
+- Preserved backend RBAC by keeping all moderation routes under `requireAuth` and `requireAdmin`.
+- Extended frontend admin ads API methods to support pagination, status moderation calls, and optional delete reason submission.
+- Rebuilt `AdminAds` UX with modal-driven unlist/reinstate/permanent-delete actions, explicit dangerous delete copy, status-aware controls, and standardized toasts.
+- Improved admin ads loading/error/empty states and responsive behavior with mobile cards + desktop table while keeping real backend data only.
 
 ---
 

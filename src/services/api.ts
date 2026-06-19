@@ -506,10 +506,25 @@ export const api = {
       method: "POST",
     }),
 
-  adminAds: () => request<AdminAd[]>("/admin/ads", { retry: 1 }),
+  adminAds: (params?: { page?: number; pageSize?: number }) => {
+    const searchParams = new URLSearchParams();
+    if (params?.page) searchParams.set("page", String(params.page));
+    if (params?.pageSize) searchParams.set("pageSize", String(params.pageSize));
+    const query = searchParams.toString();
+    return request<AdminAd[]>(`/admin/ads${query ? `?${query}` : ""}`, { retry: 1 });
+  },
 
-  deleteAdminAd: (id: string) =>
-    request<null>(`/admin/ads/${id}`, { method: "DELETE" }),
+  moderateAdminAdStatus: (id: string, payload: { status: "ACTIVE" | "ARCHIVED"; reason?: string }) =>
+    request<AdminAd>(`/admin/ads/${id}/status`, {
+      method: "PATCH",
+      body: JSON.stringify(payload),
+    }),
+
+  deleteAdminAd: (id: string, reason?: string) =>
+    request<null>(`/admin/ads/${id}`, {
+      method: "DELETE",
+      body: JSON.stringify(reason ? { reason } : {}),
+    }),
 
   adminReports: () => request<AdminReport[]>("/admin/reports", { retry: 1 }),
 
