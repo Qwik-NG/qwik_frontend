@@ -1,4 +1,4 @@
-import { useCallback, useEffect, useState } from "react";
+import { useCallback, useEffect, useState, useRef } from "react";
 import { useNavigate, useParams } from "react-router-dom";
 import Lightbox from "yet-another-react-lightbox";
 import Counter from "yet-another-react-lightbox/plugins/counter";
@@ -10,6 +10,7 @@ import { FallbackImage } from "../components/ui/FallbackImage";
 import { ImagePlaceholder } from "../components/ui/ImagePlaceholder";
 import { UserAvatar } from "../components/ui/UserAvatar";
 import { useToast } from "../context/ToastContext";
+import { useUserCache } from "../hooks/useUserCache";
 import { formatMemberSince } from "../lib/currentUser";
 import { ensureFreshVerifiedEmail } from "../lib/emailVerification";
 import { isSellerVerified } from "../lib/sellerVerification";
@@ -75,8 +76,10 @@ export default function ProductDetailsPage() {
   const navigate = useNavigate();
   const { error: showError, info, success } = useToast();
   const { id } = useParams<{ id: string }>();
+  const cachedUserResult = useUserCache();
+  const mountedRef = useRef(true);
   const [ad, setAd] = useState<Ad | null>(null);
-  const [currentUser, setCurrentUser] = useState<User | null>(null);
+  const [currentUser, setCurrentUser] = useState<User | null>(cachedUserResult.user);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const [activeImage, setActiveImage] = useState(0);
@@ -91,6 +94,21 @@ export default function ProductDetailsPage() {
   const [followersCount, setFollowersCount] = useState<number | null>(null);
   const [followLoading, setFollowLoading] = useState(false);
 
+  // Sync cached user updates
+  useEffect(() => {
+    if (cachedUserResult.user) {
+      setCurrentUser(cachedUserResult.user);
+    }
+  }, [cachedUserResult.user]);
+
+  // Cleanup on unmount
+  useEffect(() => {
+    return () => {
+      mountedRef.current = false;
+    };
+  }, []);
+
+  // Fetch ad and save status (fast path)
   const fetchAd = useCallback(async () => {
     try {
       setLoading(true);
@@ -98,37 +116,51 @@ export default function ProductDetailsPage() {
       if (!id) throw new Error("No product ID provided");
 
       const result = await api.adById(id);
+      if (!mountedRef.current) return;
       setAd(result.data);
 
       const token = getToken();
-      const authRequest = token
-        ? Promise.all([
-            api.isSaved(id),
-            api.me(),
-            result.data.user?.id ? api.getFollowStatus(result.data.user.id).catch(() => null) : Promise.resolve(null),
-          ])
-            .then(([savedResponse, meResponse, followStatus]) => {
+      if (token) {
+        // Fetch save status (fast, non-blocking)
+        api.isSaved(id)
+          .then((savedResponse) => {
+            if (mountedRef.current) {
               setIsSaved(savedResponse.data.saved);
-              setCurrentUser(meResponse.data);
-              if (followStatus?.data) {
-                setIsFollowingSeller(followStatus.data.isFollowing);
-                setFollowersCount(followStatus.data.followersCount);
-              }
-            })
-            .catch(() => {
+            }
+          })
+          .catch(() => {
+            if (mountedRef.current) {
               setIsSaved(false);
-              setCurrentUser(null);
-              setIsFollowingSeller(false);
-              setFollowersCount(null);
-            })
-        : Promise.resolve();
+            }
+          });
 
-      await authRequest;
-    } catch (err) {
-      setError(err instanceof Error ? err.message : "Failed to load product");
-      console.error("Error fetching product:", err);
-    } finally {
+        // Load follow status in background (deferred)
+        if (result.data.user?.id) {
+          setTimeout(() => {
+            api.getFollowStatus(result.data.user!.id)
+              .then((followStatus) => {
+                if (mountedRef.current) {
+                  setIsFollowingSeller(followStatus.data.isFollowing);
+                  setFollowersCount(followStatus.data.followersCount);
+                }
+              })
+              .catch(() => {
+                if (mountedRef.current) {
+                  setIsFollowingSeller(false);
+                  setFollowersCount(null);
+                }
+              });
+          }, 0);
+        }
+      }
+
       setLoading(false);
+    } catch (err) {
+      if (mountedRef.current) {
+        setError(err instanceof Error ? err.message : "Failed to load product");
+        console.error("Error fetching product:", err);
+        setLoading(false);
+      }
     }
   }, [id]);
 

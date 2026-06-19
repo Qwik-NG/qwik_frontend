@@ -3,6 +3,7 @@ import { useLocation, useNavigate } from "react-router-dom";
 import { SiteFooter, SiteHeader } from "../components/AppShell";
 import { UserAvatar } from "../components/ui/UserAvatar";
 import { useToast } from "../context/ToastContext";
+import { useUserCache } from "../hooks/useUserCache";
 import { api, isEmailVerificationRequiredError } from "../services/api";
 import { getRealtimeSocket, joinConversation, UNREAD_MESSAGES_REFRESH_EVENT } from "../services/realtime";
 import type { Conversation, Message } from "../types";
@@ -241,6 +242,7 @@ export default function MessagesPage() {
   const navigate = useNavigate();
   const { error: showError } = useToast();
   const location = useLocation();
+  const cachedUserResult = useUserCache();
   const searchParams = useMemo(() => new URLSearchParams(location.search), [location.search]);
   const requestedConversationId = searchParams.get("conversation");
   const pendingRecipientId = searchParams.get("recipient");
@@ -248,10 +250,10 @@ export default function MessagesPage() {
   const pendingSellerName = searchParams.get("seller") || "Seller";
   const pendingAdTitle = searchParams.get("title") || "Product";
   const [conversations, setConversations] = useState<Conversation[]>([]);
-  const [currentUserId, setCurrentUserId] = useState<string>();
+  const [currentUserId, setCurrentUserId] = useState<string | undefined>(cachedUserResult.user?.id);
   const [selectedConversationId, setSelectedConversationId] = useState<string | null>(null);
   const [draftMessage, setDraftMessage] = useState("");
-  const [loading, setLoading] = useState(true);
+  const [loading, setLoading] = useState(!cachedUserResult.user);
   const [sending, setSending] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [emojiOpen, setEmojiOpen] = useState(false);
@@ -259,13 +261,26 @@ export default function MessagesPage() {
   const emojiRef = useRef<HTMLDivElement | null>(null);
   const conversationIdsRef = useRef<Set<string>>(new Set());
 
+  // Sync cached user
+  useEffect(() => {
+    if (cachedUserResult.user) {
+      setCurrentUserId(cachedUserResult.user.id);
+    }
+  }, [cachedUserResult.user]);
+
   const loadConversations = useCallback(async () => {
+    if (!cachedUserResult.user) {
+      setLoading(false);
+      return;
+    }
+
     try {
       setLoading(true);
       setError(null);
 
-      const [meResponse, conversationsResponse] = await Promise.all([api.me(), api.getConversations()]);
-      setCurrentUserId(meResponse.data.id);
+      // Use cached user instead of making api.me() call
+      const conversationsResponse = await api.getConversations();
+      setCurrentUserId(cachedUserResult.user.id);
       setConversations(conversationsResponse.data);
 
       const matchingConversation =
@@ -284,7 +299,7 @@ export default function MessagesPage() {
     } finally {
       setLoading(false);
     }
-  }, [pendingAdId, pendingRecipientId, requestedConversationId]);
+  }, [pendingAdId, pendingRecipientId, requestedConversationId, cachedUserResult.user]);
 
   useEffect(() => {
     void loadConversations();
