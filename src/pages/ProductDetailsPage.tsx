@@ -16,7 +16,7 @@ import { ensureFreshVerifiedEmail } from "../lib/emailVerification";
 import { isSellerVerified } from "../lib/sellerVerification";
 import { getToken } from "../services/auth";
 import { api } from "../services/api";
-import type { Ad, User } from "../types";
+import type { Ad, AdReview, User } from "../types";
 
 function LocationPin({ className = "h-5 w-5" }: { className?: string }) {
   return (
@@ -29,6 +29,50 @@ function LocationPin({ className = "h-5 w-5" }: { className?: string }) {
 
 function Spinner({ className = "h-4 w-4" }: { className?: string }) {
   return <span className={`${className} inline-block animate-spin rounded-full border-2 border-current border-t-transparent`} aria-hidden="true" />;
+}
+
+function formatReviewDate(value: string) {
+  const date = new Date(value);
+  if (Number.isNaN(date.getTime())) return "";
+  return date.toLocaleDateString(undefined, { month: "short", day: "numeric", year: "numeric" });
+}
+
+function ReviewStars({ rating }: { rating: number }) {
+  const clampedRating = Math.max(0, Math.min(5, Math.round(rating)));
+
+  return (
+    <div className="flex items-center gap-1" aria-label={`${clampedRating} out of 5 stars`}>
+      {Array.from({ length: 5 }).map((_, index) => (
+        <span
+          key={index}
+          className={`text-[15px] leading-none ${index < clampedRating ? "text-[#ff9715]" : "text-[#d8d4dd]"}`}
+          aria-hidden="true"
+        >
+          ★
+        </span>
+      ))}
+    </div>
+  );
+}
+
+function ReviewListSkeleton() {
+  return (
+    <div className="mt-5 space-y-4" aria-label="Loading reviews">
+      {Array.from({ length: 3 }).map((_, index) => (
+        <div key={index} className="rounded-[12px] border border-[#efedf2] p-4">
+          <div className="flex items-start gap-3">
+            <div className="h-10 w-10 animate-pulse rounded-full bg-[#f2f2f4]" />
+            <div className="min-w-0 flex-1">
+              <div className="h-4 w-32 animate-pulse rounded bg-[#f2f2f4]" />
+              <div className="mt-2 h-4 w-24 animate-pulse rounded bg-[#f2f2f4]" />
+              <div className="mt-3 h-4 w-full animate-pulse rounded bg-[#f2f2f4]" />
+              <div className="mt-2 h-4 w-5/6 animate-pulse rounded bg-[#f2f2f4]" />
+            </div>
+          </div>
+        </div>
+      ))}
+    </div>
+  );
 }
 
 function formatPhoneForDisplay(phone: string) {
@@ -93,6 +137,9 @@ export default function ProductDetailsPage() {
   const [isFollowingSeller, setIsFollowingSeller] = useState(false);
   const [followersCount, setFollowersCount] = useState<number | null>(null);
   const [followLoading, setFollowLoading] = useState(false);
+  const [reviews, setReviews] = useState<AdReview[]>([]);
+  const [reviewsLoading, setReviewsLoading] = useState(false);
+  const [reviewsError, setReviewsError] = useState<string | null>(null);
 
   // Sync cached user updates
   useEffect(() => {
@@ -173,7 +220,37 @@ export default function ProductDetailsPage() {
     setIsFollowingSeller(false);
     setFollowersCount(null);
     setFollowLoading(false);
+    setReviews([]);
+    setReviewsLoading(false);
+    setReviewsError(null);
   }, [id]);
+
+  useEffect(() => {
+    if (!ad?.id) return;
+
+    let active = true;
+    setReviewsLoading(true);
+    setReviewsError(null);
+
+    api.getReviews(ad.id)
+      .then((response) => {
+        if (!active || !mountedRef.current) return;
+        setReviews(response.data);
+      })
+      .catch((err) => {
+        if (!active || !mountedRef.current) return;
+        setReviews([]);
+        setReviewsError(err instanceof Error ? err.message : "Unable to load reviews right now.");
+      })
+      .finally(() => {
+        if (!active || !mountedRef.current) return;
+        setReviewsLoading(false);
+      });
+
+    return () => {
+      active = false;
+    };
+  }, [ad?.id]);
 
   const handleSave = async () => {
     try {
@@ -672,7 +749,39 @@ export default function ProductDetailsPage() {
 
             <div className="rounded-[14px] border border-[#e5e3e9] bg-white p-4 sm:p-5">
               <h4 className="text-[36px] font-normal leading-none">Reviews</h4>
-              <p className="mt-5 text-[14px] text-[#8f8b98]">Reviews coming soon</p>
+              {reviewsLoading ? (
+                <ReviewListSkeleton />
+              ) : reviewsError ? (
+                <p className="mt-5 text-[14px] text-[#b84a4a]">{reviewsError}</p>
+              ) : reviews.length === 0 ? (
+                <p className="mt-5 text-[14px] text-[#8f8b98]">No reviews yet.</p>
+              ) : (
+                <div className="mt-5 space-y-4 overflow-x-hidden">
+                  {reviews.map((review) => (
+                    <article key={review.id} className="rounded-[12px] border border-[#efedf2] p-4">
+                      <div className="flex items-start gap-3">
+                        <UserAvatar
+                          name={review.user.fullName}
+                          className="h-10 w-10 shrink-0 rounded-full text-[12px]"
+                          alt={review.user.fullName}
+                        />
+                        <div className="min-w-0 flex-1">
+                          <div className="flex flex-wrap items-center justify-between gap-2">
+                            <div className="min-w-0">
+                              <p className="truncate text-[14px] font-medium text-[#2f2d38]">{review.user.fullName}</p>
+                              <div className="mt-1 flex flex-wrap items-center gap-2">
+                                <ReviewStars rating={review.rating} />
+                                <span className="text-[12px] text-[#9f9ba8]">{formatReviewDate(review.createdAt)}</span>
+                              </div>
+                            </div>
+                          </div>
+                          <p className="mt-3 break-words text-[14px] leading-[1.55] text-[#5f5c68]">{review.text}</p>
+                        </div>
+                      </div>
+                    </article>
+                  ))}
+                </div>
+              )}
             </div>
           </section>
 

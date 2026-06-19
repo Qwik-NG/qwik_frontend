@@ -206,6 +206,20 @@ export interface AdImage {
   order?: number;
 }
 
+export interface AdReview {
+  id: string;
+  adId: string;
+  userId: string;
+  rating: number;
+  text: string;
+  createdAt: string;
+  updatedAt?: string;
+  user: {
+    id: string;
+    fullName: string;
+  };
+}
+
 export interface Ad {
   id: string;
   title: string;

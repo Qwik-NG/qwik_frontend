@@ -9,6 +9,7 @@ import type {
   ResetPasswordPayload,
   Category,
   Ad,
+  AdReview,
   AdCreatePayload,
   AdUpdatePayload,
   SavedAd,
@@ -358,7 +359,7 @@ export const api = {
     }),
 
   getReviews: (id: string) =>
-    request<any[]>(`/ads/${id}/reviews`, {
+    request<AdReview[]>(`/ads/${id}/reviews`, {
       staleTime: SHORT_LIST_STALE_TIME,
       cacheTime: SHORT_LIST_STALE_TIME * 2,
       retry: 1,
