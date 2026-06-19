@@ -294,7 +294,7 @@ export default function GetVerifiedPaymentPage() {
             <div className="max-w-[720px]">
               <h1 className="text-[30px] font-semibold text-[#1f1d27]">Purchase Verified Seller Badge</h1>
               <p className="mt-1 text-[14px] text-[#8f8b98]">
-                Create a provider-ready payment record and submit your verification for admin review.
+                Create a provider-ready payment record and submit your verification for platform review.
               </p>
               {loading ? <p className="mt-3 text-[13px] text-[#8f8b98]">Loading verification status...</p> : null}
               {error ? <p className="mt-3 rounded-[10px] bg-[#fff0f0] px-3 py-2 text-[13px] text-[#c24141]">{error}</p> : null}

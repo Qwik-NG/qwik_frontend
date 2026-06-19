@@ -49,7 +49,7 @@ Capture current state as baseline and freeze audit findings as source of truth f
 
 ---
 
-## Phase 1 [ ] Access/Exposure Hardening
+## Phase 1 [x] Access/Exposure Hardening
 
 ### Goal
 Reduce accidental admin discoverability for normal users while retaining strict backend authorization.
@@ -75,16 +75,21 @@ Reduce accidental admin discoverability for normal users while retaining strict 
 - Confirm no normal-user menu entry points to /admin paths.
 
 ### Validation checklist
-- [ ] No normal-user page text exposes admin existence.
-- [ ] No normal-user navigation links to /admin.
-- [ ] Direct non-admin access to admin routes redirects appropriately.
-- [ ] Backend still returns 403 for non-admin /admin API calls.
+- [x] No normal-user page text exposes admin existence.
+- [x] No normal-user navigation links to /admin.
+- [x] Direct non-admin access to admin routes redirects appropriately.
+- [x] Backend still returns 403 for non-admin /admin API calls.
 
 ### Risk notes
 - Over-hiding can harm support flows if language becomes unclear.
 
 ### Completion criteria
 - Normal users cannot discover admin surface through routine navigation/copy; backend protections unchanged.
+
+### Implementation summary
+- Replaced normal-user verification copy that referenced "admin review" with neutral platform-review language in the verification payment and verification success pages.
+- Audited frontend navigation and routing surfaces to confirm no normal-user menu entry points expose /admin or /admin/login.
+- Verified admin routes remain guarded by AdminRoute on the frontend and requireAuth plus requireAdmin on backend admin endpoints.
 
 ---
 

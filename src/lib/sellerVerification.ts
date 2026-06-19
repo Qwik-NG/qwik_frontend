@@ -1,16 +1,16 @@
 /**
  * Seller Verification Status Utilities
- * Checks if a seller is admin-approved for business verification
+ * Checks if a seller is approved in the platform verification process
  */
 
 import type { User } from '../types';
 
 /**
- * Check if a seller is admin-approved (verified seller)
+ * Check if a seller is platform-approved (verified seller)
  * A seller is considered verified if their latest verification application status is APPROVED
  * 
  * @param user - The seller/user to check
- * @returns true if seller is admin-approved, false otherwise
+ * @returns true if seller is platform-approved, false otherwise
  */
 export function isSellerVerified(user: User | undefined | null): boolean {
   if (!user) return false;

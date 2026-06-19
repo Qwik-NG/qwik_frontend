@@ -144,7 +144,7 @@ export default function GetVerifiedSuccessfulPage() {
               <ShieldIllustration />
               <h1 className="mt-2 text-[28px] font-semibold text-[#1f1d27] sm:text-[30px]">Verification Request Submitted</h1>
               <p className="mt-2 text-[14px] text-[#8f8b98]">
-                Your verification request has been submitted. Approval is only granted after admin review.
+                Your verification request has been submitted. Approval is granted after the platform verification process is completed.
               </p>
             </div>
 
