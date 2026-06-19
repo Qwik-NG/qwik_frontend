@@ -223,7 +223,7 @@ Strengthen dashboard clarity, scale behavior, and design consistency while keepi
 
 ---
 
-## Phase 4 [ ] Users Management Improvements
+## Phase 4 [x] Users Management Improvements
 
 ### Goal
 
@@ -255,10 +255,10 @@ Upgrade admin user operations beyond basic ban/unban while preserving safety con
 
 ### Validation checklist
 
-- [ ] No browser confirm/prompt remains in users flow.
-- [ ] User list supports pagination/filter/search.
-- [ ] Ban/unban actions show standardized toasts.
-- [ ] Non-admin cannot perform user moderation.
+- [x] No browser confirm/prompt remains in users flow.
+- [x] User list supports pagination/filter/search.
+- [x] Ban/unban actions show standardized toasts.
+- [x] Non-admin cannot perform user moderation.
 
 ### Risk notes
 
@@ -267,6 +267,14 @@ Upgrade admin user operations beyond basic ban/unban while preserving safety con
 ### Completion criteria
 
 - Users admin page is scalable, modal-driven, and operationally safe.
+
+### Implementation summary
+
+- Extended admin users API client support for backend pagination (`page`, `pageSize`) and consumed backend `meta` totals.
+- Upgraded `AdminUsers` with page size controls, previous/next pagination, client-side search (name/email/location), and role/status filters.
+- Improved users UX states with structured loading skeletons, clearer error + retry panel, and filter-aware empty state messaging.
+- Added responsive mobile card rendering for users while preserving the desktop table layout for larger screens.
+- Preserved in-app moderation modal flows and standardized toast feedback for ban/restore actions, with no browser-native confirm/prompt usage.
 
 ---
 

@@ -487,7 +487,13 @@ export const api = {
   // ===== Admin Endpoints =====
   adminStats: () => request<AdminStats>("/admin/stats", { retry: 1 }),
 
-  adminUsers: () => request<User[]>("/admin/users", { retry: 1 }),
+  adminUsers: (params?: { page?: number; pageSize?: number }) => {
+    const searchParams = new URLSearchParams();
+    if (params?.page) searchParams.set("page", String(params.page));
+    if (params?.pageSize) searchParams.set("pageSize", String(params.pageSize));
+    const query = searchParams.toString();
+    return request<User[]>(`/admin/users${query ? `?${query}` : ""}`, { retry: 1 });
+  },
 
   banAdminUser: (id: string, reason?: string) =>
     request<User>(`/admin/users/${id}/ban`, {
