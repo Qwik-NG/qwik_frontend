@@ -87,8 +87,15 @@ export interface VerificationApplication {
   payments?: Array<PaymentCheckoutResponse & { id?: string; createdAt?: string }>;
   paymentStatus: VerificationPaymentStatus;
   rejectionReason?: string | null;
+  decisionNote?: string | null;
   submittedAt?: string | null;
   reviewedAt?: string | null;
+  reviewerId?: string | null;
+  reviewer?: {
+    id: string;
+    fullName: string;
+    email?: string;
+  } | null;
   createdAt: string;
   updatedAt: string;
 }

@@ -534,9 +534,16 @@ export const api = {
       body: JSON.stringify(payload),
     }),
 
-  adminVerifications: () => request<VerificationApplication[]>("/admin/verifications", { retry: 1 }),
+  adminVerifications: (params?: { page?: number; pageSize?: number; status?: string }) => {
+    const searchParams = new URLSearchParams();
+    if (params?.page) searchParams.set("page", String(params.page));
+    if (params?.pageSize) searchParams.set("pageSize", String(params.pageSize));
+    if (params?.status) searchParams.set("status", params.status);
+    const query = searchParams.toString();
+    return request<VerificationApplication[]>(`/admin/verifications${query ? `?${query}` : ""}`, { retry: 1 });
+  },
 
-  updateAdminVerification: (id: string, payload: { status: "IN_REVIEW" | "APPROVED" | "REJECTED"; rejectionReason?: string }) =>
+  updateAdminVerification: (id: string, payload: { status: "IN_REVIEW" | "APPROVED" | "REJECTED"; rejectionReason?: string; decisionNote?: string }) =>
     request<VerificationApplication>(`/admin/verifications/${id}`, {
       method: "PATCH",
       body: JSON.stringify(payload),
