@@ -15,7 +15,9 @@ export default function AdminLayout({ children, title, description, headerAction
     { label: 'Users', path: '/admin/users' },
     { label: 'Ads', path: '/admin/ads' },
     { label: 'Reports', path: '/admin/reports' },
+    { label: 'Reviews', path: '/admin/reviews' },
     { label: 'Verification', path: '/admin/verification' },
+    { label: 'Audit Log', path: '/admin/audit-log' },
   ];
 
   return (
