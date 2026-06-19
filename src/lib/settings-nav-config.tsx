@@ -14,13 +14,13 @@ export type SettingsMenuItem = {
 
 export function getSettingsNavItems(navigate: ReturnType<typeof useNavigate>, activePage: string): SettingsMenuItem[] {
   return [
-    { label: "Profile", icon: <UserIcon />, active: activePage === "profile", onClick: () => navigate("/profile-settings") },
-    { label: "Ads", icon: <BoxIcon />, active: activePage === "ads", onClick: () => navigate("/ads-dashboard") },
-    { label: "Start selling", icon: <TicketIcon />, active: activePage === "promote", onClick: () => navigate("/promote-ad") },
-    { label: "Get Verified", icon: <ShieldCheckIcon />, active: activePage === "get-verified", onClick: () => navigate("/get-verified") },
-    { label: "Notification", icon: <BellIcon />, active: activePage === "notification", onClick: () => navigate("/notification-settings") },
-    { label: "Help", icon: <PhoneIcon />, active: activePage === "help", onClick: () => navigate("/messages") },
-    { label: "About", icon: <InfoIcon />, active: activePage === "about", onClick: () => navigate("/") },
+    { label: "Profile", icon: <UserIcon />, active: activePage === "profile", onClick: () => navigate(ROUTES.PROFILE_SETTINGS) },
+    { label: "Ads", icon: <BoxIcon />, active: activePage === "ads", onClick: () => navigate(ROUTES.ADS_DASHBOARD) },
+    { label: "Start selling", icon: <TicketIcon />, active: activePage === "promote", onClick: () => navigate(ROUTES.PROMOTE_AD) },
+    { label: "Get Verified", icon: <ShieldCheckIcon />, active: activePage === "get-verified", onClick: () => navigate(ROUTES.GET_VERIFIED) },
+    { label: "Notification", icon: <BellIcon />, active: activePage === "notification", onClick: () => navigate(ROUTES.NOTIFICATION_SETTINGS) },
+    { label: "Help", icon: <PhoneIcon />, active: activePage === "help", onClick: () => navigate(ROUTES.SUPPORT) },
+    { label: "About", icon: <InfoIcon />, active: activePage === "about", onClick: () => navigate(ROUTES.ABOUT) },
     { label: "Log out", icon: <LogoutIcon />, onClick: () => { clearAllAuthData(); disconnectRealtimeSocket(); navigate(ROUTES.LOGIN); } },
   ];
 }

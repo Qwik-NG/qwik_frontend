@@ -176,9 +176,9 @@ function VerifiedBenefit({
   className?: string;
 }) {
   return (
-    <div className={`flex min-h-[66px] items-center gap-3 rounded-[16px] border border-[#eceaf1] bg-white px-3 py-2.5 shadow-[0_10px_24px_rgba(17,12,46,0.08)] ${className}`}>
+    <div className={`flex min-h-[66px] min-w-0 items-center gap-3 rounded-[16px] border border-[#eceaf1] bg-white px-3 py-2.5 shadow-[0_10px_24px_rgba(17,12,46,0.08)] ${className}`}>
       <span className="flex h-9 w-9 shrink-0 items-center justify-center rounded-full bg-[#fff3e3] text-[#f08a1d]">{icon}</span>
-      <span className="text-[13px] font-medium leading-[1.35] text-[#1f1d27]">{title}</span>
+      <span className="min-w-0 text-[12px] font-medium leading-[1.3] text-[#1f1d27] break-words xl:text-[13px] xl:leading-[1.35]">{title}</span>
     </div>
   );
 }
@@ -417,19 +417,19 @@ export default function AboutPage() {
             </div>
           </div>
 
-          <div className="hidden items-center gap-4 lg:grid lg:grid-cols-[minmax(0,1fr)_minmax(220px,280px)_minmax(0,1fr)]">
-            <div className="grid gap-4 justify-items-end">
-              <VerifiedBenefit title="Verified Seller Badge" icon={<ShieldIcon className="h-4 w-4" />} className="w-full max-w-[190px]" />
-              <VerifiedBenefit title="Priority Support" icon={<HeadsetIcon className="h-4 w-4" />} className="w-full max-w-[190px]" />
+          <div className="hidden items-center gap-3 lg:grid lg:grid-cols-[minmax(120px,1fr)_minmax(180px,220px)_minmax(120px,1fr)]">
+            <div className="grid min-w-0 gap-4">
+              <VerifiedBenefit title="Verified Seller Badge" icon={<ShieldIcon className="h-4 w-4" />} className="w-full" />
+              <VerifiedBenefit title="Priority Support" icon={<HeadsetIcon className="h-4 w-4" />} className="w-full" />
             </div>
 
-            <div className="mx-auto w-full max-w-[280px]">
+            <div className="mx-auto w-full max-w-[220px]">
               <img src="/about-images/verify-logo.PNG" alt="Verified seller logo" className="h-auto w-full object-contain" />
             </div>
 
-            <div className="grid gap-4 justify-items-start">
-              <VerifiedBenefit title="Increased Customer Trust" icon={<UserCircleIcon className="h-4 w-4" />} className="w-full max-w-[205px]" />
-              <VerifiedBenefit title="Higher Search Visibility" icon={<TrendUpIcon className="h-4 w-4" />} className="w-full max-w-[205px]" />
+            <div className="grid min-w-0 gap-4">
+              <VerifiedBenefit title="Increased Customer Trust" icon={<UserCircleIcon className="h-4 w-4" />} className="w-full" />
+              <VerifiedBenefit title="Higher Search Visibility" icon={<TrendUpIcon className="h-4 w-4" />} className="w-full" />
             </div>
           </div>
         </div>
