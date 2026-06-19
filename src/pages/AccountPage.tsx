@@ -4,6 +4,7 @@ import { useNavigate } from "react-router-dom";
 import { SiteFooter, SiteHeader } from "../components/AppShell";
 import { MobileSettingsMenu } from "../components/settings/SettingsSidebar";
 import { useCurrentUser } from "../hooks/useCurrentUser";
+import { clearUserCache } from "../hooks/useUserCache";
 import type { CurrentUserDisplay } from "../lib/currentUser";
 import { api } from "../services/api";
 import { clearAllAuthData } from "../services/auth";
@@ -669,6 +670,7 @@ export default function AccountPage() {
       const avatarUrl = uploadResponse.data.urls[0] || "";
       const response = await api.updateMe({ avatarUrl });
       setUser(response.data);
+      clearUserCache(); // Clear cache to sync across pages
       setSelectedAvatarFile(null);
       success("Profile photo updated");
     } catch (error) {
@@ -697,6 +699,7 @@ export default function AccountPage() {
         avatarUrl: nextAvatarUrl,
       });
       setUser(response.data);
+      clearUserCache(); // Clear cache to sync across pages
       setSelectedAvatarFile(null);
       setIsEditingProfile(false);
       success("Profile updated");

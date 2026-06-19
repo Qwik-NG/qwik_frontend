@@ -2,6 +2,7 @@ import { useEffect, useState } from "react";
 import { useLocation, useNavigate } from "react-router-dom";
 import { ROUTES } from "../constants/routes";
 import { isAlreadyVerifiedError, resolveSafeNextPath } from "../lib/emailVerification";
+import { clearUserCache } from "../hooks/useUserCache";
 import { api } from "../services/api";
 import { useToast } from "../context/ToastContext";
 
@@ -79,6 +80,7 @@ export default function VerifyEmailPage() {
     try {
       setIsVerifying(true);
       await api.verifyEmailOtp(otp);
+      clearUserCache(); // Clear cache to refresh emailVerifiedAt status
       success("Email verified successfully!");
       navigate(redirectTarget || ROUTES.WELCOME, { replace: true });
     } catch (error) {

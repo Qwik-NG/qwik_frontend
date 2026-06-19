@@ -3,6 +3,7 @@ import { useNavigate } from "react-router-dom";
 import { api } from "../services/api";
 import { useToast } from "../context/ToastContext";
 import { getLoginEmail, persistLegalConsentFromUser, setRole, setToken } from "../services/auth";
+import { clearUserCache } from "../hooks/useUserCache";
 import FormInput from "../components/ui/FormInput";
 import FormCheckbox from "../components/ui/FormCheckbox";
 import FormButton from "../components/ui/FormButton";
@@ -68,6 +69,7 @@ export default function LoginPasswordPage() {
                 setToken(res.data.token);
                 setRole(res.data.user.role);
                 persistLegalConsentFromUser(res.data.user);
+                clearUserCache(); // Clear cache on login for new user
                 
                 // Redirect based on user role and email verification status
                 if (res.data.user.role === 'ADMIN') {

@@ -4,6 +4,8 @@
  * Token is obtained from backend after login/register
  */
 
+import { clearUserCache } from "../hooks/useUserCache";
+
 const TOKEN_KEY = "qwik_token";
 const ROLE_KEY = "qwik_role";
 const LOGIN_EMAIL_KEY = "qwik_login_email";
@@ -136,4 +138,5 @@ export function clearAllAuthData() {
   clearToken();
   clearRole();
   clearLoginEmail();
+  clearUserCache(); // Also clear user cache
 }

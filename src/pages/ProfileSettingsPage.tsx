@@ -7,6 +7,7 @@ import Toggle from "../components/ui/Toggle";
 import { UserAvatar } from "../components/ui/UserAvatar";
 import { useToast } from "../context/ToastContext";
 import { useCurrentUser } from "../hooks/useCurrentUser";
+import { clearUserCache } from "../hooks/useUserCache";
 import { api } from "../services/api";
 import { getSettingsNavItems } from "../lib/settings-nav-config";
 import { ALL_NIGERIA_LOCATION, NIGERIAN_AREAS, NIGERIAN_LOCATIONS } from "../lib/searchContext";
@@ -261,6 +262,7 @@ export default function ProfileSettingsPage() {
                         : trimmedArea;
                       const response = await api.updateMe({ fullName, bio, phone, location: composedLocation, locationState: trimmedState || undefined, locationArea: trimmedArea || undefined, ...(nextAvatarUrl ? { avatarUrl: nextAvatarUrl } : {}) });
                       setUser(response.data);
+                      clearUserCache(); // Clear cache to sync across pages
                       setAvatarUrl(response.data.profile?.avatarUrl || "");
                       setSelectedAvatarFile(null);
                       setSelectedLogoName("");
