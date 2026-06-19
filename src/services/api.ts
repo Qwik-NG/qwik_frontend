@@ -528,10 +528,10 @@ export const api = {
 
   adminReports: () => request<AdminReport[]>("/admin/reports", { retry: 1 }),
 
-  updateAdminReport: (id: string, status: AdminReport["status"]) =>
+  updateAdminReport: (id: string, payload: { status: AdminReport["status"]; note?: string; unlistAd?: boolean }) =>
     request<AdminReport>(`/admin/reports/${id}`, {
       method: "PATCH",
-      body: JSON.stringify({ status }),
+      body: JSON.stringify(payload),
     }),
 
   adminVerifications: () => request<VerificationApplication[]>("/admin/verifications", { retry: 1 }),

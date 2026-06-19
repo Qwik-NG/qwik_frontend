@@ -336,7 +336,7 @@ Move from delete-only moderation to safer, reversible listing controls.
 
 ---
 
-## Phase 6 [ ] Reports Moderation Improvements
+## Phase 6 [x] Reports Moderation Improvements
 
 ### Goal
 
@@ -367,10 +367,10 @@ Turn reports handling into a full moderation workflow instead of status-only tog
 
 ### Validation checklist
 
-- [ ] No browser confirm in reports flow.
-- [ ] Reports can trigger actionable moderation outcomes.
-- [ ] Standardized toasts for all report actions.
-- [ ] Report status and linked action remain consistent.
+- [x] No browser confirm in reports flow.
+- [x] Reports can trigger actionable moderation outcomes.
+- [x] Standardized toasts for all report actions.
+- [x] Report status and linked action remain consistent.
 
 ### Risk notes
 
@@ -379,6 +379,15 @@ Turn reports handling into a full moderation workflow instead of status-only tog
 ### Completion criteria
 
 - Reports become an effective control center, not just status updates.
+
+### Implementation summary
+
+- Expanded admin report update semantics to support moderation notes and optional ad unlisting when resolving reports.
+- Reused the existing Phase 5 ad moderation pathway by applying ad status transition (`ACTIVE` -> `ARCHIVED`) during report escalation.
+- Added report escalation audit coverage by writing both report status and ad status audit entries when resolve-and-unlist is used.
+- Upgraded Admin Reports UI with richer moderation context (reporter, reported ad, seller, reason, status, and date).
+- Added modal-driven action flows for resolve, dismiss, and resolve + unlist with required moderation notes and standardized toast outcomes.
+- Improved loading, error, empty, and responsive layouts using mobile cards and desktop table rendering for safer moderation at scale.
 
 ---
 

@@ -124,6 +124,11 @@ export interface AdminReport {
   ad: {
     id: string;
     title: string;
+    user?: {
+      id: string;
+      fullName: string;
+      email?: string;
+    };
   };
   user: {
     id: string;
