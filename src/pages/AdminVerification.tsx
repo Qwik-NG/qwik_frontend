@@ -1,5 +1,6 @@
 import { useEffect, useState } from 'react';
 import AdminLayout from '../components/admin/AdminLayout';
+import AdminModerationModal from '../components/admin/AdminModerationModal';
 import { useToast } from '../context/ToastContext';
 import { api } from '../services/api';
 import type { VerificationApplication, VerificationStatus } from '../types';
@@ -26,6 +27,9 @@ export default function AdminVerification() {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState('');
   const [updatingId, setUpdatingId] = useState<string | null>(null);
+  const [selectedVerification, setSelectedVerification] = useState<VerificationApplication | null>(null);
+  const [nextStatus, setNextStatus] = useState<'APPROVED' | 'REJECTED' | null>(null);
+  const [rejectionReason, setRejectionReason] = useState('');
 
   useEffect(() => {
     fetchVerifications();
@@ -44,25 +48,33 @@ export default function AdminVerification() {
     }
   };
 
-  const updateVerification = async (id: string, status: 'APPROVED' | 'REJECTED') => {
-    if (status === 'APPROVED' && !window.confirm('Approve this verification application?')) return;
+  const openVerificationAction = (item: VerificationApplication, status: 'APPROVED' | 'REJECTED') => {
+    setSelectedVerification(item);
+    setNextStatus(status);
+    setRejectionReason('');
+  };
 
-    const rejectionReason = status === 'REJECTED'
-      ? window.prompt('Reason for rejection:')
-      : undefined;
+  const closeVerificationModal = () => {
+    setSelectedVerification(null);
+    setNextStatus(null);
+    setRejectionReason('');
+  };
 
-    if (status === 'REJECTED' && !rejectionReason?.trim()) {
+  const updateVerification = async () => {
+    if (!selectedVerification || !nextStatus) return;
+    if (nextStatus === 'REJECTED' && !rejectionReason.trim()) {
       showError('Rejection reason is required');
       return;
     }
 
     try {
-      setUpdatingId(id);
-      await api.updateAdminVerification(id, {
-        status,
-        ...(rejectionReason ? { rejectionReason } : {}),
+      setUpdatingId(selectedVerification.id);
+      await api.updateAdminVerification(selectedVerification.id, {
+        status: nextStatus,
+        ...(nextStatus === 'REJECTED' ? { rejectionReason: rejectionReason.trim() } : {}),
       });
-      success(status === 'APPROVED' ? 'Verification approved' : 'Verification rejected');
+      success(nextStatus === 'APPROVED' ? 'Verification approved' : 'Verification rejected');
+      closeVerificationModal();
       await fetchVerifications();
     } catch (err) {
       showError(err instanceof Error ? err.message : 'Unable to update verification');
@@ -120,7 +132,7 @@ export default function AdminVerification() {
                 <div className="flex flex-wrap gap-2">
                   <button
                     type="button"
-                    onClick={() => updateVerification(item.id, 'APPROVED')}
+                    onClick={() => openVerificationAction(item, 'APPROVED')}
                     disabled={updatingId === item.id || item.status === 'APPROVED'}
                     className="rounded-lg bg-green-600 px-4 py-2 text-sm font-medium text-white disabled:cursor-not-allowed disabled:opacity-60"
                   >
@@ -128,7 +140,7 @@ export default function AdminVerification() {
                   </button>
                   <button
                     type="button"
-                    onClick={() => updateVerification(item.id, 'REJECTED')}
+                    onClick={() => openVerificationAction(item, 'REJECTED')}
                     disabled={updatingId === item.id || item.status === 'REJECTED'}
                     className="rounded-lg border border-red-300 px-4 py-2 text-sm font-medium text-red-600 disabled:cursor-not-allowed disabled:opacity-60"
                   >
@@ -186,6 +198,24 @@ export default function AdminVerification() {
           ))}
         </div>
       )}
+
+      <AdminModerationModal
+        open={Boolean(selectedVerification && nextStatus)}
+        title={nextStatus === 'APPROVED' ? 'Approve verification' : 'Reject verification'}
+        description={nextStatus === 'APPROVED'
+          ? `Approve verification for ${selectedVerification?.user?.fullName || 'this applicant'}.`
+          : `Reject verification for ${selectedVerification?.user?.fullName || 'this applicant'}.`}
+        confirmLabel={nextStatus === 'APPROVED' ? 'Approve Verification' : 'Reject Verification'}
+        onConfirm={updateVerification}
+        onClose={closeVerificationModal}
+        loading={Boolean(updatingId)}
+        tone={nextStatus === 'APPROVED' ? 'success' : 'danger'}
+        reason={nextStatus === 'REJECTED' ? rejectionReason : undefined}
+        reasonRequired={nextStatus === 'REJECTED'}
+        reasonLabel="Rejection reason"
+        reasonPlaceholder="Explain why this application was rejected"
+        onReasonChange={nextStatus === 'REJECTED' ? setRejectionReason : undefined}
+      />
     </AdminLayout>
   );
 }

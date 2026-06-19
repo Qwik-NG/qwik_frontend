@@ -1,5 +1,6 @@
 import { useEffect, useState } from 'react';
 import AdminLayout from '../components/admin/AdminLayout';
+import AdminModerationModal from '../components/admin/AdminModerationModal';
 import { useToast } from '../context/ToastContext';
 import { api } from '../services/api';
 import type { AdminAd } from '../types';
@@ -9,6 +10,8 @@ export default function AdminAds() {
   const [ads, setAds] = useState<AdminAd[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState('');
+  const [selectedAd, setSelectedAd] = useState<AdminAd | null>(null);
+  const [deletingAd, setDeletingAd] = useState(false);
 
   useEffect(() => {
     fetchAds();
@@ -27,15 +30,18 @@ export default function AdminAds() {
     }
   };
 
-  const handleDeleteAd = async (adId: string) => {
-    if (!confirm('Are you sure you want to delete this ad?')) return;
-
+  const handleDeleteAd = async () => {
+    if (!selectedAd) return;
     try {
-      await api.deleteAdminAd(adId);
+      setDeletingAd(true);
+      await api.deleteAdminAd(selectedAd.id);
       success('Ad deleted successfully');
-      fetchAds();
+      setSelectedAd(null);
+      await fetchAds();
     } catch (err) {
       showError(err instanceof Error ? err.message : 'Error deleting ad');
+    } finally {
+      setDeletingAd(false);
     }
   };
 
@@ -108,7 +114,7 @@ export default function AdminAds() {
                   </td>
                   <td className="px-6 py-4 text-sm">
                     <button
-                      onClick={() => handleDeleteAd(ad.id)}
+                      onClick={() => setSelectedAd(ad)}
                       className="font-medium text-red-600 transition-colors duration-200 hover:text-red-800 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#ffb357] focus-visible:ring-offset-2 focus-visible:ring-offset-white"
                       type="button"
                     >
@@ -121,6 +127,20 @@ export default function AdminAds() {
           </table>
       </div>
       )}
+
+      <AdminModerationModal
+        open={Boolean(selectedAd)}
+        title="Delete listing"
+        description={`This will permanently remove ${selectedAd?.title || 'this listing'} from the marketplace.`}
+        confirmLabel="Delete Listing"
+        onConfirm={handleDeleteAd}
+        onClose={() => {
+          if (deletingAd) return;
+          setSelectedAd(null);
+        }}
+        loading={deletingAd}
+        tone="danger"
+      />
     </AdminLayout>
   );
 }

@@ -1,5 +1,6 @@
 import { useEffect, useState } from 'react';
 import AdminLayout from '../components/admin/AdminLayout';
+import AdminModerationModal from '../components/admin/AdminModerationModal';
 import { useToast } from '../context/ToastContext';
 import { api } from '../services/api';
 import type { AdminReport } from '../types';
@@ -9,6 +10,9 @@ export default function AdminReports() {
   const [reports, setReports] = useState<AdminReport[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState('');
+  const [selectedReport, setSelectedReport] = useState<AdminReport | null>(null);
+  const [nextStatus, setNextStatus] = useState<AdminReport['status'] | null>(null);
+  const [updatingReport, setUpdatingReport] = useState(false);
 
   useEffect(() => {
     fetchReports();
@@ -27,15 +31,19 @@ export default function AdminReports() {
     }
   };
 
-  const handleUpdateStatus = async (reportId: string, newStatus: AdminReport['status']) => {
-    if (!confirm(`Mark this report as ${newStatus.toLowerCase()}?`)) return;
-
+  const handleUpdateStatus = async () => {
+    if (!selectedReport || !nextStatus) return;
     try {
-      await api.updateAdminReport(reportId, newStatus);
+      setUpdatingReport(true);
+      await api.updateAdminReport(selectedReport.id, nextStatus);
       success('Report status updated');
-      fetchReports();
+      setSelectedReport(null);
+      setNextStatus(null);
+      await fetchReports();
     } catch (err) {
       showError(err instanceof Error ? err.message : 'Error updating report');
+    } finally {
+      setUpdatingReport(false);
     }
   };
 
@@ -104,14 +112,20 @@ export default function AdminReports() {
                     {report.status === 'PENDING' && (
                       <>
                         <button
-                          onClick={() => handleUpdateStatus(report.id, 'RESOLVED')}
+                          onClick={() => {
+                            setSelectedReport(report);
+                            setNextStatus('RESOLVED');
+                          }}
                           className="font-medium text-green-600 transition-colors duration-200 hover:text-green-800 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#ffb357] focus-visible:ring-offset-2 focus-visible:ring-offset-white"
                           type="button"
                         >
                           Resolve
                         </button>
                         <button
-                          onClick={() => handleUpdateStatus(report.id, 'DISMISSED')}
+                          onClick={() => {
+                            setSelectedReport(report);
+                            setNextStatus('DISMISSED');
+                          }}
                           className="font-medium text-gray-600 transition-colors duration-200 hover:text-gray-800 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#ffb357] focus-visible:ring-offset-2 focus-visible:ring-offset-white"
                           type="button"
                         >
@@ -126,6 +140,23 @@ export default function AdminReports() {
           </table>
       </div>
       )}
+
+      <AdminModerationModal
+        open={Boolean(selectedReport && nextStatus)}
+        title={nextStatus === 'RESOLVED' ? 'Resolve report' : 'Dismiss report'}
+        description={nextStatus === 'RESOLVED'
+          ? `Mark the report on ${selectedReport?.ad.title || 'this ad'} as resolved.`
+          : `Dismiss the report on ${selectedReport?.ad.title || 'this ad'} without further action.`}
+        confirmLabel={nextStatus === 'RESOLVED' ? 'Resolve Report' : 'Dismiss Report'}
+        onConfirm={handleUpdateStatus}
+        onClose={() => {
+          if (updatingReport) return;
+          setSelectedReport(null);
+          setNextStatus(null);
+        }}
+        loading={updatingReport}
+        tone={nextStatus === 'RESOLVED' ? 'success' : 'neutral'}
+      />
     </AdminLayout>
   );
 }

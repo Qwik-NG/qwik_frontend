@@ -1,5 +1,6 @@
 import { useEffect, useState } from 'react';
 import AdminLayout from '../components/admin/AdminLayout';
+import AdminModerationModal from '../components/admin/AdminModerationModal';
 import { useToast } from '../context/ToastContext';
 import { api } from '../services/api';
 import type { User } from '../types';
@@ -19,6 +20,10 @@ export default function AdminUsers() {
   const [users, setUsers] = useState<AdminUser[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState('');
+  const [selectedUser, setSelectedUser] = useState<AdminUser | null>(null);
+  const [actionType, setActionType] = useState<'ban' | 'restore' | null>(null);
+  const [banReason, setBanReason] = useState('Policy violation');
+  const [submittingAction, setSubmittingAction] = useState(false);
 
   useEffect(() => {
     fetchUsers();
@@ -37,29 +42,41 @@ export default function AdminUsers() {
     }
   };
 
-  const handleBanUser = async (userId: string) => {
-    if (!confirm('Are you sure you want to ban this user?')) return;
-    const reason = window.prompt('Reason for banning this user:', 'Policy violation');
-    if (reason === null) return;
-
-    try {
-      await api.banAdminUser(userId, reason.trim() || 'Policy violation');
-      success('User banned successfully');
-      fetchUsers();
-    } catch (err) {
-      showError(err instanceof Error ? err.message : 'Error banning user');
-    }
+  const openBanModal = (user: AdminUser) => {
+    setSelectedUser(user);
+    setActionType('ban');
+    setBanReason('Policy violation');
   };
 
-  const handleUnbanUser = async (userId: string) => {
-    if (!confirm('Restore this user account?')) return;
+  const openRestoreModal = (user: AdminUser) => {
+    setSelectedUser(user);
+    setActionType('restore');
+  };
+
+  const closeModal = () => {
+    setSelectedUser(null);
+    setActionType(null);
+    setBanReason('Policy violation');
+  };
+
+  const handleModerationAction = async () => {
+    if (!selectedUser || !actionType) return;
 
     try {
-      await api.unbanAdminUser(userId);
-      success('User restored successfully');
-      fetchUsers();
+      setSubmittingAction(true);
+      if (actionType === 'ban') {
+        await api.banAdminUser(selectedUser.id, banReason.trim() || 'Policy violation');
+        success('User banned successfully');
+      } else {
+        await api.unbanAdminUser(selectedUser.id);
+        success('User restored successfully');
+      }
+      closeModal();
+      await fetchUsers();
     } catch (err) {
-      showError(err instanceof Error ? err.message : 'Error restoring user');
+      showError(err instanceof Error ? err.message : 'Error updating user status');
+    } finally {
+      setSubmittingAction(false);
     }
   };
 
@@ -133,7 +150,7 @@ export default function AdminUsers() {
                   <td className="px-6 py-4 text-sm">
                     {user.role !== 'ADMIN' && user.status === 'BANNED' ? (
                       <button
-                        onClick={() => handleUnbanUser(user.id)}
+                        onClick={() => openRestoreModal(user)}
                         className="font-medium text-green-600 transition-colors duration-200 hover:text-green-800 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#ffb357] focus-visible:ring-offset-2 focus-visible:ring-offset-white"
                         type="button"
                       >
@@ -141,7 +158,7 @@ export default function AdminUsers() {
                       </button>
                     ) : user.role !== 'ADMIN' ? (
                       <button
-                        onClick={() => handleBanUser(user.id)}
+                        onClick={() => openBanModal(user)}
                         className="font-medium text-red-600 transition-colors duration-200 hover:text-red-800 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#ffb357] focus-visible:ring-offset-2 focus-visible:ring-offset-white"
                         type="button"
                       >
@@ -155,6 +172,24 @@ export default function AdminUsers() {
           </table>
       </div>
       )}
+
+      <AdminModerationModal
+        open={Boolean(selectedUser && actionType)}
+        title={actionType === 'ban' ? 'Ban user account' : 'Restore user account'}
+        description={actionType === 'ban'
+          ? `You are about to suspend ${selectedUser?.fullName || 'this user'} from the platform.`
+          : `You are about to restore ${selectedUser?.fullName || 'this user'} to active status.`}
+        confirmLabel={actionType === 'ban' ? 'Ban User' : 'Restore User'}
+        onConfirm={handleModerationAction}
+        onClose={closeModal}
+        loading={submittingAction}
+        tone={actionType === 'ban' ? 'danger' : 'success'}
+        reason={actionType === 'ban' ? banReason : undefined}
+        reasonRequired={actionType === 'ban'}
+        reasonLabel="Moderation reason"
+        reasonPlaceholder="Explain why this user is being suspended"
+        onReasonChange={actionType === 'ban' ? setBanReason : undefined}
+      />
     </AdminLayout>
   );
 }
