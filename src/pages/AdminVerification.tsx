@@ -1,11 +1,9 @@
-import { useEffect, useMemo, useState } from 'react';
+import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import AdminLayout from '../components/admin/AdminLayout';
 import AdminModerationModal from '../components/admin/AdminModerationModal';
 import { useToast } from '../context/ToastContext';
 import { api } from '../services/api';
 import type { VerificationApplication, VerificationStatus } from '../types';
-
-type VerificationAction = 'approve' | 'reject';
 
 function formatBytes(bytes?: number | null) {
   if (!bytes) return null;
@@ -14,7 +12,60 @@ function formatBytes(bytes?: number | null) {
   return `${(bytes / (1024 * 1024)).toFixed(1)} MB`;
 }
 
-function DocumentsModal({
+// ---------- Document preview (image / PDF / fallback) ----------
+
+function DocumentPreview({ url, name, type }: { url: string; name?: string | null; type?: string | null }) {
+  const [imgError, setImgError] = useState(false);
+  const [pdfError, setPdfError] = useState(false);
+
+  const isImage = /\.(jpg|jpeg|png|gif|webp|svg)(\?|$)/i.test(url) || Boolean(type?.startsWith('image/'));
+  const isPdf = /\.pdf(\?|$)/i.test(url) || type === 'application/pdf';
+
+  if (isImage && !imgError) {
+    return (
+      <div className="mt-3 overflow-hidden rounded-[10px] border border-[#e8e8ea] bg-[#f9f9fb]">
+        <img
+          src={url}
+          alt={name ?? 'Document preview'}
+          className="max-h-[280px] w-full object-contain"
+          onError={() => setImgError(true)}
+        />
+      </div>
+    );
+  }
+
+  if (isPdf && !pdfError) {
+    return (
+      <div className="mt-3 h-[280px] overflow-hidden rounded-[10px] border border-[#e8e8ea]">
+        <iframe
+          src={url}
+          title={name ?? 'PDF preview'}
+          className="h-full w-full"
+          onError={() => setPdfError(true)}
+        />
+      </div>
+    );
+  }
+
+  return (
+    <div className="mt-3 flex items-center gap-2 rounded-[10px] border border-dashed border-[#d8d5de] bg-[#f9f9fb] px-4 py-3 text-[13px] text-[#9f9ba8]">
+      <svg viewBox="0 0 24 24" className="h-5 w-5 shrink-0" fill="none" stroke="currentColor" strokeWidth="1.5" aria-hidden="true">
+        <path strokeLinecap="round" strokeLinejoin="round" d="M19.5 14.25v-2.625a3.375 3.375 0 0 0-3.375-3.375h-1.5A1.125 1.125 0 0 1 13.5 7.125v-1.5a3.375 3.375 0 0 0-3.375-3.375H8.25m0 12.75h7.5m-7.5 3H12M10.5 2.25H5.625c-.621 0-1.125.504-1.125 1.125v17.25c0 .621.504 1.125 1.125 1.125h12.75c.621 0 1.125-.504 1.125-1.125V11.25a9 9 0 0 0-9-9Z" />
+      </svg>
+      <span>Preview unavailable for this file type.</span>
+    </div>
+  );
+}
+
+// ---------- Helpers ----------
+
+function humanizeKey(key: string): string {
+  return key.replace(/([A-Z])/g, ' $1').replace(/^./, (s) => s.toUpperCase()).trim();
+}
+
+// ---------- Rich details / documents modal ----------
+
+function VerificationDetailsModal({
   item,
   onClose,
   onApprove,
@@ -25,26 +76,38 @@ function DocumentsModal({
   onApprove: (item: VerificationApplication) => void;
   onReject: (item: VerificationApplication) => void;
 }) {
+  useEffect(() => {
+    if (!item) return;
+    const handler = (event: KeyboardEvent) => { if (event.key === 'Escape') onClose(); };
+    document.addEventListener('keydown', handler);
+    return () => document.removeEventListener('keydown', handler);
+  }, [item, onClose]);
+
   if (!item) return null;
-  const docs = item.documents ?? [];
+
   const pending = item.status === 'SUBMITTED' || item.status === 'IN_REVIEW';
+  const docs = item.documents ?? [];
+  const businessInfo = (item.businessInfo ?? {}) as Record<string, string>;
+  const businessKeys = Object.keys(businessInfo).filter((k) => businessInfo[k]);
 
   return (
     <div
       className="fixed inset-0 z-[150] flex items-end justify-center bg-black/50 p-4 sm:items-center"
       role="dialog"
       aria-modal="true"
-      aria-label="Verification documents"
+      aria-label="Verification details"
       onClick={(e) => { if (e.target === e.currentTarget) onClose(); }}
     >
-      <div className="max-h-[90vh] w-full max-w-[600px] overflow-y-auto rounded-[20px] bg-white p-5 shadow-xl sm:p-6">
-        <div className="mb-5 flex items-start justify-between gap-4">
-          <div>
-            <h2 className="text-[20px] font-semibold text-[#1f1f29]">Submitted Documents</h2>
-            <p className="mt-1 text-[13px] text-[#6f6b77]">
-              {item.user?.fullName || 'Applicant'}
-              {item.user?.email ? ` · ${item.user.email}` : ''}
-            </p>
+      <div className="flex max-h-[92vh] w-full max-w-[720px] flex-col overflow-hidden rounded-[20px] bg-white shadow-xl">
+
+        {/* Sticky header */}
+        <div className="flex shrink-0 items-start justify-between gap-4 border-b border-[#e8e8ea] px-5 py-4 sm:px-6">
+          <div className="min-w-0">
+            <div className="flex flex-wrap items-center gap-2">
+              <h2 className="text-[20px] font-semibold text-[#1f1f29]">{item.user?.fullName || 'Applicant'}</h2>
+              <span className={`rounded px-2 py-1 text-[11px] font-medium ${statusClass(item.status)}`}>{item.status}</span>
+            </div>
+            {item.user?.email ? <p className="mt-0.5 truncate text-[13px] text-[#6f6b77]">{item.user.email}</p> : null}
           </div>
           <button
             type="button"
@@ -55,36 +118,112 @@ function DocumentsModal({
           </button>
         </div>
 
-        {docs.length === 0 ? (
-          <p className="py-8 text-center text-[14px] text-[#9f9ba8]">No documents submitted yet.</p>
-        ) : (
-          <ul className="space-y-3">
-            {docs.map((doc, index) => {
-              const meta = [doc.type, doc.purpose !== 'verification_document' ? doc.purpose : null, formatBytes(doc.size)].filter(Boolean).join(' · ');
-              return (
-                <li key={doc.id ?? index} className="rounded-[12px] border border-[#e8e8ea] p-4">
-                  <div className="flex items-start justify-between gap-3">
-                    <div className="min-w-0">
-                      <p className="truncate text-[14px] font-medium text-[#1f1f29]">{doc.name || `Document ${index + 1}`}</p>
-                      {meta ? <p className="mt-0.5 text-[12px] text-[#7f7e88]">{meta}</p> : null}
-                    </div>
-                    <a
-                      href={doc.url}
-                      target="_blank"
-                      rel="noopener noreferrer"
-                      className="shrink-0 rounded-[8px] border border-[#d8d5de] px-3 py-1.5 text-[12px] font-medium text-[#4f4b59] transition hover:bg-[#f4f3f6]"
-                    >
-                      Open ↗
-                    </a>
-                  </div>
-                </li>
-              );
-            })}
-          </ul>
-        )}
+        {/* Scrollable body */}
+        <div className="flex-1 overflow-y-auto px-5 py-5 sm:px-6">
 
+          {/* Application details */}
+          <section className="mb-6">
+            <h3 className="mb-3 text-[12px] font-semibold uppercase tracking-widest text-[#9f9ba8]">Application Details</h3>
+            <dl className="grid grid-cols-1 gap-x-6 gap-y-3 rounded-[12px] border border-[#e8e8ea] p-4 text-[13px] sm:grid-cols-2">
+              <div>
+                <dt className="font-medium text-[#3f3b47]">Type</dt>
+                <dd className="mt-0.5 text-[#4f4b59]">{item.type}</dd>
+              </div>
+              <div>
+                <dt className="font-medium text-[#3f3b47]">Store name</dt>
+                <dd className="mt-0.5 text-[#4f4b59]">{businessInfo.storeName || '-'}</dd>
+              </div>
+              <div>
+                <dt className="font-medium text-[#3f3b47]">Submitted</dt>
+                <dd className="mt-0.5 text-[#4f4b59]">{formatDateTime(item.submittedAt) || '-'}</dd>
+              </div>
+              <div>
+                <dt className="font-medium text-[#3f3b47]">Reviewed at</dt>
+                <dd className="mt-0.5 text-[#4f4b59]">{formatDateTime(item.reviewedAt) || '-'}</dd>
+              </div>
+              <div>
+                <dt className="font-medium text-[#3f3b47]">Reviewer</dt>
+                <dd className="mt-0.5 text-[#4f4b59]">
+                  {item.reviewer?.fullName || '-'}
+                  {item.reviewer?.email ? <span className="ml-1 text-[#9f9ba8]">({item.reviewer.email})</span> : null}
+                </dd>
+              </div>
+              <div>
+                <dt className="font-medium text-[#3f3b47]">Payment status</dt>
+                <dd className="mt-0.5 text-[#4f4b59]">{item.paymentStatus || '-'}</dd>
+              </div>
+              {item.rejectionReason ? (
+                <div className="col-span-full">
+                  <dt className="font-medium text-red-700">Rejection reason</dt>
+                  <dd className="mt-0.5 text-red-600">{item.rejectionReason}</dd>
+                </div>
+              ) : null}
+            </dl>
+          </section>
+
+          {/* Business information */}
+          {businessKeys.length > 0 ? (
+            <section className="mb-6">
+              <h3 className="mb-3 text-[12px] font-semibold uppercase tracking-widest text-[#9f9ba8]">Business Information</h3>
+              <dl className="grid grid-cols-1 gap-x-6 gap-y-3 rounded-[12px] border border-[#e8e8ea] p-4 text-[13px] sm:grid-cols-2">
+                {businessKeys.map((key) => (
+                  <div key={key}>
+                    <dt className="font-medium text-[#3f3b47]">{humanizeKey(key)}</dt>
+                    <dd className="mt-0.5 break-words text-[#4f4b59]">{businessInfo[key]}</dd>
+                  </div>
+                ))}
+              </dl>
+            </section>
+          ) : null}
+
+          {/* Submitted documents */}
+          <section>
+            <h3 className="mb-3 text-[12px] font-semibold uppercase tracking-widest text-[#9f9ba8]">
+              Submitted Documents ({docs.length})
+            </h3>
+            {docs.length === 0 ? (
+              <p className="rounded-[12px] border border-[#e8e8ea] px-4 py-6 text-center text-[14px] text-[#9f9ba8]">
+                No documents submitted yet.
+              </p>
+            ) : (
+              <ul className="space-y-4">
+                {docs.map((doc, index) => {
+                  const meta = [
+                    doc.type,
+                    doc.purpose !== 'verification_document' ? doc.purpose : null,
+                    formatBytes(doc.size),
+                    doc.createdAt ? formatDateTime(doc.createdAt) : null,
+                  ].filter(Boolean).join(' · ');
+                  return (
+                    <li key={doc.id ?? index} className="rounded-[14px] border border-[#e8e8ea] p-4">
+                      <div className="flex items-start justify-between gap-3">
+                        <div className="min-w-0">
+                          <p className="truncate text-[14px] font-medium text-[#1f1f29]">
+                            {doc.name || `Document ${index + 1}`}
+                          </p>
+                          {meta ? <p className="mt-0.5 text-[12px] text-[#7f7e88]">{meta}</p> : null}
+                        </div>
+                        <a
+                          href={doc.url}
+                          target="_blank"
+                          rel="noopener noreferrer"
+                          className="shrink-0 rounded-[8px] border border-[#d8d5de] px-3 py-1.5 text-[12px] font-medium text-[#4f4b59] transition hover:bg-[#f4f3f6]"
+                        >
+                          Open ↗
+                        </a>
+                      </div>
+                      <DocumentPreview url={doc.url} name={doc.name} type={doc.type} />
+                    </li>
+                  );
+                })}
+              </ul>
+            )}
+          </section>
+        </div>
+
+        {/* Sticky footer: approve / reject */}
         {pending ? (
-          <div className="mt-5 flex flex-wrap items-center justify-end gap-3 border-t border-[#e8e8ea] pt-4">
+          <div className="flex shrink-0 flex-wrap items-center justify-end gap-3 border-t border-[#e8e8ea] px-5 py-4 sm:px-6">
             <button
               type="button"
               onClick={() => { onReject(item); onClose(); }}
@@ -102,6 +241,99 @@ function DocumentsModal({
           </div>
         ) : null}
       </div>
+    </div>
+  );
+}
+
+// ---------- Desktop 3-dot actions menu ----------
+
+function ThreeDotsIcon() {
+  return (
+    <svg viewBox="0 0 24 24" className="h-4 w-4" fill="currentColor" aria-hidden="true">
+      <circle cx="12" cy="5" r="1.5" />
+      <circle cx="12" cy="12" r="1.5" />
+      <circle cx="12" cy="19" r="1.5" />
+    </svg>
+  );
+}
+
+function RowActionsMenu({
+  item,
+  onViewDetails,
+  onApprove,
+  onReject,
+}: {
+  item: VerificationApplication;
+  onViewDetails: (item: VerificationApplication) => void;
+  onApprove: (item: VerificationApplication) => void;
+  onReject: (item: VerificationApplication) => void;
+}) {
+  const [open, setOpen] = useState(false);
+  const containerRef = useRef<HTMLDivElement>(null);
+  const pending = item.status === 'SUBMITTED' || item.status === 'IN_REVIEW';
+
+  useEffect(() => {
+    if (!open) return;
+    const handler = (e: MouseEvent) => {
+      if (containerRef.current && !containerRef.current.contains(e.target as Node)) {
+        setOpen(false);
+      }
+    };
+    document.addEventListener('mousedown', handler);
+    return () => document.removeEventListener('mousedown', handler);
+  }, [open]);
+
+  const close = useCallback(() => setOpen(false), []);
+
+  return (
+    <div ref={containerRef} className="relative">
+      <button
+        type="button"
+        onClick={() => setOpen((v) => !v)}
+        className="grid h-8 w-8 place-items-center rounded-[8px] text-[#9f9ba8] transition hover:bg-[#f4f3f6] hover:text-[#4f4b59]"
+        aria-label="Row actions"
+        aria-expanded={open}
+        aria-haspopup="menu"
+      >
+        <ThreeDotsIcon />
+      </button>
+
+      {open ? (
+        <div
+          className="absolute right-0 top-full z-20 mt-1 w-[180px] overflow-hidden rounded-[12px] border border-[#e8e8ea] bg-white py-1 shadow-[0_8px_24px_rgba(31,29,39,0.12)]"
+          role="menu"
+        >
+          <button
+            type="button"
+            role="menuitem"
+            onClick={() => { onViewDetails(item); close(); }}
+            className="flex w-full items-center px-4 py-2 text-left text-[13px] text-[#1f1f29] transition hover:bg-[#f4f3f6]"
+          >
+            View Details
+          </button>
+          {pending ? (
+            <>
+              <div className="mx-3 my-1 border-t border-[#e8e8ea]" role="separator" />
+              <button
+                type="button"
+                role="menuitem"
+                onClick={() => { onApprove(item); close(); }}
+                className="flex w-full items-center px-4 py-2 text-left text-[13px] text-green-700 transition hover:bg-green-50"
+              >
+                Approve
+              </button>
+              <button
+                type="button"
+                role="menuitem"
+                onClick={() => { onReject(item); close(); }}
+                className="flex w-full items-center px-4 py-2 text-left text-[13px] text-red-700 transition hover:bg-red-50"
+              >
+                Reject
+              </button>
+            </>
+          ) : null}
+        </div>
+      ) : null}
     </div>
   );
 }
@@ -370,7 +602,7 @@ export default function AdminVerification() {
                       onClick={() => setDocViewItem(item)}
                       className="rounded-[8px] border border-[#d8d5de] px-3 py-1.5 text-[12px] font-medium text-[#4f4b59] transition hover:bg-[#f4f3f6]"
                     >
-                      View Documents{item.documents?.length ? ` (${item.documents.length})` : ''}
+                      View Details{item.documents?.length ? ` (${item.documents.length} docs)` : ''}
                     </button>
                     {pending ? (
                       <>
@@ -432,35 +664,12 @@ export default function AdminVerification() {
                       <td className="px-6 py-4 text-sm text-gray-600">{formatDateTime(item.reviewedAt)}</td>
                       <td className="max-w-[260px] px-6 py-4 text-sm text-gray-600">{item.rejectionReason || item.decisionNote || '-'}</td>
                       <td className="px-6 py-4 text-sm">
-                        <div className="flex flex-col gap-2">
-                          <button
-                            type="button"
-                            onClick={() => setDocViewItem(item)}
-                            className="w-fit rounded-[7px] border border-[#d8d5de] px-3 py-1 text-[12px] font-medium text-[#4f4b59] transition hover:bg-[#f4f3f6]"
-                          >
-                            View Documents{item.documents?.length ? ` (${item.documents.length})` : ''}
-                          </button>
-                          {pending ? (
-                            <div className="flex flex-wrap gap-3">
-                              <button
-                                type="button"
-                                onClick={() => openVerificationAction(item, 'APPROVED')}
-                                className="font-medium text-green-600 transition-colors duration-200 hover:text-green-800 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#ffb357] focus-visible:ring-offset-2 focus-visible:ring-offset-white"
-                              >
-                                Approve
-                              </button>
-                              <button
-                                type="button"
-                                onClick={() => openVerificationAction(item, 'REJECTED')}
-                                className="font-medium text-red-600 transition-colors duration-200 hover:text-red-800 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#ffb357] focus-visible:ring-offset-2 focus-visible:ring-offset-white"
-                              >
-                                Reject
-                              </button>
-                            </div>
-                          ) : (
-                            <span className="text-xs text-[#8a8794]">No pending actions</span>
-                          )}
-                        </div>
+                        <RowActionsMenu
+                          item={item}
+                          onViewDetails={(v) => setDocViewItem(v)}
+                          onApprove={(v) => openVerificationAction(v, 'APPROVED')}
+                          onReject={(v) => openVerificationAction(v, 'REJECTED')}
+                        />
                       </td>
                     </tr>
                   );
@@ -471,7 +680,7 @@ export default function AdminVerification() {
         </>
       )}
 
-      <DocumentsModal
+      <VerificationDetailsModal
         item={docViewItem}
         onClose={() => setDocViewItem(null)}
         onApprove={(v) => openVerificationAction(v, 'APPROVED')}
