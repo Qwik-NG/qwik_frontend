@@ -236,7 +236,9 @@ export default function ProductDetailsPage() {
       setError(null);
       if (!id) throw new Error("No product ID provided");
 
+  if (import.meta.env.DEV) console.log(`[PDP] Starting fetch for id=${id}`);
       const result = await api.adById(id);
+        if (import.meta.env.DEV) console.log(`[PDP] API returned: success=${result.success}, hasData=${!!result.data}`);
       if (!mountedRef.current) return;
       setAd(result.data);
 
@@ -275,12 +277,16 @@ export default function ProductDetailsPage() {
         }
       }
     } catch (err) {
+        const errorMsg = err instanceof Error ? err.message : "Failed to load product";
+        if (import.meta.env.DEV) console.error(`[PDP] Error caught: "${errorMsg}", isMounted=${mountedRef.current}`);
       if (mountedRef.current) {
-        setError(err instanceof Error ? err.message : "Failed to load product");
+        setError(errorMsg);
+        if (import.meta.env.DEV) console.log(`[PDP] Error state updated to: "${errorMsg}"`);
         console.error("Error fetching product:", err);
       }
     } finally {
       setLoading(false);
+      if (import.meta.env.DEV) console.log(`[PDP] finally: setLoading(false)`);
     }
   }, [id]);
 
