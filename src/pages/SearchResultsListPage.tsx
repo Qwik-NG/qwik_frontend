@@ -269,9 +269,9 @@ function ListCard({ item, onClick }: { item: Listing; onClick: () => void }) {
           )}
         </div>
         <div>
-          <div className="mb-3 flex items-center justify-between gap-3">
-            <h4 className="text-[24px] font-semibold leading-none text-[#1f1d27] sm:text-[28px]">{item.price}</h4>
-            <span className="rounded-[9px] bg-badge-bg px-2.5 py-1 text-[14px] text-[#ff9715]">New</span>
+          <div className="mb-3 flex flex-wrap items-center gap-3">
+            <h4 className="min-w-0 text-[24px] font-semibold leading-none text-[#1f1d27] sm:text-[28px]">{item.price}</h4>
+            <span className="shrink-0 rounded-[9px] bg-badge-bg px-2.5 py-1 text-[14px] text-[#ff9715]">New</span>
           </div>
           <h5 className="mb-2 text-[20px] font-medium leading-tight text-[#1f1d27]">{item.title}</h5>
           <p className="mb-3 text-[15px] leading-[1.55] text-[#6d6a74]">{item.description}</p>

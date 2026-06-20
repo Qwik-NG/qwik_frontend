@@ -7,6 +7,105 @@ import type { VerificationApplication, VerificationStatus } from '../types';
 
 type VerificationAction = 'approve' | 'reject';
 
+function formatBytes(bytes?: number | null) {
+  if (!bytes) return null;
+  if (bytes < 1024) return `${bytes} B`;
+  if (bytes < 1024 * 1024) return `${(bytes / 1024).toFixed(1)} KB`;
+  return `${(bytes / (1024 * 1024)).toFixed(1)} MB`;
+}
+
+function DocumentsModal({
+  item,
+  onClose,
+  onApprove,
+  onReject,
+}: {
+  item: VerificationApplication | null;
+  onClose: () => void;
+  onApprove: (item: VerificationApplication) => void;
+  onReject: (item: VerificationApplication) => void;
+}) {
+  if (!item) return null;
+  const docs = item.documents ?? [];
+  const pending = item.status === 'SUBMITTED' || item.status === 'IN_REVIEW';
+
+  return (
+    <div
+      className="fixed inset-0 z-[150] flex items-end justify-center bg-black/50 p-4 sm:items-center"
+      role="dialog"
+      aria-modal="true"
+      aria-label="Verification documents"
+      onClick={(e) => { if (e.target === e.currentTarget) onClose(); }}
+    >
+      <div className="max-h-[90vh] w-full max-w-[600px] overflow-y-auto rounded-[20px] bg-white p-5 shadow-xl sm:p-6">
+        <div className="mb-5 flex items-start justify-between gap-4">
+          <div>
+            <h2 className="text-[20px] font-semibold text-[#1f1f29]">Submitted Documents</h2>
+            <p className="mt-1 text-[13px] text-[#6f6b77]">
+              {item.user?.fullName || 'Applicant'}
+              {item.user?.email ? ` · ${item.user.email}` : ''}
+            </p>
+          </div>
+          <button
+            type="button"
+            onClick={onClose}
+            className="shrink-0 rounded-[8px] px-3 py-1.5 text-[13px] text-[#7a7684] transition hover:bg-[#f4f3f6]"
+          >
+            Close
+          </button>
+        </div>
+
+        {docs.length === 0 ? (
+          <p className="py-8 text-center text-[14px] text-[#9f9ba8]">No documents submitted yet.</p>
+        ) : (
+          <ul className="space-y-3">
+            {docs.map((doc, index) => {
+              const meta = [doc.type, doc.purpose !== 'verification_document' ? doc.purpose : null, formatBytes(doc.size)].filter(Boolean).join(' · ');
+              return (
+                <li key={doc.id ?? index} className="rounded-[12px] border border-[#e8e8ea] p-4">
+                  <div className="flex items-start justify-between gap-3">
+                    <div className="min-w-0">
+                      <p className="truncate text-[14px] font-medium text-[#1f1f29]">{doc.name || `Document ${index + 1}`}</p>
+                      {meta ? <p className="mt-0.5 text-[12px] text-[#7f7e88]">{meta}</p> : null}
+                    </div>
+                    <a
+                      href={doc.url}
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      className="shrink-0 rounded-[8px] border border-[#d8d5de] px-3 py-1.5 text-[12px] font-medium text-[#4f4b59] transition hover:bg-[#f4f3f6]"
+                    >
+                      Open ↗
+                    </a>
+                  </div>
+                </li>
+              );
+            })}
+          </ul>
+        )}
+
+        {pending ? (
+          <div className="mt-5 flex flex-wrap items-center justify-end gap-3 border-t border-[#e8e8ea] pt-4">
+            <button
+              type="button"
+              onClick={() => { onReject(item); onClose(); }}
+              className="rounded-[8px] border border-red-200 px-4 py-2 text-[13px] font-medium text-red-700 transition hover:bg-red-50"
+            >
+              Reject
+            </button>
+            <button
+              type="button"
+              onClick={() => { onApprove(item); onClose(); }}
+              className="rounded-[8px] border border-green-200 bg-green-50 px-4 py-2 text-[13px] font-medium text-green-700 transition hover:bg-green-100"
+            >
+              Approve
+            </button>
+          </div>
+        ) : null}
+      </div>
+    </div>
+  );
+}
+
 function statusClass(status: VerificationStatus) {
   if (status === 'APPROVED') return 'bg-green-100 text-green-800';
   if (status === 'REJECTED') return 'bg-red-100 text-red-800';
@@ -45,6 +144,7 @@ export default function AdminVerification() {
   const [rejectionReason, setRejectionReason] = useState('');
   const [decisionNote, setDecisionNote] = useState('');
   const [updatingId, setUpdatingId] = useState<string | null>(null);
+  const [docViewItem, setDocViewItem] = useState<VerificationApplication | null>(null);
 
   useEffect(() => {
     void fetchVerifications();
@@ -264,24 +364,33 @@ export default function AdminVerification() {
                     <div className="col-span-2"><span className="font-medium text-[#3f3b47]">Decision notes:</span> {decisionNoteText}</div>
                   </div>
 
-                  {pending ? (
-                    <div className="mt-3 flex flex-wrap gap-2">
-                      <button
-                        type="button"
-                        onClick={() => openVerificationAction(item, 'APPROVED')}
-                        className="rounded-[8px] border border-green-200 px-3 py-1.5 text-[12px] font-medium text-green-700 transition hover:bg-green-50"
-                      >
-                        Approve
-                      </button>
-                      <button
-                        type="button"
-                        onClick={() => openVerificationAction(item, 'REJECTED')}
-                        className="rounded-[8px] border border-red-200 px-3 py-1.5 text-[12px] font-medium text-red-700 transition hover:bg-red-50"
-                      >
-                        Reject
-                      </button>
-                    </div>
-                  ) : null}
+                  <div className="mt-3 flex flex-wrap gap-2">
+                    <button
+                      type="button"
+                      onClick={() => setDocViewItem(item)}
+                      className="rounded-[8px] border border-[#d8d5de] px-3 py-1.5 text-[12px] font-medium text-[#4f4b59] transition hover:bg-[#f4f3f6]"
+                    >
+                      View Documents{item.documents?.length ? ` (${item.documents.length})` : ''}
+                    </button>
+                    {pending ? (
+                      <>
+                        <button
+                          type="button"
+                          onClick={() => openVerificationAction(item, 'APPROVED')}
+                          className="rounded-[8px] border border-green-200 px-3 py-1.5 text-[12px] font-medium text-green-700 transition hover:bg-green-50"
+                        >
+                          Approve
+                        </button>
+                        <button
+                          type="button"
+                          onClick={() => openVerificationAction(item, 'REJECTED')}
+                          className="rounded-[8px] border border-red-200 px-3 py-1.5 text-[12px] font-medium text-red-700 transition hover:bg-red-50"
+                        >
+                          Reject
+                        </button>
+                      </>
+                    ) : null}
+                  </div>
                 </article>
               );
             })}
@@ -323,26 +432,35 @@ export default function AdminVerification() {
                       <td className="px-6 py-4 text-sm text-gray-600">{formatDateTime(item.reviewedAt)}</td>
                       <td className="max-w-[260px] px-6 py-4 text-sm text-gray-600">{item.rejectionReason || item.decisionNote || '-'}</td>
                       <td className="px-6 py-4 text-sm">
-                        {pending ? (
-                          <div className="flex flex-wrap gap-3">
-                            <button
-                              type="button"
-                              onClick={() => openVerificationAction(item, 'APPROVED')}
-                              className="font-medium text-green-600 transition-colors duration-200 hover:text-green-800 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#ffb357] focus-visible:ring-offset-2 focus-visible:ring-offset-white"
-                            >
-                              Approve
-                            </button>
-                            <button
-                              type="button"
-                              onClick={() => openVerificationAction(item, 'REJECTED')}
-                              className="font-medium text-red-600 transition-colors duration-200 hover:text-red-800 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#ffb357] focus-visible:ring-offset-2 focus-visible:ring-offset-white"
-                            >
-                              Reject
-                            </button>
-                          </div>
-                        ) : (
-                          <span className="text-xs text-[#8a8794]">No pending actions</span>
-                        )}
+                        <div className="flex flex-col gap-2">
+                          <button
+                            type="button"
+                            onClick={() => setDocViewItem(item)}
+                            className="w-fit rounded-[7px] border border-[#d8d5de] px-3 py-1 text-[12px] font-medium text-[#4f4b59] transition hover:bg-[#f4f3f6]"
+                          >
+                            View Documents{item.documents?.length ? ` (${item.documents.length})` : ''}
+                          </button>
+                          {pending ? (
+                            <div className="flex flex-wrap gap-3">
+                              <button
+                                type="button"
+                                onClick={() => openVerificationAction(item, 'APPROVED')}
+                                className="font-medium text-green-600 transition-colors duration-200 hover:text-green-800 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#ffb357] focus-visible:ring-offset-2 focus-visible:ring-offset-white"
+                              >
+                                Approve
+                              </button>
+                              <button
+                                type="button"
+                                onClick={() => openVerificationAction(item, 'REJECTED')}
+                                className="font-medium text-red-600 transition-colors duration-200 hover:text-red-800 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#ffb357] focus-visible:ring-offset-2 focus-visible:ring-offset-white"
+                              >
+                                Reject
+                              </button>
+                            </div>
+                          ) : (
+                            <span className="text-xs text-[#8a8794]">No pending actions</span>
+                          )}
+                        </div>
                       </td>
                     </tr>
                   );
@@ -352,6 +470,13 @@ export default function AdminVerification() {
           </div>
         </>
       )}
+
+      <DocumentsModal
+        item={docViewItem}
+        onClose={() => setDocViewItem(null)}
+        onApprove={(v) => openVerificationAction(v, 'APPROVED')}
+        onReject={(v) => openVerificationAction(v, 'REJECTED')}
+      />
 
       <AdminModerationModal
         open={Boolean(selectedVerification && nextStatus)}

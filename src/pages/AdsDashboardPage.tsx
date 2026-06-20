@@ -74,9 +74,9 @@ function AdCard({ ad, onClick }: { ad: DashboardAd; onClick: () => void }) {
         )}
       </div>
       <div className="pt-3.5">
-        <div className="mb-2 flex items-center justify-between">
-          <h3 className="text-[22px] font-semibold leading-none">{ad.price}</h3>
-          <span className="rounded-[10px] bg-badge-bg px-2.5 py-1 text-[13px] text-[#ff9715]">New</span>
+        <div className="mb-2 flex flex-wrap items-center gap-2">
+          <h3 className="min-w-0 text-[22px] font-semibold leading-none">{ad.price}</h3>
+          <span className="shrink-0 rounded-[10px] bg-badge-bg px-2.5 py-1 text-[13px] text-[#ff9715]">New</span>
         </div>
         <h4 className="mb-2 text-[17px] font-medium leading-tight">{ad.title}</h4>
         <p className="mb-2 text-[14px] leading-[1.35] text-[#6d6a74]">{ad.description}</p>

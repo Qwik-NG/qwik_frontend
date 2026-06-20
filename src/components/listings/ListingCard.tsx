@@ -75,10 +75,10 @@ export default function ListingCard({
         )}
       </div>
       <div className="px-0 pb-1 pt-4 sm:pt-5">
-        <div className="flex items-center justify-between gap-2">
-          <h3 className="m-0 whitespace-nowrap text-[18px] font-semibold leading-none text-[#1f1d27] sm:text-[20px]">{item.price}</h3>
+        <div className="flex flex-wrap items-center gap-2">
+          <h3 className="m-0 min-w-0 text-[18px] font-semibold leading-none text-[#1f1d27] sm:text-[20px]">{item.price}</h3>
           {showBadge && (
-            <span className="rounded-[10px] bg-badge-bg px-2 py-1 text-[12px] text-[#ff9715] sm:rounded-[12px] sm:px-3 sm:py-1.5 sm:text-[14px]">
+            <span className="shrink-0 rounded-[10px] bg-badge-bg px-2 py-1 text-[12px] text-[#ff9715] sm:rounded-[12px] sm:px-3 sm:py-1.5 sm:text-[14px]">
               {badgeLabel}
             </span>
           )}
