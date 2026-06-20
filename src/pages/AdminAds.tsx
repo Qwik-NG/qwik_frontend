@@ -1,11 +1,11 @@
 import { useEffect, useState } from 'react';
 import AdminLayout from '../components/admin/AdminLayout';
 import AdminModerationModal from '../components/admin/AdminModerationModal';
+import AdminPreviewModal from '../components/admin/AdminPreviewModal';
 import AdminRowActionsMenu, { type AdminRowActionItem } from '../components/admin/AdminRowActionsMenu';
 import { useToast } from '../context/ToastContext';
-import { buildProductDetailsRoute } from '../constants/routes';
 import { api } from '../services/api';
-import type { AdminAd } from '../types';
+import type { Ad, AdminAd } from '../types';
 
 type ModerationAction = 'unlist' | 'reinstate' | 'delete';
 
@@ -23,6 +23,9 @@ export default function AdminAds() {
   const [actionType, setActionType] = useState<ModerationAction | null>(null);
   const [reason, setReason] = useState('');
   const [submittingAction, setSubmittingAction] = useState(false);
+  const [previewAd, setPreviewAd] = useState<AdminAd | null>(null);
+  const [previewDetails, setPreviewDetails] = useState<Ad | null>(null);
+  const [previewLoading, setPreviewLoading] = useState(false);
 
   useEffect(() => {
     void fetchAds();
@@ -49,8 +52,24 @@ export default function AdminAds() {
 
   const pageCount = Math.max(1, Math.ceil(totalAds / pageSize));
 
-  const openViewAd = (ad: AdminAd) => {
-    window.open(buildProductDetailsRoute(ad.id), '_blank', 'noopener,noreferrer');
+  const openAdPreview = async (ad: AdminAd) => {
+    setPreviewAd(ad);
+    setPreviewDetails(null);
+    setPreviewLoading(true);
+    try {
+      const response = await api.adById(ad.id);
+      setPreviewDetails(response.data);
+    } catch {
+      setPreviewDetails(null);
+    } finally {
+      setPreviewLoading(false);
+    }
+  };
+
+  const closeAdPreview = () => {
+    setPreviewAd(null);
+    setPreviewDetails(null);
+    setPreviewLoading(false);
   };
 
   const openActionModal = (ad: AdminAd, action: ModerationAction) => {
@@ -154,7 +173,7 @@ export default function AdminAds() {
     const actions: AdminRowActionItem[] = [
       {
         label: 'View ad',
-        onClick: () => openViewAd(ad),
+        onClick: () => void openAdPreview(ad),
         icon: (
           <svg viewBox="0 0 24 24" className="h-4 w-4" fill="none" stroke="currentColor" strokeWidth="2" aria-hidden="true">
             <path d="M2.5 12S6 5.5 12 5.5 21.5 12 21.5 12 18 18.5 12 18.5 2.5 12 2.5 12Z" />
@@ -200,6 +219,10 @@ export default function AdminAds() {
 
     return actions;
   };
+
+  const previewStatus = previewAd?.status || 'ACTIVE';
+  const previewImage = previewDetails?.images?.[0]?.url;
+  const previewDescription = previewDetails?.description || previewAd?.description || 'No description available.';
 
   if (loading) {
     return (
@@ -429,6 +452,111 @@ export default function AdminAds() {
         reasonPlaceholder={modalConfig?.reasonPlaceholder || 'Enter reason'}
         onReasonChange={setReason}
       />
+
+      <AdminPreviewModal
+        open={Boolean(previewAd)}
+        title={previewAd ? `Ad Preview: ${previewAd.title}` : 'Ad Preview'}
+        onClose={closeAdPreview}
+        footer={
+          previewAd ? (
+            <div className="flex flex-wrap items-center justify-end gap-2">
+              <button
+                type="button"
+                onClick={closeAdPreview}
+                className="h-[38px] rounded-[9px] border border-[#d8d5de] px-4 text-[13px] font-medium text-[#4f4b59] transition hover:bg-[#f4f3f6]"
+              >
+                Close
+              </button>
+              {previewStatus === 'ARCHIVED' ? (
+                <button
+                  type="button"
+                  onClick={() => {
+                    closeAdPreview();
+                    openActionModal(previewAd, 'reinstate');
+                  }}
+                  className="h-[38px] rounded-[9px] border border-green-200 bg-white px-4 text-[13px] font-semibold text-green-700 transition hover:bg-green-50"
+                >
+                  Reinstate
+                </button>
+              ) : previewStatus === 'ACTIVE' ? (
+                <button
+                  type="button"
+                  onClick={() => {
+                    closeAdPreview();
+                    openActionModal(previewAd, 'unlist');
+                  }}
+                  className="h-[38px] rounded-[9px] border border-yellow-200 bg-white px-4 text-[13px] font-semibold text-yellow-700 transition hover:bg-yellow-50"
+                >
+                  Unlist
+                </button>
+              ) : null}
+              <button
+                type="button"
+                onClick={() => {
+                  closeAdPreview();
+                  openActionModal(previewAd, 'delete');
+                }}
+                className="h-[38px] rounded-[9px] border border-[#f0c7c7] bg-[#fff5f5] px-4 text-[13px] font-semibold text-[#c73b3b] transition hover:bg-[#ffecec]"
+              >
+                Delete Permanently
+              </button>
+            </div>
+          ) : null
+        }
+      >
+        {previewAd ? (
+          <div className="space-y-4">
+            <div className="overflow-hidden rounded-[12px] border border-[#ece9f1] bg-[#f6f5f8]">
+              {previewImage ? (
+                <img src={previewImage} alt={previewAd.title} className="h-[200px] w-full object-cover sm:h-[260px]" />
+              ) : (
+                <div className="grid h-[200px] w-full place-items-center text-[14px] text-[#7d7888] sm:h-[260px]">
+                  Main image unavailable
+                </div>
+              )}
+            </div>
+
+            <div className="rounded-[12px] border border-[#ece9f1] bg-white p-3 sm:p-4">
+              <div className="flex flex-wrap items-center gap-2">
+                <h4 className="text-[18px] font-semibold text-[#1f1f29] sm:text-[20px]">{previewAd.title}</h4>
+                <span className={`rounded px-2 py-1 text-[11px] font-medium ${previewStatus === 'ACTIVE' ? 'bg-green-100 text-green-800' : previewStatus === 'ARCHIVED' ? 'bg-yellow-100 text-yellow-800' : 'bg-gray-100 text-gray-800'}`}>
+                  {previewStatus}
+                </span>
+              </div>
+              <p className="mt-2 text-[22px] font-semibold text-[#1f1f29]">₦{previewAd.price.toLocaleString()}</p>
+              <p className="mt-3 whitespace-pre-wrap text-[14px] leading-[1.55] text-[#4d4957]">{previewDescription}</p>
+            </div>
+
+            {previewLoading ? (
+              <div className="rounded-[12px] border border-[#ece9f1] bg-white p-4 text-[14px] text-[#6f6b77]">Loading listing details...</div>
+            ) : null}
+
+            <div className="grid grid-cols-1 gap-3 sm:grid-cols-2">
+              <div className="rounded-[12px] border border-[#ece9f1] bg-white p-3">
+                <p className="text-[12px] font-medium uppercase tracking-[0.04em] text-[#8d8898]">Category</p>
+                <p className="mt-1 text-[14px] text-[#1f1f29]">{previewAd.category.name}</p>
+              </div>
+              <div className="rounded-[12px] border border-[#ece9f1] bg-white p-3">
+                <p className="text-[12px] font-medium uppercase tracking-[0.04em] text-[#8d8898]">Location</p>
+                <p className="mt-1 text-[14px] text-[#1f1f29]">{previewDetails?.location || previewAd.location || 'Not available'}</p>
+              </div>
+              <div className="rounded-[12px] border border-[#ece9f1] bg-white p-3">
+                <p className="text-[12px] font-medium uppercase tracking-[0.04em] text-[#8d8898]">Seller</p>
+                <p className="mt-1 text-[14px] text-[#1f1f29]">{previewAd.user.fullName}</p>
+                <p className="text-[13px] text-[#6f6b77]">{previewAd.user.email || 'Email unavailable'}</p>
+              </div>
+              <div className="rounded-[12px] border border-[#ece9f1] bg-white p-3">
+                <p className="text-[12px] font-medium uppercase tracking-[0.04em] text-[#8d8898]">Engagement</p>
+                <p className="mt-1 text-[14px] text-[#1f1f29]">Reports: {previewAd._count.reports} • Reviews: {previewAd._count.reviews}</p>
+              </div>
+              <div className="rounded-[12px] border border-[#ece9f1] bg-white p-3 sm:col-span-2">
+                <p className="text-[12px] font-medium uppercase tracking-[0.04em] text-[#8d8898]">Created</p>
+                <p className="mt-1 text-[14px] text-[#1f1f29]">{previewAd.createdAt ? new Date(previewAd.createdAt).toLocaleString() : 'Not available'}</p>
+              </div>
+            </div>
+          </div>
+        ) : null}
+      </AdminPreviewModal>
     </AdminLayout>
   );
 }

@@ -1,11 +1,12 @@
 import { useEffect, useState } from 'react';
 import AdminLayout from '../components/admin/AdminLayout';
 import AdminModerationModal from '../components/admin/AdminModerationModal';
+import AdminPreviewModal from '../components/admin/AdminPreviewModal';
 import AdminRowActionsMenu, { type AdminRowActionItem } from '../components/admin/AdminRowActionsMenu';
 import { useToast } from '../context/ToastContext';
 import { useCurrentUser } from '../hooks/useCurrentUser';
 import { api } from '../services/api';
-import type { User } from '../types';
+import type { PublicUserProfile, User } from '../types';
 
 type AdminUser = User & {
   email: string;
@@ -33,6 +34,9 @@ export default function AdminUsers() {
   const [actionType, setActionType] = useState<'ban' | 'restore' | 'delete' | null>(null);
   const [moderationReason, setModerationReason] = useState('Policy violation');
   const [submittingAction, setSubmittingAction] = useState(false);
+  const [previewUser, setPreviewUser] = useState<AdminUser | null>(null);
+  const [previewUserDetails, setPreviewUserDetails] = useState<PublicUserProfile | null>(null);
+  const [previewLoading, setPreviewLoading] = useState(false);
 
   useEffect(() => {
     void fetchUsers();
@@ -108,10 +112,39 @@ export default function AdminUsers() {
     }
   };
 
-  const getUserProfileUrl = (userId: string) => `/profile/${userId}`;
+  const openUserPreview = async (user: AdminUser) => {
+    setPreviewUser(user);
+    setPreviewUserDetails(null);
+    setPreviewLoading(true);
+    try {
+      const response = await api.getUser(user.id);
+      setPreviewUserDetails(response.data);
+    } catch {
+      setPreviewUserDetails(null);
+    } finally {
+      setPreviewLoading(false);
+    }
+  };
 
-  const openUserProfile = (userId: string) => {
-    window.open(getUserProfileUrl(userId), '_blank', 'noopener,noreferrer');
+  const closeUserPreview = () => {
+    setPreviewUser(null);
+    setPreviewUserDetails(null);
+    setPreviewLoading(false);
+  };
+
+  const getVerificationBadge = (user: AdminUser | null, details: PublicUserProfile | null) => {
+    const verificationStatus = details?.verification?.status ?? user?.verification?.status ?? null;
+    const sellerVerified = details?.sellerVerified === true || user?.sellerVerified === true;
+    if (sellerVerified || verificationStatus === 'APPROVED') {
+      return { label: 'Verified Seller', tone: 'bg-green-100 text-green-800' };
+    }
+    if (verificationStatus === 'REJECTED') {
+      return { label: 'Verification Rejected', tone: 'bg-red-100 text-red-700' };
+    }
+    if (verificationStatus === 'IN_REVIEW' || verificationStatus === 'SUBMITTED') {
+      return { label: 'Verification Pending', tone: 'bg-yellow-100 text-yellow-800' };
+    }
+    return { label: 'Verification Unavailable', tone: 'bg-gray-100 text-gray-700' };
   };
 
   const canDeleteUser = (user: AdminUser) => !(currentUser?.id === user.id && currentUser.role === 'ADMIN');
@@ -125,7 +158,7 @@ export default function AdminUsers() {
     const actions: AdminRowActionItem[] = [
       {
         label: 'View user profile',
-        onClick: () => openUserProfile(user.id),
+        onClick: () => void openUserPreview(user),
         icon: (
           <svg viewBox="0 0 24 24" className="h-4 w-4" fill="none" stroke="currentColor" strokeWidth="2" aria-hidden="true">
             <path d="M2.5 12S6 5.5 12 5.5 21.5 12 21.5 12 18 18.5 12 18.5 2.5 12 2.5 12Z" />
@@ -168,6 +201,10 @@ export default function AdminUsers() {
 
     return actions;
   };
+
+  const previewUserStatus = previewUser?.status || 'ACTIVE';
+  const previewRole = previewUser?.role || 'USER';
+  const verificationBadge = getVerificationBadge(previewUser, previewUserDetails);
 
   if (loading) return (
     <AdminLayout title="Manage Users" description="Search, filter, and moderate user accounts">
@@ -406,6 +443,119 @@ export default function AdminUsers() {
         reasonPlaceholder={actionType === 'delete' ? 'Explain why this user is being deleted' : 'Explain why this user is being suspended'}
         onReasonChange={actionType === 'ban' || actionType === 'delete' ? setModerationReason : undefined}
       />
+
+      <AdminPreviewModal
+        open={Boolean(previewUser)}
+        title={previewUser ? `User Preview: ${previewUser.fullName}` : 'User Preview'}
+        onClose={closeUserPreview}
+        footer={
+          previewUser ? (
+            <div className="flex flex-wrap items-center justify-end gap-2">
+              <button
+                type="button"
+                onClick={closeUserPreview}
+                className="h-[38px] rounded-[9px] border border-[#d8d5de] px-4 text-[13px] font-medium text-[#4f4b59] transition hover:bg-[#f4f3f6]"
+              >
+                Close
+              </button>
+              {previewUser.role !== 'ADMIN' && previewUserStatus === 'BANNED' ? (
+                <button
+                  type="button"
+                  onClick={() => {
+                    closeUserPreview();
+                    openRestoreModal(previewUser);
+                  }}
+                  className="h-[38px] rounded-[9px] border border-green-200 bg-white px-4 text-[13px] font-semibold text-green-700 transition hover:bg-green-50"
+                >
+                  Unban User
+                </button>
+              ) : null}
+              {previewUser.role !== 'ADMIN' && previewUserStatus !== 'BANNED' ? (
+                <button
+                  type="button"
+                  onClick={() => {
+                    closeUserPreview();
+                    openBanModal(previewUser);
+                  }}
+                  className="h-[38px] rounded-[9px] border border-red-200 bg-white px-4 text-[13px] font-semibold text-red-700 transition hover:bg-red-50"
+                >
+                  Ban User
+                </button>
+              ) : null}
+              {previewUser.role !== 'ADMIN' ? (
+                <button
+                  type="button"
+                  disabled={!canDeleteUser(previewUser)}
+                  onClick={() => {
+                    closeUserPreview();
+                    openDeleteModal(previewUser);
+                  }}
+                  className="h-[38px] rounded-[9px] border border-[#f0c7c7] bg-[#fff5f5] px-4 text-[13px] font-semibold text-[#c73b3b] transition hover:bg-[#ffecec] disabled:cursor-not-allowed disabled:opacity-50"
+                >
+                  Delete User
+                </button>
+              ) : null}
+            </div>
+          ) : null
+        }
+      >
+        {previewUser ? (
+          <div className="space-y-4">
+            <div className="flex items-start gap-3 rounded-[12px] border border-[#ece9f1] bg-[#faf9fc] p-3 sm:p-4">
+              <div className="grid h-14 w-14 shrink-0 place-items-center overflow-hidden rounded-full bg-[#ece8f3] text-[18px] font-semibold text-[#524b61]">
+                {previewUserDetails?.profile?.avatarUrl ? (
+                  <img src={previewUserDetails.profile.avatarUrl} alt={previewUser.fullName} className="h-full w-full object-cover" />
+                ) : (
+                  <span>{previewUser.fullName.slice(0, 2).toUpperCase()}</span>
+                )}
+              </div>
+              <div className="min-w-0">
+                <p className="truncate text-[16px] font-semibold text-[#1f1f29]">{previewUser.fullName}</p>
+                <p className="mt-1 truncate text-[13px] text-[#6f6b77]">{previewUser.email}</p>
+                <div className="mt-2 flex flex-wrap items-center gap-2">
+                  <span className={`rounded px-2 py-1 text-[11px] font-medium ${previewRole === 'ADMIN' ? 'bg-blue-100 text-blue-800' : 'bg-green-100 text-green-800'}`}>
+                    {previewRole}
+                  </span>
+                  <span className={`rounded px-2 py-1 text-[11px] font-medium ${previewUserStatus === 'BANNED' ? 'bg-red-100 text-red-800' : 'bg-green-100 text-green-800'}`}>
+                    {previewUserStatus}
+                  </span>
+                  <span className={`rounded px-2 py-1 text-[11px] font-medium ${verificationBadge.tone}`}>
+                    {verificationBadge.label}
+                  </span>
+                </div>
+              </div>
+            </div>
+
+            {previewLoading ? (
+              <div className="rounded-[12px] border border-[#ece9f1] bg-white p-4 text-[14px] text-[#6f6b77]">Loading profile details...</div>
+            ) : null}
+
+            <div className="grid grid-cols-1 gap-3 sm:grid-cols-2">
+              <div className="rounded-[12px] border border-[#ece9f1] bg-white p-3">
+                <p className="text-[12px] font-medium uppercase tracking-[0.04em] text-[#8d8898]">Phone</p>
+                <p className="mt-1 text-[14px] text-[#1f1f29]">{previewUser.phone || previewUserDetails?.phone || 'Not available'}</p>
+              </div>
+              <div className="rounded-[12px] border border-[#ece9f1] bg-white p-3">
+                <p className="text-[12px] font-medium uppercase tracking-[0.04em] text-[#8d8898]">Location</p>
+                <p className="mt-1 text-[14px] text-[#1f1f29]">{previewUser.location || previewUserDetails?.location || 'Not available'}</p>
+              </div>
+              <div className="rounded-[12px] border border-[#ece9f1] bg-white p-3">
+                <p className="text-[12px] font-medium uppercase tracking-[0.04em] text-[#8d8898]">Joined</p>
+                <p className="mt-1 text-[14px] text-[#1f1f29]">{new Date(previewUser.createdAt).toLocaleDateString()}</p>
+              </div>
+              <div className="rounded-[12px] border border-[#ece9f1] bg-white p-3">
+                <p className="text-[12px] font-medium uppercase tracking-[0.04em] text-[#8d8898]">Activity</p>
+                <p className="mt-1 text-[14px] text-[#1f1f29]">Ads: {previewUser._count?.ads ?? 0} • Reviews: {previewUser._count?.reviews ?? 0}</p>
+              </div>
+            </div>
+
+            <div className="rounded-[12px] border border-[#ece9f1] bg-white p-3">
+              <p className="text-[12px] font-medium uppercase tracking-[0.04em] text-[#8d8898]">Profile Bio</p>
+              <p className="mt-1 whitespace-pre-wrap text-[14px] text-[#1f1f29]">{previewUserDetails?.profile?.bio || previewUser.profile?.bio || 'No bio available'}</p>
+            </div>
+          </div>
+        ) : null}
+      </AdminPreviewModal>
     </AdminLayout>
   );
 }
