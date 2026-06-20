@@ -549,7 +549,6 @@ export const CATEGORY_LISTING_CONFIGS: Record<string, CategoryListingConfig> = {
     storageKey: "qwik:category:properties:viewMode",
     subtypes: [
       { name: "Houses & Apartments", initials: "HA", tone: "#e2f1e9" },
-      { name: "Land", initials: "Ld", tone: "#f3ead8" },
       { name: "Commercial Property", initials: "Cp", tone: "#dde8f5" },
       { name: "Short Let", initials: "Sl", tone: "#f1e4ee" },
       { name: "Event Centers", initials: "Ec", tone: "#e9edff" },
