@@ -1,4 +1,4 @@
-import { useEffect, useMemo, useState } from 'react';
+import { useEffect, useState } from 'react';
 import AdminLayout from '../components/admin/AdminLayout';
 import AdminModerationModal from '../components/admin/AdminModerationModal';
 import { useToast } from '../context/ToastContext';
@@ -24,13 +24,18 @@ export default function AdminAds() {
 
   useEffect(() => {
     void fetchAds();
-  }, [page, pageSize]);
+  }, [page, pageSize, searchTerm, statusFilter]);
 
   const fetchAds = async () => {
     try {
       setLoading(true);
       setError('');
-      const response = await api.adminAds({ page, pageSize });
+      const response = await api.adminAds({
+        page,
+        pageSize,
+        search: searchTerm.trim() || undefined,
+        status: statusFilter === 'ALL' ? undefined : statusFilter,
+      });
       setAds(response.data);
       setTotalAds(response.meta?.total ?? response.data.length);
     } catch (err) {
@@ -39,19 +44,6 @@ export default function AdminAds() {
       setLoading(false);
     }
   };
-
-  const filteredAds = useMemo(() => {
-    const query = searchTerm.trim().toLowerCase();
-    return ads.filter((ad) => {
-      const status = ad.status || 'ACTIVE';
-      const matchesSearch = !query
-        || ad.title.toLowerCase().includes(query)
-        || ad.user.fullName.toLowerCase().includes(query)
-        || ad.category.name.toLowerCase().includes(query);
-      const matchesStatus = statusFilter === 'ALL' || status === statusFilter;
-      return matchesSearch && matchesStatus;
-    });
-  }, [ads, searchTerm, statusFilter]);
 
   const pageCount = Math.max(1, Math.ceil(totalAds / pageSize));
 
@@ -190,13 +182,19 @@ export default function AdminAds() {
         <input
           type="search"
           value={searchTerm}
-          onChange={(event) => setSearchTerm(event.target.value)}
+          onChange={(event) => {
+            setSearchTerm(event.target.value);
+            setPage(1);
+          }}
           placeholder="Search by title, seller, or category"
           className="h-[38px] rounded-[9px] border border-[#d8d5de] px-3 text-[14px] text-[#1f1f29] outline-none focus:border-[#ffb46a] focus:ring-2 focus:ring-[#ffb46a]/25"
         />
         <select
           value={statusFilter}
-          onChange={(event) => setStatusFilter(event.target.value as 'ALL' | 'ACTIVE' | 'ARCHIVED' | 'SOLD' | 'DRAFT')}
+          onChange={(event) => {
+            setStatusFilter(event.target.value as 'ALL' | 'ACTIVE' | 'ARCHIVED' | 'SOLD' | 'DRAFT');
+            setPage(1);
+          }}
           className="h-[38px] rounded-[9px] border border-[#d8d5de] px-3 text-[13px] text-[#4f4b59] outline-none focus:border-[#ffb46a]"
         >
           <option value="ALL">All status</option>
@@ -221,18 +219,18 @@ export default function AdminAds() {
       </div>
 
       <div className="mb-3 flex items-center justify-between gap-3 text-[13px] text-[#6f6b77]">
-        <span>Showing {filteredAds.length} listing{filteredAds.length !== 1 ? 's' : ''} on this page</span>
+        <span>Showing {ads.length} listing{ads.length !== 1 ? 's' : ''} on this page</span>
         <span>Page {page} of {pageCount}</span>
       </div>
 
-      {filteredAds.length === 0 ? (
+      {ads.length === 0 ? (
         <div className="rounded-[16px] border border-[#e8e8ea] bg-white p-10 text-center text-[#7f7e88]">
           No ads match the current filters.
         </div>
       ) : (
         <>
           <div className="space-y-3 lg:hidden">
-            {filteredAds.map((ad) => {
+            {ads.map((ad) => {
               const status = ad.status || 'ACTIVE';
               return (
                 <article key={ad.id} className={`rounded-[14px] border bg-white p-4 shadow-sm ${ad._count.reports > 0 ? 'border-[#f2d4d4]' : 'border-[#e8e8ea]'}`}>
@@ -300,7 +298,7 @@ export default function AdminAds() {
                 </tr>
               </thead>
               <tbody className="divide-y divide-gray-200">
-                {filteredAds.map((ad) => {
+                {ads.map((ad) => {
                   const status = ad.status || 'ACTIVE';
                   return (
                     <tr key={ad.id} className={`hover:bg-gray-50 ${ad._count.reports > 0 ? 'bg-red-50/40' : ''}`}>

@@ -1,4 +1,4 @@
-import { useEffect, useMemo, useState } from 'react';
+import { useEffect, useState } from 'react';
 import AdminLayout from '../components/admin/AdminLayout';
 import AdminModerationModal from '../components/admin/AdminModerationModal';
 import { useToast } from '../context/ToastContext';
@@ -33,13 +33,19 @@ export default function AdminUsers() {
 
   useEffect(() => {
     void fetchUsers();
-  }, [page, pageSize]);
+  }, [page, pageSize, searchTerm, roleFilter, statusFilter]);
 
   const fetchUsers = async () => {
     try {
       setLoading(true);
       setError('');
-      const response = await api.adminUsers({ page, pageSize });
+      const response = await api.adminUsers({
+        page,
+        pageSize,
+        search: searchTerm.trim() || undefined,
+        role: roleFilter === 'ALL' ? undefined : roleFilter,
+        status: statusFilter === 'ALL' ? undefined : statusFilter,
+      });
       setUsers(response.data as AdminUser[]);
       setTotalUsers(response.meta?.total ?? response.data.length);
     } catch (err) {
@@ -48,20 +54,6 @@ export default function AdminUsers() {
       setLoading(false);
     }
   };
-
-  const filteredUsers = useMemo(() => {
-    const query = searchTerm.trim().toLowerCase();
-    return users.filter((user) => {
-      const matchesSearch = !query
-        || user.fullName.toLowerCase().includes(query)
-        || user.email.toLowerCase().includes(query)
-        || (user.location || '').toLowerCase().includes(query);
-      const userStatus = user.status || 'ACTIVE';
-      const matchesRole = roleFilter === 'ALL' || user.role === roleFilter;
-      const matchesStatus = statusFilter === 'ALL' || userStatus === statusFilter;
-      return matchesSearch && matchesRole && matchesStatus;
-    });
-  }, [users, searchTerm, roleFilter, statusFilter]);
 
   const pageCount = Math.max(1, Math.ceil(totalUsers / pageSize));
 
@@ -139,13 +131,19 @@ export default function AdminUsers() {
         <input
           type="search"
           value={searchTerm}
-          onChange={(event) => setSearchTerm(event.target.value)}
+          onChange={(event) => {
+            setSearchTerm(event.target.value);
+            setPage(1);
+          }}
           placeholder="Search by name, email, or location"
           className="h-[38px] rounded-[9px] border border-[#d8d5de] px-3 text-[14px] text-[#1f1f29] outline-none focus:border-[#ffb46a] focus:ring-2 focus:ring-[#ffb46a]/25"
         />
         <select
           value={roleFilter}
-          onChange={(event) => setRoleFilter(event.target.value as 'ALL' | 'USER' | 'ADMIN')}
+          onChange={(event) => {
+            setRoleFilter(event.target.value as 'ALL' | 'USER' | 'ADMIN');
+            setPage(1);
+          }}
           className="h-[38px] rounded-[9px] border border-[#d8d5de] px-3 text-[13px] text-[#4f4b59] outline-none focus:border-[#ffb46a]"
         >
           <option value="ALL">All roles</option>
@@ -154,7 +152,10 @@ export default function AdminUsers() {
         </select>
         <select
           value={statusFilter}
-          onChange={(event) => setStatusFilter(event.target.value as 'ALL' | 'ACTIVE' | 'BANNED')}
+          onChange={(event) => {
+            setStatusFilter(event.target.value as 'ALL' | 'ACTIVE' | 'BANNED');
+            setPage(1);
+          }}
           className="h-[38px] rounded-[9px] border border-[#d8d5de] px-3 text-[13px] text-[#4f4b59] outline-none focus:border-[#ffb46a]"
         >
           <option value="ALL">All status</option>
@@ -177,18 +178,18 @@ export default function AdminUsers() {
       </div>
 
       <div className="mb-3 flex items-center justify-between gap-3 text-[13px] text-[#6f6b77]">
-        <span>Showing {filteredUsers.length} user{filteredUsers.length !== 1 ? 's' : ''} on this page</span>
+        <span>Showing {users.length} user{users.length !== 1 ? 's' : ''} on this page</span>
         <span>Page {page} of {pageCount}</span>
       </div>
 
-      {filteredUsers.length === 0 ? (
+      {users.length === 0 ? (
         <div className="rounded-[16px] border border-[#e8e8ea] bg-white p-10 text-center text-[#7f7e88]">
           No users match the current filters.
         </div>
       ) : (
         <>
           <div className="space-y-3 lg:hidden">
-            {filteredUsers.map((user) => {
+            {users.map((user) => {
               const status = user.status || 'ACTIVE';
               return (
                 <article key={user.id} className="rounded-[14px] border border-[#e8e8ea] bg-white p-4 shadow-sm">
@@ -251,7 +252,7 @@ export default function AdminUsers() {
                 </tr>
               </thead>
               <tbody className="divide-y divide-gray-200">
-                {filteredUsers.map((user) => {
+                {users.map((user) => {
                   const status = user.status || 'ACTIVE';
                   return (
                     <tr key={user.id} className="hover:bg-gray-50">

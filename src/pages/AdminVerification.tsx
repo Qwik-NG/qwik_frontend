@@ -1,4 +1,4 @@
-import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
+import { useCallback, useEffect, useRef, useState } from 'react';
 import AdminLayout from '../components/admin/AdminLayout';
 import AdminModerationModal from '../components/admin/AdminModerationModal';
 import { useToast } from '../context/ToastContext';
@@ -380,7 +380,7 @@ export default function AdminVerification() {
 
   useEffect(() => {
     void fetchVerifications();
-  }, [statusFilter, page, pageSize]);
+  }, [statusFilter, page, pageSize, searchTerm, fromDate, toDate]);
 
   const fetchVerifications = async () => {
     try {
@@ -390,6 +390,9 @@ export default function AdminVerification() {
         status: statusFilter === 'ALL' ? undefined : statusFilter,
         page,
         pageSize,
+        search: searchTerm.trim() || undefined,
+        from: fromDate || undefined,
+        to: toDate || undefined,
       });
       setVerifications(response.data);
       setTotalVerifications(response.meta?.total ?? response.data.length);
@@ -399,34 +402,6 @@ export default function AdminVerification() {
       setLoading(false);
     }
   };
-
-  const filteredVerifications = useMemo(() => {
-    const query = searchTerm.trim().toLowerCase();
-    const from = fromDate ? new Date(`${fromDate}T00:00:00`).getTime() : null;
-    const to = toDate ? new Date(`${toDate}T23:59:59`).getTime() : null;
-
-    return verifications.filter((item) => {
-      const submittedAt = new Date(item.submittedAt || item.createdAt).getTime();
-      const inFromRange = from === null || submittedAt >= from;
-      const inToRange = to === null || submittedAt <= to;
-
-      const applicantName = item.user?.fullName?.toLowerCase() || '';
-      const applicantEmail = item.user?.email?.toLowerCase() || '';
-      const reviewerName = item.reviewer?.fullName?.toLowerCase() || '';
-      const reviewerEmail = item.reviewer?.email?.toLowerCase() || '';
-      const storeName = String(item.businessInfo?.storeName || '').toLowerCase();
-      const businessName = String(item.businessInfo?.businessName || '').toLowerCase();
-      const matchesSearch = !query
-        || applicantName.includes(query)
-        || applicantEmail.includes(query)
-        || reviewerName.includes(query)
-        || reviewerEmail.includes(query)
-        || storeName.includes(query)
-        || businessName.includes(query);
-
-      return inFromRange && inToRange && matchesSearch;
-    });
-  }, [verifications, searchTerm, fromDate, toDate]);
 
   const openVerificationAction = (item: VerificationApplication, status: 'APPROVED' | 'REJECTED') => {
     setSelectedVerification(item);
@@ -510,7 +485,10 @@ export default function AdminVerification() {
         <input
           type="search"
           value={searchTerm}
-          onChange={(event) => setSearchTerm(event.target.value)}
+          onChange={(event) => {
+            setSearchTerm(event.target.value);
+            setPage(1);
+          }}
           placeholder="Search applicant/reviewer name or email"
           className="h-[38px] rounded-[9px] border border-[#d8d5de] px-3 text-[14px] text-[#1f1f29] outline-none focus:border-[#ffb46a] focus:ring-2 focus:ring-[#ffb46a]/25"
         />
@@ -532,19 +510,25 @@ export default function AdminVerification() {
         <input
           type="date"
           value={fromDate}
-          onChange={(event) => setFromDate(event.target.value)}
+          onChange={(event) => {
+            setFromDate(event.target.value);
+            setPage(1);
+          }}
           className="h-[38px] rounded-[9px] border border-[#d8d5de] px-3 text-[13px] text-[#4f4b59] outline-none focus:border-[#ffb46a]"
         />
         <input
           type="date"
           value={toDate}
-          onChange={(event) => setToDate(event.target.value)}
+          onChange={(event) => {
+            setToDate(event.target.value);
+            setPage(1);
+          }}
           className="h-[38px] rounded-[9px] border border-[#d8d5de] px-3 text-[13px] text-[#4f4b59] outline-none focus:border-[#ffb46a]"
         />
       </div>
 
       <div className="mb-3 flex items-center justify-between gap-3 text-[13px] text-[#6f6b77]">
-        <span>Showing {filteredVerifications.length} application{filteredVerifications.length !== 1 ? 's' : ''} on this page</span>
+        <span>Showing {verifications.length} application{verifications.length !== 1 ? 's' : ''} on this page</span>
         <div className="flex items-center gap-3">
           <span>Page {page} of {pageCount}</span>
           <select
@@ -563,14 +547,14 @@ export default function AdminVerification() {
         </div>
       </div>
 
-      {filteredVerifications.length === 0 ? (
+      {verifications.length === 0 ? (
         <div className="rounded-[16px] border border-[#e8e8ea] bg-white p-10 text-center text-[#7f7e88]">
           No verification applications match the current filters.
         </div>
       ) : (
         <>
           <div className="space-y-3 lg:hidden">
-            {filteredVerifications.map((item) => {
+            {verifications.map((item) => {
               const submittedDate = item.submittedAt || item.createdAt;
               const decisionNoteText = item.rejectionReason || item.decisionNote || '-';
               const reviewer = item.reviewer?.fullName || '-';
@@ -643,7 +627,7 @@ export default function AdminVerification() {
                 </tr>
               </thead>
               <tbody className="divide-y divide-gray-200">
-                {filteredVerifications.map((item) => {
+                {verifications.map((item) => {
                   const pending = item.status === 'SUBMITTED' || item.status === 'IN_REVIEW';
                   return (
                     <tr key={item.id} className="hover:bg-gray-50">

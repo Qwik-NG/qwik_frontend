@@ -506,10 +506,13 @@ export const api = {
     retry: 1,
   }),
 
-  adminUsers: (params?: { page?: number; pageSize?: number }) => {
+  adminUsers: (params?: { page?: number; pageSize?: number; search?: string; role?: 'USER' | 'ADMIN'; status?: 'ACTIVE' | 'BANNED' }) => {
     const searchParams = new URLSearchParams();
     if (params?.page) searchParams.set("page", String(params.page));
     if (params?.pageSize) searchParams.set("pageSize", String(params.pageSize));
+    if (params?.search) searchParams.set("search", params.search);
+    if (params?.role) searchParams.set("role", params.role);
+    if (params?.status) searchParams.set("status", params.status);
     const query = searchParams.toString();
     return request<User[]>(`/admin/users${query ? `?${query}` : ""}`, {
       staleTime: ADMIN_STALE_TIME,
@@ -535,10 +538,12 @@ export const api = {
       return response;
     }),
 
-  adminAds: (params?: { page?: number; pageSize?: number }) => {
+  adminAds: (params?: { page?: number; pageSize?: number; search?: string; status?: 'ACTIVE' | 'ARCHIVED' | 'SOLD' | 'DRAFT' }) => {
     const searchParams = new URLSearchParams();
     if (params?.page) searchParams.set("page", String(params.page));
     if (params?.pageSize) searchParams.set("pageSize", String(params.pageSize));
+    if (params?.search) searchParams.set("search", params.search);
+    if (params?.status) searchParams.set("status", params.status);
     const query = searchParams.toString();
     return request<AdminAd[]>(`/admin/ads${query ? `?${query}` : ""}`, {
       staleTime: ADMIN_STALE_TIME,
@@ -565,10 +570,11 @@ export const api = {
       return response;
     }),
 
-  adminReviews: (params?: { page?: number; pageSize?: number }) => {
+  adminReviews: (params?: { page?: number; pageSize?: number; search?: string }) => {
     const searchParams = new URLSearchParams();
     if (params?.page) searchParams.set("page", String(params.page));
     if (params?.pageSize) searchParams.set("pageSize", String(params.pageSize));
+    if (params?.search) searchParams.set("search", params.search);
     const query = searchParams.toString();
     return request<AdminReview[]>(`/admin/reviews${query ? `?${query}` : ""}`, {
       staleTime: ADMIN_STALE_TIME,
@@ -586,10 +592,12 @@ export const api = {
       return response;
     }),
 
-  adminReports: (params?: { page?: number; pageSize?: number }) => {
+  adminReports: (params?: { page?: number; pageSize?: number; search?: string; status?: AdminReport["status"] }) => {
     const searchParams = new URLSearchParams();
     if (params?.page) searchParams.set("page", String(params.page));
     if (params?.pageSize) searchParams.set("pageSize", String(params.pageSize));
+    if (params?.search) searchParams.set("search", params.search);
+    if (params?.status) searchParams.set("status", params.status);
     const query = searchParams.toString();
     return request<AdminReport[]>(`/admin/reports${query ? `?${query}` : ""}`, {
       staleTime: ADMIN_STALE_TIME,
@@ -607,11 +615,14 @@ export const api = {
       return response;
     }),
 
-  adminVerifications: (params?: { page?: number; pageSize?: number; status?: string }) => {
+  adminVerifications: (params?: { page?: number; pageSize?: number; status?: string; search?: string; from?: string; to?: string }) => {
     const searchParams = new URLSearchParams();
     if (params?.page) searchParams.set("page", String(params.page));
     if (params?.pageSize) searchParams.set("pageSize", String(params.pageSize));
     if (params?.status) searchParams.set("status", params.status);
+    if (params?.search) searchParams.set("search", params.search);
+    if (params?.from) searchParams.set("from", params.from);
+    if (params?.to) searchParams.set("to", params.to);
     const query = searchParams.toString();
     return request<VerificationApplication[]>(`/admin/verifications${query ? `?${query}` : ""}`, {
       staleTime: ADMIN_STALE_TIME,
@@ -629,10 +640,11 @@ export const api = {
       return response;
     }),
 
-  adminAuditLog: (params?: { page?: number; pageSize?: number; action?: string; targetType?: string; from?: string; to?: string }) => {
+  adminAuditLog: (params?: { page?: number; pageSize?: number; search?: string; action?: string; targetType?: string; from?: string; to?: string }) => {
     const searchParams = new URLSearchParams();
     if (params?.page) searchParams.set("page", String(params.page));
     if (params?.pageSize) searchParams.set("pageSize", String(params.pageSize));
+    if (params?.search) searchParams.set("search", params.search);
     if (params?.action) searchParams.set("action", params.action);
     if (params?.targetType) searchParams.set("targetType", params.targetType);
     if (params?.from) searchParams.set("from", params.from);

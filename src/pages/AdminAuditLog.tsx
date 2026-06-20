@@ -1,4 +1,4 @@
-import { useEffect, useMemo, useState } from 'react';
+import { useEffect, useState } from 'react';
 import AdminLayout from '../components/admin/AdminLayout';
 import { api } from '../services/api';
 import type { AdminAuditLogEntry } from '../types';
@@ -92,7 +92,7 @@ export default function AdminAuditLog() {
 
   useEffect(() => {
     void fetchLogs();
-  }, [page, actionFilter, targetTypeFilter, fromDate, toDate]);
+  }, [page, actionFilter, targetTypeFilter, fromDate, toDate, searchTerm]);
 
   const fetchLogs = async () => {
     try {
@@ -101,6 +101,7 @@ export default function AdminAuditLog() {
       const response = await api.adminAuditLog({
         page,
         pageSize,
+        search: searchTerm.trim() || undefined,
         action: actionFilter || undefined,
         targetType: targetTypeFilter || undefined,
         from: fromDate || undefined,
@@ -114,20 +115,6 @@ export default function AdminAuditLog() {
       setLoading(false);
     }
   };
-
-  const filteredLogs = useMemo(() => {
-    const query = searchTerm.trim().toLowerCase();
-    if (!query) return logs;
-    return logs.filter((entry) => {
-      return (
-        entry.admin.fullName.toLowerCase().includes(query) ||
-        (entry.admin.email ?? '').toLowerCase().includes(query) ||
-        entry.action.toLowerCase().includes(query) ||
-        entry.targetType.toLowerCase().includes(query) ||
-        (entry.targetId ?? '').toLowerCase().includes(query)
-      );
-    });
-  }, [logs, searchTerm]);
 
   const pageCount = Math.max(1, Math.ceil(totalLogs / pageSize));
 
@@ -176,7 +163,10 @@ export default function AdminAuditLog() {
         <input
           type="search"
           value={searchTerm}
-          onChange={(event) => setSearchTerm(event.target.value)}
+          onChange={(event) => {
+            setSearchTerm(event.target.value);
+            setPage(1);
+          }}
           placeholder="Search admin, action, or target ID"
           className="h-[38px] rounded-[9px] border border-[#d8d5de] px-3 text-[14px] text-[#1f1f29] outline-none focus:border-[#ffb46a] focus:ring-2 focus:ring-[#ffb46a]/25 xl:col-span-2"
         />
@@ -229,11 +219,11 @@ export default function AdminAuditLog() {
       </div>
 
       <div className="mb-3 flex items-center justify-between text-[13px] text-[#6f6b77]">
-        <span>Showing {filteredLogs.length} entr{filteredLogs.length !== 1 ? 'ies' : 'y'} on this page</span>
+        <span>Showing {logs.length} entr{logs.length !== 1 ? 'ies' : 'y'} on this page</span>
         <span>Page {page} of {pageCount}</span>
       </div>
 
-      {filteredLogs.length === 0 ? (
+      {logs.length === 0 ? (
         <div className="rounded-[16px] border border-[#e8e8ea] bg-white p-10 text-center text-[#7f7e88]">
           No audit log entries match the current filters.
         </div>
@@ -241,7 +231,7 @@ export default function AdminAuditLog() {
         <>
           {/* Mobile cards (< lg) */}
           <div className="space-y-3 lg:hidden">
-            {filteredLogs.map((entry) => (
+            {logs.map((entry) => (
               <article key={entry.id} className="rounded-[14px] border border-[#e8e8ea] bg-white p-4 shadow-sm">
                 <div className="flex flex-wrap items-center justify-between gap-2">
                   <span className={`rounded px-2 py-1 text-[11px] font-medium ${actionBadgeClass(entry.action)}`}>
@@ -292,7 +282,7 @@ export default function AdminAuditLog() {
                 </tr>
               </thead>
               <tbody className="divide-y divide-gray-200">
-                {filteredLogs.map((entry) => (
+                {logs.map((entry) => (
                   <tr key={entry.id} className="hover:bg-gray-50">
                     <td className="whitespace-nowrap px-5 py-4 text-sm text-gray-600">
                       {new Date(entry.createdAt).toLocaleString()}

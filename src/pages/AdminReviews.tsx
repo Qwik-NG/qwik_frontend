@@ -1,4 +1,4 @@
-import { useEffect, useMemo, useState } from 'react';
+import { useEffect, useState } from 'react';
 import AdminLayout from '../components/admin/AdminLayout';
 import AdminModerationModal from '../components/admin/AdminModerationModal';
 import { useToast } from '../context/ToastContext';
@@ -20,13 +20,17 @@ export default function AdminReviews() {
 
   useEffect(() => {
     void fetchReviews();
-  }, [page, pageSize]);
+  }, [page, pageSize, searchTerm]);
 
   const fetchReviews = async () => {
     try {
       setLoading(true);
       setError('');
-      const response = await api.adminReviews({ page, pageSize });
+      const response = await api.adminReviews({
+        page,
+        pageSize,
+        search: searchTerm.trim() || undefined,
+      });
       setReviews(response.data);
       setTotalReviews(response.meta?.total ?? response.data.length);
     } catch (err) {
@@ -35,20 +39,6 @@ export default function AdminReviews() {
       setLoading(false);
     }
   };
-
-  const filteredReviews = useMemo(() => {
-    const query = searchTerm.trim().toLowerCase();
-    return reviews.filter((review) => {
-      if (!query) return true;
-      return (
-        review.user.fullName.toLowerCase().includes(query)
-        || (review.user.email || '').toLowerCase().includes(query)
-        || review.ad.title.toLowerCase().includes(query)
-        || review.ad.user.fullName.toLowerCase().includes(query)
-        || review.text.toLowerCase().includes(query)
-      );
-    });
-  }, [reviews, searchTerm]);
 
   const pageCount = Math.max(1, Math.ceil(totalReviews / pageSize));
 
@@ -119,7 +109,10 @@ export default function AdminReviews() {
         <input
           type="search"
           value={searchTerm}
-          onChange={(event) => setSearchTerm(event.target.value)}
+          onChange={(event) => {
+            setSearchTerm(event.target.value);
+            setPage(1);
+          }}
           placeholder="Search by reviewer, ad, seller, or review text"
           className="h-[38px] rounded-[9px] border border-[#d8d5de] px-3 text-[14px] text-[#1f1f29] outline-none focus:border-[#ffb46a] focus:ring-2 focus:ring-[#ffb46a]/25"
         />
@@ -139,18 +132,18 @@ export default function AdminReviews() {
       </div>
 
       <div className="mb-3 flex items-center justify-between gap-3 text-[13px] text-[#6f6b77]">
-        <span>Showing {filteredReviews.length} review{filteredReviews.length !== 1 ? 's' : ''} on this page</span>
+        <span>Showing {reviews.length} review{reviews.length !== 1 ? 's' : ''} on this page</span>
         <span>Page {page} of {pageCount}</span>
       </div>
 
-      {filteredReviews.length === 0 ? (
+      {reviews.length === 0 ? (
         <div className="rounded-[16px] border border-[#e8e8ea] bg-white p-10 text-center text-[#7f7e88]">
           No reviews match the current filters.
         </div>
       ) : (
         <>
           <div className="space-y-3 lg:hidden">
-            {filteredReviews.map((review) => (
+            {reviews.map((review) => (
               <article key={review.id} className="rounded-[14px] border border-[#e8e8ea] bg-white p-4 shadow-sm">
                 <div className="flex items-start justify-between gap-3">
                   <div>
@@ -195,7 +188,7 @@ export default function AdminReviews() {
                 </tr>
               </thead>
               <tbody className="divide-y divide-gray-200">
-                {filteredReviews.map((review) => (
+                {reviews.map((review) => (
                   <tr key={review.id} className="hover:bg-gray-50">
                     <td className="px-6 py-4 text-sm font-medium text-gray-900">{review.ad.title}</td>
                     <td className="px-6 py-4 text-sm text-gray-600">{review.ad.user.fullName}</td>

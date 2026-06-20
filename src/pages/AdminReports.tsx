@@ -1,4 +1,4 @@
-import { useEffect, useMemo, useState } from 'react';
+import { useEffect, useState } from 'react';
 import AdminLayout from '../components/admin/AdminLayout';
 import AdminModerationModal from '../components/admin/AdminModerationModal';
 import { useToast } from '../context/ToastContext';
@@ -24,13 +24,18 @@ export default function AdminReports() {
 
   useEffect(() => {
     void fetchReports();
-  }, [page, pageSize]);
+  }, [page, pageSize, searchTerm, statusFilter]);
 
   const fetchReports = async () => {
     try {
       setLoading(true);
       setError('');
-      const response = await api.adminReports({ page, pageSize });
+      const response = await api.adminReports({
+        page,
+        pageSize,
+        search: searchTerm.trim() || undefined,
+        status: statusFilter === 'ALL' ? undefined : statusFilter,
+      });
       setReports(response.data);
       setTotalReports(response.meta?.total ?? response.data.length);
     } catch (err) {
@@ -39,19 +44,6 @@ export default function AdminReports() {
       setLoading(false);
     }
   };
-
-  const filteredReports = useMemo(() => {
-    const query = searchTerm.trim().toLowerCase();
-    return reports.filter((report) => {
-      const matchesSearch = !query
-        || report.ad.title.toLowerCase().includes(query)
-        || report.user.fullName.toLowerCase().includes(query)
-        || (report.ad.user?.fullName || '').toLowerCase().includes(query)
-        || report.reason.toLowerCase().includes(query);
-      const matchesStatus = statusFilter === 'ALL' || report.status === statusFilter;
-      return matchesSearch && matchesStatus;
-    });
-  }, [reports, searchTerm, statusFilter]);
 
   const pendingReports = reports.filter((report) => report.status === 'PENDING').length;
   const pageCount = Math.max(1, Math.ceil(totalReports / pageSize));
@@ -198,13 +190,19 @@ export default function AdminReports() {
         <input
           type="search"
           value={searchTerm}
-          onChange={(event) => setSearchTerm(event.target.value)}
+          onChange={(event) => {
+            setSearchTerm(event.target.value);
+            setPage(1);
+          }}
           placeholder="Search by ad, reporter, seller, or reason"
           className="h-[38px] rounded-[9px] border border-[#d8d5de] px-3 text-[14px] text-[#1f1f29] outline-none focus:border-[#ffb46a] focus:ring-2 focus:ring-[#ffb46a]/25"
         />
         <select
           value={statusFilter}
-          onChange={(event) => setStatusFilter(event.target.value as 'ALL' | 'PENDING' | 'RESOLVED' | 'DISMISSED')}
+          onChange={(event) => {
+            setStatusFilter(event.target.value as 'ALL' | 'PENDING' | 'RESOLVED' | 'DISMISSED');
+            setPage(1);
+          }}
           className="h-[38px] rounded-[9px] border border-[#d8d5de] px-3 text-[13px] text-[#4f4b59] outline-none focus:border-[#ffb46a]"
         >
           <option value="ALL">All status</option>
@@ -228,18 +226,18 @@ export default function AdminReports() {
       </div>
 
       <div className="mb-3 flex items-center justify-between gap-3 text-[13px] text-[#6f6b77]">
-        <span>Showing {filteredReports.length} report{filteredReports.length !== 1 ? 's' : ''} on this page</span>
+        <span>Showing {reports.length} report{reports.length !== 1 ? 's' : ''} on this page</span>
         <span>Page {page} of {pageCount}</span>
       </div>
 
-      {filteredReports.length === 0 ? (
+      {reports.length === 0 ? (
         <div className="rounded-[16px] border border-[#e8e8ea] bg-white p-10 text-center text-[#7f7e88]">
           No reports match the current filters.
         </div>
       ) : (
         <>
           <div className="space-y-3 lg:hidden">
-            {filteredReports.map((report) => {
+            {reports.map((report) => {
               const sellerName = report.ad.user?.fullName || 'Unknown seller';
               const isPending = report.status === 'PENDING';
               return (
@@ -303,7 +301,7 @@ export default function AdminReports() {
                 </tr>
               </thead>
               <tbody className="divide-y divide-gray-200">
-                {filteredReports.map((report) => {
+                {reports.map((report) => {
                   const sellerName = report.ad.user?.fullName || 'Unknown seller';
                   const isPending = report.status === 'PENDING';
                   return (
