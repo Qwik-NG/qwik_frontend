@@ -26,6 +26,7 @@ export interface User {
   profile?: UserProfile;
   verification?: VerificationSummary;
   verificationApplications?: VerificationSummary[];
+  sellerVerified?: boolean;
   stats?: UserStats;
   createdAt?: string;
   updatedAt?: string;

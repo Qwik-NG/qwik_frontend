@@ -15,6 +15,10 @@ import type { User } from '../types';
 export function isSellerVerified(user: User | undefined | null): boolean {
   if (!user) return false;
 
+  if (user.sellerVerified === true) {
+    return true;
+  }
+
   // Check if they have a verification application with APPROVED status
   // The backend returns verificationApplications as an array with the latest first
   const latestVerification = user.verificationApplications?.[0];

@@ -6,7 +6,9 @@ import { buildSearchResultsCategoryRoute } from "../constants/routes";
 import { FallbackImage } from "../components/ui/FallbackImage";
 import { ImagePlaceholder } from "../components/ui/ImagePlaceholder";
 import { getLocationSearchParam } from "../lib/searchContext";
+import { isSellerVerified } from "../lib/sellerVerification";
 import { api } from "../services/api";
+import type { Ad } from "../types";
 
 type Category = {
   name: string;
@@ -16,7 +18,7 @@ type Category = {
   icon?: ComponentType<{ className?: string }>;
   route: string;
 };
-type Product = { id: string; price: number; title: string; description: string; location: string; images: Array<{ url: string }> };
+type Product = Ad;
 
 const categories: Category[] = [
   { name: "Vehicles", shortName: "Cars", image: "/category-images/vehicles.png", tone: "#f8ebe4", route: buildSearchResultsCategoryRoute("vehicles") },
@@ -262,7 +264,16 @@ export default function HomePage() {
                 className="cursor-pointer rounded-[22px] bg-white p-2.5 transition hover:scale-[1.01] sm:rounded-[26px] sm:p-4"
                 onClick={() => navigate(`/product-details/${item.id}`)}
               >
-                <div className="h-[170px] w-full overflow-hidden rounded-[14px] bg-white sm:h-[260px] sm:rounded-[18px]">
+                <div className="relative h-[170px] w-full overflow-hidden rounded-[14px] bg-white sm:h-[260px] sm:rounded-[18px]">
+                  {isSellerVerified(item.user as any) ? (
+                    <span className="absolute left-2.5 top-2.5 z-10 inline-flex max-w-[calc(100%-20px)] items-center gap-1 rounded-[8px] bg-[#73b784] px-2 py-1 text-[10px] font-medium text-white sm:left-3 sm:top-3 sm:text-[11px]">
+                      <svg viewBox="0 0 24 24" className="h-3.5 w-3.5 shrink-0" fill="none" stroke="currentColor" strokeWidth="2" aria-hidden="true">
+                        <path d="M12 3 5 6v6c0 5 3.4 8.8 7 10 3.6-1.2 7-5 7-10V6l-7-3Z" />
+                        <path d="m9.4 12.1 1.8 1.8 3.8-4.1" />
+                      </svg>
+                      <span className="truncate">Verified Seller</span>
+                    </span>
+                  ) : null}
                   {item.images?.[0]?.url ? (
                     <FallbackImage
                       src={item.images[0].url}
@@ -299,7 +310,16 @@ export default function HomePage() {
                 className="flex cursor-pointer gap-3 overflow-hidden rounded-[22px] bg-white p-3 transition hover:shadow-[0_8px_24px_rgba(31,29,39,0.06)] sm:gap-6 sm:rounded-[26px] sm:p-4"
                 onClick={() => navigate(`/product-details/${item.id}`)}
               >
-                <div className="h-[120px] w-[120px] shrink-0 overflow-hidden rounded-[14px] bg-[#f2f2f4] sm:h-[200px] sm:w-[260px] sm:rounded-[18px]">
+                <div className="relative h-[120px] w-[120px] shrink-0 overflow-hidden rounded-[14px] bg-[#f2f2f4] sm:h-[200px] sm:w-[260px] sm:rounded-[18px]">
+                  {isSellerVerified(item.user as any) ? (
+                    <span className="absolute left-2 top-2 z-10 inline-flex max-w-[calc(100%-16px)] items-center gap-1 rounded-[8px] bg-[#73b784] px-2 py-1 text-[10px] font-medium text-white sm:left-3 sm:top-3 sm:text-[11px]">
+                      <svg viewBox="0 0 24 24" className="h-3.5 w-3.5 shrink-0" fill="none" stroke="currentColor" strokeWidth="2" aria-hidden="true">
+                        <path d="M12 3 5 6v6c0 5 3.4 8.8 7 10 3.6-1.2 7-5 7-10V6l-7-3Z" />
+                        <path d="m9.4 12.1 1.8 1.8 3.8-4.1" />
+                      </svg>
+                      <span className="truncate">Verified Seller</span>
+                    </span>
+                  ) : null}
                   {item.images?.[0]?.url ? (
                     <FallbackImage
                       src={item.images[0].url}

@@ -19,6 +19,7 @@ import { FallbackImage } from "../components/ui/FallbackImage";
 import { ImagePlaceholder } from "../components/ui/ImagePlaceholder";
 import { isBeautySearchQuery, isElectronicsSearchQuery, isFashionSearchQuery, isFurnitureSearchQuery, isJobSearchQuery, isPhonesSearchQuery, isVehicleSearchQuery, mockCategories } from "../lib/mockData";
 import { ALL_NIGERIA_LOCATION, getCategorySearchContext, getLocationSearchParam, NIGERIAN_LOCATIONS } from "../lib/searchContext";
+import { isSellerVerified } from "../lib/sellerVerification";
 import { api } from "../services/api";
 import type { Ad } from "../types";
 
@@ -124,7 +125,7 @@ function toListing(ad: Ad): Listing {
     description: ad.description,
     location: ad.location,
     image: ad.images?.[0]?.url,
-    verifiedSeller: Boolean(ad.user?.profile?.verified || ad.user?.profile?.verificationStatus === "verified"),
+    verifiedSeller: isSellerVerified(ad.user),
   };
 }
 
@@ -452,7 +453,7 @@ export default function SearchResultsListPage() {
     matchedAds.filter((ad) => {
       const categoryMatches =
         selectedCategory === "all" || ad.category.slug === selectedCategory;
-      const verified = Boolean(ad.user?.profile?.verified || ad.user?.profile?.verificationStatus === "verified");
+      const verified = isSellerVerified(ad.user);
       const verifiedMatches =
         verifiedFilter === "all" ||
         (verifiedFilter === "verified" && verified) ||
