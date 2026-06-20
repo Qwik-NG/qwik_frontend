@@ -126,7 +126,7 @@ async function request<T>(path: string, init?: ApiRequestInit): Promise<ApiRespo
     let lastError: unknown;
     for (let attempt = 0; attempt <= retry; attempt += 1) {
       try {
-        const res = await fetch(`${API_BASE_URL}${path}`, { ...fetchInit, headers });
+         const res = await fetch(`${API_BASE_URL}${path}`, { ...fetchInit, headers });
         const body = (await res.json().catch(() => ({}))) as ApiResponse<T>;
         if (!res.ok || !body.success) {
           if (authToken && res.status === 401) {
@@ -135,6 +135,14 @@ async function request<T>(path: string, init?: ApiRequestInit): Promise<ApiRespo
             GET_CACHE.clear();
           }
           const error = new Error(friendlyRequestError(res.status, body.message));
+          if (import.meta.env.DEV && path.includes("/ads/")) {
+            console.warn(`[API] Response error for ${path}:`, {
+              resOk: res.ok,
+              resStatus: res.status,
+              bodySuccess: body.success,
+              errorMessage: error.message
+            });
+          }
           if (attempt < retry && res.status >= 500) {
             lastError = error;
             await sleep(350 * (attempt + 1));
@@ -159,6 +167,14 @@ async function request<T>(path: string, init?: ApiRequestInit): Promise<ApiRespo
         return body;
       } catch (err) {
         lastError = err;
+        if (import.meta.env.DEV && path.includes("/ads/")) {
+          console.warn(`[API] Fetch error for ${path}:`, {
+            attempt,
+            maxAttempts: retry + 1,
+            errorMessage: err instanceof Error ? err.message : String(err),
+            errorName: err instanceof Error ? err.name : "Unknown"
+          });
+        }
         if (attempt < retry) {
           await sleep(350 * (attempt + 1));
           continue;
@@ -166,13 +182,22 @@ async function request<T>(path: string, init?: ApiRequestInit): Promise<ApiRespo
       }
     }
 
-    throw lastError instanceof Error ? lastError : new Error("Request failed");
+    const finalError = lastError instanceof Error ? lastError : new Error("Request failed");
+    if (import.meta.env.DEV && path.includes("/ads/")) {
+      console.error(`[API] Final error for ${path}:`, {
+        errorMessage: finalError.message,
+        errorName: finalError.name,
+        originalError: lastError
+      });
+    }
+    throw finalError;
   };
 
   const promise = performRequest();
   if (cacheKey) IN_FLIGHT_GETS.set(cacheKey, promise as Promise<ApiResponse<unknown>>);
   try {
-    return await promise;
+    const result = await promise;
+    return result;
   } finally {
     if (cacheKey) IN_FLIGHT_GETS.delete(cacheKey);
   }
