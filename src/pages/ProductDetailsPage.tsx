@@ -1,4 +1,4 @@
-import { useCallback, useEffect, useState, useRef } from "react";
+import { useCallback, useEffect, useState } from "react";
 import { useNavigate, useParams } from "react-router-dom";
 import Lightbox from "yet-another-react-lightbox";
 import Counter from "yet-another-react-lightbox/plugins/counter";
@@ -189,7 +189,6 @@ export default function ProductDetailsPage() {
   const { error: showError, info, success } = useToast();
   const { id } = useParams<{ id: string }>();
   const cachedUserResult = useUserCache();
-  const mountedRef = useRef(true);
   const [ad, setAd] = useState<Ad | null>(null);
   const [currentUser, setCurrentUser] = useState<User | null>(cachedUserResult.user);
   const [loading, setLoading] = useState(true);
@@ -222,22 +221,15 @@ export default function ProductDetailsPage() {
     }
   }, [cachedUserResult.user]);
 
-  // Cleanup on unmount
-  useEffect(() => {
-    return () => {
-      mountedRef.current = false;
-    };
-  }, []);
-
   // Fetch ad and save status (fast path)
-  const fetchAd = useCallback(async () => {
+  const fetchAd = useCallback(async (isCancelled: () => boolean = () => false) => {
     try {
       setLoading(true);
       setError(null);
       if (!id) throw new Error("No product ID provided");
 
       const result = await api.adById(id);
-      if (!mountedRef.current) return;
+      if (isCancelled()) return;
       setAd(result.data);
 
       const token = getToken();
@@ -245,12 +237,12 @@ export default function ProductDetailsPage() {
         // Fetch save status (fast, non-blocking)
         api.isSaved(id)
           .then((savedResponse) => {
-            if (mountedRef.current) {
+            if (!isCancelled()) {
               setIsSaved(savedResponse.data.saved);
             }
           })
           .catch(() => {
-            if (mountedRef.current) {
+            if (!isCancelled()) {
               setIsSaved(false);
             }
           });
@@ -260,13 +252,13 @@ export default function ProductDetailsPage() {
           setTimeout(() => {
             api.getFollowStatus(result.data.user!.id)
               .then((followStatus) => {
-                if (mountedRef.current) {
+                if (!isCancelled()) {
                   setIsFollowingSeller(followStatus.data.isFollowing);
                   setFollowersCount(followStatus.data.followersCount);
                 }
               })
               .catch(() => {
-                if (mountedRef.current) {
+                if (!isCancelled()) {
                   setIsFollowingSeller(false);
                   setFollowersCount(null);
                 }
@@ -275,17 +267,23 @@ export default function ProductDetailsPage() {
         }
       }
     } catch (err) {
-      if (mountedRef.current) {
+      if (!isCancelled()) {
         setError(err instanceof Error ? err.message : "Failed to load product");
         console.error("Error fetching product:", err);
       }
     } finally {
-      setLoading(false);
+      if (!isCancelled()) {
+        setLoading(false);
+      }
     }
   }, [id]);
 
   useEffect(() => {
-    fetchAd();
+    let cancelled = false;
+    void fetchAd(() => cancelled);
+    return () => {
+      cancelled = true;
+    };
   }, [fetchAd]);
 
   useEffect(() => {
@@ -304,26 +302,30 @@ export default function ProductDetailsPage() {
     setSubmittingReport(false);
   }, [id]);
 
-  const fetchReviews = useCallback(async (adId: string) => {
+  const fetchReviews = useCallback(async (adId: string, isCancelled: () => boolean = () => false) => {
     setReviewsLoading(true);
     setReviewsError(null);
     try {
       const response = await api.getReviews(adId);
-      if (!mountedRef.current) return;
+      if (isCancelled()) return;
       setReviews(response.data);
     } catch (err) {
-      if (!mountedRef.current) return;
+      if (isCancelled()) return;
       setReviews([]);
       setReviewsError(err instanceof Error ? err.message : "Unable to load reviews right now.");
     } finally {
-      if (!mountedRef.current) return;
+      if (isCancelled()) return;
       setReviewsLoading(false);
     }
   }, []);
 
   useEffect(() => {
     if (!ad?.id) return;
-    void fetchReviews(ad.id);
+    let cancelled = false;
+    void fetchReviews(ad.id, () => cancelled);
+    return () => {
+      cancelled = true;
+    };
   }, [ad?.id, fetchReviews]);
 
   const handleOpenReportModal = () => {
@@ -608,7 +610,9 @@ export default function ProductDetailsPage() {
             <p className="mt-3 text-[15px] text-[#6d6a74]">{error || "Product not found"}</p>
             <button
               type="button"
-              onClick={fetchAd}
+              onClick={() => {
+                void fetchAd();
+              }}
               className="mt-5 rounded-[8px] bg-gradient-to-r from-amber to-orange px-4 py-2 text-[15px] text-white"
             >
               Retry
