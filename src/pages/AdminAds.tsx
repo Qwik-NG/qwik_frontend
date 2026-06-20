@@ -1,7 +1,9 @@
 import { useEffect, useState } from 'react';
 import AdminLayout from '../components/admin/AdminLayout';
 import AdminModerationModal from '../components/admin/AdminModerationModal';
+import AdminRowActionsMenu, { type AdminRowActionItem } from '../components/admin/AdminRowActionsMenu';
 import { useToast } from '../context/ToastContext';
+import { buildProductDetailsRoute } from '../constants/routes';
 import { api } from '../services/api';
 import type { AdminAd } from '../types';
 
@@ -46,6 +48,10 @@ export default function AdminAds() {
   };
 
   const pageCount = Math.max(1, Math.ceil(totalAds / pageSize));
+
+  const openViewAd = (ad: AdminAd) => {
+    window.open(buildProductDetailsRoute(ad.id), '_blank', 'noopener,noreferrer');
+  };
 
   const openActionModal = (ad: AdminAd, action: ModerationAction) => {
     setSelectedAd(ad);
@@ -141,6 +147,59 @@ export default function AdminAds() {
       reasonPlaceholder: 'Provide the policy reason for permanent deletion',
     };
   })();
+
+  const getDesktopAdActions = (ad: AdminAd) => {
+    const status = ad.status || 'ACTIVE';
+
+    const actions: AdminRowActionItem[] = [
+      {
+        label: 'View ad',
+        onClick: () => openViewAd(ad),
+        icon: (
+          <svg viewBox="0 0 24 24" className="h-4 w-4" fill="none" stroke="currentColor" strokeWidth="2" aria-hidden="true">
+            <path d="M2.5 12S6 5.5 12 5.5 21.5 12 21.5 12 18 18.5 12 18.5 2.5 12 2.5 12Z" />
+            <circle cx="12" cy="12" r="2.5" />
+          </svg>
+        ),
+      },
+    ];
+
+    if (status === 'ACTIVE' || status === 'ARCHIVED') {
+      actions.push({
+        label: status === 'ARCHIVED' ? 'Reinstate' : 'Unlist',
+        onClick: () => openActionModal(ad, status === 'ARCHIVED' ? 'reinstate' : 'unlist'),
+        icon: status === 'ARCHIVED' ? (
+          <svg viewBox="0 0 24 24" className="h-4 w-4" fill="none" stroke="currentColor" strokeWidth="2" aria-hidden="true">
+            <path d="M6 10V8a6 6 0 1 1 12 0v2" />
+            <rect x="5" y="10" width="14" height="10" rx="2" />
+            <path d="m9 15 2 2 4-4" />
+          </svg>
+        ) : (
+          <svg viewBox="0 0 24 24" className="h-4 w-4" fill="none" stroke="currentColor" strokeWidth="2" aria-hidden="true">
+            <path d="M6 10V8a6 6 0 1 1 12 0v2" />
+            <rect x="5" y="10" width="14" height="10" rx="2" />
+            <path d="M8 15h8" />
+          </svg>
+        ),
+      });
+    }
+
+    actions.push({
+      label: 'Delete permanently',
+      onClick: () => openActionModal(ad, 'delete'),
+      danger: true,
+      icon: (
+        <svg viewBox="0 0 24 24" className="h-4 w-4" fill="none" stroke="currentColor" strokeWidth="2" aria-hidden="true">
+          <path d="M4 7h16" />
+          <path d="M9 7V5h6v2" />
+          <path d="M6 7l1 13h10l1-13" />
+          <path d="M10 11v5M14 11v5" />
+        </svg>
+      ),
+    });
+
+    return actions;
+  };
 
   if (loading) {
     return (
@@ -322,32 +381,8 @@ export default function AdminAds() {
                         {ad.createdAt ? new Date(ad.createdAt).toLocaleDateString() : '-'}
                       </td>
                       <td className="px-6 py-4 text-sm">
-                        <div className="flex flex-wrap gap-3">
-                          {status === 'ACTIVE' ? (
-                            <button
-                              onClick={() => openActionModal(ad, 'unlist')}
-                              className="font-medium text-yellow-700 transition-colors duration-200 hover:text-yellow-800 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#ffb357] focus-visible:ring-offset-2 focus-visible:ring-offset-white"
-                              type="button"
-                            >
-                              Unlist
-                            </button>
-                          ) : null}
-                          {status === 'ARCHIVED' ? (
-                            <button
-                              onClick={() => openActionModal(ad, 'reinstate')}
-                              className="font-medium text-green-700 transition-colors duration-200 hover:text-green-800 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#ffb357] focus-visible:ring-offset-2 focus-visible:ring-offset-white"
-                              type="button"
-                            >
-                              Reinstate
-                            </button>
-                          ) : null}
-                          <button
-                            onClick={() => openActionModal(ad, 'delete')}
-                            className="font-medium text-red-600 transition-colors duration-200 hover:text-red-800 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#ffb357] focus-visible:ring-offset-2 focus-visible:ring-offset-white"
-                            type="button"
-                          >
-                            Delete Permanently
-                          </button>
+                        <div className="flex items-center justify-end">
+                          <AdminRowActionsMenu ariaLabel={`Open actions for ${ad.title}`} items={getDesktopAdActions(ad)} />
                         </div>
                       </td>
                     </tr>

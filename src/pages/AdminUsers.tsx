@@ -1,7 +1,9 @@
 import { useEffect, useState } from 'react';
 import AdminLayout from '../components/admin/AdminLayout';
 import AdminModerationModal from '../components/admin/AdminModerationModal';
+import AdminRowActionsMenu, { type AdminRowActionItem } from '../components/admin/AdminRowActionsMenu';
 import { useToast } from '../context/ToastContext';
+import { useCurrentUser } from '../hooks/useCurrentUser';
 import { api } from '../services/api';
 import type { User } from '../types';
 
@@ -17,6 +19,7 @@ type AdminUser = User & {
 
 export default function AdminUsers() {
   const { error: showError, success } = useToast();
+  const { user: currentUser } = useCurrentUser();
   const [users, setUsers] = useState<AdminUser[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState('');
@@ -27,8 +30,8 @@ export default function AdminUsers() {
   const [roleFilter, setRoleFilter] = useState<'ALL' | 'USER' | 'ADMIN'>('ALL');
   const [statusFilter, setStatusFilter] = useState<'ALL' | 'ACTIVE' | 'BANNED'>('ALL');
   const [selectedUser, setSelectedUser] = useState<AdminUser | null>(null);
-  const [actionType, setActionType] = useState<'ban' | 'restore' | null>(null);
-  const [banReason, setBanReason] = useState('Policy violation');
+  const [actionType, setActionType] = useState<'ban' | 'restore' | 'delete' | null>(null);
+  const [moderationReason, setModerationReason] = useState('Policy violation');
   const [submittingAction, setSubmittingAction] = useState(false);
 
   useEffect(() => {
@@ -60,18 +63,25 @@ export default function AdminUsers() {
   const openBanModal = (user: AdminUser) => {
     setSelectedUser(user);
     setActionType('ban');
-    setBanReason('Policy violation');
+    setModerationReason('Policy violation');
   };
 
   const openRestoreModal = (user: AdminUser) => {
     setSelectedUser(user);
     setActionType('restore');
+    setModerationReason('');
+  };
+
+  const openDeleteModal = (user: AdminUser) => {
+    setSelectedUser(user);
+    setActionType('delete');
+    setModerationReason('Severe policy violation');
   };
 
   const closeModal = () => {
     setSelectedUser(null);
     setActionType(null);
-    setBanReason('Policy violation');
+    setModerationReason('Policy violation');
   };
 
   const handleModerationAction = async () => {
@@ -80,11 +90,14 @@ export default function AdminUsers() {
     try {
       setSubmittingAction(true);
       if (actionType === 'ban') {
-        await api.banAdminUser(selectedUser.id, banReason.trim() || 'Policy violation');
+        await api.banAdminUser(selectedUser.id, moderationReason.trim() || 'Policy violation');
         success('User banned successfully');
-      } else {
+      } else if (actionType === 'restore') {
         await api.unbanAdminUser(selectedUser.id);
         success('User restored successfully');
+      } else {
+        await api.deleteAdminUser(selectedUser.id, moderationReason.trim() || 'Severe policy violation');
+        success('User deleted successfully');
       }
       closeModal();
       await fetchUsers();
@@ -93,6 +106,67 @@ export default function AdminUsers() {
     } finally {
       setSubmittingAction(false);
     }
+  };
+
+  const getUserProfileUrl = (userId: string) => `/profile/${userId}`;
+
+  const openUserProfile = (userId: string) => {
+    window.open(getUserProfileUrl(userId), '_blank', 'noopener,noreferrer');
+  };
+
+  const canDeleteUser = (user: AdminUser) => !(currentUser?.id === user.id && currentUser.role === 'ADMIN');
+
+  const getDesktopUserActions = (user: AdminUser) => {
+    if (user.role === 'ADMIN') return null;
+
+    const status = user.status || 'ACTIVE';
+    const isBanned = status === 'BANNED';
+
+    const actions: AdminRowActionItem[] = [
+      {
+        label: 'View user profile',
+        onClick: () => openUserProfile(user.id),
+        icon: (
+          <svg viewBox="0 0 24 24" className="h-4 w-4" fill="none" stroke="currentColor" strokeWidth="2" aria-hidden="true">
+            <path d="M2.5 12S6 5.5 12 5.5 21.5 12 21.5 12 18 18.5 12 18.5 2.5 12 2.5 12Z" />
+            <circle cx="12" cy="12" r="2.5" />
+          </svg>
+        ),
+      },
+      {
+        label: isBanned ? 'Unban user' : 'Ban user',
+        onClick: () => (isBanned ? openRestoreModal(user) : openBanModal(user)),
+        icon: isBanned ? (
+          <svg viewBox="0 0 24 24" className="h-4 w-4" fill="none" stroke="currentColor" strokeWidth="2" aria-hidden="true">
+            <path d="M6 10V8a6 6 0 1 1 12 0v2" />
+            <rect x="5" y="10" width="14" height="10" rx="2" />
+            <path d="m9 15 2 2 4-4" />
+          </svg>
+        ) : (
+          <svg viewBox="0 0 24 24" className="h-4 w-4" fill="none" stroke="currentColor" strokeWidth="2" aria-hidden="true">
+            <path d="M6 10V8a6 6 0 1 1 12 0v2" />
+            <rect x="5" y="10" width="14" height="10" rx="2" />
+            <path d="m9.5 15.5 5-5M14.5 15.5l-5-5" />
+          </svg>
+        ),
+      },
+      {
+        label: 'Delete user',
+        onClick: () => openDeleteModal(user),
+        danger: true,
+        disabled: !canDeleteUser(user),
+        icon: (
+          <svg viewBox="0 0 24 24" className="h-4 w-4" fill="none" stroke="currentColor" strokeWidth="2" aria-hidden="true">
+            <path d="M4 7h16" />
+            <path d="M9 7V5h6v2" />
+            <path d="M6 7l1 13h10l1-13" />
+            <path d="M10 11v5M14 11v5" />
+          </svg>
+        ),
+      },
+    ];
+
+    return actions;
   };
 
   if (loading) return (
@@ -276,23 +350,13 @@ export default function AdminUsers() {
                       <td className="px-6 py-4 text-sm text-gray-600">{user.location || '-'}</td>
                       <td className="px-6 py-4 text-sm text-gray-600">{new Date(user.createdAt).toLocaleDateString()}</td>
                       <td className="px-6 py-4 text-sm">
-                        {user.role !== 'ADMIN' && status === 'BANNED' ? (
-                          <button
-                            onClick={() => openRestoreModal(user)}
-                            className="font-medium text-green-600 transition-colors duration-200 hover:text-green-800 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#ffb357] focus-visible:ring-offset-2 focus-visible:ring-offset-white"
-                            type="button"
-                          >
-                            Restore
-                          </button>
-                        ) : user.role !== 'ADMIN' ? (
-                          <button
-                            onClick={() => openBanModal(user)}
-                            className="font-medium text-red-600 transition-colors duration-200 hover:text-red-800 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#ffb357] focus-visible:ring-offset-2 focus-visible:ring-offset-white"
-                            type="button"
-                          >
-                            Ban
-                          </button>
-                        ) : null}
+                        <div className="flex items-center justify-end">
+                          {getDesktopUserActions(user) ? (
+                            <AdminRowActionsMenu ariaLabel={`Open actions for ${user.fullName}`} items={getDesktopUserActions(user)!} />
+                          ) : (
+                            <span className="text-[12px] text-[#9b97a5]">Protected</span>
+                          )}
+                        </div>
                       </td>
                     </tr>
                   );
@@ -325,20 +389,22 @@ export default function AdminUsers() {
 
       <AdminModerationModal
         open={Boolean(selectedUser && actionType)}
-        title={actionType === 'ban' ? 'Ban user account' : 'Restore user account'}
+        title={actionType === 'ban' ? 'Ban user account' : actionType === 'delete' ? 'Delete user account' : 'Restore user account'}
         description={actionType === 'ban'
           ? `You are about to suspend ${selectedUser?.fullName || 'this user'} from the platform.`
-          : `You are about to restore ${selectedUser?.fullName || 'this user'} to active status.`}
-        confirmLabel={actionType === 'ban' ? 'Ban User' : 'Restore User'}
+          : actionType === 'delete'
+            ? `This is permanent. ${selectedUser?.fullName || 'this user'} and all related account data will be removed.`
+            : `You are about to restore ${selectedUser?.fullName || 'this user'} to active status.`}
+        confirmLabel={actionType === 'ban' ? 'Ban User' : actionType === 'delete' ? 'Delete User' : 'Restore User'}
         onConfirm={handleModerationAction}
         onClose={closeModal}
         loading={submittingAction}
-        tone={actionType === 'ban' ? 'danger' : 'success'}
-        reason={actionType === 'ban' ? banReason : undefined}
-        reasonRequired={actionType === 'ban'}
+        tone={actionType === 'ban' || actionType === 'delete' ? 'danger' : 'success'}
+        reason={actionType === 'ban' || actionType === 'delete' ? moderationReason : undefined}
+        reasonRequired={actionType === 'ban' || actionType === 'delete'}
         reasonLabel="Moderation reason"
-        reasonPlaceholder="Explain why this user is being suspended"
-        onReasonChange={actionType === 'ban' ? setBanReason : undefined}
+        reasonPlaceholder={actionType === 'delete' ? 'Explain why this user is being deleted' : 'Explain why this user is being suspended'}
+        onReasonChange={actionType === 'ban' || actionType === 'delete' ? setModerationReason : undefined}
       />
     </AdminLayout>
   );

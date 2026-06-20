@@ -562,6 +562,15 @@ export const api = {
       return response;
     }),
 
+  deleteAdminUser: (id: string, reason?: string) =>
+    request<null>(`/admin/users/${id}`, {
+      method: "DELETE",
+      body: JSON.stringify(reason ? { reason } : {}),
+    }).then((response) => {
+      clearAdminApiCache();
+      return response;
+    }),
+
   adminAds: (params?: { page?: number; pageSize?: number; search?: string; status?: 'ACTIVE' | 'ARCHIVED' | 'SOLD' | 'DRAFT' }) => {
     const searchParams = new URLSearchParams();
     if (params?.page) searchParams.set("page", String(params.page));
