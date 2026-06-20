@@ -68,10 +68,10 @@ export default function ListingCard({
             alt={item.title}
             fit={item.imageFit === "contain" ? "contain" : "cover"}
             className={`h-full w-full ${item.imageFit === "contain" ? "p-4" : ""}`}
-            fallbackClassName="rounded-[14px] sm:rounded-[18px]"
+            fallback={<ImagePlaceholder title="" labelClassName="hidden" className="rounded-[14px] sm:rounded-[18px]" />}
           />
         ) : (
-          <ImagePlaceholder className="rounded-[14px] sm:rounded-[18px]" />
+          <ImagePlaceholder title="" labelClassName="hidden" className="rounded-[14px] sm:rounded-[18px]" />
         )}
       </div>
       <div className="px-0 pb-1 pt-4 sm:pt-5">

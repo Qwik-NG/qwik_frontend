@@ -159,7 +159,7 @@ function VehicleListCard({ item, onClick }: { item: MockVehicleListing; onClick:
       <div className="grid grid-cols-1 items-center gap-4 md:grid-cols-[280px_minmax(0,1fr)]">
         <div className="relative h-[220px] w-full overflow-hidden rounded-[18px] bg-white sm:h-[250px]">
           {isSellerVerified(item.ad.user) ? (
-            <span className="absolute left-3 top-3 z-10 inline-flex items-center gap-1 rounded-[8px] bg-[#73b784] px-2.5 py-1 text-[11px] font-medium text-white">
+            <span className="absolute left-3 top-3 z-10 inline-flex max-w-[calc(100%-24px)] items-center gap-1 rounded-[8px] bg-[#73b784] px-2.5 py-1 text-[11px] font-medium text-white">
               <svg viewBox="0 0 24 24" className="h-3.5 w-3.5" fill="none" stroke="currentColor" strokeWidth="2" aria-hidden="true">
                 <path d="M12 3 5 6v6c0 5 3.4 8.8 7 10 3.6-1.2 7-5 7-10V6l-7-3Z" />
                 <path d="m9.4 12.1 1.8 1.8 3.8-4.1" />
@@ -172,10 +172,10 @@ function VehicleListCard({ item, onClick }: { item: MockVehicleListing; onClick:
               src={item.ad.images[0].url}
               alt={item.ad.title}
               className="h-full w-full"
-              fallbackClassName="rounded-[18px]"
+              fallback={<ImagePlaceholder title="" labelClassName="hidden" className="rounded-[18px]" />}
             />
           ) : (
-            <ImagePlaceholder className="rounded-[18px]" />
+            <ImagePlaceholder title="" labelClassName="hidden" className="rounded-[18px]" />
           )}
         </div>
         <div>
@@ -580,9 +580,7 @@ export default function VehicleSearchResultsView({ query, navigate, view, locati
                       description: item.ad.description,
                       location: item.ad.location,
                       image: item.ad.images?.[0]?.url,
-                      verifiedSeller: Boolean(
-                        item.ad.user?.profile?.verified || item.ad.user?.profile?.verificationStatus === "verified",
-                      ),
+                      verifiedSeller: isSellerVerified(item.ad.user),
                     }}
                     interactive
                     clampTitleLines={2}

@@ -1,6 +1,7 @@
 import { useEffect, useMemo, useState, type ReactNode } from "react";
 import { buildProductDetailsRoute } from "../../constants/routes";
 import { ALL_NIGERIA_LOCATION, isCategoryMarkerQuery, NIGERIAN_LOCATIONS } from "../../lib/searchContext";
+import { isSellerVerified } from "../../lib/sellerVerification";
 import { CategoryBubbleAvatar } from "./CategoryBubbleAvatar";
 import { getCategoryBubbleImage, type CategoryBubbleGroup } from "../../lib/categoryBubbleImages";
 import { api } from "../../services/api";
@@ -8,6 +9,8 @@ import type { Ad } from "../../types";
 import ListingCard from "../listings/ListingCard";
 import BackButton from "../ui/BackButton";
 import DropdownSelect from "../ui/DropdownSelect";
+import { FallbackImage } from "../ui/FallbackImage";
+import { ImagePlaceholder } from "../ui/ImagePlaceholder";
 
 type NavigateTo = (to: string) => void;
 type SortValue = "newest" | "price-low" | "price-high";
@@ -322,7 +325,7 @@ export default function CategoryListingView({ config, query, navigate, locationF
     () =>
       sortAds(
         ads.filter((ad) => {
-          const verified = Boolean(ad.user?.profile?.verified || ad.user?.profile?.verificationStatus === "verified");
+          const verified = isSellerVerified(ad.user);
           const subtypeMatches =
             selectedSubtype === "all" ||
             (ad.title + " " + ad.description).toLowerCase().includes(selectedSubtype.toLowerCase());
@@ -484,7 +487,7 @@ export default function CategoryListingView({ config, query, navigate, locationF
                     description: ad.description,
                     location: ad.location,
                     image: ad.images?.[0]?.url,
-                    verifiedSeller: Boolean(ad.user?.profile?.verified || ad.user?.profile?.verificationStatus === "verified"),
+                    verifiedSeller: isSellerVerified(ad.user),
                   }}
                   interactive
                   clampTitleLines={2}
@@ -503,10 +506,26 @@ export default function CategoryListingView({ config, query, navigate, locationF
                   className="flex cursor-pointer gap-3 overflow-hidden rounded-[24px] border border-[#ddd9d2] bg-white p-3 shadow-[0_8px_24px_rgba(31,29,39,0.05)] transition hover:shadow-[0_12px_28px_rgba(31,29,39,0.08)] sm:gap-6 sm:rounded-[28px] sm:p-4"
                   onClick={() => navigate(buildProductDetailsRoute(ad.id))}
                 >
-                  <div className="h-[120px] w-[120px] shrink-0 overflow-hidden rounded-[16px] bg-[#f2f2f4] sm:h-[210px] sm:w-[280px] sm:rounded-[20px]">
-                    {ad.images?.[0]?.url ? (
-                      <img src={ad.images[0].url} alt={ad.title} className="h-full w-full object-cover" />
+                  <div className="relative h-[120px] w-[120px] shrink-0 overflow-hidden rounded-[16px] bg-[#f2f2f4] sm:h-[210px] sm:w-[280px] sm:rounded-[20px]">
+                    {isSellerVerified(ad.user) ? (
+                      <span className="absolute left-2 top-2 z-10 inline-flex max-w-[calc(100%-16px)] items-center gap-1 rounded-[8px] bg-[#73b784] px-2 py-1 text-[10px] font-medium text-white sm:left-3 sm:top-3 sm:text-[11px]">
+                        <svg viewBox="0 0 24 24" className="h-3.5 w-3.5 shrink-0" fill="none" stroke="currentColor" strokeWidth="2" aria-hidden="true">
+                          <path d="M12 3 5 6v6c0 5 3.4 8.8 7 10 3.6-1.2 7-5 7-10V6l-7-3Z" />
+                          <path d="m9.4 12.1 1.8 1.8 3.8-4.1" />
+                        </svg>
+                        <span className="truncate">Verified Seller</span>
+                      </span>
                     ) : null}
+                    {ad.images?.[0]?.url ? (
+                      <FallbackImage
+                        src={ad.images[0].url}
+                        alt={ad.title}
+                        className="h-full w-full object-cover"
+                        fallback={<ImagePlaceholder title="" labelClassName="hidden" className="h-full rounded-[16px] sm:rounded-[20px]" />}
+                      />
+                    ) : (
+                      <ImagePlaceholder title="" labelClassName="hidden" className="h-full rounded-[16px] sm:rounded-[20px]" />
+                    )}
                   </div>
                   <div className="flex min-w-0 flex-1 flex-col py-1 sm:py-3">
                     <div className="flex flex-wrap items-center gap-2 sm:gap-3">

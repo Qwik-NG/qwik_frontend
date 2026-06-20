@@ -279,10 +279,10 @@ export default function HomePage() {
                       src={item.images[0].url}
                       alt={item.title}
                       className="h-full w-full"
-                      fallbackClassName="rounded-[14px] sm:rounded-[18px]"
+                      fallback={<ImagePlaceholder title="" labelClassName="hidden" className="rounded-[14px] sm:rounded-[18px]" />}
                     />
                   ) : (
-                    <ImagePlaceholder className="rounded-[14px] sm:rounded-[18px]" />
+                    <ImagePlaceholder title="" labelClassName="hidden" className="rounded-[14px] sm:rounded-[18px]" />
                   )}
                 </div>
                 <div className="px-0 pb-1 pt-3 sm:pt-4">
@@ -325,10 +325,10 @@ export default function HomePage() {
                       src={item.images[0].url}
                       alt={item.title}
                       className="h-full w-full"
-                      fallbackClassName="rounded-[14px] sm:rounded-[18px]"
+                      fallback={<ImagePlaceholder title="" labelClassName="hidden" className="rounded-[14px] sm:rounded-[18px]" />}
                     />
                   ) : (
-                    <ImagePlaceholder className="rounded-[14px] sm:rounded-[18px]" />
+                    <ImagePlaceholder title="" labelClassName="hidden" className="rounded-[14px] sm:rounded-[18px]" />
                   )}
                 </div>
                 <div className="flex min-w-0 flex-1 flex-col py-1 sm:py-3">

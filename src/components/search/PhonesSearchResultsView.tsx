@@ -4,6 +4,7 @@ import {
   ROUTES,
 } from "../../constants/routes";
 import { ALL_NIGERIA_LOCATION, isCategoryMarkerQuery, NIGERIAN_LOCATIONS } from "../../lib/searchContext";
+import { isSellerVerified } from "../../lib/sellerVerification";
 import {
   type MockPhonesListing,
   type PhonesCondition,
@@ -358,7 +359,7 @@ export default function PhonesSearchResultsView({ query, navigate, view, locatio
     () =>
       sortPhonesResults(
         phonesResults.filter((item) => {
-          const verified = Boolean(item.ad.user?.profile?.verified || item.ad.user?.profile?.verificationStatus === "verified");
+          const verified = isSellerVerified(item.ad.user);
           const typeMatches = selectedType === "all" || item.phonesType === selectedType;
           const brandMatches = selectedBrand === "all" || item.brand === selectedBrand;
           const stripMatches = item.stripBrand === selectedStripBrand;
@@ -497,7 +498,7 @@ export default function PhonesSearchResultsView({ query, navigate, view, locatio
                   description: item.ad.description,
                   location: item.ad.location,
                   image: item.ad.images?.[0]?.url,
-                  verifiedSeller: Boolean(item.ad.user?.profile?.verified || item.ad.user?.profile?.verificationStatus === "verified"),
+                  verifiedSeller: isSellerVerified(item.ad.user),
                 }}
                 interactive
                 clampTitleLines={2}

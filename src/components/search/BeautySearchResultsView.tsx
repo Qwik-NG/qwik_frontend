@@ -4,6 +4,7 @@ import {
   ROUTES,
 } from "../../constants/routes";
 import { ALL_NIGERIA_LOCATION, isCategoryMarkerQuery, NIGERIAN_LOCATIONS } from "../../lib/searchContext";
+import { isSellerVerified } from "../../lib/sellerVerification";
 import {
   type BeautyCondition,
   type BeautyType,
@@ -341,7 +342,7 @@ export default function BeautySearchResultsView({ query, navigate, view, locatio
     () =>
       sortBeautyResults(
         beautyResults.filter((item) => {
-          const verified = Boolean(item.ad.user?.profile?.verified || item.ad.user?.profile?.verificationStatus === "verified");
+          const verified = isSellerVerified(item.ad.user);
           const categoryMatches = selectedCategory === "all" || item.categoryType === selectedCategory;
           const typeMatches = selectedType === "all" || item.beautyType === selectedType;
           const brandMatches = selectedBrand === "all" || item.brand === selectedBrand;
@@ -480,7 +481,7 @@ export default function BeautySearchResultsView({ query, navigate, view, locatio
                   description: item.ad.description,
                   location: item.ad.location,
                   image: item.ad.images?.[0]?.url,
-                  verifiedSeller: Boolean(item.ad.user?.profile?.verified || item.ad.user?.profile?.verificationStatus === "verified"),
+                  verifiedSeller: isSellerVerified(item.ad.user),
                 }}
                 interactive
                 clampTitleLines={2}

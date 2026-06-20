@@ -31,7 +31,7 @@ export default function ProductCard({
         src={item.image}
         alt={item.title}
         className="h-[180px] w-full rounded-[12px]"
-        fallback={<ImagePlaceholder className="h-[180px] rounded-[12px]" />}
+        fallback={<ImagePlaceholder title="" labelClassName="hidden" className="h-[180px] rounded-[12px]" />}
       />
       <div className="pt-3">
         <div className="mb-2 flex items-center justify-between">
