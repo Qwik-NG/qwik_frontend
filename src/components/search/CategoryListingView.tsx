@@ -7,6 +7,7 @@ import { getCategoryBubbleImage, type CategoryBubbleGroup } from "../../lib/cate
 import { api } from "../../services/api";
 import type { Ad } from "../../types";
 import ListingCard from "../listings/ListingCard";
+import VerifiedSellerBadge from "../listings/VerifiedSellerBadge";
 import BackButton from "../ui/BackButton";
 import DropdownSelect from "../ui/DropdownSelect";
 import { FallbackImage } from "../ui/FallbackImage";
@@ -507,15 +508,7 @@ export default function CategoryListingView({ config, query, navigate, locationF
                   onClick={() => navigate(buildProductDetailsRoute(ad.id))}
                 >
                   <div className="relative h-[120px] w-[120px] shrink-0 overflow-hidden rounded-[16px] bg-[#f2f2f4] sm:h-[210px] sm:w-[280px] sm:rounded-[20px]">
-                    {isSellerVerified(ad.user) ? (
-                      <span className="absolute left-2 top-2 z-10 inline-flex max-w-[calc(100%-16px)] items-center gap-1 rounded-[8px] bg-[#73b784] px-2 py-1 text-[10px] font-medium text-white sm:left-3 sm:top-3 sm:text-[11px]">
-                        <svg viewBox="0 0 24 24" className="h-3.5 w-3.5 shrink-0" fill="none" stroke="currentColor" strokeWidth="2" aria-hidden="true">
-                          <path d="M12 3 5 6v6c0 5 3.4 8.8 7 10 3.6-1.2 7-5 7-10V6l-7-3Z" />
-                          <path d="m9.4 12.1 1.8 1.8 3.8-4.1" />
-                        </svg>
-                        <span className="truncate">Verified Seller</span>
-                      </span>
-                    ) : null}
+                    {isSellerVerified(ad.user) ? <VerifiedSellerBadge /> : null}
                     {ad.images?.[0]?.url ? (
                       <FallbackImage
                         src={ad.images[0].url}

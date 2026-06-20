@@ -2,6 +2,7 @@ import type { ComponentType } from "react";
 import { useCallback, useEffect, useState } from "react";
 import { useLocation, useNavigate } from "react-router-dom";
 import { SiteFooter, SiteHeader } from "../components/AppShell";
+import VerifiedSellerBadge from "../components/listings/VerifiedSellerBadge";
 import { buildSearchResultsCategoryRoute } from "../constants/routes";
 import { FallbackImage } from "../components/ui/FallbackImage";
 import { ImagePlaceholder } from "../components/ui/ImagePlaceholder";
@@ -265,15 +266,7 @@ export default function HomePage() {
                 onClick={() => navigate(`/product-details/${item.id}`)}
               >
                 <div className="relative h-[170px] w-full overflow-hidden rounded-[14px] bg-white sm:h-[260px] sm:rounded-[18px]">
-                  {isSellerVerified(item.user as any) ? (
-                    <span className="absolute left-2.5 top-2.5 z-10 inline-flex max-w-[calc(100%-20px)] items-center gap-1 rounded-[8px] bg-[#73b784] px-2 py-1 text-[10px] font-medium text-white sm:left-3 sm:top-3 sm:text-[11px]">
-                      <svg viewBox="0 0 24 24" className="h-3.5 w-3.5 shrink-0" fill="none" stroke="currentColor" strokeWidth="2" aria-hidden="true">
-                        <path d="M12 3 5 6v6c0 5 3.4 8.8 7 10 3.6-1.2 7-5 7-10V6l-7-3Z" />
-                        <path d="m9.4 12.1 1.8 1.8 3.8-4.1" />
-                      </svg>
-                      <span className="truncate">Verified Seller</span>
-                    </span>
-                  ) : null}
+                  {isSellerVerified(item.user as any) ? <VerifiedSellerBadge /> : null}
                   {item.images?.[0]?.url ? (
                     <FallbackImage
                       src={item.images[0].url}
@@ -311,15 +304,7 @@ export default function HomePage() {
                 onClick={() => navigate(`/product-details/${item.id}`)}
               >
                 <div className="relative h-[120px] w-[120px] shrink-0 overflow-hidden rounded-[14px] bg-[#f2f2f4] sm:h-[200px] sm:w-[260px] sm:rounded-[18px]">
-                  {isSellerVerified(item.user as any) ? (
-                    <span className="absolute left-2 top-2 z-10 inline-flex max-w-[calc(100%-16px)] items-center gap-1 rounded-[8px] bg-[#73b784] px-2 py-1 text-[10px] font-medium text-white sm:left-3 sm:top-3 sm:text-[11px]">
-                      <svg viewBox="0 0 24 24" className="h-3.5 w-3.5 shrink-0" fill="none" stroke="currentColor" strokeWidth="2" aria-hidden="true">
-                        <path d="M12 3 5 6v6c0 5 3.4 8.8 7 10 3.6-1.2 7-5 7-10V6l-7-3Z" />
-                        <path d="m9.4 12.1 1.8 1.8 3.8-4.1" />
-                      </svg>
-                      <span className="truncate">Verified Seller</span>
-                    </span>
-                  ) : null}
+                  {isSellerVerified(item.user as any) ? <VerifiedSellerBadge /> : null}
                   {item.images?.[0]?.url ? (
                     <FallbackImage
                       src={item.images[0].url}

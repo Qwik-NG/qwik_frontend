@@ -2,6 +2,7 @@ import type { CSSProperties } from "react";
 import { LocationPin } from "../icons/LocationPin";
 import { ImagePlaceholder } from "../ui/ImagePlaceholder";
 import { FallbackImage } from "../ui/FallbackImage";
+import VerifiedSellerBadge from "./VerifiedSellerBadge";
 
 export type ListingCardItem = {
   price: string;
@@ -53,15 +54,7 @@ export default function ListingCard({
       onClick={onClick}
     >
       <div className={`relative w-full overflow-hidden rounded-[18px] bg-white sm:rounded-[22px] ${imageHeightClassName}`.trim()}>
-        {item.verifiedSeller ? (
-          <span className="absolute left-3 top-3 z-10 inline-flex items-center gap-1 rounded-[8px] bg-[#73b784] px-2.5 py-1 text-[11px] font-medium text-white sm:left-4 sm:top-4">
-            <svg viewBox="0 0 24 24" className="h-3.5 w-3.5" fill="none" stroke="currentColor" strokeWidth="2" aria-hidden="true">
-              <path d="M12 3 5 6v6c0 5 3.4 8.8 7 10 3.6-1.2 7-5 7-10V6l-7-3Z" />
-              <path d="m9.4 12.1 1.8 1.8 3.8-4.1" />
-            </svg>
-            <span>Verified Seller</span>
-          </span>
-        ) : null}
+        {item.verifiedSeller ? <VerifiedSellerBadge /> : null}
         {item.image ? (
           <FallbackImage
             src={item.image}

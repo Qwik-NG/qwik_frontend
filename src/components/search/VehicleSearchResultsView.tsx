@@ -7,6 +7,7 @@ import { isCategoryMarkerQuery } from "../../lib/searchContext";
 import { ALL_NIGERIA_LOCATION, NIGERIAN_LOCATIONS } from "../../lib/searchContext";
 import { isSellerVerified } from "../../lib/sellerVerification";
 import ListingCard from "../listings/ListingCard";
+import VerifiedSellerBadge from "../listings/VerifiedSellerBadge";
 import { FallbackImage } from "../ui/FallbackImage";
 import BackButton from "../ui/BackButton";
 import { CategoryBubbleAvatar } from "./CategoryBubbleAvatar";
@@ -158,15 +159,7 @@ function VehicleListCard({ item, onClick }: { item: MockVehicleListing; onClick:
     <article className="cursor-pointer rounded-[24px] border border-[#ddd9d2] bg-white p-3 shadow-[0_8px_24px_rgba(31,29,39,0.05)] sm:p-4" onClick={onClick}>
       <div className="grid grid-cols-1 items-center gap-4 md:grid-cols-[280px_minmax(0,1fr)]">
         <div className="relative h-[220px] w-full overflow-hidden rounded-[18px] bg-white sm:h-[250px]">
-          {isSellerVerified(item.ad.user) ? (
-            <span className="absolute left-3 top-3 z-10 inline-flex max-w-[calc(100%-24px)] items-center gap-1 rounded-[8px] bg-[#73b784] px-2.5 py-1 text-[11px] font-medium text-white">
-              <svg viewBox="0 0 24 24" className="h-3.5 w-3.5" fill="none" stroke="currentColor" strokeWidth="2" aria-hidden="true">
-                <path d="M12 3 5 6v6c0 5 3.4 8.8 7 10 3.6-1.2 7-5 7-10V6l-7-3Z" />
-                <path d="m9.4 12.1 1.8 1.8 3.8-4.1" />
-              </svg>
-              <span>Verified Seller</span>
-            </span>
-          ) : null}
+          {isSellerVerified(item.ad.user) ? <VerifiedSellerBadge /> : null}
           {item.ad.images?.[0]?.url ? (
             <FallbackImage
               src={item.ad.images[0].url}

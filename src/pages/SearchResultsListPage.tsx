@@ -12,6 +12,7 @@ import FurnituresSearchResultsView from "../components/search/FurnituresSearchRe
 import JobSearchResultsView from "../components/search/JobSearchResultsView";
 import PhonesSearchResultsView from "../components/search/PhonesSearchResultsView";
 import VehicleSearchResultsView from "../components/search/VehicleSearchResultsView";
+import VerifiedSellerBadge from "../components/listings/VerifiedSellerBadge";
 import { LocationPin } from "../components/icons/LocationPin";
 import BackButton from "../components/ui/BackButton";
 import DropdownSelect from "../components/ui/DropdownSelect";
@@ -249,15 +250,7 @@ function ListCard({ item, onClick }: { item: Listing; onClick: () => void }) {
     <article className="cursor-pointer rounded-[24px] border border-[#ddd9d2] bg-white p-3 shadow-[0_8px_24px_rgba(31,29,39,0.05)] sm:p-4" onClick={onClick}>
       <div className="grid grid-cols-1 items-center gap-4 md:grid-cols-[260px_minmax(0,1fr)]">
         <div className="relative h-[220px] w-full overflow-hidden rounded-[18px] bg-white sm:h-[250px]">
-          {item.verifiedSeller ? (
-            <span className="absolute left-3 top-3 z-10 inline-flex items-center gap-1 rounded-[8px] bg-[#73b784] px-2.5 py-1 text-[11px] font-medium text-white">
-              <svg viewBox="0 0 24 24" className="h-3.5 w-3.5" fill="none" stroke="currentColor" strokeWidth="2" aria-hidden="true">
-                <path d="M12 3 5 6v6c0 5 3.4 8.8 7 10 3.6-1.2 7-5 7-10V6l-7-3Z" />
-                <path d="m9.4 12.1 1.8 1.8 3.8-4.1" />
-              </svg>
-              <span>Verified Seller</span>
-            </span>
-          ) : null}
+          {item.verifiedSeller ? <VerifiedSellerBadge /> : null}
           {item.image ? (
             <FallbackImage
               src={item.image}
