@@ -1,9 +1,9 @@
 import { useEffect, useState } from "react";
 import { useLocation, useNavigate } from "react-router-dom";
 import { ROUTES } from "../constants/routes";
-import { isAlreadyVerifiedError, resolveSafeNextPath } from "../lib/emailVerification";
+import { buildLoginRoute, isAlreadyVerifiedError, resolveSafeNextPath } from "../lib/emailVerification";
 import { clearUserCache } from "../hooks/useUserCache";
-import { api } from "../services/api";
+import { api, isUnauthorizedError } from "../services/api";
 import { useToast } from "../context/ToastContext";
 
 export default function VerifyEmailPage() {
@@ -40,6 +40,12 @@ export default function VerifyEmailPage() {
         await api.sendVerificationOtp();
         success("Verification code sent to your email");
       } catch (error) {
+        if (isUnauthorizedError(error)) {
+          showError("Your session has expired. Please log in again.");
+          navigate(buildLoginRoute(redirectTarget), { replace: true });
+          return;
+        }
+
         if (isAlreadyVerifiedError(error)) {
           info("Your email is already verified.");
           navigate(redirectTarget, { replace: true });
@@ -84,6 +90,12 @@ export default function VerifyEmailPage() {
       success("Email verified successfully!");
       navigate(redirectTarget || ROUTES.WELCOME, { replace: true });
     } catch (error) {
+      if (isUnauthorizedError(error)) {
+        showError("Your session has expired. Please log in again.");
+        navigate(buildLoginRoute(redirectTarget), { replace: true });
+        return;
+      }
+
       if (error instanceof Error) {
         const message = error.message;
         // Check if it's a lockout error (429)
@@ -110,6 +122,12 @@ export default function VerifyEmailPage() {
       setResendCooldown(60);
       setOtp("");
     } catch (error) {
+      if (isUnauthorizedError(error)) {
+        showError("Your session has expired. Please log in again.");
+        navigate(buildLoginRoute(redirectTarget), { replace: true });
+        return;
+      }
+
       if (isAlreadyVerifiedError(error)) {
         info("Your email is already verified.");
         navigate(redirectTarget, { replace: true });

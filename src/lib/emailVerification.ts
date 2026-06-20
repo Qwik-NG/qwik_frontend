@@ -1,9 +1,11 @@
-import { api, isEmailVerificationRequiredError } from "../services/api";
+import { clearAllAuthData, getToken, hasValidToken } from "../services/auth";
+import { api, isEmailVerificationRequiredError, isUnauthorizedError } from "../services/api";
 import type { User } from "../types";
 
 type NavigateFn = (to: string, options?: { replace?: boolean }) => void;
 
 const VERIFY_EMAIL_ROUTE = "/verify-email";
+const LOGIN_ROUTE = "/login";
 
 export function isAlreadyVerifiedError(error: unknown) {
   if (!(error instanceof Error)) return false;
@@ -14,6 +16,12 @@ export function buildVerifyEmailRoute(nextPath?: string) {
   if (!nextPath || nextPath === "/") return VERIFY_EMAIL_ROUTE;
   const params = new URLSearchParams({ next: nextPath });
   return `${VERIFY_EMAIL_ROUTE}?${params.toString()}`;
+}
+
+export function buildLoginRoute(nextPath?: string) {
+  if (!nextPath || nextPath === "/") return LOGIN_ROUTE;
+  const params = new URLSearchParams({ next: nextPath });
+  return `${LOGIN_ROUTE}?${params.toString()}`;
 }
 
 export function resolveSafeNextPath(nextParam: string | null | undefined, fallback = "/") {
@@ -29,11 +37,20 @@ export function resolveSafeNextPath(nextParam: string | null | undefined, fallba
 }
 
 export async function fetchFreshCurrentUser() {
+  const token = getToken();
+  if (!token || !hasValidToken()) {
+    return { user: null, unauthenticated: true as const };
+  }
+
   try {
     const response = await api.me();
-    return response.data;
-  } catch {
-    return null;
+    return { user: response.data, unauthenticated: false as const };
+  } catch (error) {
+    if (isUnauthorizedError(error)) {
+      clearAllAuthData();
+      return { user: null, unauthenticated: true as const };
+    }
+    return { user: null, unauthenticated: false as const };
   }
 }
 
@@ -48,8 +65,14 @@ export async function ensureFreshVerifiedEmail({
   fallbackUser?: User | null;
   onUnverified?: () => void;
 }) {
-  const freshUser = await fetchFreshCurrentUser();
-  const verified = Boolean(freshUser?.emailVerifiedAt || fallbackUser?.emailVerifiedAt);
+  const authState = await fetchFreshCurrentUser();
+
+  if (authState.unauthenticated) {
+    navigate(buildLoginRoute(nextPath));
+    return false;
+  }
+
+  const verified = Boolean(authState.user?.emailVerifiedAt || fallbackUser?.emailVerifiedAt);
 
   if (verified) return true;
 

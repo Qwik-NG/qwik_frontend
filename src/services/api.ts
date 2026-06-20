@@ -63,6 +63,16 @@ type CachedResponse = {
   response: ApiResponse<unknown>;
 };
 
+export class ApiError extends Error {
+  status: number;
+
+  constructor(status: number, message: string) {
+    super(message);
+    this.name = "ApiError";
+    this.status = status;
+  }
+}
+
 const GET_CACHE = new Map<string, CachedResponse>();
 const IN_FLIGHT_GETS = new Map<string, Promise<ApiResponse<unknown>>>();
 const ADS_STALE_TIME = 30_000;
@@ -91,6 +101,18 @@ function friendlyRequestError(status: number, message?: string) {
   if (status === 503) return "Database unavailable. Please try again in a moment.";
   if (status >= 500) return "The server is having trouble. Please try again in a moment.";
   return message ?? "Request failed";
+}
+
+export function isApiError(error: unknown): error is ApiError {
+  return error instanceof ApiError;
+}
+
+export function isUnauthorizedError(error: unknown) {
+  return isApiError(error) && error.status === 401;
+}
+
+export function isForbiddenError(error: unknown): error is ApiError {
+  return isApiError(error) && error.status === 403;
 }
 
 async function request<T>(path: string, init?: ApiRequestInit): Promise<ApiResponse<T>> {
@@ -134,7 +156,7 @@ async function request<T>(path: string, init?: ApiRequestInit): Promise<ApiRespo
             disconnectRealtimeSocket();
             GET_CACHE.clear();
           }
-          const error = new Error(friendlyRequestError(res.status, body.message));
+          const error = new ApiError(res.status, friendlyRequestError(res.status, body.message));
           if (attempt < retry && res.status >= 500) {
             lastError = error;
             await sleep(350 * (attempt + 1));
@@ -181,8 +203,10 @@ async function request<T>(path: string, init?: ApiRequestInit): Promise<ApiRespo
 export { type ApiResponse };
 
 export function isEmailVerificationRequiredError(error: unknown) {
-  if (!(error instanceof Error)) return false;
-  return error.message.trim().toLowerCase() === "email verification required";
+  if (isForbiddenError(error)) {
+    return error.message.trim().toLowerCase() === "email verification required";
+  }
+  return false;
 }
 
 export const api = {

@@ -124,8 +124,11 @@ export function setAcceptedLegalConsentSnapshot(accepted: boolean) {
   localStorage.removeItem(LEGAL_CONSENT_ACCEPTED_KEY);
 }
 
-export function persistLegalConsentFromUser(user: { termsAcceptedAt?: string | null; privacyAcceptedAt?: string | null } | null | undefined) {
-  const accepted = Boolean(user?.termsAcceptedAt && user?.privacyAcceptedAt);
+export function persistLegalConsentFromUser(
+  user: { termsAcceptedAt?: string | null; privacyAcceptedAt?: string | null; emailVerifiedAt?: string | null } | null | undefined,
+) {
+  // Some legacy users may be verified but missing consent timestamps in older records.
+  const accepted = Boolean((user?.termsAcceptedAt && user?.privacyAcceptedAt) || user?.emailVerifiedAt);
   setAcceptedLegalConsentSnapshot(accepted);
 }
 

@@ -99,10 +99,10 @@ export default function App() {
         <Route path={ROUTES.PRODUCTS_WITH_ID} element={lazyRoute(<ProductDetailsPage />)} />
         <Route path={ROUTES.PUBLIC_USER_PROFILE} element={lazyRoute(<PublicProfilePage />)} />
         <Route path="/profile/:id" element={lazyRoute(<PublicProfilePage />)} />
-        <Route path={ROUTES.POST} element={lazyRoute(<ProtectedRoute><PostPage /></ProtectedRoute>)} />
-        <Route path={ROUTES.POST_DETAILS} element={lazyRoute(<ProtectedRoute><PostDetailsPage /></ProtectedRoute>)} />
-        <Route path={ROUTES.NEW_ADVERT_DETAILS} element={lazyRoute(<ProtectedRoute><NewAdvertDetailsPage /></ProtectedRoute>)} />
-        <Route path={ROUTES.PROMOTE_AD} element={lazyRoute(<ProtectedRoute><PromoteAdPage /></ProtectedRoute>)} />
+        <Route path={ROUTES.POST} element={lazyRoute(<ProtectedRoute requireVerifiedEmail><PostPage /></ProtectedRoute>)} />
+        <Route path={ROUTES.POST_DETAILS} element={lazyRoute(<ProtectedRoute requireVerifiedEmail><PostDetailsPage /></ProtectedRoute>)} />
+        <Route path={ROUTES.NEW_ADVERT_DETAILS} element={lazyRoute(<ProtectedRoute requireVerifiedEmail><NewAdvertDetailsPage /></ProtectedRoute>)} />
+        <Route path={ROUTES.PROMOTE_AD} element={lazyRoute(<ProtectedRoute requireVerifiedEmail><PromoteAdPage /></ProtectedRoute>)} />
         <Route path={ROUTES.MAKE_OFFER} element={lazyRoute(<MakeOfferPage />)} />
 
         {/* Search & Discovery */}
