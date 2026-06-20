@@ -274,14 +274,13 @@ export default function ProductDetailsPage() {
           }, 0);
         }
       }
-
-      setLoading(false);
     } catch (err) {
       if (mountedRef.current) {
         setError(err instanceof Error ? err.message : "Failed to load product");
         console.error("Error fetching product:", err);
-        setLoading(false);
       }
+    } finally {
+      setLoading(false);
     }
   }, [id]);
 
