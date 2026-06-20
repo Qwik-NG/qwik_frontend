@@ -108,7 +108,7 @@ export default function MakeOfferPage() {
 
       const response = await createOfferConversation();
       success("Offer sent to the seller.");
-      navigate(`/messages?conversation=${response.data.id}`);
+      navigate(buildProductDetailsRoute(ad.id));
     } catch (err) {
       if (isEmailVerificationRequiredError(err)) {
         const verified = await reconcileVerificationRequiredError({
@@ -129,7 +129,7 @@ export default function MakeOfferPage() {
               offerAmount: amount,
             });
             success("Offer sent to the seller.");
-            navigate(`/messages?conversation=${retryResponse.data.id}`);
+            navigate(buildProductDetailsRoute(ad.id));
             return;
           } catch (retryErr) {
             const retryMessage = retryErr instanceof Error ? retryErr.message : "Unable to send your offer right now.";
