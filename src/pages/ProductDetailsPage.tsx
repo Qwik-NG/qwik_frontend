@@ -13,6 +13,7 @@ import { useToast } from "../context/ToastContext";
 import { useUserCache } from "../hooks/useUserCache";
 import { formatMemberSince } from "../lib/currentUser";
 import { ensureFreshVerifiedEmail } from "../lib/emailVerification";
+import { getAdConditionLabel } from "../lib/adCondition";
 import { isSellerVerified } from "../lib/sellerVerification";
 import { getToken } from "../services/auth";
 import { api } from "../services/api";
@@ -674,7 +675,7 @@ export default function ProductDetailsPage() {
 
   const detailRows = specArray.length > 0
     ? specArray
-    : [["Condition", ad.condition ?? "Not specified"], ["Availability", ad.status ?? "Available"]] as Array<[string, unknown]>;
+    : [["Condition", getAdConditionLabel(ad.condition) ?? "Not specified"], ["Availability", ad.status ?? "Available"]] as Array<[string, unknown]>;
 
   return (
     <div className="min-h-screen bg-page text-ink">
@@ -759,7 +760,9 @@ export default function ProductDetailsPage() {
                 </p>
                 <div className="mt-3 flex items-center gap-2.5">
                   <h2 className="text-[44px] font-semibold leading-none text-[#161420]">₦ {ad.price.toLocaleString()}</h2>
-                  <span className="rounded-[8px] bg-badge-bg px-2 py-1 text-[12px] font-medium text-[#ff9715]">New</span>
+                  {getAdConditionLabel(ad.condition) ? (
+                    <span className="rounded-[8px] bg-badge-bg px-2 py-1 text-[12px] font-medium text-[#ff9715]">{getAdConditionLabel(ad.condition)}</span>
+                  ) : null}
                 </div>
                 <p className="mt-1.5 text-[13px] text-[#57b77a]">Check market price</p>
                 <div className="mt-5 grid grid-cols-[minmax(0,1fr)_auto_auto] items-center gap-2.5 sm:w-fit">

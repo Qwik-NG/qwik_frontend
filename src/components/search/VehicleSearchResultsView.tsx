@@ -21,6 +21,7 @@ import {
 } from "../../lib/mockData";
 import { api } from "../../services/api";
 import type { Ad } from "../../types";
+import { getAdConditionLabel } from "../../lib/adCondition";
 import { getCategoryBubbleImage } from "../../lib/categoryBubbleImages";
 
 type NavigateTo = (to: string) => void;
@@ -174,7 +175,9 @@ function VehicleListCard({ item, onClick }: { item: MockVehicleListing; onClick:
         <div>
           <div className="mb-3 flex items-center justify-between gap-3">
             <h4 className="text-[24px] font-semibold leading-none text-[#1f1d27] sm:text-[28px]">{formatNaira(item.ad.price)}</h4>
-            <span className="rounded-[9px] bg-badge-bg px-2.5 py-1 text-[14px] text-[#ff9715]">New</span>
+            {getAdConditionLabel(item.ad.condition) ? (
+              <span className="rounded-[9px] bg-badge-bg px-2.5 py-1 text-[14px] text-[#ff9715]">{getAdConditionLabel(item.ad.condition)}</span>
+            ) : null}
           </div>
           <h5 className="mb-2 text-[20px] font-medium leading-tight text-[#1f1d27]">{item.ad.title}</h5>
           <p className="mb-3 text-[15px] leading-[1.55] text-[#6d6a74]">{item.ad.description}</p>
@@ -200,7 +203,11 @@ function sortVehicleResults(results: MockVehicleListing[], sortBy: SortValue) {
 
 function toVehicleResult(ad: Ad): MockVehicleListing {
   const brand = VEHICLE_FILTER_BRANDS.includes(ad.brand as VehicleBrand) ? (ad.brand as VehicleBrand) : "Toyota";
-  const condition = VEHICLE_FILTER_CONDITIONS.includes(ad.condition as VehicleCondition) ? (ad.condition as VehicleCondition) : "Local Used";
+  const normalizedCondition = getAdConditionLabel(ad.condition);
+  const conditionForFilter = normalizedCondition === "Nigerian Used" ? "Local Used" : normalizedCondition;
+  const condition = VEHICLE_FILTER_CONDITIONS.includes(conditionForFilter as VehicleCondition)
+    ? (conditionForFilter as VehicleCondition)
+    : "Local Used";
   return { id: ad.id, ad, vehicleType: "Car", brand, condition } as MockVehicleListing;
 }
 
@@ -575,6 +582,8 @@ export default function VehicleSearchResultsView({ query, navigate, view, locati
                       image: item.ad.images?.[0]?.url,
                       verifiedSeller: isSellerVerified(item.ad.user),
                     }}
+                    showBadge={Boolean(getAdConditionLabel(item.ad.condition))}
+                    badgeLabel={getAdConditionLabel(item.ad.condition) ?? undefined}
                     interactive
                     clampTitleLines={2}
                     clampDescriptionLines={3}

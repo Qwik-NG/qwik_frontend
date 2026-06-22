@@ -6,6 +6,7 @@ import { CategoryBubbleAvatar } from "./CategoryBubbleAvatar";
 import { getCategoryBubbleImage, type CategoryBubbleGroup } from "../../lib/categoryBubbleImages";
 import { api } from "../../services/api";
 import type { Ad } from "../../types";
+import { getAdConditionLabel } from "../../lib/adCondition";
 import ListingCard from "../listings/ListingCard";
 import VerifiedSellerBadge from "../listings/VerifiedSellerBadge";
 import BackButton from "../ui/BackButton";
@@ -490,6 +491,8 @@ export default function CategoryListingView({ config, query, navigate, locationF
                     image: ad.images?.[0]?.url,
                     verifiedSeller: isSellerVerified(ad.user),
                   }}
+                    showBadge={Boolean(getAdConditionLabel(ad.condition))}
+                    badgeLabel={getAdConditionLabel(ad.condition) ?? undefined}
                   interactive
                   clampTitleLines={2}
                   clampDescriptionLines={3}
@@ -523,7 +526,11 @@ export default function CategoryListingView({ config, query, navigate, locationF
                   <div className="flex min-w-0 flex-1 flex-col py-1 sm:py-3">
                     <div className="flex flex-wrap items-center gap-2 sm:gap-3">
                       <h3 className="m-0 whitespace-nowrap text-[16px] font-semibold leading-none sm:text-[20px]">{formatNaira(ad.price)}</h3>
-                      <span className="rounded-[10px] bg-[#f5ebdc] px-2 py-1 text-[12px] text-[#ff9715] sm:rounded-[12px] sm:px-3 sm:py-1.5 sm:text-[15px]">New</span>
+                      {getAdConditionLabel(ad.condition) ? (
+                        <span className="rounded-[10px] bg-[#f5ebdc] px-2 py-1 text-[12px] text-[#ff9715] sm:rounded-[12px] sm:px-3 sm:py-1.5 sm:text-[15px]">
+                          {getAdConditionLabel(ad.condition)}
+                        </span>
+                      ) : null}
                     </div>
                     <h4
                       className="mb-1.5 mt-2 text-[15px] font-medium leading-[1.25] sm:mb-2 sm:mt-3 sm:text-[18px]"
