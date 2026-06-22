@@ -19,6 +19,7 @@ import DropdownSelect from "../components/ui/DropdownSelect";
 import { FallbackImage } from "../components/ui/FallbackImage";
 import { ImagePlaceholder } from "../components/ui/ImagePlaceholder";
 import { isBeautySearchQuery, isElectronicsSearchQuery, isFashionSearchQuery, isFurnitureSearchQuery, isJobSearchQuery, isPhonesSearchQuery, isVehicleSearchQuery, mockCategories } from "../lib/mockData";
+import { getAdConditionLabel } from "../lib/adCondition";
 import { ALL_NIGERIA_LOCATION, getCategorySearchContext, getLocationSearchParam, NIGERIAN_LOCATIONS } from "../lib/searchContext";
 import { isSellerVerified } from "../lib/sellerVerification";
 import { api } from "../services/api";
@@ -34,6 +35,7 @@ type Listing = {
   title: string;
   description: string;
   location: string;
+  condition: string | null;
   image?: string;
   verifiedSeller?: boolean;
 };
@@ -125,6 +127,7 @@ function toListing(ad: Ad): Listing {
     title: ad.title,
     description: ad.description,
     location: ad.location,
+    condition: getAdConditionLabel(ad.condition),
     image: ad.images?.[0]?.url,
     verifiedSeller: isSellerVerified(ad.user),
   };
@@ -265,7 +268,9 @@ function ListCard({ item, onClick }: { item: Listing; onClick: () => void }) {
         <div>
           <div className="mb-3 flex flex-wrap items-center gap-3">
             <h4 className="min-w-0 text-[24px] font-semibold leading-none text-[#1f1d27] sm:text-[28px]">{item.price}</h4>
-            <span className="shrink-0 rounded-[9px] bg-badge-bg px-2.5 py-1 text-[14px] text-[#ff9715]">New</span>
+            {item.condition ? (
+              <span className="shrink-0 rounded-[9px] bg-badge-bg px-2.5 py-1 text-[14px] text-[#ff9715]">{item.condition}</span>
+            ) : null}
           </div>
           <h5 className="mb-2 text-[20px] font-medium leading-tight text-[#1f1d27]">{item.title}</h5>
           <p className="mb-3 text-[15px] leading-[1.55] text-[#6d6a74]">{item.description}</p>
