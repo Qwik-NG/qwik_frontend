@@ -15,7 +15,6 @@ import { LocationPin } from "../icons/LocationPin";
 import { ImagePlaceholder } from "../ui/ImagePlaceholder";
 import DropdownSelect from "../ui/DropdownSelect";
 import {
-  type MockVehicleListing,
   type VehicleCondition,
   type VehicleType,
 } from "../../lib/mockData";
@@ -23,13 +22,22 @@ import { api } from "../../services/api";
 import type { Ad } from "../../types";
 import { getAdConditionLabel } from "../../lib/adCondition";
 import { getCategoryBubbleImage } from "../../lib/categoryBubbleImages";
+import { getVehicleBrandOptionsByType } from "../../lib/brandOptions";
 
 type NavigateTo = (to: string) => void;
 type SortValue = "newest" | "price-low" | "price-high";
 type VerifiedValue = "all" | "verified" | "unverified";
 type VehicleView = "grid" | "list";
 
-type VehicleBrand = MockVehicleListing["brand"];
+type VehicleBrand = string;
+
+type VehicleListing = {
+  id: string;
+  ad: Ad;
+  vehicleType: VehicleType;
+  brand: VehicleBrand;
+  condition: VehicleCondition;
+};
 
 type VehicleSearchResultsViewProps = {
   query: string;
@@ -38,14 +46,7 @@ type VehicleSearchResultsViewProps = {
   locationFilter?: string;
 };
 
-const VEHICLE_FILTER_TYPES: Array<"all" | VehicleType> = [
-  "all",
-  "Car",
-  "Buses",
-  "Motorcycle & Scooters",
-  "Buses & Microbuses",
-];
-const VEHICLE_FILTER_BRANDS: Array<"all" | VehicleBrand> = ["all", "Benz", "Toyota", "Honda"];
+const VEHICLE_FILTER_TYPES: Array<"all" | VehicleType> = ["all", "Car", "Motorcycle & Scooters", "Buses", "Buses & Microbuses"];
 const VEHICLE_FILTER_CONDITIONS: Array<"all" | VehicleCondition> = [
   "all",
   "Brand New",
@@ -62,16 +63,40 @@ const SORT_OPTIONS: Array<{ label: string; value: SortValue }> = [
   { label: "Price: Low to High", value: "price-low" },
   { label: "Price: High to Low", value: "price-high" },
 ];
-const BRAND_STRIP: Array<{ name: VehicleBrand; mark: string; textClassName?: string }> = [
-  { name: "Benz", mark: "MB", textClassName: "text-white" },
-  { name: "Toyota", mark: "TY" },
-  { name: "Honda", mark: "HN" },
-  { name: "Ford", mark: "FD" },
-  { name: "Lexus", mark: "LX" },
-  { name: "Nissan", mark: "NS" },
-  { name: "BMW", mark: "BM", textClassName: "text-white" },
-  { name: "Audi", mark: "AU" },
-];
+const TYPE_LABELS: Record<VehicleType, string> = {
+  Car: "Cars",
+  "Motorcycle & Scooters": "Motorcycles & Scooters",
+  Buses: "Buses",
+  "Buses & Microbuses": "Buses & Microbuses",
+};
+
+function initialsForBrand(brand: string) {
+  const parts = brand.split(/\s+/).filter(Boolean);
+  if (parts.length === 0) return "BR";
+  if (parts.length === 1) return parts[0].slice(0, 2).toUpperCase();
+  return `${parts[0][0] ?? ""}${parts[1][0] ?? ""}`.toUpperCase();
+}
+
+function inferVehicleTypeFromText(value?: string): VehicleType {
+  const token = (value ?? "").trim().toLowerCase();
+  if (!token) return "Car";
+  if (token.includes("motor") || token.includes("scooter") || token.includes("bike")) return "Motorcycle & Scooters";
+  if (token.includes("microbus")) return "Buses & Microbuses";
+  if (token.includes("bus")) return "Buses";
+  if (token.includes("truck") || token.includes("lorry") || token.includes("van")) return "Buses";
+  return "Car";
+}
+
+function inferVehicleTypeFromQuery(query: string): "all" | VehicleType {
+  const token = query.trim().toLowerCase();
+  if (!token || token === "vehicle" || token === "vehicles") return "all";
+  if (token.includes("motor") || token.includes("scooter") || token.includes("bike")) return "Motorcycle & Scooters";
+  if (token.includes("microbus")) return "Buses & Microbuses";
+  if (token.includes("bus")) return "Buses";
+  if (token.includes("truck") || token.includes("lorry") || token.includes("van")) return "Buses";
+  if (token.includes("car") || token.includes("suv") || token.includes("sedan")) return "Car";
+  return "all";
+}
 
 function formatNaira(value: number) {
   return `₦ ${value.toLocaleString()}`;
@@ -131,7 +156,7 @@ function BrandBubble({
   onClick,
   textClassName,
 }: {
-  name: VehicleBrand;
+  name: string;
   mark: string;
   active: boolean;
   onClick: () => void;
@@ -155,7 +180,7 @@ function BrandBubble({
   );
 }
 
-function VehicleListCard({ item, onClick }: { item: MockVehicleListing; onClick: () => void }) {
+function VehicleListCard({ item, onClick }: { item: VehicleListing; onClick: () => void }) {
   return (
     <article className="cursor-pointer rounded-[24px] border border-[#ddd9d2] bg-white p-3 shadow-[0_8px_24px_rgba(31,29,39,0.05)] sm:p-4" onClick={onClick}>
       <div className="grid grid-cols-1 items-center gap-4 md:grid-cols-[280px_minmax(0,1fr)]">
@@ -191,7 +216,7 @@ function VehicleListCard({ item, onClick }: { item: MockVehicleListing; onClick:
   );
 }
 
-function sortVehicleResults(results: MockVehicleListing[], sortBy: SortValue) {
+function sortVehicleResults(results: VehicleListing[], sortBy: SortValue) {
   return [...results].sort((left, right) => {
     if (sortBy === "price-low") return left.ad.price - right.ad.price;
     if (sortBy === "price-high") return right.ad.price - left.ad.price;
@@ -201,14 +226,15 @@ function sortVehicleResults(results: MockVehicleListing[], sortBy: SortValue) {
   });
 }
 
-function toVehicleResult(ad: Ad): MockVehicleListing {
-  const brand = VEHICLE_FILTER_BRANDS.includes(ad.brand as VehicleBrand) ? (ad.brand as VehicleBrand) : "Toyota";
+function toVehicleResult(ad: Ad): VehicleListing {
+  const brand = ad.brand?.trim() || "Other";
+  const vehicleType = inferVehicleTypeFromText(ad.category?.name || ad.category?.slug);
   const normalizedCondition = getAdConditionLabel(ad.condition);
   const conditionForFilter = normalizedCondition === "Nigerian Used" ? "Local Used" : normalizedCondition;
   const condition = VEHICLE_FILTER_CONDITIONS.includes(conditionForFilter as VehicleCondition)
     ? (conditionForFilter as VehicleCondition)
     : "Local Used";
-  return { id: ad.id, ad, vehicleType: "Car", brand, condition } as MockVehicleListing;
+  return { id: ad.id, ad, vehicleType, brand, condition };
 }
 
 function VehicleFilters({
@@ -227,6 +253,7 @@ function VehicleFilters({
   maxPrice,
   selectedCondition,
   onSelectedConditionChange,
+  brandOptions,
 }: {
   selectedType: "all" | VehicleType;
   onSelectedTypeChange: (value: "all" | VehicleType) => void;
@@ -243,11 +270,13 @@ function VehicleFilters({
   maxPrice: number;
   selectedCondition: "all" | VehicleCondition;
   onSelectedConditionChange: (value: "all" | VehicleCondition) => void;
+  brandOptions: VehicleBrand[];
 }) {
   const [showAllTypes, setShowAllTypes] = useState(false);
   const [showAllBrands, setShowAllBrands] = useState(false);
   const visibleTypeOptions = showAllTypes ? VEHICLE_FILTER_TYPES : VEHICLE_FILTER_TYPES.slice(0, 4);
-  const visibleBrandOptions = showAllBrands ? VEHICLE_FILTER_BRANDS : VEHICLE_FILTER_BRANDS.slice(0, 3);
+  const brandFilterOptions: Array<"all" | VehicleBrand> = ["all", ...brandOptions];
+  const visibleBrandOptions = showAllBrands ? brandFilterOptions : brandFilterOptions.slice(0, 3);
 
   return (
     <div className="space-y-4">
@@ -301,21 +330,25 @@ function VehicleFilters({
       </FilterPanel>
 
       <FilterPanel title="Brand">
-        <div className="space-y-3">
-          {visibleBrandOptions.map((option) => (
-            <FilterOption
-              key={option}
-              label={option === "all" ? "Show All" : option}
-              checked={selectedBrand === option}
-              onClick={() => onSelectedBrandChange(option)}
-            />
-          ))}
-          {VEHICLE_FILTER_BRANDS.length > 3 ? (
-            <button type="button" className="pt-1 text-[15px] text-[#1f1d27]" onClick={() => setShowAllBrands((current) => !current)}>
-              {showAllBrands ? "Show less" : "Show more"}
-            </button>
-          ) : null}
-        </div>
+        {brandOptions.length === 0 ? (
+          <p className="text-[14px] text-[#6d6a74]">Select a vehicle category to see brand options.</p>
+        ) : (
+          <div className="space-y-3">
+            {visibleBrandOptions.map((option) => (
+              <FilterOption
+                key={option}
+                label={option === "all" ? "Show All" : option}
+                checked={selectedBrand === option}
+                onClick={() => onSelectedBrandChange(option)}
+              />
+            ))}
+            {brandFilterOptions.length > 3 ? (
+              <button type="button" className="pt-1 text-[15px] text-[#1f1d27]" onClick={() => setShowAllBrands((current) => !current)}>
+                {showAllBrands ? "Show less" : "Show more"}
+              </button>
+            ) : null}
+          </div>
+        )}
       </FilterPanel>
 
       <FilterPanel title="Verified Sellers">
@@ -365,12 +398,18 @@ function VehicleFilters({
 }
 
 export default function VehicleSearchResultsView({ query, navigate, view, locationFilter }: VehicleSearchResultsViewProps) {
-  const [selectedType, setSelectedType] = useState<"all" | VehicleType>("Car");
+  const [selectedType, setSelectedType] = useState<"all" | VehicleType>(() => inferVehicleTypeFromQuery(query));
   const [sortBy, setSortBy] = useState<SortValue>("newest");
   const [selectedBrand, setSelectedBrand] = useState<"all" | VehicleBrand>("all");
   const [verifiedFilter, setVerifiedFilter] = useState<VerifiedValue>("all");
-  const [vehicleResults, setVehicleResults] = useState<MockVehicleListing[]>([]);
+  const [vehicleResults, setVehicleResults] = useState<VehicleListing[]>([]);
   const [resultTotal, setResultTotal] = useState(0);
+  const brandOptions = useMemo(() => (selectedType === "all" ? [] : getVehicleBrandOptionsByType(selectedType)), [selectedType]);
+  const brandStrip = useMemo(
+    () => brandOptions.map((name) => ({ name, mark: initialsForBrand(name) })),
+    [brandOptions],
+  );
+  const categoryHeading = selectedType === "all" ? "Vehicles in Nigeria" : `${TYPE_LABELS[selectedType]} in Nigeria`;
   const maxPrice = useMemo(
     () => Math.max(...vehicleResults.map((item) => item.ad.price), 100200000),
     [vehicleResults],
@@ -409,7 +448,7 @@ export default function VehicleSearchResultsView({ query, navigate, view, locati
   }, [query, locationFilter]);
 
   useEffect(() => {
-    setSelectedType("Car");
+    setSelectedType(inferVehicleTypeFromQuery(query));
     setSortBy("newest");
     setSelectedBrand("all");
     setVerifiedFilter("all");
@@ -417,6 +456,12 @@ export default function VehicleSearchResultsView({ query, navigate, view, locati
     setSelectedMaxPrice(100200000);
     setMobileFiltersOpen(false);
   }, [query]);
+
+  useEffect(() => {
+    if (selectedBrand === "all") return;
+    if (brandOptions.includes(selectedBrand)) return;
+    setSelectedBrand("all");
+  }, [brandOptions, selectedBrand]);
 
   const filteredResults = useMemo(
     () =>
@@ -469,6 +514,7 @@ export default function VehicleSearchResultsView({ query, navigate, view, locati
                 maxPrice={maxPrice}
                 selectedCondition={selectedCondition}
                 onSelectedConditionChange={setSelectedCondition}
+                brandOptions={brandOptions}
               />
             </div>
           </div>
@@ -492,6 +538,7 @@ export default function VehicleSearchResultsView({ query, navigate, view, locati
               maxPrice={maxPrice}
               selectedCondition={selectedCondition}
               onSelectedConditionChange={setSelectedCondition}
+              brandOptions={brandOptions}
             />
           </aside>
 
@@ -512,7 +559,7 @@ export default function VehicleSearchResultsView({ query, navigate, view, locati
                   <h1 className="text-[28px] font-medium tracking-[-0.02em] text-[#1f1d27] sm:text-[36px]">
                     Found <span className="text-[#ff9715]">{resultTotal.toLocaleString()}</span> results for “Vehicles”
                   </h1>
-                  <p className="mt-3 text-[24px] font-medium text-[#1f1d27]">Cars in Nigeria</p>
+                  <p className="mt-3 text-[24px] font-medium text-[#1f1d27]">{categoryHeading}</p>
                 </div>
               </div>
               <div className="flex items-center gap-2 self-start pt-1">
@@ -538,18 +585,21 @@ export default function VehicleSearchResultsView({ query, navigate, view, locati
             </div>
 
             <div className="mb-8 overflow-x-auto rounded-[28px] border border-[#ddd9d2] bg-white px-4 py-5 shadow-[0_8px_24px_rgba(31,29,39,0.05)] sm:px-6">
-              <div className="flex min-w-max items-start gap-6 sm:gap-8">
-                {BRAND_STRIP.map((brand) => (
-                  <BrandBubble
-                    key={brand.name}
-                    name={brand.name}
-                    mark={brand.mark}
-                    textClassName={brand.textClassName}
-                    active={selectedBrand === brand.name}
-                    onClick={() => setSelectedBrand((current) => (current === brand.name ? "all" : brand.name))}
-                  />
-                ))}
-              </div>
+              {brandStrip.length === 0 ? (
+                <p className="text-[14px] text-[#6d6a74]">Select a vehicle category to browse brand quick filters.</p>
+              ) : (
+                <div className="flex min-w-max items-start gap-6 sm:gap-8">
+                  {brandStrip.map((brand) => (
+                    <BrandBubble
+                      key={brand.name}
+                      name={brand.name}
+                      mark={brand.mark}
+                      active={selectedBrand === brand.name}
+                      onClick={() => setSelectedBrand((current) => (current === brand.name ? "all" : brand.name))}
+                    />
+                  ))}
+                </div>
+              )}
             </div>
 
             {filteredResults.length === 0 ? (
