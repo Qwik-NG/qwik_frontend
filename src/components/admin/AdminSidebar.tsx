@@ -9,6 +9,7 @@ import {
   CheckCircle,
   MessageSquare,
   ClipboardList,
+  Mail,
   LogOut 
 } from 'lucide-react';
 
@@ -28,6 +29,7 @@ export default function AdminSidebar({ className = '' }: AdminSidebarProps) {
     { label: 'Reviews', icon: MessageSquare, path: '/admin/reviews' },
     { label: 'Verification', icon: CheckCircle, path: '/admin/verification' },
     { label: 'Audit Log', icon: ClipboardList, path: '/admin/audit-log' },
+    { label: 'Communications', icon: Mail, path: '/admin/communications' },
   ];
 
   const isActive = (path: string) => location.pathname === path;
