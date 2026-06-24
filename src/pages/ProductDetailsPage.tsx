@@ -1,18 +1,19 @@
 import { useCallback, useEffect, useState } from "react";
-import { useNavigate, useParams } from "react-router-dom";
+import { useLocation, useNavigate, useParams } from "react-router-dom";
 import Lightbox from "yet-another-react-lightbox";
 import Counter from "yet-another-react-lightbox/plugins/counter";
 import Zoom from "yet-another-react-lightbox/plugins/zoom";
 import "yet-another-react-lightbox/styles.css";
 import "yet-another-react-lightbox/plugins/counter.css";
 import { SiteFooter, SiteHeader } from "../components/AppShell";
+import { ROUTES } from "../constants/routes";
 import { FallbackImage } from "../components/ui/FallbackImage";
 import { ImagePlaceholder } from "../components/ui/ImagePlaceholder";
 import { UserAvatar } from "../components/ui/UserAvatar";
 import { useToast } from "../context/ToastContext";
 import { useUserCache } from "../hooks/useUserCache";
 import { formatMemberSince } from "../lib/currentUser";
-import { ensureFreshVerifiedEmail } from "../lib/emailVerification";
+import { buildLoginRoute, ensureFreshVerifiedEmail } from "../lib/emailVerification";
 import { getAdConditionLabel } from "../lib/adCondition";
 import { isSellerVerified } from "../lib/sellerVerification";
 import { getToken } from "../services/auth";
@@ -187,7 +188,8 @@ function ProductDetailsSkeleton({ navigate }: { navigate: (to: string) => void }
 
 export default function ProductDetailsPage() {
   const navigate = useNavigate();
-  const { error: showError, info, success } = useToast();
+  const location = useLocation();
+  const { error: showError, info, success, showToast } = useToast();
   const { id } = useParams<{ id: string }>();
   const cachedUserResult = useUserCache();
   const [ad, setAd] = useState<Ad | null>(null);
@@ -447,13 +449,32 @@ export default function ProductDetailsPage() {
 
   const handleChatSeller = async () => {
     const token = getToken();
+    const currentPath = `${location.pathname}${location.search}`;
+
     if (!token) {
-      alert("Please log in to chat with the seller");
+      showToast({
+        title: "Login Required",
+        message: "Please sign in or create an account to chat with the seller.",
+        actions: [
+          {
+            label: "Sign In",
+            onClick: () => navigate(buildLoginRoute(currentPath)),
+          },
+          {
+            label: "Create Account",
+            onClick: () => {
+              const params = new URLSearchParams({ next: currentPath });
+              navigate(`${ROUTES.SIGNUP}?${params.toString()}`);
+            },
+          },
+        ],
+        durationMs: 7000,
+      });
       return;
     }
 
     if (!ad?.user?.id) {
-      alert("Seller information is unavailable for this ad");
+      showError("Seller information is unavailable for this ad");
       return;
     }
 

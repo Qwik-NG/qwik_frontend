@@ -12,14 +12,31 @@ import { Toast } from "../components/ui/Toast";
 
 export type ToastVariant = "success" | "error" | "info";
 
-export type ToastMessage = {
-  id: number;
-  message: string;
-  variant: ToastVariant;
+export type ToastAction = {
+  label: string;
+  onClick: () => void;
 };
 
+export type ToastMessage = {
+  id: number;
+  title?: string;
+  message: string;
+  variant: ToastVariant;
+  actions?: ToastAction[];
+};
+
+type ToastInput =
+  | string
+  | {
+      title?: string;
+      message: string;
+      variant?: ToastVariant;
+      actions?: ToastAction[];
+      durationMs?: number;
+    };
+
 type ToastContextValue = {
-  showToast: (message: string, variant?: ToastVariant) => void;
+  showToast: (message: ToastInput, variant?: ToastVariant) => void;
   success: (message: string) => void;
   error: (message: string) => void;
   info: (message: string) => void;
@@ -44,15 +61,29 @@ export function ToastProvider({ children }: { children: ReactNode }) {
   }, []);
 
   const showToast = useCallback(
-    (message: string, variant: ToastVariant = "info") => {
+    (input: ToastInput, variant: ToastVariant = "info") => {
       const id = nextIdRef.current + 1;
       nextIdRef.current = id;
 
-      setToasts((currentToasts) => [...currentToasts, { id, message, variant }]);
+      const toast =
+        typeof input === "string"
+          ? { id, message: input, variant }
+          : {
+              id,
+              title: input.title,
+              message: input.message,
+              variant: input.variant ?? variant,
+              actions: input.actions,
+            };
+
+      setToasts((currentToasts) => [...currentToasts, toast]);
+
+      const timeoutDuration = typeof input === "string" ? TOAST_DURATION : (input.durationMs ?? TOAST_DURATION);
+      if (timeoutDuration <= 0) return;
 
       const timeoutId = window.setTimeout(() => {
         removeToast(id);
-      }, TOAST_DURATION);
+      }, timeoutDuration);
 
       timeoutsRef.current.set(id, timeoutId);
     },

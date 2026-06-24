@@ -48,8 +48,25 @@ export function Toast({
               </div>
 
               <div className="min-w-0 flex-1">
-                <p className="text-[13px] font-semibold leading-none">{styles.label}</p>
+                <p className="text-[13px] font-semibold leading-none">{toast.title || styles.label}</p>
                 <p className="mt-1 text-[14px] leading-[1.45] text-[#4b4a54]">{toast.message}</p>
+                {toast.actions && toast.actions.length > 0 ? (
+                  <div className="mt-3 flex flex-wrap gap-2">
+                    {toast.actions.map((action, index) => (
+                      <button
+                        key={`${toast.id}-${index}`}
+                        className="pointer-events-auto rounded-[9px] border border-[#dedee1] bg-white px-3 py-1.5 text-[12px] font-semibold text-[#2c3454] transition-colors duration-200 hover:bg-[#f6f7fb] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#ffb357] focus-visible:ring-offset-2 focus-visible:ring-offset-white"
+                        onClick={() => {
+                          action.onClick();
+                          onDismiss(toast.id);
+                        }}
+                        type="button"
+                      >
+                        {action.label}
+                      </button>
+                    ))}
+                  </div>
+                ) : null}
               </div>
 
               <button
