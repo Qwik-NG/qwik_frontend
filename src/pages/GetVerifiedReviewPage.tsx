@@ -69,8 +69,8 @@ function StepDot({ label, status }: { label: string; status: "completed" | "acti
   const labelText = label === "1" ? "Business info" : label === "2" ? "Documents" : label === "3" ? "Review" : "Payment";
   const statusText = status === "completed" ? "Completed" : status === "active" ? "In Progress" : "Pending";
   return (
-    <div className="flex flex-col items-center gap-2 text-center">
-      <span className={`flex h-[30px] w-[30px] items-center justify-center rounded-full border ${isActive ? "border-[#ff8b2c] bg-[#ff8b2c] text-white" : "border-[#d7d5de] bg-white text-[#1f1d27]"}`}>
+    <div className="relative z-10 flex flex-col items-center gap-2 text-center">
+      <span className={`relative z-10 flex h-[30px] w-[30px] items-center justify-center rounded-full border ${isActive ? "border-[#ff8b2c] bg-[#ff8b2c] text-white" : "border-[#d7d5de] bg-white text-[#1f1d27]"}`}>
         {label}
       </span>
       <p className="text-[14px] font-medium text-[#1f1d27]">{labelText}</p>
@@ -168,8 +168,8 @@ export default function GetVerifiedReviewPage() {
             </div>
 
             <div className="relative mt-6">
-              <div className="absolute left-0 right-0 top-[15px] hidden h-[2px] bg-[#d7d5de] md:block" />
-              <div className="absolute left-0 top-[15px] hidden h-[2px] w-[72%] bg-[#ff8b2c] md:block" />
+              <div className="absolute left-0 right-0 top-[15px] z-0 hidden h-[2px] bg-[#d7d5de] md:block" />
+              <div className="absolute left-0 top-[15px] z-0 hidden h-[2px] w-[72%] bg-[#ff8b2c] md:block" />
               <div className="grid grid-cols-2 gap-6 md:grid-cols-4">
                 <StepDot label="1" status="completed" />
                 <StepDot label="2" status="completed" />

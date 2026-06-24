@@ -1,4 +1,4 @@
-import { useEffect, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { SiteFooter, SiteHeader } from "../components/AppShell";
 import SettingsSidebar, { MobileSettingsMenu } from "../components/settings/SettingsSidebar";
@@ -77,8 +77,8 @@ function CalendarIcon() {
 
 function StepDot({ active, label }: { active?: boolean; label: string }) {
   return (
-    <div className="flex flex-col items-center gap-2 text-center">
-      <span className={`flex h-[30px] w-[30px] items-center justify-center rounded-full border ${active ? "border-[#ff8b2c] bg-[#ff8b2c] text-white" : "border-[#d7d5de] bg-white text-[#1f1d27]"}`}>
+    <div className="relative z-10 flex flex-col items-center gap-2 text-center">
+      <span className={`relative z-10 flex h-[30px] w-[30px] items-center justify-center rounded-full border ${active ? "border-[#ff8b2c] bg-[#ff8b2c] text-white" : "border-[#d7d5de] bg-white text-[#1f1d27]"}`}>
         {label}
       </span>
       <p className="text-[14px] font-medium text-[#1f1d27]">{label === "1" ? "Business info" : label === "2" ? "Documents" : label === "3" ? "Review" : "Payment"}</p>
@@ -91,9 +91,11 @@ export default function GetVerifiedBusinessInfoPage() {
   const navigate = useNavigate();
   const [verificationId, setVerificationId] = useState<string | null>(null);
   const [form, setForm] = useState<BusinessInfo>(emptyBusinessInfo);
+  const [fieldErrors, setFieldErrors] = useState<Partial<Record<keyof BusinessInfo, string>>>({});
   const [loading, setLoading] = useState(true);
   const [saving, setSaving] = useState(false);
   const [error, setError] = useState<string | null>(null);
+  const savingRef = useRef(false);
 
   useEffect(() => {
     let mounted = true;
@@ -120,13 +122,53 @@ export default function GetVerifiedBusinessInfoPage() {
 
   const updateField = (field: keyof BusinessInfo, value: string) => {
     setForm((current) => ({ ...current, [field]: value }));
+    setFieldErrors((current) => {
+      if (!current[field]) return current;
+      const next = { ...current };
+      delete next[field];
+      return next;
+    });
   };
 
   const stateOptions = NIGERIAN_LOCATIONS.filter((location) => location !== ALL_NIGERIA_LOCATION);
   const cityOptions = form.state ? NIGERIAN_AREAS[form.state] ?? [] : [];
 
+  const validateForm = () => {
+    const nextErrors: Partial<Record<keyof BusinessInfo, string>> = {};
+    const requiredFields: Array<[keyof BusinessInfo, string]> = [
+      ["businessName", "Business Name"],
+      ["storeName", "Store Name"],
+      ["businessType", "Business Type"],
+      ["businessCategory", "Business Category"],
+      ["email", "Email Address"],
+      ["phone", "Phone Number"],
+      ["address", "Business Address"],
+      ["state", "State"],
+      ["city", "City / Area"],
+      ["nin", "NIN Number"],
+    ];
+
+    for (const [field, label] of requiredFields) {
+      if (!form[field].trim()) {
+        nextErrors[field] = `${label} is required.`;
+      }
+    }
+
+    return nextErrors;
+  };
+
   const handleContinue = async () => {
+    if (savingRef.current) return;
+
+    const nextErrors = validateForm();
+    setFieldErrors(nextErrors);
+    if (Object.keys(nextErrors).length > 0) {
+      setError("Please complete all required fields before continuing.");
+      return;
+    }
+
     try {
+      savingRef.current = true;
       setSaving(true);
       setError(null);
       const id = verificationId ?? (await api.createVerification()).data.id;
@@ -136,6 +178,7 @@ export default function GetVerifiedBusinessInfoPage() {
     } catch (err) {
       setError(err instanceof Error ? err.message : "Failed to save business information");
     } finally {
+      savingRef.current = false;
       setSaving(false);
     }
   };
@@ -164,8 +207,8 @@ export default function GetVerifiedBusinessInfoPage() {
             </div>
 
             <div className="relative mt-6">
-              <div className="absolute left-0 right-0 top-[15px] hidden h-[2px] bg-[#d7d5de] md:block" />
-              <div className="absolute left-0 top-[15px] hidden h-[2px] w-[12.5%] bg-[#ff8b2c] md:block" />
+              <div className="absolute left-0 right-0 top-[15px] z-0 hidden h-[2px] bg-[#d7d5de] md:block" />
+              <div className="absolute left-0 top-[15px] z-0 hidden h-[2px] w-[12.5%] bg-[#ff8b2c] md:block" />
               <div className="grid grid-cols-2 gap-6 md:grid-cols-4">
                 <StepDot active label="1" />
                 <StepDot label="2" />
@@ -189,6 +232,7 @@ export default function GetVerifiedBusinessInfoPage() {
                   placeholder="Enter your business name"
                   value={form.businessName}
                   onChange={(event) => updateField("businessName", event.target.value)}
+                  error={fieldErrors.businessName}
                   labelClassName="text-[14px] font-medium text-[#1f1d27]"
                   inputClassName="bg-white border-[#c9c7d2]"
                 />
@@ -198,6 +242,7 @@ export default function GetVerifiedBusinessInfoPage() {
                   placeholder="Enter your store name"
                   value={form.storeName}
                   onChange={(event) => updateField("storeName", event.target.value)}
+                  error={fieldErrors.storeName}
                   labelClassName="text-[14px] font-medium text-[#1f1d27]"
                   inputClassName="bg-white border-[#c9c7d2]"
                 />
@@ -205,6 +250,7 @@ export default function GetVerifiedBusinessInfoPage() {
                   label="Business Type"
                   value={form.businessType}
                   onChange={(event) => updateField("businessType", event.target.value)}
+                  error={fieldErrors.businessType}
                   labelClassName="text-[14px] font-medium text-[#1f1d27]"
                   selectClassName="bg-white border-[#c9c7d2]"
                 >
@@ -217,6 +263,7 @@ export default function GetVerifiedBusinessInfoPage() {
                   label="Business Category"
                   value={form.businessCategory}
                   onChange={(event) => updateField("businessCategory", event.target.value)}
+                  error={fieldErrors.businessCategory}
                   labelClassName="text-[14px] font-medium text-[#1f1d27]"
                   selectClassName="bg-white border-[#c9c7d2]"
                 >
@@ -239,6 +286,7 @@ export default function GetVerifiedBusinessInfoPage() {
                   placeholder="Enter email address"
                   value={form.email}
                   onChange={(event) => updateField("email", event.target.value)}
+                  error={fieldErrors.email}
                   labelClassName="text-[14px] font-medium text-[#1f1d27]"
                   inputClassName="bg-white border-[#c9c7d2]"
                 />
@@ -248,6 +296,7 @@ export default function GetVerifiedBusinessInfoPage() {
                   placeholder="Enter phone number"
                   value={form.phone}
                   onChange={(event) => updateField("phone", event.target.value)}
+                  error={fieldErrors.phone}
                   labelClassName="text-[14px] font-medium text-[#1f1d27]"
                   inputClassName="bg-white border-[#c9c7d2]"
                 />
@@ -257,6 +306,7 @@ export default function GetVerifiedBusinessInfoPage() {
                   placeholder="Enter your business address"
                   value={form.address}
                   onChange={(event) => updateField("address", event.target.value)}
+                  error={fieldErrors.address}
                   labelClassName="text-[14px] font-medium text-[#1f1d27]"
                   inputClassName="bg-white border-[#c9c7d2]"
                   containerClassName="md:col-span-2"
@@ -271,7 +321,14 @@ export default function GetVerifiedBusinessInfoPage() {
                       state: nextState,
                       city: "",
                     }));
+                    setFieldErrors((current) => {
+                      const next = { ...current };
+                      delete next.state;
+                      delete next.city;
+                      return next;
+                    });
                   }}
+                  error={fieldErrors.state}
                   labelClassName="text-[14px] font-medium text-[#1f1d27]"
                   selectClassName="bg-white border-[#c9c7d2]"
                 >
@@ -285,6 +342,7 @@ export default function GetVerifiedBusinessInfoPage() {
                     label="City / Area"
                     value={form.city}
                     onChange={(event) => updateField("city", event.target.value)}
+                    error={fieldErrors.city}
                     labelClassName="text-[14px] font-medium text-[#1f1d27]"
                     selectClassName="bg-white border-[#c9c7d2]"
                   >
@@ -298,6 +356,7 @@ export default function GetVerifiedBusinessInfoPage() {
                     label="City / Area"
                     value=""
                     onChange={() => {}}
+                    error={fieldErrors.city}
                     labelClassName="text-[14px] font-medium text-[#1f1d27]"
                     selectClassName="bg-white border-[#c9c7d2]"
                     disabled
@@ -319,6 +378,7 @@ export default function GetVerifiedBusinessInfoPage() {
                   placeholder="Enter your NIN number"
                   value={form.nin}
                   onChange={(event) => updateField("nin", event.target.value)}
+                  error={fieldErrors.nin}
                   labelClassName="text-[14px] font-medium text-[#1f1d27]"
                   inputClassName="bg-white border-[#c9c7d2]"
                 />
@@ -341,12 +401,12 @@ export default function GetVerifiedBusinessInfoPage() {
 
               <div className="mt-4 flex justify-end">
                 <button
-                  className="flex h-[48px] items-center gap-3 rounded-[12px] bg-gradient-to-r from-amber to-orange px-5 text-[14px] font-medium text-white shadow-glow"
+                  className="flex h-[48px] items-center gap-3 rounded-[12px] bg-gradient-to-r from-amber to-orange px-5 text-[14px] font-medium text-white shadow-glow disabled:cursor-not-allowed disabled:opacity-70"
                   type="button"
                   onClick={handleContinue}
                   disabled={loading || saving}
                 >
-                  <span>{saving ? "Saving..." : "Continue to upload Document"}</span>
+                  <span>{saving ? "Processing..." : "Continue to upload Document"}</span>
                   <span className="text-[18px]">-&gt;</span>
                 </button>
               </div>
