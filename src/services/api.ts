@@ -730,6 +730,14 @@ export const api = {
     ]);
   },
 
+  // ===== Admin Communications =====
+
+  adminSendTestEmail: (payload: { subject: string; message: string }) =>
+    request<{ recipient: string; sent: boolean; messageId?: string | null }>("/admin/communications/test-email", {
+      method: "POST",
+      body: JSON.stringify(payload),
+    }),
+
   // ===== Offer Endpoints (Future) =====
   // TODO: createOffer - make offer on ad
   // createOffer: (payload: OfferCreatePayload) => request<Offer>("/offers", { method: "POST", body: JSON.stringify(payload) }),
