@@ -172,7 +172,7 @@ export default function AdminAds() {
 
     const actions: AdminRowActionItem[] = [
       {
-        label: 'View ad',
+        label: 'View details',
         onClick: () => void openAdPreview(ad),
         icon: (
           <svg viewBox="0 0 24 24" className="h-4 w-4" fill="none" stroke="currentColor" strokeWidth="2" aria-hidden="true">
@@ -221,7 +221,8 @@ export default function AdminAds() {
   };
 
   const previewStatus = previewAd?.status || 'ACTIVE';
-  const previewImage = previewDetails?.images?.[0]?.url;
+  const previewMainImage = previewDetails?.images?.[0]?.url || previewAd?.images?.[0]?.url;
+  const previewImages = previewDetails?.images || [];
   const previewDescription = previewDetails?.description || previewAd?.description || 'No description available.';
 
   if (loading) {
@@ -314,8 +315,19 @@ export default function AdminAds() {
           <div className="space-y-3 lg:hidden">
             {ads.map((ad) => {
               const status = ad.status || 'ACTIVE';
+              const thumbnail = ad.images?.[0]?.url;
               return (
                 <article key={ad.id} className={`rounded-[14px] border bg-white p-4 shadow-sm ${ad._count.reports > 0 ? 'border-[#f2d4d4]' : 'border-[#e8e8ea]'}`}>
+                  <div className="mb-3 overflow-hidden rounded-[10px] border border-[#ece9f1] bg-[#f6f5f8]">
+                    {thumbnail ? (
+                      <img src={thumbnail} alt={ad.title} className="h-[150px] w-full object-cover" />
+                    ) : (
+                      <div className="grid h-[150px] w-full place-items-center text-[13px] text-[#7d7888]">
+                        Image unavailable
+                      </div>
+                    )}
+                  </div>
+
                   <div className="flex items-start justify-between gap-3">
                     <div>
                       <p className="text-[15px] font-semibold text-[#1f1f29]">{ad.title}</p>
@@ -334,6 +346,13 @@ export default function AdminAds() {
                     <div><span className="font-medium text-[#3f3b47]">Posted:</span> {ad.createdAt ? new Date(ad.createdAt).toLocaleDateString() : '-'}</div>
                   </div>
                   <div className="mt-3 flex flex-wrap gap-2">
+                    <button
+                      onClick={() => void openAdPreview(ad)}
+                      className="rounded-[8px] border border-[#d8d5de] px-3 py-1.5 text-[12px] font-medium text-[#4f4b59] transition hover:bg-[#f4f3f6]"
+                      type="button"
+                    >
+                      View details
+                    </button>
                     {status === 'ACTIVE' ? (
                       <button
                         onClick={() => openActionModal(ad, 'unlist')}
@@ -369,7 +388,7 @@ export default function AdminAds() {
             <table className="min-w-full divide-y divide-gray-200">
               <thead className="bg-gray-50">
                 <tr>
-                  <th className="px-6 py-3 text-left text-xs font-medium uppercase text-gray-500">Title</th>
+                  <th className="px-6 py-3 text-left text-xs font-medium uppercase text-gray-500">Listing</th>
                   <th className="px-6 py-3 text-left text-xs font-medium uppercase text-gray-500">Seller</th>
                   <th className="px-6 py-3 text-left text-xs font-medium uppercase text-gray-500">Category</th>
                   <th className="px-6 py-3 text-left text-xs font-medium uppercase text-gray-500">Price</th>
@@ -382,9 +401,30 @@ export default function AdminAds() {
               <tbody className="divide-y divide-gray-200">
                 {ads.map((ad) => {
                   const status = ad.status || 'ACTIVE';
+                  const thumbnail = ad.images?.[0]?.url;
                   return (
                     <tr key={ad.id} className={`hover:bg-gray-50 ${ad._count.reports > 0 ? 'bg-red-50/40' : ''}`}>
-                      <td className="px-6 py-4 text-sm font-medium text-gray-900">{ad.title}</td>
+                      <td className="px-6 py-4 text-sm text-gray-900">
+                        <div className="flex items-center gap-3">
+                          <div className="h-12 w-12 overflow-hidden rounded-[8px] border border-[#ece9f1] bg-[#f6f5f8]">
+                            {thumbnail ? (
+                              <img src={thumbnail} alt={ad.title} className="h-full w-full object-cover" />
+                            ) : (
+                              <div className="grid h-full w-full place-items-center text-[10px] text-[#7d7888]">No image</div>
+                            )}
+                          </div>
+                          <div className="min-w-0">
+                            <p className="truncate text-sm font-medium text-gray-900">{ad.title}</p>
+                            <button
+                              type="button"
+                              onClick={() => void openAdPreview(ad)}
+                              className="mt-0.5 text-xs font-medium text-[#5f5a69] underline-offset-2 transition hover:text-[#1f1f29] hover:underline"
+                            >
+                              View details
+                            </button>
+                          </div>
+                        </div>
+                      </td>
                       <td className="px-6 py-4 text-sm text-gray-600">{ad.user.fullName}</td>
                       <td className="px-6 py-4 text-sm text-gray-600">{ad.category.name}</td>
                       <td className="px-6 py-4 text-sm text-gray-900">₦{ad.price.toLocaleString()}</td>
@@ -507,12 +547,31 @@ export default function AdminAds() {
         {previewAd ? (
           <div className="space-y-4">
             <div className="overflow-hidden rounded-[12px] border border-[#ece9f1] bg-[#f6f5f8]">
-              {previewImage ? (
-                <img src={previewImage} alt={previewAd.title} className="h-[200px] w-full object-cover sm:h-[260px]" />
+              {previewMainImage ? (
+                <img src={previewMainImage} alt={previewAd.title} className="h-[200px] w-full object-cover sm:h-[260px]" />
               ) : (
                 <div className="grid h-[200px] w-full place-items-center text-[14px] text-[#7d7888] sm:h-[260px]">
                   Main image unavailable
                 </div>
+              )}
+            </div>
+
+            <div className="rounded-[12px] border border-[#ece9f1] bg-white p-3 sm:p-4">
+              <p className="text-[12px] font-medium uppercase tracking-[0.04em] text-[#8d8898]">All Images</p>
+              {previewImages.length > 0 ? (
+                <div className="mt-3 grid grid-cols-2 gap-2 sm:grid-cols-3">
+                  {previewImages.map((image, index) => (
+                    <div key={image.id || `${image.url}-${index}`} className="overflow-hidden rounded-[10px] border border-[#ece9f1] bg-[#f6f5f8]">
+                      <img
+                        src={image.url}
+                        alt={`${previewAd.title} image ${index + 1}`}
+                        className="h-[96px] w-full object-cover sm:h-[112px]"
+                      />
+                    </div>
+                  ))}
+                </div>
+              ) : (
+                <p className="mt-2 text-[13px] text-[#6f6b77]">No additional images available.</p>
               )}
             </div>
 
