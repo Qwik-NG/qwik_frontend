@@ -19,6 +19,7 @@ type PostDraft = {
   subcategoryId?: string;
   brand?: string;
   model?: string;
+  year?: string;
   condition?: string;
   color?: string;
   location?: string;
@@ -91,10 +92,12 @@ export default function NewAdvertDetailsPage() {
   const [subcategoryId, setSubcategoryId] = useState("");
   const [brand, setBrand] = useState("");
   const [model, setModel] = useState("");
+  const [year, setYear] = useState("");
   const [categories, setCategories] = useState<Category[]>([]);
   const [navigating, setNavigating] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [categoryWarning, setCategoryWarning] = useState<string | null>(null);
+  const [hasHydratedDraft, setHasHydratedDraft] = useState(false);
 
   useEffect(() => {
     const draft = readDraft();
@@ -104,6 +107,8 @@ export default function NewAdvertDetailsPage() {
     setSubcategoryId(draft.subcategoryId || "");
     setBrand(draft.brand || "");
     setModel(draft.model || "");
+    setYear(draft.year || "");
+    setHasHydratedDraft(true);
 
     const loadCategories = async () => {
       try {
@@ -119,6 +124,7 @@ export default function NewAdvertDetailsPage() {
 
   const orderedCategories = getOrderedPostCategories(categories);
   const categorySlug = getCategorySlugById(categoryId, categories);
+  const isVehicleCategory = categorySlug === "vehicles";
   const selectedCategory = useMemo(() => getCategoryById(categoryId, categories), [categoryId, categories]);
   const subcategoryOptions = selectedCategory?.children ?? [];
   const hasSubcategories = subcategoryOptions.length > 0;
@@ -131,9 +137,33 @@ export default function NewAdvertDetailsPage() {
     [categorySlug, selectedSubcategory?.name],
   );
   const modelOptions = getModelOptions(brand);
+  const yearOptions = useMemo(() => {
+    const currentYear = new Date().getFullYear();
+    return Array.from({ length: currentYear - 1980 + 1 }, (_, index) => String(currentYear - index));
+  }, []);
   const isKnownBrand = isBrandInOptions(brand, brandOptions);
   const brandInputValue = isKnownBrand ? "" : brand;
-  const canProceed = Number(price) > 0 && Boolean(categoryId) && (!hasSubcategories || Boolean(subcategoryId)) && !navigating;
+  const canProceed =
+    Number(price) > 0 &&
+    Boolean(categoryId) &&
+    (!hasSubcategories || Boolean(subcategoryId)) &&
+    (!isVehicleCategory || (Boolean(brand.trim()) && Boolean(model) && Boolean(year))) &&
+    !navigating;
+
+  useEffect(() => {
+    if (!hasHydratedDraft) return;
+
+    writeDraft({
+      ...readDraft(),
+      price,
+      negotiable,
+      categoryId,
+      subcategoryId,
+      brand,
+      model,
+      year,
+    });
+  }, [hasHydratedDraft, price, negotiable, categoryId, subcategoryId, brand, model, year]);
 
   const handleNext = () => {
     if (!canProceed) return;
@@ -147,6 +177,7 @@ export default function NewAdvertDetailsPage() {
       subcategoryId: hasSubcategories ? subcategoryId : "",
       brand: brand.trim(),
       model: model.trim(),
+      year: year.trim(),
     });
     window.setTimeout(() => navigate("/post-details"), 120);
   };
@@ -212,6 +243,7 @@ export default function NewAdvertDetailsPage() {
                   setSubcategoryId("");
                   setBrand("");
                   setModel("");
+                  setYear("");
                   setCategoryWarning(null);
                 }}
               />
@@ -225,6 +257,7 @@ export default function NewAdvertDetailsPage() {
                     setSubcategoryId(value);
                     setBrand("");
                     setModel("");
+                    setYear("");
                   }}
                 />
               ) : null}
@@ -237,6 +270,7 @@ export default function NewAdvertDetailsPage() {
                 onChange={(value) => {
                   setBrand(value);
                   setModel("");
+                  setYear("");
                 }}
                 disabled={!categoryId}
                 helperText={!categoryId ? "Select category first" : undefined}
@@ -248,6 +282,7 @@ export default function NewAdvertDetailsPage() {
                 onChange={(value) => {
                   setBrand(value);
                   setModel("");
+                  setYear("");
                 }}
               />
               <DropdownSelect
@@ -255,10 +290,22 @@ export default function NewAdvertDetailsPage() {
                 placeholder="What's the model?"
                 value={model}
                 options={modelOptions.map((option) => ({ value: option, label: option }))}
-                onChange={setModel}
+                onChange={(value) => {
+                  setModel(value);
+                  setYear("");
+                }}
                 disabled={!brand}
                 helperText={!brand ? "Select brand first" : undefined}
               />
+              {isVehicleCategory && brand.trim() && model ? (
+                <DropdownSelect
+                  label="Year"
+                  placeholder="Select vehicle year"
+                  value={year}
+                  options={yearOptions.map((option) => ({ value: option, label: option }))}
+                  onChange={setYear}
+                />
+              ) : null}
             </div>
 
             {error && <p className="mt-4 text-[15px] text-[#d14343]">{error}</p>}
