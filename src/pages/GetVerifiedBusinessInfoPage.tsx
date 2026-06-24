@@ -5,6 +5,7 @@ import SettingsSidebar, { MobileSettingsMenu } from "../components/settings/Sett
 import FormInput from "../components/ui/FormInput";
 import FormSelect from "../components/ui/FormSelect";
 import { ROUTES } from "../constants/routes";
+import { ALL_NIGERIA_LOCATION, NIGERIAN_AREAS, NIGERIAN_LOCATIONS } from "../lib/searchContext";
 import { getSettingsNavItems } from "../lib/settings-nav-config";
 import { api } from "../services/api";
 
@@ -120,6 +121,9 @@ export default function GetVerifiedBusinessInfoPage() {
   const updateField = (field: keyof BusinessInfo, value: string) => {
     setForm((current) => ({ ...current, [field]: value }));
   };
+
+  const stateOptions = NIGERIAN_LOCATIONS.filter((location) => location !== ALL_NIGERIA_LOCATION);
+  const cityOptions = form.state ? NIGERIAN_AREAS[form.state] ?? [] : [];
 
   const handleContinue = async () => {
     try {
@@ -260,25 +264,47 @@ export default function GetVerifiedBusinessInfoPage() {
                 <FormSelect
                   label="State"
                   value={form.state}
-                  onChange={(event) => updateField("state", event.target.value)}
+                  onChange={(event) => {
+                    const nextState = event.target.value;
+                    setForm((current) => ({
+                      ...current,
+                      state: nextState,
+                      city: "",
+                    }));
+                  }}
                   labelClassName="text-[14px] font-medium text-[#1f1d27]"
                   selectClassName="bg-white border-[#c9c7d2]"
                 >
                   <option value="">Select State</option>
-                  <option value="lagos">Lagos</option>
-                  <option value="abuja">Abuja</option>
+                  {stateOptions.map((state) => (
+                    <option key={state} value={state}>{state}</option>
+                  ))}
                 </FormSelect>
-                <FormSelect
-                  label="City"
-                  value={form.city}
-                  onChange={(event) => updateField("city", event.target.value)}
-                  labelClassName="text-[14px] font-medium text-[#1f1d27]"
-                  selectClassName="bg-white border-[#c9c7d2]"
-                >
-                  <option value="">Select city</option>
-                  <option value="ikeja">Ikeja</option>
-                  <option value="wuse">Wuse</option>
-                </FormSelect>
+                {form.state ? (
+                  <FormSelect
+                    label="City / Area"
+                    value={form.city}
+                    onChange={(event) => updateField("city", event.target.value)}
+                    labelClassName="text-[14px] font-medium text-[#1f1d27]"
+                    selectClassName="bg-white border-[#c9c7d2]"
+                  >
+                    <option value="">Select city</option>
+                    {cityOptions.map((city) => (
+                      <option key={city} value={city}>{city}</option>
+                    ))}
+                  </FormSelect>
+                ) : (
+                  <FormSelect
+                    label="City / Area"
+                    value=""
+                    onChange={() => {}}
+                    labelClassName="text-[14px] font-medium text-[#1f1d27]"
+                    selectClassName="bg-white border-[#c9c7d2]"
+                    disabled
+                  >
+                    <option value="">Select state first</option>
+                  </FormSelect>
+                )}
               </div>
 
               <div className="mt-4 flex items-center gap-3">
