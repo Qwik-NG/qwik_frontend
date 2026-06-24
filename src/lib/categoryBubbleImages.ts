@@ -82,7 +82,9 @@ const CATEGORY_BUBBLE_IMAGE_MAP: Record<CategoryBubbleGroup, Record<string, stri
     "fitness-and-personal-training-services": "/sport-categories/fitness-personal.png",
   },
   vehicles: {
+    // Cars
     benz: "/vehicle-categories/mercedes-benz-24.png",
+    "mercedes-benz": "/vehicle-categories/mercedes-benz-24.png",
     toyota: "/vehicle-categories/toyota-50.png",
     honda: "/vehicle-categories/honda-50.png",
     ford: "/vehicle-categories/icons8-ford-48.png",
@@ -90,6 +92,25 @@ const CATEGORY_BUBBLE_IMAGE_MAP: Record<CategoryBubbleGroup, Record<string, stri
     nissan: "/vehicle-categories/icons8-nissan-48.png",
     bmw: "/vehicle-categories/icons8-bmw-48.png",
     audi: "/vehicle-categories/icons8-audi-50.png",
+    chevrolet: "/vehicle-categories/chevrolet.png",
+    kia: "/vehicle-categories/kia.png",
+    // Motorcycles & Scooters
+    bajaj: "/vehicle-categories/bajaj.png",
+    tvs: "/vehicle-categories/tvs.png",
+    haojue: "/vehicle-categories/haojue.png",
+    qlink: "/vehicle-categories/qlink.png",
+    suzuki: "/vehicle-categories/suzuki.png",
+    jincheng: "/vehicle-categories/jincheng.png",
+    yamaha: "/vehicle-categories/yamaha.png",
+    kawasaki: "/vehicle-categories/kawasaki.png",
+    "electric-vehicles": "/vehicle-categories/electric-vehicles.jpeg",
+    // Buses / Trucks / Microbuses
+    mitsubishi: "/vehicle-categories/mitsubishi.png",
+    man: "/vehicle-categories/man.png",
+    volvo: "/vehicle-categories/volvo.png",
+    iveco: "/vehicle-categories/iveco.png",
+    isuzu: "/vehicle-categories/isuzu.png",
+    "ashok-leyland": "/vehicle-categories/leyland.png",
   },
 };
 
