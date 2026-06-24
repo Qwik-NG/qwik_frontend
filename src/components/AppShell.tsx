@@ -435,7 +435,7 @@ export function SiteHeader({
           className="h-8 cursor-pointer rounded-[9px] bg-gradient-to-r from-amber to-orange px-2 text-[11px] font-medium text-white shadow-glow shrink-0 whitespace-nowrap sm:h-9 sm:px-2.5 sm:text-[12px] md:h-10 md:px-3 md:text-[13px] lg:h-[42px] lg:rounded-[8px] lg:px-[16px] lg:text-[16px]"
           onClick={() => void handlePostAdClick()}
         >
-          Post
+          Post Ad
         </button>
         </div>
       </header>
