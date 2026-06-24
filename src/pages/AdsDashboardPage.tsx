@@ -3,11 +3,15 @@ import { useNavigate } from "react-router-dom";
 import { SiteFooter, SiteHeader } from "../components/AppShell";
 import { LocationPin } from "../components/icons/LocationPin";
 import SettingsSidebar, { MobileSettingsMenu } from "../components/settings/SettingsSidebar";
+import DropdownSelect from "../components/ui/DropdownSelect";
 import { FallbackImage } from "../components/ui/FallbackImage";
 import { ImagePlaceholder } from "../components/ui/ImagePlaceholder";
+import { getBrandOptions, getCategoryById, getCategorySlugById, getModelOptions, getOrderedPostCategories } from "../lib/postAdOptions";
+import { isBrandInOptions } from "../lib/brandOptions";
 import { getSettingsNavItems } from "../lib/settings-nav-config";
+import { ALL_NIGERIA_LOCATION, NIGERIAN_AREAS, NIGERIAN_LOCATIONS } from "../lib/searchContext";
 import { api } from "../services/api";
-import type { Ad, AdUpdatePayload } from "../types";
+import type { Ad, Category, AdUpdatePayload } from "../types";
 
 type DashboardAd = {
   id: string;
@@ -23,6 +27,7 @@ type DashboardAd = {
   model?: string;
   condition?: string;
   categoryId?: string;
+  category?: Category;
   specifications?: Record<string, unknown>;
   negotiable: boolean;
   year: string;
@@ -35,8 +40,11 @@ type EditFormState = {
   description: string;
   price: string;
   negotiable: boolean;
+  categoryId: string;
+  subcategoryId: string;
   condition: string;
-  location: string;
+  locationState: string;
+  locationArea: string;
   brand: string;
   model: string;
   year: string;
@@ -71,6 +79,7 @@ function toDashboardAd(ad: Ad): DashboardAd {
     model: ad.model,
     condition: ad.condition,
     categoryId: ad.categoryId,
+    category: ad.category,
     specifications,
     negotiable,
     year,
@@ -87,17 +96,34 @@ function getStatusBadge(status: DashboardAd["status"]) {
 }
 
 function toEditFormState(ad: DashboardAd): EditFormState {
+  const categoryId = ad.category?.parentId ? ad.category.parentId : ad.categoryId ?? "";
+  const subcategoryId = ad.category?.parentId ? ad.categoryId ?? "" : "";
+
   return {
     title: ad.title,
     description: ad.description,
-    price: String(ad.priceValue),
+    price: ad.priceValue.toLocaleString("en-NG"),
     negotiable: ad.negotiable,
+    categoryId,
+    subcategoryId,
     condition: ad.condition ?? "",
-    location: ad.location,
+    locationState: ad.locationState ?? "",
+    locationArea: ad.locationArea ?? "",
     brand: ad.brand ?? "",
     model: ad.model ?? "",
     year: ad.year,
   };
+}
+
+function formatPriceInput(value: string) {
+  const digits = value.replace(/[^\d]/g, "");
+  if (!digits) return "";
+  return Number(digits).toLocaleString("en-NG");
+}
+
+function parsePriceInput(value: string) {
+  const parsed = Number(value.replace(/,/g, ""));
+  return Number.isFinite(parsed) ? parsed : NaN;
 }
 
 function StateChip({ label, active = false, onClick }: { label: string; active?: boolean; onClick: () => void }) {
@@ -245,8 +271,11 @@ export default function AdsDashboardPage() {
   const navigate = useNavigate();
   const [activeFilter, setActiveFilter] = useState<FilterState>("ACTIVE");
   const [ads, setAds] = useState<DashboardAd[]>([]);
+  const [categories, setCategories] = useState<Category[]>([]);
   const [loading, setLoading] = useState(true);
+  const [categoriesLoading, setCategoriesLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
+  const [categoriesError, setCategoriesError] = useState<string | null>(null);
   const [actionLoadingId, setActionLoadingId] = useState<string | null>(null);
   const [notice, setNotice] = useState<{ type: "success" | "error"; message: string } | null>(null);
   const [editingAd, setEditingAd] = useState<DashboardAd | null>(null);
@@ -269,6 +298,44 @@ export default function AdsDashboardPage() {
   useEffect(() => {
     void loadUserAds();
   }, [loadUserAds]);
+
+  useEffect(() => {
+    let active = true;
+
+    const loadCategories = async () => {
+      try {
+        setCategoriesLoading(true);
+        setCategoriesError(null);
+        const response = await api.categories();
+        if (active) {
+          setCategories(response.data);
+        }
+      } catch (err) {
+        if (active) {
+          setCategoriesError(err instanceof Error ? err.message : "Failed to load categories");
+        }
+      } finally {
+        if (active) {
+          setCategoriesLoading(false);
+        }
+      }
+    };
+
+    void loadCategories();
+
+    return () => {
+      active = false;
+    };
+  }, []);
+
+  useEffect(() => {
+    if (!editingAd) return;
+    const previousOverflow = document.body.style.overflow;
+    document.body.style.overflow = "hidden";
+    return () => {
+      document.body.style.overflow = previousOverflow;
+    };
+  }, [editingAd]);
 
   const emptyMessage = useMemo(() => {
     if (activeFilter === "ACTIVE") return "No active ads yet.";
@@ -306,15 +373,51 @@ export default function AdsDashboardPage() {
     setEditForm((current) => (current ? { ...current, ...patch } : current));
   }, []);
 
+  const orderedCategories = useMemo(() => getOrderedPostCategories(categories), [categories]);
+
+  const selectedCategory = useMemo(() => {
+    if (!editForm) return null;
+    return getCategoryById(editForm.categoryId, categories);
+  }, [categories, editForm]);
+
+  const selectedSubcategory = useMemo(() => {
+    if (!selectedCategory || !editForm) return null;
+    return selectedCategory.children?.find((sub) => sub.id === editForm.subcategoryId) ?? null;
+  }, [editForm, selectedCategory]);
+
+  const categorySlug = useMemo(() => {
+    if (!editForm) return "";
+    return getCategorySlugById(editForm.categoryId, categories);
+  }, [categories, editForm]);
+
+  const subcategoryOptions = selectedCategory?.children ?? [];
+  const brandOptions = useMemo(() => getBrandOptions(categorySlug, selectedSubcategory?.name), [categorySlug, selectedSubcategory?.name]);
+  const modelOptions = useMemo(() => getModelOptions(editForm?.brand ?? ""), [editForm?.brand]);
+  const yearOptions = useMemo(() => {
+    const currentYear = new Date().getFullYear();
+    return Array.from({ length: currentYear - 1980 + 1 }, (_, index) => String(currentYear - index));
+  }, []);
+  const isVehicleCategory = categorySlug === "vehicles";
+  const isKnownBrand = useMemo(() => isBrandInOptions(editForm?.brand ?? "", brandOptions), [brandOptions, editForm?.brand]);
+  const brandInputValue = isKnownBrand || !editForm ? "" : editForm.brand;
+  const areasForState = editForm?.locationState ? NIGERIAN_AREAS[editForm.locationState] ?? null : null;
+  const locationStateOptions = useMemo(() => NIGERIAN_LOCATIONS.filter((location) => location !== ALL_NIGERIA_LOCATION), []);
+
   const submitEdit = useCallback(async (event: FormEvent<HTMLFormElement>) => {
     event.preventDefault();
     if (!editingAd || !editForm) return;
 
-    const parsedPrice = Number(editForm.price);
+    const parsedPrice = parsePriceInput(editForm.price);
     if (!Number.isFinite(parsedPrice) || parsedPrice < 0) {
       setNotice({ type: "error", message: "Price must be a valid non-negative number." });
       return;
     }
+
+    const nextLocationState = editForm.locationState.trim();
+    const nextLocationArea = editForm.locationArea.trim();
+    const composedLocation = nextLocationState
+      ? (nextLocationArea ? `${nextLocationArea}, ${nextLocationState}` : nextLocationState)
+      : editingAd.location;
 
     const nextSpecifications: Record<string, unknown> = { ...(editingAd.specifications ?? {}) };
     nextSpecifications.negotiable = editForm.negotiable;
@@ -328,7 +431,11 @@ export default function AdsDashboardPage() {
       title: editForm.title.trim(),
       description: editForm.description.trim(),
       price: parsedPrice,
-      location: editForm.location.trim(),
+      location: composedLocation,
+      locationState: nextLocationState || undefined,
+      locationArea: nextLocationArea || undefined,
+      categoryId: editForm.categoryId,
+      subcategoryId: editForm.subcategoryId || undefined,
       brand: editForm.brand.trim() || undefined,
       model: editForm.model.trim() || undefined,
       condition: editForm.condition.trim() || undefined,
@@ -463,7 +570,7 @@ export default function AdsDashboardPage() {
       {editingAd && editForm ? (
         <div className="fixed inset-0 z-[120] bg-[#1f1d27]/45 px-4 py-6" onClick={closeEditModal}>
           <div
-            className="mx-auto w-full max-w-[720px] rounded-[18px] bg-white p-5 shadow-[0_22px_60px_rgba(31,29,39,0.25)] sm:p-6"
+            className="mx-auto flex max-h-[calc(100dvh-3rem)] w-full max-w-[720px] flex-col overflow-hidden rounded-[18px] bg-white p-5 shadow-[0_22px_60px_rgba(31,29,39,0.25)] sm:p-6"
             onClick={(event) => event.stopPropagation()}
           >
             <div className="mb-5 flex items-start justify-between gap-4">
@@ -481,7 +588,7 @@ export default function AdsDashboardPage() {
               </button>
             </div>
 
-            <form className="grid grid-cols-1 gap-4 sm:grid-cols-2" onSubmit={submitEdit}>
+            <form className="grid flex-1 grid-cols-1 gap-4 overflow-y-auto pr-1 sm:grid-cols-2" onSubmit={submitEdit}>
               <label className="flex flex-col gap-1.5 sm:col-span-2">
                 <span className="text-[13px] font-medium text-[#4b4a54]">Title</span>
                 <input
@@ -502,66 +609,122 @@ export default function AdsDashboardPage() {
                 />
               </label>
 
+              <DropdownSelect
+                label="Category"
+                placeholder={categoriesLoading ? "Loading categories..." : "What type of item is it?"}
+                value={editForm.categoryId}
+                options={orderedCategories.map((category) => ({
+                  value: category.id || `missing:${category.slug}`,
+                  label: category.name,
+                  disabled: !category.available,
+                  helperText: category.available ? undefined : "Unavailable right now",
+                }))}
+                onChange={(value) => {
+                  const selectedCategoryOption = orderedCategories.find((category) => category.id === value);
+                  if (!selectedCategoryOption?.available) return;
+                  updateEditForm({ categoryId: value, subcategoryId: "", brand: "", model: "", year: "" });
+                }}
+                disabled={categoriesLoading || orderedCategories.length === 0}
+                helperText={categoriesError ?? (categoriesLoading ? "Loading categories from the server." : undefined)}
+              />
+
+              {subcategoryOptions.length > 0 ? (
+                <DropdownSelect
+                  label="Subcategory"
+                  placeholder="Pick a subcategory"
+                  value={editForm.subcategoryId}
+                  options={subcategoryOptions.map((sub) => ({ value: sub.id, label: sub.name }))}
+                  onChange={(value) => updateEditForm({ subcategoryId: value, brand: "", model: "", year: "" })}
+                />
+              ) : null}
+
+              <DropdownSelect
+                label="Condition"
+                placeholder="Select condition"
+                value={editForm.condition}
+                options={["New", "Foreign Used", "Local Used"].map((option) => ({ value: option, label: option }))}
+                onChange={(value) => updateEditForm({ condition: value })}
+              />
+
+              <DropdownSelect
+                label="State"
+                placeholder="Select your state"
+                value={editForm.locationState}
+                options={locationStateOptions.map((option) => ({ value: option, label: option }))}
+                onChange={(value) => updateEditForm({ locationState: value, locationArea: "" })}
+              />
+
+              {editForm.locationState && areasForState ? (
+                <DropdownSelect
+                  label="Area"
+                  placeholder="Select your area"
+                  value={editForm.locationArea}
+                  options={areasForState.map((option) => ({ value: option, label: option }))}
+                  onChange={(value) => updateEditForm({ locationArea: value })}
+                />
+              ) : editForm.locationState ? (
+                <label className="flex flex-col gap-1.5">
+                  <span className="text-[13px] font-medium text-[#4b4a54]">Area / LGA / Neighbourhood</span>
+                  <input
+                    value={editForm.locationArea}
+                    onChange={(event) => updateEditForm({ locationArea: event.target.value })}
+                    className="h-11 rounded-[10px] border border-[#e2ded7] px-3 text-[14px]"
+                    placeholder="e.g. Ikeja"
+                  />
+                </label>
+              ) : null}
+
               <label className="flex flex-col gap-1.5">
                 <span className="text-[13px] font-medium text-[#4b4a54]">Price</span>
                 <input
-                  type="number"
-                  min="0"
-                  step="0.01"
+                  inputMode="numeric"
                   value={editForm.price}
-                  onChange={(event) => updateEditForm({ price: event.target.value })}
+                  onChange={(event) => updateEditForm({ price: formatPriceInput(event.target.value) })}
                   className="h-11 rounded-[10px] border border-[#e2ded7] px-3 text-[14px]"
+                  placeholder="e.g. 250,000"
                   required
                 />
               </label>
 
+              <DropdownSelect
+                label="Brand"
+                placeholder={editForm.categoryId ? "Select brand" : "Select category first"}
+                value={editForm.brand}
+                options={brandOptions.map((option) => ({ value: option, label: option }))}
+                onChange={(value) => updateEditForm({ brand: value, model: "", year: "" })}
+                disabled={!editForm.categoryId}
+                helperText={!editForm.categoryId ? "Select a category first" : undefined}
+              />
+
               <label className="flex flex-col gap-1.5">
-                <span className="text-[13px] font-medium text-[#4b4a54]">Condition</span>
+                <span className="text-[13px] font-medium text-[#4b4a54]">Brand (if not listed)</span>
                 <input
-                  value={editForm.condition}
-                  onChange={(event) => updateEditForm({ condition: event.target.value })}
+                  value={brandInputValue}
+                  onChange={(event) => updateEditForm({ brand: event.target.value, model: "", year: "" })}
                   className="h-11 rounded-[10px] border border-[#e2ded7] px-3 text-[14px]"
-                  placeholder="e.g. Used"
+                  placeholder="Type custom brand"
                 />
               </label>
 
-              <label className="flex flex-col gap-1.5 sm:col-span-2">
-                <span className="text-[13px] font-medium text-[#4b4a54]">Location</span>
-                <input
-                  value={editForm.location}
-                  onChange={(event) => updateEditForm({ location: event.target.value })}
-                  className="h-11 rounded-[10px] border border-[#e2ded7] px-3 text-[14px]"
-                  required
-                />
-              </label>
+              <DropdownSelect
+                label="Model"
+                placeholder="What's the model?"
+                value={editForm.model}
+                options={modelOptions.map((option) => ({ value: option, label: option }))}
+                onChange={(value) => updateEditForm({ model: value, year: "" })}
+                disabled={!editForm.brand.trim()}
+                helperText={!editForm.brand.trim() ? "Select or enter a brand first" : undefined}
+              />
 
-              <label className="flex flex-col gap-1.5">
-                <span className="text-[13px] font-medium text-[#4b4a54]">Brand</span>
-                <input
-                  value={editForm.brand}
-                  onChange={(event) => updateEditForm({ brand: event.target.value })}
-                  className="h-11 rounded-[10px] border border-[#e2ded7] px-3 text-[14px]"
-                />
-              </label>
-
-              <label className="flex flex-col gap-1.5">
-                <span className="text-[13px] font-medium text-[#4b4a54]">Model</span>
-                <input
-                  value={editForm.model}
-                  onChange={(event) => updateEditForm({ model: event.target.value })}
-                  className="h-11 rounded-[10px] border border-[#e2ded7] px-3 text-[14px]"
-                />
-              </label>
-
-              <label className="flex flex-col gap-1.5">
-                <span className="text-[13px] font-medium text-[#4b4a54]">Year</span>
-                <input
+              {isVehicleCategory && editForm.brand.trim() && editForm.model ? (
+                <DropdownSelect
+                  label="Year"
+                  placeholder="Select vehicle year"
                   value={editForm.year}
-                  onChange={(event) => updateEditForm({ year: event.target.value })}
-                  className="h-11 rounded-[10px] border border-[#e2ded7] px-3 text-[14px]"
-                  placeholder="e.g. 2022"
+                  options={yearOptions.map((option) => ({ value: option, label: option }))}
+                  onChange={(value) => updateEditForm({ year: value })}
                 />
-              </label>
+              ) : null}
 
               <label className="flex items-center gap-2 self-end pb-2">
                 <input

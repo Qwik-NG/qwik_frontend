@@ -301,6 +301,7 @@ export interface Ad {
 
 export interface AdCreatePayload {
   categoryId: string;
+  subcategoryId?: string;
   title: string;
   description: string;
   price: number;
