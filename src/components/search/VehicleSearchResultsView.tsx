@@ -28,6 +28,7 @@ type NavigateTo = (to: string) => void;
 type SortValue = "newest" | "price-low" | "price-high";
 type VerifiedValue = "all" | "verified" | "unverified";
 type VehicleView = "grid" | "list";
+type SearchResultMode = "exact" | "related";
 
 type VehicleBrand = string;
 
@@ -404,6 +405,8 @@ export default function VehicleSearchResultsView({ query, navigate, view, locati
   const [verifiedFilter, setVerifiedFilter] = useState<VerifiedValue>("all");
   const [vehicleResults, setVehicleResults] = useState<VehicleListing[]>([]);
   const [resultTotal, setResultTotal] = useState(0);
+  const [resultMode, setResultMode] = useState<SearchResultMode>("exact");
+  const [relatedTo, setRelatedTo] = useState("");
   const brandOptions = useMemo(() => (selectedType === "all" ? [] : getVehicleBrandOptionsByType(selectedType)), [selectedType]);
   const brandStrip = useMemo(
     () => brandOptions.map((name) => ({ name, mark: initialsForBrand(name) })),
@@ -443,6 +446,8 @@ export default function VehicleSearchResultsView({ query, navigate, view, locati
       const response = await api.ads(`?${params.toString()}`);
       setVehicleResults(response.data.map(toVehicleResult));
       setResultTotal(response.meta?.total ?? response.data.length);
+      setResultMode(response.meta?.resultMode === "related" ? "related" : "exact");
+      setRelatedTo(response.meta?.relatedTo ?? query);
     };
     void loadAds();
   }, [query, locationFilter]);
@@ -602,9 +607,20 @@ export default function VehicleSearchResultsView({ query, navigate, view, locati
               )}
             </div>
 
+            {resultMode === "related" && filteredResults.length > 0 ? (
+              <div className="mb-5 rounded-[20px] border border-[#ffe1b8] bg-[#fff8ef] px-5 py-4">
+                <p className="text-[18px] font-medium text-[#1f1d27]">No exact results found</p>
+                <p className="mt-1 text-[14px] leading-[1.6] text-[#6d6a74]">
+                  Related ads you may like for “{relatedTo || query || "Vehicles"}”.
+                </p>
+              </div>
+            ) : null}
+
             {filteredResults.length === 0 ? (
               <div className="rounded-[24px] border border-[#ddd9d2] bg-white px-6 py-12 text-center shadow-[0_8px_24px_rgba(31,29,39,0.05)]">
-                <h2 className="text-[22px] font-medium text-[#1f1d27]">No results found</h2>
+                <h2 className="text-[22px] font-medium text-[#1f1d27]">
+                  {resultMode === "related" ? "No exact results found" : "No results found"}
+                </h2>
                 <p className="mt-3 text-[15px] leading-[1.6] text-[#6d6a74]">
                   Try another vehicle keyword or adjust the filters to widen your search.
                 </p>
