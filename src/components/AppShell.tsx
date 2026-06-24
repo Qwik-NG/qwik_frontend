@@ -43,7 +43,7 @@ function IconBox({
       type="button"
       onClick={onClick}
       aria-label={ariaLabel}
-      className={`grid h-10 w-10 place-items-center rounded-lg lg:h-[42px] lg:w-[42px] ${active ? "bg-[#0a0820] text-white" : "bg-[#ececec] text-[#1f1d27]"}`}
+      className={`grid h-8 w-8 place-items-center rounded-lg sm:h-9 sm:w-9 md:h-10 md:w-10 lg:h-[42px] lg:w-[42px] ${active ? "bg-[#0a0820] text-white" : "bg-[#ececec] text-[#1f1d27]"}`}
     >
       {children}
     </button>
@@ -334,9 +334,9 @@ export function SiteHeader({
 
   return (
     <>
-      <header className={`${hideOnMobile ? "hidden md:flex" : "flex"} sticky top-0 z-[100] mx-auto w-full max-w-[1728px] flex-wrap items-center gap-2 bg-page/95 px-4 py-0.5 backdrop-blur-sm sm:px-6 lg:gap-4 lg:px-12 lg:py-1`}>
+      <header className={`${hideOnMobile ? "hidden md:flex" : "flex"} sticky top-0 z-[100] mx-auto w-full max-w-[1728px] flex-nowrap items-center gap-1 bg-page/95 px-3 py-0.5 backdrop-blur-sm sm:gap-1.5 sm:px-4 md:gap-2 md:px-6 lg:gap-4 lg:px-12 lg:py-1`}>
         <button
-          className="relative h-[54px] w-[54px] shrink-0 overflow-hidden rounded-full bg-white lg:h-[58px] lg:w-[58px]"
+          className="relative h-[44px] w-[44px] shrink-0 overflow-hidden rounded-full bg-white sm:h-[50px] sm:w-[50px] md:h-[54px] md:w-[54px] lg:h-[58px] lg:w-[58px]"
           onClick={() => navigate("/")}
         >
           <img
@@ -348,7 +348,7 @@ export function SiteHeader({
 
         {renderSearchControls("desktop", desktopLocationRef)}
 
-        <div className="relative z-30 ml-auto flex flex-nowrap items-center justify-end gap-1.5 pointer-events-auto lg:order-3 lg:w-auto lg:gap-2">
+        <div className="relative z-30 ml-auto flex flex-nowrap items-center justify-end gap-1 shrink-0 pointer-events-auto sm:gap-1.5 md:gap-1.5 lg:order-3 lg:w-auto lg:gap-2">
         <IconBox
           onClick={() => navigate(ROUTES.NOTIFICATIONS)}
           active={activeIcon === "bell"}
@@ -421,21 +421,21 @@ export function SiteHeader({
         </IconBox>
         <button
           onClick={() => navigate("/profile-settings")}
-          className="cursor-pointer rounded-full"
+          className="cursor-pointer rounded-full shrink-0"
           type="button"
         >
           <UserAvatar
             name={currentUser.fullName}
             imageUrl={currentUser.avatarUrl}
             alt={`${currentUser.fullName} profile`}
-            className="h-10 w-10 rounded-full object-cover lg:h-[42px] lg:w-[42px]"
+            className="h-8 w-8 rounded-full object-cover sm:h-9 sm:w-9 md:h-10 md:w-10 lg:h-[42px] lg:w-[42px]"
           />
         </button>
         <button
-          className="h-10 cursor-pointer rounded-[11px] bg-gradient-to-r from-amber to-orange px-3 text-[13px] text-white shadow-glow lg:h-[42px] lg:rounded-[8px] lg:px-[16px] lg:text-[16px]"
+          className="h-8 cursor-pointer rounded-[9px] bg-gradient-to-r from-amber to-orange px-2 text-[11px] font-medium text-white shadow-glow shrink-0 whitespace-nowrap sm:h-9 sm:px-2.5 sm:text-[12px] md:h-10 md:px-3 md:text-[13px] lg:h-[42px] lg:rounded-[8px] lg:px-[16px] lg:text-[16px]"
           onClick={() => void handlePostAdClick()}
         >
-          Post a free ad
+          Post
         </button>
         </div>
       </header>
