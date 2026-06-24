@@ -1,4 +1,4 @@
-import { useRef, useState } from 'react';
+import { useRef, useState, useEffect } from 'react';
 import AdminLayout from '../components/admin/AdminLayout';
 import { api } from '../services/api';
 import type { User } from '../types';
@@ -10,11 +10,36 @@ function isSellerEligible(user: AdminUserOption): boolean {
   return Number(user._count?.ads ?? 0) > 0;
 }
 
+interface Campaign {
+  id: string;
+  type: string;
+  status: string;
+  subject: string;
+  requestedCount: number;
+  eligibleCount: number;
+  sentCount: number;
+  failedCount: number;
+  skippedCount: number;
+  createdAt: string;
+}
+
+interface CampaignDetails extends Campaign {
+  recipients: Array<{
+    id: string;
+    userId: string;
+    email: string | null;
+    status: string;
+    error: string | null;
+    createdAt: string;
+  }>;
+}
+
 export default function AdminCommunications() {
   const [subject, setSubject] = useState('');
   const [message, setMessage] = useState('');
   const [sending, setSending] = useState(false);
   const [result, setResult] = useState<{ ok: boolean; text: string } | null>(null);
+  const [testEmailSent, setTestEmailSent] = useState(false);
   const sendingRef = useRef(false);
 
   const [usersLoading, setUsersLoading] = useState(false);
@@ -42,6 +67,15 @@ export default function AdminCommunications() {
   const [sellerResult, setSellerResult] = useState<{ ok: boolean; text: string } | null>(null);
   const sellerSendingRef = useRef(false);
 
+  const [showPreview, setShowPreview] = useState(false);
+  const [confirmCheckbox, setConfirmCheckbox] = useState(false);
+  const [confirmText, setConfirmText] = useState('');
+
+  const [campaigns, setCampaigns] = useState<Campaign[]>([]);
+  const [campaignsLoading, setCampaignsLoading] = useState(false);
+  const [selectedCampaign, setSelectedCampaign] = useState<CampaignDetails | null>(null);
+  const [campaignDetailsLoading, setCampaignDetailsLoading] = useState(false);
+
   const subjectTrimmed = subject.trim();
   const messageTrimmed = message.trim();
   const isValid = subjectTrimmed.length > 0 && messageTrimmed.length > 0;
@@ -55,6 +89,22 @@ export default function AdminCommunications() {
   const sellerMessageTrimmed = sellerMessage.trim();
   const selectedSellers = sellers.filter((seller) => selectedSellerIds.includes(seller.id));
   const sellerIsValid = selectedSellerIds.length > 0 && sellerSubjectTrimmed.length > 0 && sellerMessageTrimmed.length > 0;
+  const sellerGatesPassed = testEmailSent && confirmCheckbox && confirmText === 'SEND TO SELECTED SELLERS';
+
+  useEffect(() => {
+    const loadCampaigns = async () => {
+      try {
+        setCampaignsLoading(true);
+        const response = await api.adminGetCampaigns();
+        setCampaigns(response.data);
+      } catch {
+        // silent fail
+      } finally {
+        setCampaignsLoading(false);
+      }
+    };
+    loadCampaigns();
+  }, []);
 
   const loadUsers = async (search?: string) => {
     setUsersLoading(true);
@@ -110,6 +160,7 @@ export default function AdminCommunications() {
         ok: true,
         text: response.message ?? `Test email sent to ${response.data.recipient}.`,
       });
+      setTestEmailSent(true);
       setSubject('');
       setMessage('');
     } catch (err) {
@@ -171,15 +222,13 @@ export default function AdminCommunications() {
   const clearSellerSelection = () => {
     setSelectedSellerIds([]);
     setSellerResult(null);
+    setShowPreview(false);
+    setConfirmCheckbox(false);
+    setConfirmText('');
   };
 
   const handleSendSelectedSellers = async () => {
-    if (sellerSendingRef.current || !sellerIsValid) return;
-
-    const confirmed = window.confirm(
-      `Send this email to ${selectedSellerIds.length} selected seller${selectedSellerIds.length === 1 ? '' : 's'}?`,
-    );
-    if (!confirmed) return;
+    if (sellerSendingRef.current || !sellerIsValid || !sellerGatesPassed) return;
 
     sellerSendingRef.current = true;
     setSellerSending(true);
@@ -195,11 +244,23 @@ export default function AdminCommunications() {
       const summary = response.data;
       setSellerResult({
         ok: summary.sentCount > 0 && summary.failedCount === 0,
-        text: `Requested: ${summary.requestedCount}, Eligible: ${summary.eligibleCount}, Sent: ${summary.sentCount}, Failed: ${summary.failedCount}, Skipped non-seller: ${summary.skippedNonSellerCount}.`,
+        text: `Sent ${summary.sentCount}/${summary.eligibleCount} eligible sellers. Failed: ${summary.failedCount}, Skipped: ${summary.skippedNonSellerCount}. Campaign ID: ${summary.campaignId}`,
       });
+
+      // Reload campaigns
+      try {
+        const campaignsResponse = await api.adminGetCampaigns();
+        setCampaigns(campaignsResponse.data);
+      } catch {
+        // silent fail
+      }
+
       setSellerSubject('');
       setSellerMessage('');
       setSelectedSellerIds([]);
+      setShowPreview(false);
+      setConfirmCheckbox(false);
+      setConfirmText('');
     } catch (err) {
       setSellerResult({
         ok: false,
@@ -208,6 +269,31 @@ export default function AdminCommunications() {
     } finally {
       sellerSendingRef.current = false;
       setSellerSending(false);
+    }
+  };
+
+  const loadCampaignDetails = async (campaignId: string) => {
+    try {
+      setCampaignDetailsLoading(true);
+      const response = await api.adminGetCampaignDetails(campaignId);
+      setSelectedCampaign(response.data);
+    } catch (err) {
+      console.error(err);
+    } finally {
+      setCampaignDetailsLoading(false);
+    }
+  };
+
+  const getStatusBadgeColor = (status: string) => {
+    switch (status) {
+      case 'SENT':
+        return 'bg-[#edfaf2] border border-[#c3e6cb] text-[#1a6035]';
+      case 'PARTIAL':
+        return 'bg-[#fffbf2] border border-[#e4c896] text-[#8b6200]';
+      case 'FAILED':
+        return 'bg-[#fff0f0] border border-[#f5c6cb] text-[#c24141]';
+      default:
+        return 'bg-[#f4f3f6] border border-[#d8d5de] text-[#6f6b77]';
     }
   };
 
@@ -543,10 +629,82 @@ export default function AdminCommunications() {
               <p className="mt-1 text-right text-[11px] text-[#9a99a6]">{sellerMessage.length}/5000</p>
             </div>
 
-            {selectedSellers.length > 0 ? (
-              <p className="text-[12px] text-[#6f6b77]">
-                Ready to send to {selectedSellers.length} selected seller{selectedSellers.length === 1 ? '' : 's'}.
-              </p>
+            {selectedSellers.length > 0 && sellerIsValid ? (
+              <div className="space-y-3 rounded-[10px] border border-[#e4e2ea] bg-[#f8f8fa] p-3">
+                <button
+                  type="button"
+                  onClick={() => setShowPreview(!showPreview)}
+                  className="flex w-full items-center justify-between text-[13px] font-medium text-[#6f6b77] hover:text-[#1f1f29]"
+                >
+                  <span>{showPreview ? '▼' : '▶'} Preview email</span>
+                </button>
+
+                {showPreview && (
+                  <div className="space-y-2 rounded border border-[#d8d5de] bg-white p-3">
+                    <div>
+                      <p className="text-[11px] font-medium text-[#9a99a6]">SUBJECT</p>
+                      <p className="text-[13px] text-[#1f1f29]">{sellerSubjectTrimmed}</p>
+                    </div>
+                    <div className="border-t border-[#e8e8ea] pt-2">
+                      <p className="text-[11px] font-medium text-[#9a99a6]">MESSAGE</p>
+                      <p className="whitespace-pre-wrap text-[13px] text-[#3a3743]">{sellerMessageTrimmed}</p>
+                    </div>
+                  </div>
+                )}
+              </div>
+            ) : null}
+
+            {!testEmailSent ? (
+              <div className="rounded-[10px] border border-[#f5c6cb] bg-[#fff0f0] px-4 py-3 text-[13px] text-[#c24141]">
+                ⚠️ You must send a test email first before sending to selected sellers.
+              </div>
+            ) : null}
+
+            {testEmailSent && selectedSellers.length > 0 && sellerIsValid ? (
+              <div className="space-y-3">
+                <label className="flex items-start gap-3">
+                  <input
+                    type="checkbox"
+                    checked={confirmCheckbox}
+                    onChange={(e) => setConfirmCheckbox(e.target.checked)}
+                    disabled={sellerSending}
+                    className="mt-0.5 h-4 w-4 rounded border-[#c9c5d1] text-[#ff9715] focus:ring-[#ff9715]"
+                  />
+                  <span className="text-[13px] text-[#3a3743]">
+                    I confirm this email should be sent only to the {selectedSellers.length} selected seller{selectedSellers.length === 1 ? '' : 's'}.
+                  </span>
+                </label>
+
+                <div>
+                  <label htmlFor="confirm-text" className="mb-1.5 block text-[13px] font-medium text-[#3a3743]">
+                    Type to confirm: <code className="font-mono font-semibold text-[#ff9715]">SEND TO SELECTED SELLERS</code>
+                  </label>
+                  <input
+                    id="confirm-text"
+                    type="text"
+                    value={confirmText}
+                    onChange={(e) => setConfirmText(e.target.value)}
+                    placeholder="Type exactly: SEND TO SELECTED SELLERS"
+                    disabled={sellerSending}
+                    className="h-[40px] w-full rounded-[9px] border border-[#d8d5de] px-3 text-[14px] text-[#1f1f29] outline-none focus:border-[#ff9715] focus:ring-2 focus:ring-[#ff9715]/20 disabled:opacity-60"
+                  />
+                </div>
+
+                <div className="flex flex-col gap-2">
+                  <div className={`flex items-center gap-2 text-[12px] ${testEmailSent ? 'text-[#1a6035]' : 'text-[#9a99a6]'}`}>
+                    <span>{testEmailSent ? '✓' : '○'}</span>
+                    <span>Test email sent</span>
+                  </div>
+                  <div className={`flex items-center gap-2 text-[12px] ${confirmCheckbox ? 'text-[#1a6035]' : 'text-[#9a99a6]'}`}>
+                    <span>{confirmCheckbox ? '✓' : '○'}</span>
+                    <span>Confirmation checkbox checked</span>
+                  </div>
+                  <div className={`flex items-center gap-2 text-[12px] ${confirmText === 'SEND TO SELECTED SELLERS' ? 'text-[#1a6035]' : 'text-[#9a99a6]'}`}>
+                    <span>{confirmText === 'SEND TO SELECTED SELLERS' ? '✓' : '○'}</span>
+                    <span>Confirmation text matches</span>
+                  </div>
+                </div>
+              </div>
             ) : null}
 
             {sellerResult ? (
@@ -564,7 +722,7 @@ export default function AdminCommunications() {
             <button
               type="button"
               onClick={() => void handleSendSelectedSellers()}
-              disabled={sellerSending || !sellerIsValid}
+              disabled={sellerSending || !sellerIsValid || !sellerGatesPassed}
               className="flex h-[44px] w-full items-center justify-center gap-2 rounded-[10px] bg-[#ff9715] px-5 text-[14px] font-semibold text-white transition hover:bg-[#e6880f] disabled:cursor-not-allowed disabled:opacity-60 sm:w-auto"
             >
               {sellerSending ? (
@@ -575,11 +733,135 @@ export default function AdminCommunications() {
                   Sending…
                 </>
               ) : (
-                <>Send to selected sellers</>
+                <>Send to {selectedSellerIds.length} selected seller{selectedSellerIds.length === 1 ? '' : 's'}</>
               )}
             </button>
           </div>
         </div>
+
+        {/* Phase 2D Recent email activity section */}
+        <div className="rounded-[16px] border border-[#e8e8ea] bg-white p-5 shadow-sm sm:p-6">
+          <h2 className="mb-4 text-[17px] font-semibold text-[#1f1f29]">Recent Email Activity</h2>
+
+          {campaignsLoading ? (
+            <div className="text-center text-[13px] text-[#9a99a6]">Loading campaigns…</div>
+          ) : campaigns.length === 0 ? (
+            <p className="text-[13px] text-[#6f6b77]">No email campaigns sent yet.</p>
+          ) : (
+            <div className="space-y-2">
+              {campaigns.map((campaign) => (
+                <button
+                  key={campaign.id}
+                  onClick={() => void loadCampaignDetails(campaign.id)}
+                  className="w-full text-left rounded-[10px] border border-[#e4e2ea] bg-[#f8f8fa] px-3 py-2.5 transition hover:border-[#ff9715] hover:bg-[#fff9f3]"
+                >
+                  <div className="flex items-start justify-between gap-2">
+                    <div className="flex-1">
+                      <p className="text-[13px] font-medium text-[#1f1f29]">{campaign.subject}</p>
+                      <p className="mt-1 text-[12px] text-[#6f6b77]">
+                        {campaign.type === 'SELECTED_SELLERS' ? 'Selected sellers' : campaign.type} • {new Date(campaign.createdAt).toLocaleDateString()}
+                      </p>
+                      <p className="mt-1 text-[11px] text-[#9a99a6]">
+                        Requested: {campaign.requestedCount} | Eligible: {campaign.eligibleCount} | Sent: {campaign.sentCount} | Failed: {campaign.failedCount}
+                      </p>
+                    </div>
+                    <span className={`inline-block rounded-full px-2.5 py-1 text-[11px] font-medium ${getStatusBadgeColor(campaign.status)}`}>
+                      {campaign.status}
+                    </span>
+                  </div>
+                </button>
+              ))}
+            </div>
+          )}
+        </div>
+
+        {/* Campaign details modal */}
+        {selectedCampaign && (
+          <div className="fixed inset-0 z-50 flex items-center justify-center bg-black bg-opacity-40 p-4">
+            <div className="w-full max-w-[600px] rounded-[16px] bg-white shadow-lg">
+              <div className="flex items-center justify-between border-b border-[#e8e8ea] px-6 py-4">
+                <h3 className="text-[17px] font-semibold text-[#1f1f29]">Campaign Details</h3>
+                <button
+                  onClick={() => setSelectedCampaign(null)}
+                  className="text-[#9a99a6] hover:text-[#1f1f29]"
+                >
+                  ✕
+                </button>
+              </div>
+
+              {campaignDetailsLoading ? (
+                <div className="p-6 text-center text-[13px] text-[#9a99a6]">Loading details…</div>
+              ) : (
+                <div className="p-6 space-y-4">
+                  <div>
+                    <p className="text-[11px] font-medium text-[#9a99a6]">SUBJECT</p>
+                    <p className="text-[14px] font-medium text-[#1f1f29]">{selectedCampaign.subject}</p>
+                  </div>
+
+                  <div className="grid grid-cols-2 gap-4">
+                    <div>
+                      <p className="text-[11px] font-medium text-[#9a99a6]">REQUESTED</p>
+                      <p className="text-[16px] font-semibold text-[#1f1f29]">{selectedCampaign.requestedCount}</p>
+                    </div>
+                    <div>
+                      <p className="text-[11px] font-medium text-[#9a99a6]">ELIGIBLE</p>
+                      <p className="text-[16px] font-semibold text-[#1f1f29]">{selectedCampaign.eligibleCount}</p>
+                    </div>
+                    <div>
+                      <p className="text-[11px] font-medium text-[#9a99a6]">SENT</p>
+                      <p className="text-[16px] font-semibold text-[#1a6035]">{selectedCampaign.sentCount}</p>
+                    </div>
+                    <div>
+                      <p className="text-[11px] font-medium text-[#9a99a6]">FAILED</p>
+                      <p className="text-[16px] font-semibold text-[#c24141]">{selectedCampaign.failedCount}</p>
+                    </div>
+                  </div>
+
+                  <div>
+                    <p className="text-[11px] font-medium text-[#9a99a6]">STATUS</p>
+                    <span className={`inline-block mt-1 rounded-full px-3 py-1 text-[12px] font-medium ${getStatusBadgeColor(selectedCampaign.status)}`}>
+                      {selectedCampaign.status}
+                    </span>
+                  </div>
+
+                  <div>
+                    <p className="text-[11px] font-medium text-[#9a99a6]">RECIPIENTS</p>
+                    <div className="mt-2 max-h-[250px] overflow-y-auto rounded-[9px] border border-[#d8d5de]">
+                      {selectedCampaign.recipients.length === 0 ? (
+                        <p className="p-3 text-[12px] text-[#6f6b77]">No recipients.</p>
+                      ) : (
+                        selectedCampaign.recipients.map((recipient) => (
+                          <div key={recipient.id} className="border-b border-[#f0eef3] px-3 py-2.5 last:border-b-0 text-[12px]">
+                            <div className="flex items-center justify-between">
+                              <div>
+                                <p className="text-[#1f1f29]">{recipient.email || '(no email)'}</p>
+                                {recipient.error && <p className="text-[#c24141]">{recipient.error}</p>}
+                              </div>
+                              <span className={`rounded px-2 py-1 text-[10px] font-medium ${
+                                recipient.status === 'SENT' ? 'bg-[#edfaf2] text-[#1a6035]' : 'bg-[#fff0f0] text-[#c24141]'
+                              }`}>
+                                {recipient.status}
+                              </span>
+                            </div>
+                          </div>
+                        ))
+                      )}
+                    </div>
+                  </div>
+                </div>
+              )}
+
+              <div className="border-t border-[#e8e8ea] px-6 py-4">
+                <button
+                  onClick={() => setSelectedCampaign(null)}
+                  className="w-full h-[40px] rounded-[10px] border border-[#d8d5de] text-[13px] font-medium text-[#4f4b59] transition hover:bg-[#f4f3f6]"
+                >
+                  Close
+                </button>
+              </div>
+            </div>
+          </div>
+        )}
       </div>
     </AdminLayout>
   );

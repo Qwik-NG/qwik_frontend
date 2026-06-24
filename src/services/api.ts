@@ -745,9 +745,23 @@ export const api = {
     }),
 
   adminSendSelectedSellersEmail: (payload: { userIds: string[]; subject: string; message: string }) =>
-    request<{ requestedCount: number; eligibleCount: number; sentCount: number; failedCount: number; skippedNonSellerCount: number }>("/admin/communications/send-selected-sellers-email", {
+    request<{ campaignId?: string; requestedCount: number; eligibleCount: number; sentCount: number; failedCount: number; skippedNonSellerCount: number }>("/admin/communications/send-selected-sellers-email", {
       method: "POST",
       body: JSON.stringify(payload),
+    }),
+
+  adminGetCampaigns: () =>
+    request<any[]>("/admin/communications/campaigns", {
+      staleTime: 30000,
+      cacheTime: 60000,
+      retry: 1,
+    }),
+
+  adminGetCampaignDetails: (id: string) =>
+    request<any>(`/admin/communications/campaigns/${id}`, {
+      staleTime: 30000,
+      cacheTime: 60000,
+      retry: 1,
     }),
 
   // ===== Offer Endpoints (Future) =====
