@@ -356,7 +356,29 @@ export const api = {
       return response;
     }),
 
-  deleteAd: (id: string) => request<null>(`/ads/${id}`, { method: "DELETE" }),
+  pauseAd: (id: string) =>
+    request<Ad>(`/ads/${id}/mark-unavailable`, { method: "PATCH" }).then((response) => {
+      GET_CACHE.clear();
+      return response;
+    }),
+
+  resumeAd: (id: string) =>
+    request<Ad>(`/ads/${id}`, { method: "PATCH", body: JSON.stringify({ status: "ACTIVE" }) }).then((response) => {
+      GET_CACHE.clear();
+      return response;
+    }),
+
+  markAdSold: (id: string) =>
+    request<Ad>(`/ads/${id}`, { method: "PATCH", body: JSON.stringify({ status: "SOLD" }) }).then((response) => {
+      GET_CACHE.clear();
+      return response;
+    }),
+
+  deleteAd: (id: string) =>
+    request<null>(`/ads/${id}`, { method: "DELETE" }).then((response) => {
+      GET_CACHE.clear();
+      return response;
+    }),
 
   markAdUnavailable: (id: string) =>
     request<Ad>(`/ads/${id}/mark-unavailable`, { method: "PATCH" }),
