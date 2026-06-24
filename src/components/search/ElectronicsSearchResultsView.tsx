@@ -39,7 +39,7 @@ const ELECTRONICS_FILTER_TYPES: Array<"all" | ElectronicsType> = [
   "Computer Hardware",
   "Monitors",
 ];
-const ELECTRONICS_FILTER_BRANDS: Array<"all" | ElectronicsBrand> = ["all", "Asus", "Apple", "HP"];
+const ELECTRONICS_FILTER_BRANDS: Array<"all" | ElectronicsBrand> = ["all", "Asus", "Apple", "HP", "Dell", "Lenovo"];
 const ELECTRONICS_FILTER_CONDITIONS: Array<"all" | ElectronicsCondition> = [
   "all",
   "Brand New",

@@ -49,7 +49,7 @@ type FashionStateConfig = {
 
 const FASHION_CATEGORY_OPTIONS: Array<"all" | FashionCategory> = ["all", "Men's Fashion", "Women's Fashion", "Baby & Kids Fashion"];
 const FASHION_TYPE_OPTIONS: Array<"all" | FashionType> = ["all", "Clothings", "Bags", "Jewelry", "Shoe"];
-const FASHION_BRAND_OPTIONS: Array<"all" | FashionBrand> = ["all", "Nike", "Louis vitton", "Adidas"];
+const FASHION_BRAND_OPTIONS: Array<"all" | FashionBrand> = ["all", "Nike", "Louis Vuitton", "Adidas"];
 const FASHION_STYLE_OPTIONS: Array<"all" | FashionStyle> = ["all", "Casual", "Formal", "Vintage"];
 const FASHION_COLOR_OPTIONS: Array<"all" | FashionColor> = ["all", "Black", "Multi", "White"];
 const FASHION_CONDITION_OPTIONS: Array<"all" | FashionCondition> = ["all", "Brand New", "Used"];

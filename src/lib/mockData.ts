@@ -28,7 +28,7 @@ export type FurnitureCondition = "Brand New" | "Used";
 export type FashionSearchState = "general" | "men" | "women" | "baby-kids";
 export type FashionCategory = "Men's Fashion" | "Women's Fashion" | "Baby & Kids Fashion";
 export type FashionType = "Clothings" | "Bags" | "Jewelry" | "Shoe";
-export type FashionBrand = "Nike" | "Louis vitton" | "Adidas";
+export type FashionBrand = "Nike" | "Louis Vuitton" | "Adidas";
 export type FashionStyle = "Casual" | "Formal" | "Vintage";
 export type FashionColor = "Black" | "Multi" | "White";
 export type FashionCondition = "Brand New" | "Used";
@@ -80,7 +80,7 @@ export type MockBeautyListing = {
   ad: Ad;
   categoryType: "Body Care" | "Face Care" | "Vitamin and Supplement" | "Fragrance";
   beautyType: BeautyType;
-  brand: "Fresh" | "Zoya" | "Clean";
+  brand: "Nivea" | "Dove" | "L'Oreal" | "Other";
   stripCategory: BeautyType;
   condition: BeautyCondition;
 };
@@ -871,7 +871,7 @@ export const mockBeautyListings: MockBeautyListing[] = [
     categoryType: "Body Care",
     beautyType: "Body Lotion",
     stripCategory: "Body Lotion",
-    brand: "Fresh",
+    brand: "Nivea",
     condition: "Brand New",
     ad: createMockAd(
       "beauty-ad-1",
@@ -889,7 +889,7 @@ export const mockBeautyListings: MockBeautyListing[] = [
     categoryType: "Body Care",
     beautyType: "Body Wash & Soap",
     stripCategory: "Body Wash & Soap",
-    brand: "Zoya",
+    brand: "Dove",
     condition: "Brand New",
     ad: createMockAd(
       "beauty-ad-2",
@@ -907,7 +907,7 @@ export const mockBeautyListings: MockBeautyListing[] = [
     categoryType: "Body Care",
     beautyType: "Body Oils",
     stripCategory: "Body Oils",
-    brand: "Clean",
+    brand: "L'Oreal",
     condition: "Brand New",
     ad: createMockAd(
       "beauty-ad-3",
@@ -925,7 +925,7 @@ export const mockBeautyListings: MockBeautyListing[] = [
     categoryType: "Body Care",
     beautyType: "Body Creams & Milks",
     stripCategory: "Body Creams & Milks",
-    brand: "Fresh",
+    brand: "Nivea",
     condition: "Brand New",
     ad: createMockAd(
       "beauty-ad-4",
@@ -943,7 +943,7 @@ export const mockBeautyListings: MockBeautyListing[] = [
     categoryType: "Body Care",
     beautyType: "Body Scrubs",
     stripCategory: "Body Scrubs",
-    brand: "Zoya",
+    brand: "Dove",
     condition: "Refurbished",
     ad: createMockAd(
       "beauty-ad-5",
@@ -961,7 +961,7 @@ export const mockBeautyListings: MockBeautyListing[] = [
     categoryType: "Body Care",
     beautyType: "Shower Gel",
     stripCategory: "Shower Gel",
-    brand: "Clean",
+    brand: "L'Oreal",
     condition: "Brand New",
     ad: createMockAd(
       "beauty-ad-6",
@@ -979,7 +979,7 @@ export const mockBeautyListings: MockBeautyListing[] = [
     categoryType: "Face Care",
     beautyType: "Body Lotion",
     stripCategory: "Body Lotion",
-    brand: "Fresh",
+    brand: "Nivea",
     condition: "Brand New",
     ad: createMockAd(
       "beauty-ad-7",
@@ -997,7 +997,7 @@ export const mockBeautyListings: MockBeautyListing[] = [
     categoryType: "Vitamin and Supplement",
     beautyType: "Body Oils",
     stripCategory: "Body Oils",
-    brand: "Clean",
+    brand: "L'Oreal",
     condition: "Used",
     ad: createMockAd(
       "beauty-ad-8",
@@ -1015,7 +1015,7 @@ export const mockBeautyListings: MockBeautyListing[] = [
     categoryType: "Fragrance",
     beautyType: "Shower Gel",
     stripCategory: "Shower Gel",
-    brand: "Zoya",
+    brand: "Dove",
     condition: "Brand New",
     ad: createMockAd(
       "beauty-ad-9",
@@ -1286,7 +1286,7 @@ export const mockFashionListings: MockFashionListing[] = [
     audience: "men",
     categoryType: "Men's Fashion",
     fashionType: "Bags",
-    brand: "Louis vitton",
+    brand: "Louis Vuitton",
     style: "Formal",
     color: "Black",
     stripCategory: "Bags",
@@ -1349,7 +1349,7 @@ export const mockFashionListings: MockFashionListing[] = [
     audience: "women",
     categoryType: "Women's Fashion",
     fashionType: "Jewelry",
-    brand: "Louis vitton",
+    brand: "Louis Vuitton",
     style: "Vintage",
     color: "Multi",
     stripCategory: "Jewelry",
@@ -1370,7 +1370,7 @@ export const mockFashionListings: MockFashionListing[] = [
     audience: "women",
     categoryType: "Women's Fashion",
     fashionType: "Bags",
-    brand: "Louis vitton",
+    brand: "Louis Vuitton",
     style: "Formal",
     color: "Black",
     stripCategory: "Bags",

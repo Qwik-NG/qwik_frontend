@@ -39,7 +39,7 @@ const PHONES_FILTER_TYPES: Array<"all" | PhonesType> = [
   "Accessories for Phones and Tab",
   "Smart watch",
 ];
-const PHONES_FILTER_BRANDS: Array<"all" | PhonesBrand> = ["all", "Tecno", "Apple", "Samsung"];
+const PHONES_FILTER_BRANDS: Array<"all" | PhonesBrand> = ["all", "Apple", "Samsung", "Tecno", "Xiaomi", "Redmi"];
 const PHONES_FILTER_CONDITIONS: Array<"all" | PhonesCondition> = ["all", "Brand New", "Refurbished", "Used"];
 const VERIFIED_OPTIONS: Array<{ label: string; value: VerifiedValue }> = [
   { label: "Show All", value: "all" },

@@ -52,7 +52,7 @@ const BEAUTY_STRIP_OPTIONS: Array<{ name: BeautyType; image?: string }> = [
   { name: "Body Scrubs", image: getCategoryBubbleImage("beauty", "Body Scrubs") },
   { name: "Shower Gel", image: getCategoryBubbleImage("beauty", "Shower Gel") },
 ];
-const BEAUTY_BRAND_OPTIONS: Array<"all" | BeautyBrand> = ["all", "Fresh", "Zoya", "Clean"];
+const BEAUTY_BRAND_OPTIONS: Array<"all" | BeautyBrand> = ["all", "Nivea", "Dove", "L'Oreal", "Other"];
 const BEAUTY_CONDITION_OPTIONS: Array<"all" | BeautyCondition> = ["all", "Brand New", "Refurbished", "Used"];
 const VERIFIED_OPTIONS: Array<{ label: string; value: VerifiedValue }> = [
   { label: "Show All", value: "all" },
@@ -143,7 +143,7 @@ function sortBeautyResults(results: MockBeautyListing[], sortBy: SortValue) {
 }
 
 function toBeautyResult(ad: Ad): MockBeautyListing {
-  const brand = BEAUTY_BRAND_OPTIONS.includes(ad.brand as BeautyBrand) ? (ad.brand as BeautyBrand) : "Fresh";
+  const brand = BEAUTY_BRAND_OPTIONS.includes(ad.brand as BeautyBrand) ? (ad.brand as BeautyBrand) : "Other";
   return { id: ad.id, ad, categoryType: "Body Care", beautyType: "Body Lotion", stripCategory: "Body Lotion", brand, condition: "Brand New" } as MockBeautyListing;
 }
 
