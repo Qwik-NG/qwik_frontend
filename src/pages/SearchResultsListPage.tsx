@@ -27,6 +27,7 @@ import type { Ad } from "../types";
 
 type SortValue = "newest" | "price-low" | "price-high";
 type VerifiedValue = "all" | "verified" | "unverified";
+type SearchResultMode = "exact" | "related";
 
 type Listing = {
   id: string;
@@ -411,6 +412,8 @@ export default function SearchResultsListPage() {
   const [sortBy, setSortBy] = useState<SortValue>("newest");
   const [verifiedFilter, setVerifiedFilter] = useState<VerifiedValue>("all");
   const [matchedAds, setMatchedAds] = useState<Ad[]>([]);
+  const [resultMode, setResultMode] = useState<SearchResultMode>("exact");
+  const [relatedTo, setRelatedTo] = useState("");
   const [loadingAds, setLoadingAds] = useState(true);
   const [adsError, setAdsError] = useState<string | null>(null);
   const maxPrice = Math.max(...matchedAds.map((ad) => ad.price), 100200000);
@@ -427,9 +430,13 @@ export default function SearchResultsListPage() {
       if (selectedLocation) params.set("location", selectedLocation);
       const response = await api.ads(`?${params.toString()}`);
       setMatchedAds(response.data);
+      setResultMode(response.meta?.resultMode === "related" ? "related" : "exact");
+      setRelatedTo(response.meta?.relatedTo ?? query);
     } catch (err) {
       setAdsError(err instanceof Error ? err.message : "Failed to load ads");
       setMatchedAds([]);
+      setResultMode("exact");
+      setRelatedTo("");
     } finally {
       setLoadingAds(false);
     }
@@ -572,13 +579,23 @@ export default function SearchResultsListPage() {
               </div>
             ) : results.length === 0 ? (
               <div className="rounded-[24px] border border-[#ddd9d2] bg-white px-6 py-12 text-center shadow-[0_8px_24px_rgba(31,29,39,0.05)]">
-                <h2 className="text-[22px] font-medium text-[#1f1d27]">No results found</h2>
+                <h2 className="text-[22px] font-medium text-[#1f1d27]">
+                  {resultMode === "related" ? "No exact results found" : "No results found"}
+                </h2>
                 <p className="mt-3 text-[15px] leading-[1.6] text-[#6d6a74]">
                   Try another keyword or adjust the filters to widen your search for “{resultsLabel}”.
                 </p>
               </div>
             ) : (
               <div className="space-y-3 sm:space-y-4">
+                {resultMode === "related" ? (
+                  <div className="rounded-[20px] border border-[#ffe1b8] bg-[#fff8ef] px-5 py-4">
+                    <p className="text-[18px] font-medium text-[#1f1d27]">No exact results found</p>
+                    <p className="mt-1 text-[14px] leading-[1.6] text-[#6d6a74]">
+                      Related ads you may like for “{relatedTo || resultsLabel}”.
+                    </p>
+                  </div>
+                ) : null}
                 {results.map((item) => (
                   <ListCard key={item.id} item={item} onClick={() => navigate(buildProductDetailsRoute(item.id))} />
                 ))}

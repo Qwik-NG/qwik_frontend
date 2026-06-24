@@ -48,7 +48,14 @@ type ApiResponse<T> = {
   success: boolean;
   data: T;
   message?: string;
-  meta?: { page: number; pageSize: number; total: number };
+  meta?: {
+    page: number;
+    pageSize: number;
+    total?: number;
+    resultMode?: "exact" | "related";
+    relatedTo?: string;
+    exactMatches?: number;
+  };
 };
 
 type ApiRequestInit = RequestInit & {

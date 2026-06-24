@@ -18,6 +18,7 @@ type NavigateTo = (to: string) => void;
 type SortValue = "newest" | "price-low" | "price-high";
 type VerifiedValue = "all" | "verified" | "unverified";
 type ViewMode = "grid" | "list";
+type SearchResultMode = "exact" | "related";
 
 export type CategorySubtype = {
   name: string;
@@ -263,6 +264,8 @@ export default function CategoryListingView({ config, query, navigate, locationF
   const [selectedMaxPrice, setSelectedMaxPrice] = useState(config.rangeMax);
   const [ads, setAds] = useState<Ad[]>([]);
   const [resultTotal, setResultTotal] = useState(0);
+  const [resultMode, setResultMode] = useState<SearchResultMode>("exact");
+  const [relatedTo, setRelatedTo] = useState("");
   const [loading, setLoading] = useState(true);
   const [errorMessage, setErrorMessage] = useState<string | null>(null);
   const [mobileFiltersOpen, setMobileFiltersOpen] = useState(false);
@@ -298,12 +301,16 @@ export default function CategoryListingView({ config, query, navigate, locationF
         if (!cancelled) {
           setAds(response.data);
           setResultTotal(response.meta?.total ?? response.data.length);
+          setResultMode(response.meta?.resultMode === "related" ? "related" : "exact");
+          setRelatedTo(response.meta?.relatedTo ?? query);
         }
       } catch (err) {
         if (!cancelled) {
           setErrorMessage(err instanceof Error ? err.message : "Failed to load ads");
           setAds([]);
           setResultTotal(0);
+          setResultMode("exact");
+          setRelatedTo("");
         }
       } finally {
         if (!cancelled) setLoading(false);
@@ -452,6 +459,15 @@ export default function CategoryListingView({ config, query, navigate, locationF
             </div>
           </div>
 
+          {resultMode === "related" && filteredAds.length > 0 ? (
+            <div className="mb-5 rounded-[20px] border border-[#ffe1b8] bg-[#fff8ef] px-5 py-4">
+              <p className="text-[18px] font-medium text-[#1f1d27]">No exact results found</p>
+              <p className="mt-1 text-[14px] leading-[1.6] text-[#6d6a74]">
+                Related ads you may like for “{relatedTo || headingQuery}”.
+              </p>
+            </div>
+          ) : null}
+
           {loading ? (
             <div className="grid grid-cols-1 gap-5 sm:grid-cols-2 xl:grid-cols-3">
               {Array.from({ length: 6 }).map((_, index) => (
@@ -473,7 +489,9 @@ export default function CategoryListingView({ config, query, navigate, locationF
             </div>
           ) : filteredAds.length === 0 ? (
             <div className="rounded-[24px] border border-[#ddd9d2] bg-white px-6 py-12 text-center shadow-[0_8px_24px_rgba(31,29,39,0.05)]">
-              <h2 className="text-[22px] font-medium text-[#1f1d27]">No results found</h2>
+              <h2 className="text-[22px] font-medium text-[#1f1d27]">
+                {resultMode === "related" ? "No exact results found" : "No results found"}
+              </h2>
               <p className="mt-3 text-[15px] leading-[1.6] text-[#6d6a74]">
                 Try another keyword or adjust the filters to widen your search.
               </p>
