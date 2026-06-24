@@ -1,4 +1,4 @@
-import { useEffect, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { SiteFooter, SiteHeader } from "../components/AppShell";
 import SettingsSidebar, { MobileSettingsMenu } from "../components/settings/SettingsSidebar";
@@ -127,6 +127,21 @@ function CheckIcon() {
   );
 }
 
+function StepDot({ label, status }: { label: string; status: "completed" | "active" | "pending" }) {
+  const isActive = status !== "pending";
+  const labelText = label === "1" ? "Business info" : label === "2" ? "Documents" : label === "3" ? "Review" : "Payment";
+  const statusText = status === "completed" ? "Completed" : status === "active" ? "In Progress" : "Pending";
+  return (
+    <div className="relative z-10 flex flex-col items-center gap-2 text-center">
+      <span className={`relative z-10 flex h-[30px] w-[30px] items-center justify-center rounded-full border ${isActive ? "border-[#ff8b2c] bg-[#ff8b2c] text-white" : "border-[#d7d5de] bg-white text-[#1f1d27]"}`}>
+        {label}
+      </span>
+      <p className="text-[14px] font-medium text-[#1f1d27]">{labelText}</p>
+      <p className={`text-[12px] ${isActive ? "text-[#ff8b2c]" : "text-[#8f8b98]"}`}>{statusText}</p>
+    </div>
+  );
+}
+
 function PaystackIcon() {
   return (
     <div className="flex h-[34px] w-[34px] items-center justify-center rounded-[10px] bg-[#f2f4fb]">
@@ -212,6 +227,7 @@ export default function GetVerifiedPaymentPage() {
   const [selectedPaymentMethod, setSelectedPaymentMethod] = useState<VerificationPaymentMethod | null>(null);
   const [error, setError] = useState<string | null>(null);
   const [message, setMessage] = useState<string | null>(null);
+  const submittingRef = useRef(false);
 
   useEffect(() => {
     let mounted = true;
@@ -234,7 +250,10 @@ export default function GetVerifiedPaymentPage() {
   }, []);
 
   const handleSubmitForReview = async () => {
+    if (submittingRef.current) return;
+
     try {
+      submittingRef.current = true;
       setSubmitting(true);
       setError(null);
       setMessage(null);
@@ -262,6 +281,7 @@ export default function GetVerifiedPaymentPage() {
     } catch (err) {
       setError(err instanceof Error ? err.message : "Failed to submit verification");
     } finally {
+      submittingRef.current = false;
       setSubmitting(false);
     }
   };
@@ -304,6 +324,17 @@ export default function GetVerifiedPaymentPage() {
             <div className="mt-6 grid gap-6 xl:grid-cols-[1fr_1.15fr]">
               <div className="space-y-5">
                 <div className="rounded-card border border-[#e2e1e8] bg-white p-6 shadow-[0_8px_30px_rgba(0,0,0,0.04)]">
+                  <div className="relative mt-2">
+                    <div className="absolute left-0 right-0 top-[15px] z-0 hidden h-[2px] bg-[#d7d5de] md:block" />
+                    <div className="absolute left-0 top-[15px] z-0 hidden h-[2px] w-[100%] bg-[#ff8b2c] md:block" />
+                    <div className="grid grid-cols-2 gap-6 md:grid-cols-4">
+                      <StepDot label="1" status="completed" />
+                      <StepDot label="2" status="completed" />
+                      <StepDot label="3" status="completed" />
+                      <StepDot label="4" status="active" />
+                    </div>
+                  </div>
+
                   <ShieldIllustration />
 
                   <div className="mt-4 text-center">
@@ -404,41 +435,41 @@ export default function GetVerifiedPaymentPage() {
                   <p className="mt-1 text-[13px] text-[#8f8b98]">Provider checkout is prepared but not live until payment keys are configured.</p>
 
                   <div role="radiogroup" aria-label="Verification payment method">
-                  <PaymentMethodCard
-                    method={VERIFICATION_PAYMENT_METHODS[0]}
-                    selected={selectedPaymentMethod === "paystack"}
-                    onSelect={() => {
-                      setSelectedPaymentMethod("paystack");
-                      setError(null);
-                    }}
-                  >
-                    <div className="mt-4 rounded-[12px] bg-[#f4f4f7] p-4">
-                      <div className="flex flex-wrap gap-3">
-                        <PaymentLogo label="VISA" />
-                        <PaymentLogo label="G Pay" />
-                        <PaymentLogo label="Apple Pay" />
-                        <PaymentLogo label="Mastercard" />
+                    <PaymentMethodCard
+                      method={VERIFICATION_PAYMENT_METHODS[0]}
+                      selected={selectedPaymentMethod === "paystack"}
+                      onSelect={() => {
+                        setSelectedPaymentMethod("paystack");
+                        setError(null);
+                      }}
+                    >
+                      <div className="mt-4 rounded-[12px] bg-[#f4f4f7] p-4">
+                        <div className="flex flex-wrap gap-3">
+                          <PaymentLogo label="VISA" />
+                          <PaymentLogo label="G Pay" />
+                          <PaymentLogo label="Apple Pay" />
+                          <PaymentLogo label="Mastercard" />
+                        </div>
                       </div>
-                    </div>
-                  </PaymentMethodCard>
+                    </PaymentMethodCard>
 
-                  <PaymentMethodCard
-                    method={VERIFICATION_PAYMENT_METHODS[1]}
-                    selected={selectedPaymentMethod === "bank-transfer"}
-                    onSelect={() => {
-                      setSelectedPaymentMethod("bank-transfer");
-                      setError(null);
-                    }}
-                  />
+                    <PaymentMethodCard
+                      method={VERIFICATION_PAYMENT_METHODS[1]}
+                      selected={selectedPaymentMethod === "bank-transfer"}
+                      onSelect={() => {
+                        setSelectedPaymentMethod("bank-transfer");
+                        setError(null);
+                      }}
+                    />
                   </div>
 
                   <button
-                    className="mt-6 flex h-[48px] w-full items-center justify-center gap-4 rounded-[12px] bg-gradient-to-r from-amber to-orange px-6 text-[15px] font-semibold text-white shadow-glow"
+                    className="mt-6 flex h-[48px] w-full items-center justify-center gap-4 rounded-[12px] bg-gradient-to-r from-amber to-orange px-6 text-[15px] font-semibold text-white shadow-glow disabled:cursor-not-allowed disabled:opacity-70"
                     type="button"
                     onClick={handleSubmitForReview}
                     disabled={loading || submitting || !verification || !selectedPaymentMethod}
                   >
-                    <span>{submitting ? "Submitting..." : "Create Payment Record & Submit"}</span>
+                    <span>{submitting ? "Processing..." : "Create Payment Record & Submit"}</span>
                     <span className="text-[18px]">-&gt;</span>
                   </button>
 

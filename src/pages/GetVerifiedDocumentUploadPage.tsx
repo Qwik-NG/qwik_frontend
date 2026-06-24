@@ -31,9 +31,9 @@ function StepDot({ label, status }: { label: string; status: "completed" | "acti
   const labelText = label === "1" ? "Business info" : label === "2" ? "Documents" : label === "3" ? "Review" : "Payment";
   const statusText = status === "completed" ? "Completed" : status === "active" ? "In Progress" : "Pending";
   return (
-    <div className="flex flex-col items-center gap-2 text-center">
+    <div className="relative z-10 flex flex-col items-center gap-2 text-center">
       <span
-        className={`flex h-[30px] w-[30px] items-center justify-center rounded-full border ${isActive ? "border-[#ff8b2c] bg-[#ff8b2c] text-white" : "border-[#d7d5de] bg-white text-[#1f1d27]"}`}
+        className={`relative z-10 flex h-[30px] w-[30px] items-center justify-center rounded-full border ${isActive ? "border-[#ff8b2c] bg-[#ff8b2c] text-white" : "border-[#d7d5de] bg-white text-[#1f1d27]"}`}
       >
         {label}
       </span>
@@ -53,11 +53,13 @@ function UploadCard({
   title,
   description,
   file,
+  error,
   onFileChange,
 }: {
   title: string;
   description: string;
   file: File | null;
+  error?: string;
   onFileChange: (file: File | null) => void;
 }) {
   const inputRef = useRef<HTMLInputElement | null>(null);
@@ -93,6 +95,7 @@ function UploadCard({
           {file.name} ({formatFileSize(file.size)})
         </p>
       ) : null}
+      {error ? <p className="mt-2 text-[12px] text-[#d14343]">{error}</p> : null}
     </div>
   );
 }
@@ -105,9 +108,17 @@ export default function GetVerifiedDocumentUploadPage() {
     proof_of_address: null,
     storefront_photo: null,
   });
+  const [fileErrors, setFileErrors] = useState<Record<string, string>>({});
   const [loading, setLoading] = useState(true);
   const [uploading, setUploading] = useState(false);
   const [error, setError] = useState<string | null>(null);
+  const uploadingRef = useRef(false);
+
+  const requiredDocuments: Array<{ key: keyof typeof files; label: string; title: string; description: string }> = [
+    { key: "cac_certificate", label: "CAC Certificate", title: "CAC Certificate Upload", description: "Drag & drop your CAC certificate" },
+    { key: "proof_of_address", label: "Proof of Address", title: "Proof of Address Upload", description: "Drag & drop your proof of address" },
+    { key: "storefront_photo", label: "Storefront Photo", title: "Storefront Photo Upload", description: "Drag & drop your storefront photo" },
+  ];
 
   useEffect(() => {
     let mounted = true;
@@ -132,19 +143,37 @@ export default function GetVerifiedDocumentUploadPage() {
 
   const setFile = (purpose: string, file: File | null) => {
     setFiles((current) => ({ ...current, [purpose]: file }));
+    setFileErrors((current) => {
+      if (!current[purpose]) return current;
+      const next = { ...current };
+      delete next[purpose];
+      return next;
+    });
   };
 
   const handleContinue = async () => {
+    if (uploadingRef.current) return;
+
+    const nextErrors = requiredDocuments.reduce<Record<string, string>>((accumulator, document) => {
+      if (!files[document.key]) {
+        accumulator[document.key] = `${document.label} is required.`;
+      }
+      return accumulator;
+    }, {});
+
+    setFileErrors(nextErrors);
+    if (Object.keys(nextErrors).length > 0) {
+      setError("Please upload CAC Certificate, Proof of Address, and Storefront Photo before continuing.");
+      return;
+    }
+
     try {
+      uploadingRef.current = true;
       setUploading(true);
       setError(null);
       const id = verificationId ?? (await api.createVerification()).data.id;
       setVerificationId(id);
       const selected = Object.entries(files).filter((entry): entry is [string, File] => Boolean(entry[1]));
-      if (selected.length === 0) {
-        setError("Please choose at least one document before continuing.");
-        return;
-      }
       const uploadedDocuments = [];
       for (const [purpose, file] of selected) {
         const upload = await api.uploadDocuments([file], purpose);
@@ -155,6 +184,7 @@ export default function GetVerifiedDocumentUploadPage() {
     } catch (err) {
       setError(err instanceof Error ? err.message : "Failed to upload documents");
     } finally {
+      uploadingRef.current = false;
       setUploading(false);
     }
   };
@@ -183,8 +213,8 @@ export default function GetVerifiedDocumentUploadPage() {
             </div>
 
             <div className="relative mt-6">
-              <div className="absolute left-0 right-0 top-[15px] hidden h-[2px] bg-[#d7d5de] md:block" />
-              <div className="absolute left-0 top-[15px] hidden h-[2px] w-[45%] bg-[#ff8b2c] md:block" />
+              <div className="absolute left-0 right-0 top-[15px] z-0 hidden h-[2px] bg-[#d7d5de] md:block" />
+              <div className="absolute left-0 top-[15px] z-0 hidden h-[2px] w-[45%] bg-[#ff8b2c] md:block" />
               <div className="grid grid-cols-2 gap-6 md:grid-cols-4">
                 <StepDot label="1" status="completed" />
                 <StepDot label="2" status="active" />
@@ -203,24 +233,16 @@ export default function GetVerifiedDocumentUploadPage() {
               {error ? <p className="mt-3 rounded-[10px] bg-[#fff0f0] px-3 py-2 text-[13px] text-[#c24141]">{error}</p> : null}
 
               <div className="mt-6 grid grid-cols-1 gap-5 sm:grid-cols-2 xl:grid-cols-3">
-                <UploadCard
-                  title="CAC Certificate Upload"
-                  description="Drag & drop your CAC certificate"
-                  file={files.cac_certificate}
-                  onFileChange={(file) => setFile("cac_certificate", file)}
-                />
-                <UploadCard
-                  title="Proof of Address Upload"
-                  description="Drag & drop your proof of address"
-                  file={files.proof_of_address}
-                  onFileChange={(file) => setFile("proof_of_address", file)}
-                />
-                <UploadCard
-                  title="Storefront Photo Upload"
-                  description="Drag & drop your storefront photo"
-                  file={files.storefront_photo}
-                  onFileChange={(file) => setFile("storefront_photo", file)}
-                />
+                {requiredDocuments.map((document) => (
+                  <UploadCard
+                    key={document.key}
+                    title={document.title}
+                    description={document.description}
+                    file={files[document.key]}
+                    error={fileErrors[document.key]}
+                    onFileChange={(file) => setFile(document.key, file)}
+                  />
+                ))}
               </div>
 
               <div className="mt-6 flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
@@ -233,12 +255,12 @@ export default function GetVerifiedDocumentUploadPage() {
                   <span>Back</span>
                 </button>
                 <button
-                  className="flex h-[44px] items-center gap-3 rounded-[12px] bg-gradient-to-r from-amber to-orange px-6 text-[13px] font-medium text-white shadow-glow"
+                  className="flex h-[44px] items-center gap-3 rounded-[12px] bg-gradient-to-r from-amber to-orange px-6 text-[13px] font-medium text-white shadow-glow disabled:cursor-not-allowed disabled:opacity-70"
                   type="button"
                   onClick={handleContinue}
                   disabled={loading || uploading}
                 >
-                  <span>{uploading ? "Uploading..." : "Continue to Review"}</span>
+                  <span>{uploading ? "Processing..." : "Continue to Review"}</span>
                   <span className="text-[16px]">-&gt;</span>
                 </button>
               </div>
