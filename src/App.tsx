@@ -57,7 +57,8 @@ const AdminAds = lazy(() => import("./pages/AdminAds"));
 const AdminReports = lazy(() => import("./pages/AdminReports"));
 const AdminReviews = lazy(() => import("./pages/AdminReviews"));
 const AdminVerification = lazy(() => import("./pages/AdminVerification"));
-const AdminAuditLog = lazy(() => import("./pages/AdminAuditLog"));const AdminCommunications = lazy(() => import('./pages/AdminCommunications'));
+const AdminAuditLog = lazy(() => import("./pages/AdminAuditLog"));
+const AdminCommunications = lazy(() => import("./pages/AdminCommunications"));
 function RouteFallback() {
   return <div aria-hidden="true" className="min-h-screen bg-page" />;
 }
