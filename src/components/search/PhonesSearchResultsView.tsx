@@ -4,6 +4,7 @@ import {
   ROUTES,
 } from "../../constants/routes";
 import { ALL_NIGERIA_LOCATION, isCategoryMarkerQuery, NIGERIAN_LOCATIONS } from "../../lib/searchContext";
+import { getAdConditionLabel } from "../../lib/adCondition";
 import { isSellerVerified } from "../../lib/sellerVerification";
 import {
   type MockPhonesListing,
@@ -40,7 +41,7 @@ const PHONES_FILTER_TYPES: Array<"all" | PhonesType> = [
   "Smart watch",
 ];
 const PHONES_FILTER_BRANDS: Array<"all" | PhonesBrand> = ["all", "Apple", "Samsung", "Tecno", "Xiaomi", "Redmi"];
-const PHONES_FILTER_CONDITIONS: Array<"all" | PhonesCondition> = ["all", "Brand New", "Refurbished", "Used"];
+const PHONES_FILTER_CONDITIONS: Array<"all" | PhonesCondition> = ["all", "New", "Refurbished", "Used"];
 const VERIFIED_OPTIONS: Array<{ label: string; value: VerifiedValue }> = [
   { label: "Show All", value: "all" },
   { label: "Verified Seller", value: "verified" },
@@ -146,7 +147,8 @@ function sortPhonesResults(results: MockPhonesListing[], sortBy: SortValue) {
 
 function toPhonesResult(ad: Ad): MockPhonesListing {
   const brand = PHONES_FILTER_BRANDS.includes(ad.brand as PhonesBrand) ? (ad.brand as PhonesBrand) : "Apple";
-  const condition = PHONES_FILTER_CONDITIONS.includes(ad.condition as PhonesCondition) ? (ad.condition as PhonesCondition) : "Used";
+  const normalizedCondition = getAdConditionLabel(ad.condition);
+  const condition = PHONES_FILTER_CONDITIONS.includes(normalizedCondition as PhonesCondition) ? (normalizedCondition as PhonesCondition) : "Used";
   return { id: ad.id, ad, phonesType: "Mobile Phones", brand, stripBrand: brand, condition } as MockPhonesListing;
 }
 

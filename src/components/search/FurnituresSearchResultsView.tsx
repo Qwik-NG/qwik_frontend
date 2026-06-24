@@ -4,6 +4,7 @@ import {
   ROUTES,
 } from "../../constants/routes";
 import { ALL_NIGERIA_LOCATION, isCategoryMarkerQuery, NIGERIAN_LOCATIONS } from "../../lib/searchContext";
+import { getAdConditionLabel } from "../../lib/adCondition";
 import { isSellerVerified } from "../../lib/sellerVerification";
 import {
   type FurnitureCondition,
@@ -39,7 +40,7 @@ const FURNITURE_CATEGORY_OPTIONS: Array<"all" | MockFurnitureListing["categoryTy
 ];
 const FURNITURE_TYPE_OPTIONS: Array<"all" | FurnitureType> = ["all", "Chairs", "Tables", "Bed & Frames"];
 const FURNITURE_ROOM_OPTIONS: Array<"all" | MockFurnitureListing["room"]> = ["all", "Bedroom", "Kitchen", "Home Office / Study"];
-const FURNITURE_CONDITION_OPTIONS: Array<"all" | FurnitureCondition> = ["all", "Brand New", "Used"];
+const FURNITURE_CONDITION_OPTIONS: Array<"all" | FurnitureCondition> = ["all", "New", "Used"];
 const FURNITURE_STRIP_OPTIONS: Array<{ name: FurnitureType; image?: string }> = [
   { name: "Chairs", image: getCategoryBubbleImage("furniture", "Chairs") },
   { name: "Tables", image: getCategoryBubbleImage("furniture", "Tables") },
@@ -138,7 +139,8 @@ function sortFurnitureResults(results: MockFurnitureListing[], sortBy: SortValue
 }
 
 function toFurnitureResult(ad: Ad): MockFurnitureListing {
-  const condition = FURNITURE_CONDITION_OPTIONS.includes(ad.condition as FurnitureCondition) ? (ad.condition as FurnitureCondition) : "Used";
+  const normalizedCondition = getAdConditionLabel(ad.condition);
+  const condition = FURNITURE_CONDITION_OPTIONS.includes(normalizedCondition as FurnitureCondition) ? (normalizedCondition as FurnitureCondition) : "Used";
   return {
     id: ad.id,
     ad,

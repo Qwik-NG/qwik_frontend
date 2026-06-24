@@ -43,6 +43,14 @@ const VERIFIED_OPTIONS: Array<{ label: string; value: VerifiedValue }> = [
   { label: "Unverified Seller", value: "unverified" },
 ];
 
+function toConditionDisplay(value: string) {
+  return value === "Brand New" ? "New" : value;
+}
+
+function toConditionQueryValue(value: string) {
+  return value === "New" ? "Brand New" : value;
+}
+
 function GridResultSkeleton() {
   return (
     <article className="rounded-[22px] bg-white p-3 shadow-[0_10px_26px_rgba(31,29,39,0.04)]">
@@ -263,7 +271,7 @@ function SearchFilters({
 
       <FilterPanel title="Condition">
         <div className="space-y-2">
-          {["Brand New", "Foreign Used", "Local Used"].map((cond) => (
+          {["New", "Foreign Used", "Local Used"].map((cond) => (
             <button
               key={cond}
               type="button"
@@ -408,7 +416,8 @@ export default function SearchResultsPage() {
   const selectedMaxPrice = Number(searchParams.get("maxPrice")) || 0;
   const verifiedParam = searchParams.get("verified");
   const verifiedFilter: VerifiedValue = verifiedParam === "true" ? "verified" : verifiedParam === "false" ? "unverified" : "all";
-  const condition = searchParams.get("condition") || "";
+  const rawCondition = searchParams.get("condition") || "";
+  const condition = toConditionDisplay(rawCondition);
 
   // Update URL params helper
   const updateSearchParam = useCallback(
@@ -450,7 +459,7 @@ export default function SearchResultsPage() {
       if (selectedMinPrice > 0) params.set("minPrice", String(selectedMinPrice));
       if (selectedMaxPrice > 0) params.set("maxPrice", String(selectedMaxPrice));
       if (sortBy && sortBy !== "newest") params.set("sort", sortBy);
-      if (condition) params.set("condition", condition);
+      if (condition) params.set("condition", toConditionQueryValue(condition));
 
       const response = await api.ads(`?${params.toString()}`);
       setMatchedAds(response.data);

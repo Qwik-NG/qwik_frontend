@@ -15,23 +15,23 @@ import type {
 } from "../types/index";
 
 export type VehicleType = "Car" | "Buses" | "Motorcycle & Scooters" | "Buses & Microbuses";
-export type VehicleCondition = "Brand New" | "Foreign Used" | "Local Used";
+export type VehicleCondition = "New" | "Brand New" | "Foreign Used" | "Local Used";
 
 export type ElectronicsType = "Laptops & Computers" | "Audio & Music Equipment" | "Computer Hardware" | "Monitors";
-export type ElectronicsCondition = "Brand New" | "Refurbished" | "Used";
+export type ElectronicsCondition = "New" | "Brand New" | "Refurbished" | "Used";
 export type PhonesType = "Mobile Phones" | "Tablet" | "Accessories for Phones and Tab" | "Smart watch";
-export type PhonesCondition = "Brand New" | "Refurbished" | "Used";
+export type PhonesCondition = "New" | "Brand New" | "Refurbished" | "Used";
 export type BeautyType = "Body Lotion" | "Body Wash & Soap" | "Body Oils" | "Body Creams & Milks" | "Body Scrubs" | "Shower Gel";
-export type BeautyCondition = "Brand New" | "Refurbished" | "Used";
+export type BeautyCondition = "New" | "Brand New" | "Refurbished" | "Used";
 export type FurnitureType = "Chairs" | "Tables" | "Bed & Frames" | "Sofas" | "TV Stand & Mount" | "Mattresses" | "Wardrobes";
-export type FurnitureCondition = "Brand New" | "Used";
+export type FurnitureCondition = "New" | "Brand New" | "Used";
 export type FashionSearchState = "general" | "men" | "women" | "baby-kids";
 export type FashionCategory = "Men's Fashion" | "Women's Fashion" | "Baby & Kids Fashion";
 export type FashionType = "Clothings" | "Bags" | "Jewelry" | "Shoe";
 export type FashionBrand = "Nike" | "Louis Vuitton" | "Adidas";
 export type FashionStyle = "Casual" | "Formal" | "Vintage";
 export type FashionColor = "Black" | "Multi" | "White";
-export type FashionCondition = "Brand New" | "Used";
+export type FashionCondition = "New" | "Brand New" | "Used";
 export type FashionStripItem =
   | "Men's Fashion"
   | "Women's Fashion"

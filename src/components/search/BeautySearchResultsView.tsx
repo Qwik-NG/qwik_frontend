@@ -4,6 +4,7 @@ import {
   ROUTES,
 } from "../../constants/routes";
 import { ALL_NIGERIA_LOCATION, isCategoryMarkerQuery, NIGERIAN_LOCATIONS } from "../../lib/searchContext";
+import { getAdConditionLabel } from "../../lib/adCondition";
 import { isSellerVerified } from "../../lib/sellerVerification";
 import {
   type BeautyCondition,
@@ -53,7 +54,7 @@ const BEAUTY_STRIP_OPTIONS: Array<{ name: BeautyType; image?: string }> = [
   { name: "Shower Gel", image: getCategoryBubbleImage("beauty", "Shower Gel") },
 ];
 const BEAUTY_BRAND_OPTIONS: Array<"all" | BeautyBrand> = ["all", "Nivea", "Dove", "L'Oreal", "Other"];
-const BEAUTY_CONDITION_OPTIONS: Array<"all" | BeautyCondition> = ["all", "Brand New", "Refurbished", "Used"];
+const BEAUTY_CONDITION_OPTIONS: Array<"all" | BeautyCondition> = ["all", "New", "Refurbished", "Used"];
 const VERIFIED_OPTIONS: Array<{ label: string; value: VerifiedValue }> = [
   { label: "Show All", value: "all" },
   { label: "Verified Seller", value: "verified" },
@@ -144,7 +145,9 @@ function sortBeautyResults(results: MockBeautyListing[], sortBy: SortValue) {
 
 function toBeautyResult(ad: Ad): MockBeautyListing {
   const brand = BEAUTY_BRAND_OPTIONS.includes(ad.brand as BeautyBrand) ? (ad.brand as BeautyBrand) : "Other";
-  return { id: ad.id, ad, categoryType: "Body Care", beautyType: "Body Lotion", stripCategory: "Body Lotion", brand, condition: "Brand New" } as MockBeautyListing;
+  const normalizedCondition = getAdConditionLabel(ad.condition);
+  const condition = BEAUTY_CONDITION_OPTIONS.includes(normalizedCondition as BeautyCondition) ? (normalizedCondition as BeautyCondition) : "Used";
+  return { id: ad.id, ad, categoryType: "Body Care", beautyType: "Body Lotion", stripCategory: "Body Lotion", brand, condition } as MockBeautyListing;
 }
 
 function BeautyFilters({

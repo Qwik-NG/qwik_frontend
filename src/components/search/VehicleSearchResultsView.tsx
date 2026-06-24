@@ -50,7 +50,7 @@ type VehicleSearchResultsViewProps = {
 const VEHICLE_FILTER_TYPES: Array<"all" | VehicleType> = ["all", "Car", "Motorcycle & Scooters", "Buses", "Buses & Microbuses"];
 const VEHICLE_FILTER_CONDITIONS: Array<"all" | VehicleCondition> = [
   "all",
-  "Brand New",
+  "New",
   "Foreign Used",
   "Local Used",
 ];
@@ -237,9 +237,7 @@ function toVehicleResult(ad: Ad): VehicleListing {
   const normalizedCondition = getAdConditionLabel(ad.condition);
   const conditionForFilter = normalizedCondition === "Nigerian Used"
     ? "Local Used"
-    : normalizedCondition === "New"
-      ? "Brand New"
-      : normalizedCondition;
+    : normalizedCondition;
   const condition = VEHICLE_FILTER_CONDITIONS.includes(conditionForFilter as VehicleCondition)
     ? (conditionForFilter as VehicleCondition)
     : "Local Used";
