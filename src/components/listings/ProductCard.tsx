@@ -4,6 +4,7 @@ export type ProductCardItem = {
   location: string;
   description: string;
   image?: string;
+  condition?: string | null;
 };
 
 type ProductCardProps = {
@@ -25,6 +26,8 @@ export default function ProductCard({
   showBadge = true,
   className = "",
 }: ProductCardProps) {
+  const label = item.condition?.trim() || badgeLabel;
+
   return (
     <article className={`cursor-pointer rounded-[18px] bg-white p-3 ${className}`.trim()} onClick={onClick}>
       <FallbackImage
@@ -34,20 +37,22 @@ export default function ProductCard({
         fallback={<ImagePlaceholder title="" labelClassName="hidden" className="h-[180px] rounded-[12px]" />}
       />
       <div className="pt-3">
-        <div className="mb-2 flex items-center justify-between">
+        <div className="mb-2 flex items-center">
           <h4 className="text-[20px] font-semibold">{item.price}</h4>
-          {showBadge && (
-            <span className="rounded-[8px] bg-badge-bg px-2.5 py-1 text-[14px] text-[#ff9715]">
-              {badgeLabel}
-            </span>
-          )}
         </div>
         <h5 className="mb-2 text-[16px] font-medium leading-tight">{item.title}</h5>
         <p className="mb-2 text-[14px] leading-[1.35] text-[#6d6a74]">{item.description}</p>
-        <small className="flex items-center gap-1 text-[14px] text-[#4b4a54]">
-          <LocationPin className="h-4 w-4" />
-          <span>{item.location}</span>
-        </small>
+        <div className="flex items-end justify-between gap-2">
+          <small className="flex min-w-0 items-center gap-1 text-[14px] text-[#4b4a54]">
+            <LocationPin className="h-4 w-4 shrink-0" />
+            <span className="truncate">{item.location}</span>
+          </small>
+          {showBadge && label ? (
+            <span className="shrink-0 rounded-[8px] bg-badge-bg px-2 py-0.5 text-[11px] font-medium text-[#c07a1f]">
+              {label}
+            </span>
+          ) : null}
+        </div>
       </div>
     </article>
   );

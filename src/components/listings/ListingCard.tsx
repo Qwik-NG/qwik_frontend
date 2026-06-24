@@ -70,11 +70,6 @@ export default function ListingCard({
       <div className="px-0 pb-1 pt-4 sm:pt-5">
         <div className="flex flex-wrap items-center gap-2">
           <h3 className="m-0 min-w-0 text-[18px] font-semibold leading-none text-[#1f1d27] sm:text-[20px]">{item.price}</h3>
-          {showBadge && (
-            <span className="shrink-0 rounded-[10px] bg-badge-bg px-2 py-1 text-[12px] text-[#ff9715] sm:rounded-[12px] sm:px-3 sm:py-1.5 sm:text-[14px]">
-              {badgeLabel}
-            </span>
-          )}
         </div>
         <h4
           className="mb-2 mt-4 text-[15px] font-medium leading-[1.32] text-[#1f1d27] sm:text-[18px]"
@@ -88,10 +83,17 @@ export default function ListingCard({
         >
           {item.description}
         </p>
-        <small className="flex items-center gap-1 text-[13px] text-[#5f5d6c] sm:text-[15px]">
-          <LocationPin className="h-4 w-4" />
-          <span style={clampStyle(clampLocationLines)}>{item.location}</span>
-        </small>
+        <div className="flex items-end justify-between gap-2">
+          <small className="flex min-w-0 items-center gap-1 text-[13px] text-[#5f5d6c] sm:text-[15px]">
+            <LocationPin className="h-4 w-4 shrink-0" />
+            <span style={clampStyle(clampLocationLines)}>{item.location}</span>
+          </small>
+          {showBadge ? (
+            <span className="shrink-0 rounded-[8px] bg-badge-bg px-2 py-0.5 text-[11px] font-medium text-[#c07a1f] sm:text-[12px]">
+              {badgeLabel}
+            </span>
+          ) : null}
+        </div>
       </div>
     </article>
   );

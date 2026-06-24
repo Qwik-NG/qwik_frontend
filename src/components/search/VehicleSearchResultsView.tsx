@@ -199,18 +199,22 @@ function VehicleListCard({ item, onClick }: { item: VehicleListing; onClick: () 
           )}
         </div>
         <div>
-          <div className="mb-3 flex items-center justify-between gap-3">
+          <div className="mb-3 flex items-center gap-3">
             <h4 className="text-[24px] font-semibold leading-none text-[#1f1d27] sm:text-[28px]">{formatNaira(item.ad.price)}</h4>
-            {getAdConditionLabel(item.ad.condition) ? (
-              <span className="rounded-[9px] bg-badge-bg px-2.5 py-1 text-[14px] text-[#ff9715]">{getAdConditionLabel(item.ad.condition)}</span>
-            ) : null}
           </div>
           <h5 className="mb-2 text-[20px] font-medium leading-tight text-[#1f1d27]">{item.ad.title}</h5>
           <p className="mb-3 text-[15px] leading-[1.55] text-[#6d6a74]">{item.ad.description}</p>
-          <small className="flex items-center gap-1 text-[14px] text-[#4b4a54]">
-            <LocationPin className="h-4 w-4" />
-            <span>{item.ad.location}</span>
-          </small>
+          <div className="flex items-end justify-between gap-2">
+            <small className="flex min-w-0 items-center gap-1 text-[14px] text-[#4b4a54]">
+              <LocationPin className="h-4 w-4 shrink-0" />
+              <span className="truncate">{item.ad.location}</span>
+            </small>
+            {getAdConditionLabel(item.ad.condition) ? (
+              <span className="shrink-0 rounded-[8px] bg-badge-bg px-2 py-0.5 text-[11px] font-medium text-[#c07a1f] sm:text-[12px]">
+                {getAdConditionLabel(item.ad.condition)}
+              </span>
+            ) : null}
+          </div>
         </div>
       </div>
     </article>
@@ -231,7 +235,11 @@ function toVehicleResult(ad: Ad): VehicleListing {
   const brand = ad.brand?.trim() || "Other";
   const vehicleType = inferVehicleTypeFromText(ad.category?.name || ad.category?.slug);
   const normalizedCondition = getAdConditionLabel(ad.condition);
-  const conditionForFilter = normalizedCondition === "Nigerian Used" ? "Local Used" : normalizedCondition;
+  const conditionForFilter = normalizedCondition === "Nigerian Used"
+    ? "Local Used"
+    : normalizedCondition === "New"
+      ? "Brand New"
+      : normalizedCondition;
   const condition = VEHICLE_FILTER_CONDITIONS.includes(conditionForFilter as VehicleCondition)
     ? (conditionForFilter as VehicleCondition)
     : "Local Used";

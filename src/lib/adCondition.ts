@@ -6,6 +6,14 @@ function normalizeConditionToken(value: string) {
     .replace(/\s+/g, " ");
 }
 
+function toTitleCase(value: string) {
+  return value
+    .split(" ")
+    .filter(Boolean)
+    .map((word) => word.charAt(0).toUpperCase() + word.slice(1))
+    .join(" ");
+}
+
 export function getAdConditionLabel(condition?: string | null): string | null {
   if (!condition) return null;
 
@@ -13,7 +21,7 @@ export function getAdConditionLabel(condition?: string | null): string | null {
   if (!token) return null;
 
   if (token === "new" || token === "brand new" || token === "brandnew") {
-    return "Brand New";
+    return "New";
   }
 
   if (token === "foreign used" || token === "foreignused") {
@@ -28,5 +36,9 @@ export function getAdConditionLabel(condition?: string | null): string | null {
     return "Nigerian Used";
   }
 
-  return condition.trim();
+  if (token === "used") {
+    return "Used";
+  }
+
+  return toTitleCase(token);
 }
