@@ -4,6 +4,7 @@ import {
   ROUTES,
 } from "../../constants/routes";
 import { ALL_NIGERIA_LOCATION, isCategoryMarkerQuery, NIGERIAN_LOCATIONS } from "../../lib/searchContext";
+import { getAdConditionLabel } from "../../lib/adCondition";
 import { isSellerVerified } from "../../lib/sellerVerification";
 import ListingCard from "../listings/ListingCard";
 import {
@@ -43,7 +44,7 @@ const ELECTRONICS_FILTER_TYPES: Array<"all" | ElectronicsType> = [
 const ELECTRONICS_FILTER_BRANDS: Array<"all" | ElectronicsBrand> = ["all", "Asus", "Apple", "HP", "Dell", "Lenovo"];
 const ELECTRONICS_FILTER_CONDITIONS: Array<"all" | ElectronicsCondition> = [
   "all",
-  "Brand New",
+  "New",
   "Refurbished",
   "Used",
 ];
@@ -150,7 +151,8 @@ function sortElectronicsResults(results: MockElectronicsListing[], sortBy: SortV
 
 function toElectronicsResult(ad: Ad): MockElectronicsListing {
   const brand = ELECTRONICS_FILTER_BRANDS.includes(ad.brand as ElectronicsBrand) ? (ad.brand as ElectronicsBrand) : "Apple";
-  const condition = ELECTRONICS_FILTER_CONDITIONS.includes(ad.condition as ElectronicsCondition) ? (ad.condition as ElectronicsCondition) : "Used";
+  const normalizedCondition = getAdConditionLabel(ad.condition);
+  const condition = ELECTRONICS_FILTER_CONDITIONS.includes(normalizedCondition as ElectronicsCondition) ? (normalizedCondition as ElectronicsCondition) : "Used";
   const stripCategory = ad.category?.slug === "desktop-computers" ? "Desktop" : ad.category?.slug === "servers" ? "Server" : "Laptops";
   return { id: ad.id, ad, electronicsType: "Laptops & Computers", stripCategory, brand, condition } as MockElectronicsListing;
 }

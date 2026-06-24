@@ -18,6 +18,7 @@ import {
   type FashionType,
   type MockFashionListing,
 } from "../../lib/mockData";
+import { getAdConditionLabel } from "../../lib/adCondition";
 import { api } from "../../services/api";
 import type { Ad } from "../../types";
 import ListingCard from "../listings/ListingCard";
@@ -52,7 +53,7 @@ const FASHION_TYPE_OPTIONS: Array<"all" | FashionType> = ["all", "Clothings", "B
 const FASHION_BRAND_OPTIONS: Array<"all" | FashionBrand> = ["all", "Nike", "Louis Vuitton", "Adidas"];
 const FASHION_STYLE_OPTIONS: Array<"all" | FashionStyle> = ["all", "Casual", "Formal", "Vintage"];
 const FASHION_COLOR_OPTIONS: Array<"all" | FashionColor> = ["all", "Black", "Multi", "White"];
-const FASHION_CONDITION_OPTIONS: Array<"all" | FashionCondition> = ["all", "Brand New", "Used"];
+const FASHION_CONDITION_OPTIONS: Array<"all" | FashionCondition> = ["all", "New", "Used"];
 const VERIFIED_OPTIONS: Array<{ label: string; value: VerifiedValue }> = [
   { label: "Show All", value: "all" },
   { label: "Verified Seller", value: "verified" },
@@ -206,7 +207,8 @@ function sortFashionResults(results: MockFashionListing[], sortBy: SortValue) {
 
 function toFashionResult(ad: Ad): MockFashionListing {
   const brand = FASHION_BRAND_OPTIONS.includes(ad.brand as FashionBrand) ? (ad.brand as FashionBrand) : "Nike";
-  const condition = FASHION_CONDITION_OPTIONS.includes(ad.condition as FashionCondition) ? (ad.condition as FashionCondition) : "Used";
+  const normalizedCondition = getAdConditionLabel(ad.condition);
+  const condition = FASHION_CONDITION_OPTIONS.includes(normalizedCondition as FashionCondition) ? (normalizedCondition as FashionCondition) : "Used";
   return {
     id: ad.id,
     ad,

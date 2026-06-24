@@ -3,6 +3,7 @@ import { useNavigate, useParams } from "react-router-dom";
 import { SiteFooter, SiteHeader } from "../components/AppShell";
 import ProductCard from "../components/listings/ProductCard";
 import { UserAvatar } from "../components/ui/UserAvatar";
+import { getAdConditionLabel } from "../lib/adCondition";
 import { api } from "../services/api";
 import { getToken } from "../services/auth";
 import type { PublicUserProfile } from "../types";
@@ -156,6 +157,7 @@ export default function PublicProfilePage() {
                         location: ad.location,
                         description: ad.description,
                         image: ad.images?.[0]?.url,
+                        condition: getAdConditionLabel(ad.condition),
                       }}
                       onClick={() => navigate(`/product-details/${ad.id}`)}
                     />

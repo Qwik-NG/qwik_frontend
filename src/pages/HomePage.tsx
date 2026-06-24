@@ -282,18 +282,20 @@ export default function HomePage() {
                 <div className="px-0 pb-1 pt-3 sm:pt-4">
                   <div className="flex flex-wrap items-center gap-2">
                     <h3 className="m-0 min-w-0 text-[16px] font-semibold leading-none sm:text-[20px]">₦ {item.price.toLocaleString()}</h3>
+                  </div>
+                  <h4 className="mb-1.5 mt-3 text-[15px] font-medium leading-[1.25] sm:mt-4 sm:text-[18px]" style={{ display: "-webkit-box", WebkitLineClamp: 2, WebkitBoxOrient: "vertical", overflow: "hidden" }}>{item.title}</h4>
+                  <p className="mb-2 text-[13px] leading-[1.35] text-muted sm:mb-3 sm:text-[15px] sm:leading-[1.4]" style={{ display: "-webkit-box", WebkitLineClamp: 2, WebkitBoxOrient: "vertical", overflow: "hidden" }}>{item.description}</p>
+                  <div className="flex items-end justify-between gap-2">
+                    <small className="flex min-w-0 items-center gap-1 text-[13px] text-[#4b4a54] sm:text-[15px]">
+                      <LocationPin className="h-4 w-4 shrink-0" />
+                      <span style={{ display: "-webkit-box", WebkitLineClamp: 1, WebkitBoxOrient: "vertical", overflow: "hidden" }}>{item.location}</span>
+                    </small>
                     {getAdConditionLabel(item.condition) ? (
-                      <span className="shrink-0 rounded-[10px] bg-[#f5ebdc] px-2 py-1 text-[12px] text-[#ff9715] sm:rounded-[12px] sm:px-3 sm:py-1.5 sm:text-[15px]">
+                      <span className="shrink-0 rounded-[8px] bg-[#f5ebdc] px-2 py-0.5 text-[11px] font-medium text-[#c07a1f] sm:text-[12px]">
                         {getAdConditionLabel(item.condition)}
                       </span>
                     ) : null}
                   </div>
-                  <h4 className="mb-1.5 mt-3 text-[15px] font-medium leading-[1.25] sm:mt-4 sm:text-[18px]" style={{ display: "-webkit-box", WebkitLineClamp: 2, WebkitBoxOrient: "vertical", overflow: "hidden" }}>{item.title}</h4>
-                  <p className="mb-2 text-[13px] leading-[1.35] text-muted sm:mb-3 sm:text-[15px] sm:leading-[1.4]" style={{ display: "-webkit-box", WebkitLineClamp: 2, WebkitBoxOrient: "vertical", overflow: "hidden" }}>{item.description}</p>
-                  <small className="flex items-center gap-1 text-[13px] text-[#4b4a54] sm:text-[15px]">
-                    <LocationPin className="h-4 w-4" />
-                    <span style={{ display: "-webkit-box", WebkitLineClamp: 1, WebkitBoxOrient: "vertical", overflow: "hidden" }}>{item.location}</span>
-                  </small>
                 </div>
               </article>
             ))}
@@ -324,18 +326,20 @@ export default function HomePage() {
                 <div className="flex min-w-0 flex-1 flex-col py-1 sm:py-3">
                   <div className="flex flex-wrap items-center gap-2 sm:gap-3">
                     <h3 className="m-0 min-w-0 text-[16px] font-semibold leading-none sm:text-[20px]">₦ {item.price.toLocaleString()}</h3>
+                  </div>
+                  <h4 className="mb-1.5 mt-2 text-[15px] font-medium leading-[1.25] sm:mb-2 sm:mt-3 sm:text-[18px]" style={{ display: "-webkit-box", WebkitLineClamp: 1, WebkitBoxOrient: "vertical", overflow: "hidden" }}>{item.title}</h4>
+                  <p className="mb-2 text-[13px] leading-[1.4] text-muted sm:mb-3 sm:text-[15px]" style={{ display: "-webkit-box", WebkitLineClamp: 2, WebkitBoxOrient: "vertical", overflow: "hidden" }}>{item.description}</p>
+                  <div className="mt-auto flex items-end justify-between gap-2">
+                    <small className="flex min-w-0 items-center gap-1 text-[13px] text-[#4b4a54] sm:text-[15px]">
+                      <LocationPin className="h-4 w-4 shrink-0" />
+                      <span className="truncate">{item.location}</span>
+                    </small>
                     {getAdConditionLabel(item.condition) ? (
-                      <span className="shrink-0 rounded-[10px] bg-[#f5ebdc] px-2 py-1 text-[12px] text-[#ff9715] sm:rounded-[12px] sm:px-3 sm:py-1.5 sm:text-[15px]">
+                      <span className="shrink-0 rounded-[8px] bg-[#f5ebdc] px-2 py-0.5 text-[11px] font-medium text-[#c07a1f] sm:text-[12px]">
                         {getAdConditionLabel(item.condition)}
                       </span>
                     ) : null}
                   </div>
-                  <h4 className="mb-1.5 mt-2 text-[15px] font-medium leading-[1.25] sm:mb-2 sm:mt-3 sm:text-[18px]" style={{ display: "-webkit-box", WebkitLineClamp: 1, WebkitBoxOrient: "vertical", overflow: "hidden" }}>{item.title}</h4>
-                  <p className="mb-2 text-[13px] leading-[1.4] text-muted sm:mb-3 sm:text-[15px]" style={{ display: "-webkit-box", WebkitLineClamp: 2, WebkitBoxOrient: "vertical", overflow: "hidden" }}>{item.description}</p>
-                  <small className="mt-auto flex items-center gap-1 text-[13px] text-[#4b4a54] sm:text-[15px]">
-                    <LocationPin className="h-4 w-4" />
-                    <span className="truncate">{item.location}</span>
-                  </small>
                 </div>
               </article>
             ))}

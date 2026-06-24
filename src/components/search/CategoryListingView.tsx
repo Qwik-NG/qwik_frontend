@@ -544,11 +544,6 @@ export default function CategoryListingView({ config, query, navigate, locationF
                   <div className="flex min-w-0 flex-1 flex-col py-1 sm:py-3">
                     <div className="flex flex-wrap items-center gap-2 sm:gap-3">
                       <h3 className="m-0 whitespace-nowrap text-[16px] font-semibold leading-none sm:text-[20px]">{formatNaira(ad.price)}</h3>
-                      {getAdConditionLabel(ad.condition) ? (
-                        <span className="rounded-[10px] bg-[#f5ebdc] px-2 py-1 text-[12px] text-[#ff9715] sm:rounded-[12px] sm:px-3 sm:py-1.5 sm:text-[15px]">
-                          {getAdConditionLabel(ad.condition)}
-                        </span>
-                      ) : null}
                     </div>
                     <h4
                       className="mb-1.5 mt-2 text-[15px] font-medium leading-[1.25] sm:mb-2 sm:mt-3 sm:text-[18px]"
@@ -562,7 +557,14 @@ export default function CategoryListingView({ config, query, navigate, locationF
                     >
                       {ad.description}
                     </p>
-                    <small className="mt-auto truncate text-[13px] text-[#4b4a54] sm:text-[15px]">{ad.location}</small>
+                    <div className="mt-auto flex items-end justify-between gap-2">
+                      <small className="truncate text-[13px] text-[#4b4a54] sm:text-[15px]">{ad.location}</small>
+                      {getAdConditionLabel(ad.condition) ? (
+                        <span className="shrink-0 rounded-[8px] bg-[#f5ebdc] px-2 py-0.5 text-[11px] font-medium text-[#c07a1f] sm:text-[12px]">
+                          {getAdConditionLabel(ad.condition)}
+                        </span>
+                      ) : null}
+                    </div>
                   </div>
                 </article>
               ))}
