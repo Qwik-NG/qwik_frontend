@@ -3,6 +3,7 @@ import { useNavigate } from "react-router-dom";
 import { SiteFooter, SiteHeader } from "../components/AppShell";
 import DropdownSelect from "../components/ui/DropdownSelect";
 import { getBrandOptions, getCategoryById, getCategorySlugById, getModelOptions, getOrderedPostCategories } from "../lib/postAdOptions";
+import { isBrandInOptions } from "../lib/brandOptions";
 import { api } from "../services/api";
 import type { Category } from "../types";
 
@@ -121,8 +122,17 @@ export default function NewAdvertDetailsPage() {
   const selectedCategory = useMemo(() => getCategoryById(categoryId, categories), [categoryId, categories]);
   const subcategoryOptions = selectedCategory?.children ?? [];
   const hasSubcategories = subcategoryOptions.length > 0;
-  const brandOptions = getBrandOptions(categorySlug);
+  const selectedSubcategory = useMemo(
+    () => subcategoryOptions.find((sub) => sub.id === subcategoryId) ?? null,
+    [subcategoryId, subcategoryOptions],
+  );
+  const brandOptions = useMemo(
+    () => getBrandOptions(categorySlug, selectedSubcategory?.name),
+    [categorySlug, selectedSubcategory?.name],
+  );
   const modelOptions = getModelOptions(brand);
+  const isKnownBrand = isBrandInOptions(brand, brandOptions);
+  const brandInputValue = isKnownBrand ? "" : brand;
   const canProceed = Number(price) > 0 && Boolean(categoryId) && (!hasSubcategories || Boolean(subcategoryId)) && !navigating;
 
   const handleNext = () => {
@@ -211,7 +221,11 @@ export default function NewAdvertDetailsPage() {
                   placeholder="Pick a subcategory"
                   value={subcategoryId}
                   options={subcategoryOptions.map((sub) => ({ value: sub.id, label: sub.name }))}
-                  onChange={setSubcategoryId}
+                  onChange={(value) => {
+                    setSubcategoryId(value);
+                    setBrand("");
+                    setModel("");
+                  }}
                 />
               ) : null}
               {categoryWarning ? <p className="text-[13px] leading-snug text-[#d14343]">{categoryWarning}</p> : null}
@@ -226,6 +240,15 @@ export default function NewAdvertDetailsPage() {
                 }}
                 disabled={!categoryId}
                 helperText={!categoryId ? "Select category first" : undefined}
+              />
+              <InputField
+                label="Brand (if not listed)"
+                placeholder="Type custom brand"
+                value={brandInputValue}
+                onChange={(value) => {
+                  setBrand(value);
+                  setModel("");
+                }}
               />
               <DropdownSelect
                 label="Model"

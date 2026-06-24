@@ -1,4 +1,5 @@
 import type { Category } from "../types";
+import { getBrandOptionsForCategory } from "./brandOptions";
 
 export const POST_CATEGORY_OPTIONS = [
   { name: "Vehicles", slug: "vehicles" },
@@ -15,14 +16,6 @@ export const POST_CATEGORY_OPTIONS = [
 ];
 
 export const CONDITION_OPTIONS = ["New", "Foreign Used", "Local Used"];
-
-const BRAND_OPTIONS_BY_SLUG: Record<string, string[]> = {
-  vehicles: ["Toyota", "Mercedes-Benz", "Honda", "Lexus", "Hyundai", "Kia", "Nissan", "BMW", "Other"],
-  "phones-tablets": ["Apple", "Samsung", "Tecno", "Infinix", "Xiaomi", "Oppo", "Vivo", "Huawei", "Other"],
-  electronics: ["HP", "Dell", "Lenovo", "Apple", "Samsung", "LG", "Sony", "Other"],
-};
-
-const DEFAULT_BRAND_OPTIONS = ["Generic", "Other"];
 
 const MODEL_OPTIONS_BY_BRAND: Record<string, string[]> = {
   Apple: ["iPhone 11", "iPhone 12", "iPhone 13", "iPhone 14", "iPhone 15", "MacBook Pro", "MacBook Air", "Other"],
@@ -75,8 +68,8 @@ export function getCategoryById(categoryId: string, categories: Category[]) {
   return null;
 }
 
-export function getBrandOptions(categorySlug: string) {
-  return BRAND_OPTIONS_BY_SLUG[categorySlug] ?? DEFAULT_BRAND_OPTIONS;
+export function getBrandOptions(categorySlug: string, subcategoryName?: string) {
+  return getBrandOptionsForCategory(categorySlug, subcategoryName);
 }
 
 export function getModelOptions(brand: string) {
