@@ -32,6 +32,7 @@ type DashboardAd = {
   negotiable: boolean;
   year: string;
   image?: string;
+  images?: Array<{ url: string; position?: number }>;
   fit?: "cover" | "contain";
 };
 
@@ -48,6 +49,7 @@ type EditFormState = {
   brand: string;
   model: string;
   year: string;
+  imageUrls: string[];
 };
 
 type FilterState = "ACTIVE" | "DRAFT" | "SOLD" | "ARCHIVED";
@@ -84,6 +86,7 @@ function toDashboardAd(ad: Ad): DashboardAd {
     negotiable,
     year,
     image: ad.images?.[0]?.url,
+    images: ad.images,
     fit: "cover",
   };
 }
@@ -112,6 +115,7 @@ function toEditFormState(ad: DashboardAd): EditFormState {
     brand: ad.brand ?? "",
     model: ad.model ?? "",
     year: ad.year,
+    imageUrls: [], // Will be populated from ad.images in openEditModal
   };
 }
 
@@ -280,6 +284,8 @@ export default function AdsDashboardPage() {
   const [notice, setNotice] = useState<{ type: "success" | "error"; message: string } | null>(null);
   const [editingAd, setEditingAd] = useState<DashboardAd | null>(null);
   const [editForm, setEditForm] = useState<EditFormState | null>(null);
+  const [editImageUploading, setEditImageUploading] = useState(false);
+  const [editImageError, setEditImageError] = useState<string | null>(null);
   const [savingEdit, setSavingEdit] = useState(false);
 
   const loadUserAds = useCallback(async () => {
@@ -359,8 +365,16 @@ export default function AdsDashboardPage() {
 
   const openEditModal = useCallback((ad: DashboardAd) => {
     setNotice(null);
+    setEditImageError(null);
+    const form = toEditFormState(ad);
+    // Populate imageUrls from ad.images
+    if (ad.images && ad.images.length > 0) {
+      form.imageUrls = ad.images
+        .sort((a, b) => (a.position ?? 0) - (b.position ?? 0))
+        .map((img) => img.url);
+    }
     setEditingAd(ad);
-    setEditForm(toEditFormState(ad));
+    setEditForm(form);
   }, []);
 
   const closeEditModal = useCallback(() => {
@@ -403,6 +417,34 @@ export default function AdsDashboardPage() {
   const areasForState = editForm?.locationState ? NIGERIAN_AREAS[editForm.locationState] ?? null : null;
   const locationStateOptions = useMemo(() => NIGERIAN_LOCATIONS.filter((location) => location !== ALL_NIGERIA_LOCATION), []);
 
+  const handleEditImageUpload = useCallback(async (files: FileList | null) => {
+    if (!files || files.length === 0) return;
+    if (!editForm) return;
+
+    setEditImageError(null);
+    const totalImages = editForm.imageUrls.length + files.length;
+    if (totalImages > 10) {
+      setEditImageError(`Cannot add ${files.length} image(s). Ad cannot have more than 10 images. Current: ${editForm.imageUrls.length}`);
+      return;
+    }
+
+    try {
+      setEditImageUploading(true);
+      const response = await api.uploadImages(Array.from(files));
+      const newUrls = response.data.urls;
+      updateEditForm({ imageUrls: [...editForm.imageUrls, ...newUrls] });
+    } catch (err) {
+      setEditImageError(err instanceof Error ? err.message : "Failed to upload images");
+    } finally {
+      setEditImageUploading(false);
+    }
+  }, [editForm]);
+
+  const handleRemoveEditImage = useCallback((index: number) => {
+    if (!editForm) return;
+    updateEditForm({ imageUrls: editForm.imageUrls.filter((_, i) => i !== index) });
+  }, [editForm]);
+
   const submitEdit = useCallback(async (event: FormEvent<HTMLFormElement>) => {
     event.preventDefault();
     if (!editingAd || !editForm) return;
@@ -410,6 +452,11 @@ export default function AdsDashboardPage() {
     const parsedPrice = parsePriceInput(editForm.price);
     if (!Number.isFinite(parsedPrice) || parsedPrice < 0) {
       setNotice({ type: "error", message: "Price must be a valid non-negative number." });
+      return;
+    }
+
+    if (editForm.imageUrls.length < 4 || editForm.imageUrls.length > 10) {
+      setNotice({ type: "error", message: "Ad must have between 4 and 10 images." });
       return;
     }
 
@@ -440,6 +487,7 @@ export default function AdsDashboardPage() {
       model: editForm.model.trim() || undefined,
       condition: editForm.condition.trim() || undefined,
       specifications: nextSpecifications,
+      imageUrls: editForm.imageUrls,
     };
 
     try {
@@ -576,7 +624,7 @@ export default function AdsDashboardPage() {
             <div className="mb-5 flex items-start justify-between gap-4">
               <div>
                 <h2 className="text-[24px] font-medium text-[#1f1d27]">Edit Ad</h2>
-                <p className="mt-1 text-[14px] text-[#6d6a74]">Update listing details. Image editing is not included in this phase.</p>
+                <p className="mt-1 text-[14px] text-[#6d6a74]">Update listing details and manage images below.</p>
               </div>
               <button
                 type="button"
@@ -726,7 +774,74 @@ export default function AdsDashboardPage() {
                 />
               ) : null}
 
-              <label className="flex items-center gap-2 self-end pb-2">
+              <div className="sm:col-span-2 border-t border-[#e2ded7] pt-4">
+                <div className="mb-4">
+                  <div className="mb-3 flex items-center justify-between">
+                    <span className="text-[13px] font-medium text-[#4b4a54]">
+                      Product Images ({editForm.imageUrls.length}/10)
+                    </span>
+                    <label className="flex items-center gap-2 cursor-pointer">
+                      <input
+                        type="file"
+                        multiple
+                        accept="image/jpeg,image/png,image/webp,image/gif"
+                        onChange={(e) => handleEditImageUpload(e.target.files)}
+                        disabled={editImageUploading || editForm.imageUrls.length >= 10}
+                        className="hidden"
+                      />
+                      <button
+                        type="button"
+                        disabled={editImageUploading || editForm.imageUrls.length >= 10}
+                        className="rounded-[8px] border border-[#e2ded7] px-3 py-1.5 text-[12px] font-medium text-[#1f1d27] hover:bg-[#f8f7f3] disabled:cursor-not-allowed disabled:opacity-60"
+                        onClick={(e) => {
+                          e.preventDefault();
+                          (e.currentTarget.previousElementSibling as HTMLInputElement)?.click();
+                        }}
+                      >
+                        {editImageUploading ? "Uploading..." : "Add Images"}
+                      </button>
+                    </label>
+                  </div>
+
+                  {editImageError ? (
+                    <div className="mb-3 rounded-[8px] border border-[#f0d1d1] bg-[#fff4f4] px-3 py-2 text-[12px] text-[#c0392b]">
+                      {editImageError}
+                    </div>
+                  ) : null}
+
+                  {editForm.imageUrls.length === 0 ? (
+                    <div className="flex h-32 items-center justify-center rounded-[10px] border-2 border-dashed border-[#e2ded7] text-[13px] text-[#999]">
+                      No images yet. Add at least 4 images.
+                    </div>
+                  ) : (
+                    <div className="grid gap-2 grid-cols-2 sm:grid-cols-3 md:grid-cols-4">
+                      {editForm.imageUrls.map((url, index) => (
+                        <div key={`${url}-${index}`} className="relative aspect-square rounded-[8px] overflow-hidden bg-[#f1efe7] border border-[#e2ded7]">
+                          <img
+                            src={url}
+                            alt={`Product ${index + 1}`}
+                            className="h-full w-full object-cover"
+                          />
+                          <button
+                            type="button"
+                            onClick={() => handleRemoveEditImage(index)}
+                            className="absolute top-1 right-1 rounded-full bg-[#ff4444] text-white p-1 shadow-md hover:bg-[#ff2222] disabled:opacity-60"
+                            disabled={savingEdit}
+                            title="Remove image"
+                          >
+                            <span className="text-[12px] font-bold">✕</span>
+                          </button>
+                          <div className="absolute bottom-1 left-1 bg-[rgba(0,0,0,0.6)] text-white text-[10px] px-2 py-1 rounded">
+                            {index + 1}
+                          </div>
+                        </div>
+                      ))}
+                    </div>
+                  )}
+                </div>
+              </div>
+
+              <label className="flex items-center gap-2 self-end pb-2 sm:col-span-2">
                 <input
                   type="checkbox"
                   checked={editForm.negotiable}
