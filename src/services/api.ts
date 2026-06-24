@@ -744,6 +744,12 @@ export const api = {
       body: JSON.stringify(payload),
     }),
 
+  adminSendSelectedSellersEmail: (payload: { userIds: string[]; subject: string; message: string }) =>
+    request<{ requestedCount: number; eligibleCount: number; sentCount: number; failedCount: number; skippedNonSellerCount: number }>("/admin/communications/send-selected-sellers-email", {
+      method: "POST",
+      body: JSON.stringify(payload),
+    }),
+
   // ===== Offer Endpoints (Future) =====
   // TODO: createOffer - make offer on ad
   // createOffer: (payload: OfferCreatePayload) => request<Offer>("/offers", { method: "POST", body: JSON.stringify(payload) }),
