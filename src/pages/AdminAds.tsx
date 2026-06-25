@@ -316,6 +316,7 @@ export default function AdminAds() {
             {ads.map((ad) => {
               const status = ad.status || 'ACTIVE';
               const thumbnail = ad.images?.[0]?.url;
+              const isPromotedActive = ad.isPromoted && ad.promotedUntil && new Date(ad.promotedUntil) > new Date();
               return (
                 <article key={ad.id} className={`rounded-[14px] border bg-white p-4 shadow-sm ${ad._count.reports > 0 ? 'border-[#f2d4d4]' : 'border-[#e8e8ea]'}`}>
                   <div className="mb-3 overflow-hidden rounded-[10px] border border-[#ece9f1] bg-[#f6f5f8]">
@@ -333,11 +334,22 @@ export default function AdminAds() {
                       <p className="text-[15px] font-semibold text-[#1f1f29]">{ad.title}</p>
                       <p className="mt-1 text-[13px] text-[#6f6b77]">{ad.user.fullName}</p>
                     </div>
-                    <span className={`rounded px-2 py-1 text-[11px] font-medium ${
-                      status === 'ACTIVE' ? 'bg-green-100 text-green-800' : status === 'ARCHIVED' ? 'bg-yellow-100 text-yellow-800' : 'bg-gray-100 text-gray-800'
-                    }`}>
-                      {status}
-                    </span>
+                    <div className="flex flex-col gap-1">
+                      <span className={`rounded px-2 py-1 text-[11px] font-medium ${
+                        status === 'ACTIVE' ? 'bg-green-100 text-green-800' : status === 'ARCHIVED' ? 'bg-yellow-100 text-yellow-800' : 'bg-gray-100 text-gray-800'
+                      }`}>
+                        {status}
+                      </span>
+                      {isPromotedActive ? (
+                        <span className="rounded bg-[#fff3e5] px-2 py-0.5 text-[10px] font-medium text-[#ff9715]">
+                          Promoted
+                        </span>
+                      ) : ad.isPromoted && ad.promotedUntil ? (
+                        <span className="rounded bg-gray-100 px-2 py-0.5 text-[10px] font-medium text-gray-600">
+                          Expired
+                        </span>
+                      ) : null}
+                    </div>
                   </div>
                   <div className="mt-3 grid grid-cols-2 gap-2 text-[12px] text-[#6f6b77]">
                     <div><span className="font-medium text-[#3f3b47]">Category:</span> {ad.category.name}</div>
@@ -393,6 +405,7 @@ export default function AdminAds() {
                   <th className="px-6 py-3 text-left text-xs font-medium uppercase text-gray-500">Category</th>
                   <th className="px-6 py-3 text-left text-xs font-medium uppercase text-gray-500">Price</th>
                   <th className="px-6 py-3 text-left text-xs font-medium uppercase text-gray-500">Status</th>
+                  <th className="px-6 py-3 text-left text-xs font-medium uppercase text-gray-500">Promotion</th>
                   <th className="px-6 py-3 text-left text-xs font-medium uppercase text-gray-500">Reports</th>
                   <th className="px-6 py-3 text-left text-xs font-medium uppercase text-gray-500">Posted</th>
                   <th className="px-6 py-3 text-left text-xs font-medium uppercase text-gray-500">Actions</th>
@@ -402,6 +415,7 @@ export default function AdminAds() {
                 {ads.map((ad) => {
                   const status = ad.status || 'ACTIVE';
                   const thumbnail = ad.images?.[0]?.url;
+                  const isPromotedActive = ad.isPromoted && ad.promotedUntil && new Date(ad.promotedUntil) > new Date();
                   return (
                     <tr key={ad.id} className={`hover:bg-gray-50 ${ad._count.reports > 0 ? 'bg-red-50/40' : ''}`}>
                       <td className="px-6 py-4 text-sm text-gray-900">
@@ -434,6 +448,19 @@ export default function AdminAds() {
                         }`}>
                           {status}
                         </span>
+                      </td>
+                      <td className="px-6 py-4 text-sm">
+                        {isPromotedActive ? (
+                          <span className="rounded bg-[#fff3e5] px-2 py-1 text-xs font-medium text-[#ff9715]">
+                            Promoted
+                          </span>
+                        ) : ad.isPromoted && ad.promotedUntil ? (
+                          <span className="rounded bg-gray-100 px-2 py-1 text-xs font-medium text-gray-600">
+                            Expired
+                          </span>
+                        ) : (
+                          <span className="text-xs text-gray-400">—</span>
+                        )}
                       </td>
                       <td className="px-6 py-4 text-sm text-gray-700">
                         {ad._count.reports > 0 ? (

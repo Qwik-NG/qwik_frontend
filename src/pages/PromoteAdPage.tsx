@@ -300,10 +300,17 @@ export default function PromoteAdPage() {
                   <div className="mb-5 rounded-[12px] bg-[#fff7ed] p-4">
                     <p className="text-[14px] font-medium text-[#ff7f1f]">Selected ad</p>
                     <h2 className="mt-1 break-words text-[18px] font-semibold">{selectedAd.title}</h2>
+                    {selectedAd.isPromoted && selectedAd.promotedUntil ? (
+                      <p className="mt-2 text-[13px] leading-[1.45] text-[#ff9715]">
+                        ⭐ Currently promoted until {new Date(selectedAd.promotedUntil).toLocaleDateString("en-NG", { month: "short", day: "numeric", year: "numeric" })}
+                      </p>
+                    ) : null}
                     <p className="mt-2 text-[14px] leading-[1.45] text-[#918d99]">
-                      {standardAdIsFree
-                        ? "Promotion is optional. Your ad is already live and can be viewed or managed without payment."
-                        : "Promotion is optional. Additional standard ads cost a listing fee before standard placement."}
+                      {selectedAd.isPromoted && selectedAd.promotedUntil && new Date(selectedAd.promotedUntil) > new Date()
+                        ? "Your ad is already promoted. You can extend or upgrade the promotion with another plan."
+                        : standardAdIsFree
+                          ? "Promotion is optional. Your ad is already live and can be viewed or managed without payment."
+                          : "Promotion is optional. Additional standard ads cost a listing fee before standard placement."}
                     </p>
                   </div>
 

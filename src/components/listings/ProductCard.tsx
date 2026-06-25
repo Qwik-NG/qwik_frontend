@@ -1,3 +1,8 @@
+import { LocationPin } from "../icons/LocationPin";
+import { FallbackImage } from "../ui/FallbackImage";
+import { ImagePlaceholder } from "../ui/ImagePlaceholder";
+import PromotedBadge from "./PromotedBadge";
+
 export type ProductCardItem = {
   title: string;
   price: string;
@@ -5,6 +10,8 @@ export type ProductCardItem = {
   description: string;
   image?: string;
   condition?: string | null;
+  isPromoted?: boolean;
+  promotedUntil?: string;
 };
 
 type ProductCardProps = {
@@ -15,10 +22,6 @@ type ProductCardProps = {
   className?: string;
 };
 
-import { LocationPin } from "../icons/LocationPin";
-import { FallbackImage } from "../ui/FallbackImage";
-import { ImagePlaceholder } from "../ui/ImagePlaceholder";
-
 export default function ProductCard({
   item,
   onClick,
@@ -27,6 +30,7 @@ export default function ProductCard({
   className = "",
 }: ProductCardProps) {
   const label = item.condition?.trim() || badgeLabel;
+  const isPromotedActive = item.isPromoted && item.promotedUntil && new Date(item.promotedUntil) > new Date();
 
   return (
     <article className={`cursor-pointer rounded-[18px] bg-white p-3 ${className}`.trim()} onClick={onClick}>
@@ -37,8 +41,9 @@ export default function ProductCard({
         fallback={<ImagePlaceholder title="" labelClassName="hidden" className="h-[180px] rounded-[12px]" />}
       />
       <div className="pt-3">
-        <div className="mb-2 flex items-center">
+        <div className="mb-2 flex items-center gap-2">
           <h4 className="text-[20px] font-semibold">{item.price}</h4>
+          {isPromotedActive ? <PromotedBadge /> : null}
         </div>
         <h5 className="mb-2 text-[16px] font-medium leading-tight">{item.title}</h5>
         <p className="mb-2 text-[14px] leading-[1.35] text-[#6d6a74]">{item.description}</p>

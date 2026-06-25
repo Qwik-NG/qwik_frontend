@@ -291,6 +291,8 @@ export interface Ad {
   images: AdImage[];
   status?: "ACTIVE" | "SOLD" | "DRAFT" | "ARCHIVED";
   isPromoted?: boolean;
+  promotedAt?: string;
+  promotedUntil?: string;
   featured?: boolean;
   viewCount?: number;
   savedCount?: number;
