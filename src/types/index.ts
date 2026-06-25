@@ -293,6 +293,7 @@ export interface Ad {
   isPromoted?: boolean;
   promotedAt?: string;
   promotedUntil?: string;
+  promotionPriority?: number;
   featured?: boolean;
   viewCount?: number;
   savedCount?: number;
