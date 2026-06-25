@@ -17,7 +17,7 @@ import { buildLoginRoute, ensureFreshVerifiedEmail } from "../lib/emailVerificat
 import { getAdConditionLabel } from "../lib/adCondition";
 import { isSellerVerified } from "../lib/sellerVerification";
 import { getToken } from "../services/auth";
-import { api } from "../services/api";
+import { API_BASE_URL, api } from "../services/api";
 import type { Ad, AdReview, User } from "../types";
 
 function LocationPin({ className = "h-5 w-5" }: { className?: string }) {
@@ -599,7 +599,8 @@ export default function ProductDetailsPage() {
 
   const handleShareAd = async () => {
     if (!ad) return;
-    const shareUrl = window.location.href;
+    const apiOrigin = API_BASE_URL.replace(/\/api\/?$/, "");
+    const shareUrl = `${apiOrigin}/api/ads/${ad.id}/share-preview`;
     const sharePayload = {
       title: ad.title,
       text: `Check out this listing on Qwik: ${ad.title}`,
