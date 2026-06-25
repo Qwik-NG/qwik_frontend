@@ -623,6 +623,33 @@ export const api = {
       return response;
     }),
 
+  promoteAdminAd: (id: string, payload?: { durationDays?: number; priority?: number }) =>
+    request<AdminAd>(`/admin/ads/${id}/promote`, {
+      method: "PATCH",
+      body: JSON.stringify(payload ?? {}),
+    }).then((response) => {
+      clearAdminApiCache();
+      return response;
+    }),
+
+  unpromoteAdminAd: (id: string) =>
+    request<AdminAd>(`/admin/ads/${id}/unpromote`, {
+      method: "PATCH",
+      body: JSON.stringify({}),
+    }).then((response) => {
+      clearAdminApiCache();
+      return response;
+    }),
+
+  updateAdminAdPromotionPriority: (id: string, payload: { priority: number }) =>
+    request<AdminAd>(`/admin/ads/${id}/promotion-priority`, {
+      method: "PATCH",
+      body: JSON.stringify(payload),
+    }).then((response) => {
+      clearAdminApiCache();
+      return response;
+    }),
+
   deleteAdminAd: (id: string, reason?: string) =>
     request<null>(`/admin/ads/${id}`, {
       method: "DELETE",

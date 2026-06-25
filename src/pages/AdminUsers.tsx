@@ -154,11 +154,14 @@ export default function AdminUsers() {
 
     const status = user.status || 'ACTIVE';
     const isBanned = status === 'BANNED';
+    const disableMenuActions = submittingAction;
 
     const actions: AdminRowActionItem[] = [
       {
+        id: `view-${user.id}`,
         label: 'View user profile',
         onClick: () => void openUserPreview(user),
+        disabled: disableMenuActions,
         icon: (
           <svg viewBox="0 0 24 24" className="h-4 w-4" fill="none" stroke="currentColor" strokeWidth="2" aria-hidden="true">
             <path d="M2.5 12S6 5.5 12 5.5 21.5 12 21.5 12 18 18.5 12 18.5 2.5 12 2.5 12Z" />
@@ -167,8 +170,10 @@ export default function AdminUsers() {
         ),
       },
       {
+        id: `ban-toggle-${user.id}`,
         label: isBanned ? 'Unban user' : 'Ban user',
         onClick: () => (isBanned ? openRestoreModal(user) : openBanModal(user)),
+        disabled: disableMenuActions,
         icon: isBanned ? (
           <svg viewBox="0 0 24 24" className="h-4 w-4" fill="none" stroke="currentColor" strokeWidth="2" aria-hidden="true">
             <path d="M6 10V8a6 6 0 1 1 12 0v2" />
@@ -184,10 +189,11 @@ export default function AdminUsers() {
         ),
       },
       {
+        id: `delete-${user.id}`,
         label: 'Delete user',
         onClick: () => openDeleteModal(user),
         danger: true,
-        disabled: !canDeleteUser(user),
+        disabled: disableMenuActions || !canDeleteUser(user),
         icon: (
           <svg viewBox="0 0 24 24" className="h-4 w-4" fill="none" stroke="currentColor" strokeWidth="2" aria-hidden="true">
             <path d="M4 7h16" />

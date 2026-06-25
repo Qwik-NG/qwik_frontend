@@ -1,8 +1,9 @@
 import { useEffect, useRef, useState, type ReactNode } from "react";
 
 export type AdminRowActionItem = {
+  id?: string;
   label: string;
-  onClick: () => void;
+  onClick: () => void | Promise<void>;
   danger?: boolean;
   disabled?: boolean;
   icon?: ReactNode;
@@ -23,9 +24,37 @@ function DotsIcon() {
   );
 }
 
+function SmallSpinner() {
+  return (
+    <span
+      className="inline-block h-3.5 w-3.5 animate-spin rounded-full border-2 border-current border-r-transparent"
+      aria-hidden="true"
+    />
+  );
+}
+
 export default function AdminRowActionsMenu({ ariaLabel, items }: AdminRowActionsMenuProps) {
   const [open, setOpen] = useState(false);
+  const [pendingActionId, setPendingActionId] = useState<string | null>(null);
   const menuRef = useRef<HTMLDivElement | null>(null);
+  const isBusy = pendingActionId !== null;
+
+  const runAction = async (item: AdminRowActionItem, actionId: string) => {
+    if (item.disabled || isBusy) return;
+
+    try {
+      const result = item.onClick();
+      if (result && typeof result === "object" && "then" in result) {
+        setPendingActionId(actionId);
+        await result;
+      }
+      setOpen(false);
+    } catch {
+      // Parent handlers display user-facing errors via toasts/modals.
+    } finally {
+      setPendingActionId((current) => (current === actionId ? null : current));
+    }
+  };
 
   useEffect(() => {
     if (!open) return;
@@ -57,7 +86,11 @@ export default function AdminRowActionsMenu({ ariaLabel, items }: AdminRowAction
         aria-label={ariaLabel}
         aria-haspopup="menu"
         aria-expanded={open}
-        onClick={() => setOpen((current) => !current)}
+        onClick={() => {
+          if (isBusy) return;
+          setOpen((current) => !current);
+        }}
+        disabled={isBusy}
         className="grid h-9 w-9 place-items-center rounded-[10px] border border-[#d9d6df] bg-white text-[#4f4b59] transition hover:border-[#c9c4d0] hover:bg-[#f7f6f9] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#ffb357] focus-visible:ring-offset-2 focus-visible:ring-offset-white"
       >
         <DotsIcon />
@@ -65,25 +98,26 @@ export default function AdminRowActionsMenu({ ariaLabel, items }: AdminRowAction
 
       {open ? (
         <div className="absolute right-0 top-[calc(100%+8px)] z-50 min-w-[220px] overflow-hidden rounded-[14px] border border-[#e3e0e7] bg-white p-1 shadow-[0_16px_36px_rgba(31,29,39,0.16)]">
-          {items.map((item) => {
+          {items.map((item, index) => {
+            const actionId = item.id ?? `${item.label}-${index}`;
+            const isItemLoading = pendingActionId === actionId;
             const baseClasses = item.danger
               ? "text-[#c73b3b] hover:bg-[#fff2f2]"
               : "text-[#1f1d27] hover:bg-[#f5f4f7]";
 
             return (
               <button
-                key={item.label}
+                key={actionId}
                 type="button"
                 onClick={() => {
-                  if (item.disabled) return;
-                  setOpen(false);
-                  item.onClick();
+                  void runAction(item, actionId);
                 }}
-                disabled={item.disabled}
+                disabled={item.disabled || isBusy}
                 className={`flex w-full items-center gap-2 rounded-[10px] px-3 py-2 text-left text-[13px] font-medium transition disabled:cursor-not-allowed disabled:opacity-50 ${baseClasses}`}
+                aria-busy={isItemLoading}
               >
-                {item.icon ? <span className="grid h-4 w-4 place-items-center">{item.icon}</span> : null}
-                <span>{item.label}</span>
+                {isItemLoading ? <span className="grid h-4 w-4 place-items-center"><SmallSpinner /></span> : item.icon ? <span className="grid h-4 w-4 place-items-center">{item.icon}</span> : null}
+                <span>{isItemLoading ? `${item.label} (Processing...)` : item.label}</span>
               </button>
             );
           })}
