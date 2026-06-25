@@ -3,6 +3,7 @@ import { LocationPin } from "../icons/LocationPin";
 import { ImagePlaceholder } from "../ui/ImagePlaceholder";
 import { FallbackImage } from "../ui/FallbackImage";
 import VerifiedSellerBadge from "./VerifiedSellerBadge";
+import PromotedBadge from "./PromotedBadge";
 
 export type ListingCardItem = {
   price: string;
@@ -12,6 +13,8 @@ export type ListingCardItem = {
   image?: string;
   imageFit?: "cover" | "contain";
   verifiedSeller?: boolean;
+  isPromoted?: boolean;
+  promotedUntil?: string;
 };
 
 type ListingCardProps = {
@@ -70,6 +73,9 @@ export default function ListingCard({
       <div className="px-0 pb-1 pt-4 sm:pt-5">
         <div className="flex flex-wrap items-center gap-2">
           <h3 className="m-0 min-w-0 text-[18px] font-semibold leading-none text-[#1f1d27] sm:text-[20px]">{item.price}</h3>
+          {item.isPromoted && item.promotedUntil && new Date(item.promotedUntil) > new Date() ? (
+            <PromotedBadge />
+          ) : null}
         </div>
         <h4
           className="mb-2 mt-4 text-[15px] font-medium leading-[1.32] text-[#1f1d27] sm:text-[18px]"

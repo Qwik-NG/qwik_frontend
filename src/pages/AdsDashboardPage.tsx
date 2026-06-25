@@ -34,6 +34,9 @@ type DashboardAd = {
   image?: string;
   images?: Array<{ url: string; position?: number }>;
   fit?: "cover" | "contain";
+  isPromoted?: boolean;
+  promotedAt?: string;
+  promotedUntil?: string;
 };
 
 type EditFormState = {
@@ -88,6 +91,9 @@ function toDashboardAd(ad: Ad): DashboardAd {
     image: ad.images?.[0]?.url,
     images: ad.images,
     fit: "cover",
+    isPromoted: ad.isPromoted,
+    promotedAt: ad.promotedAt,
+    promotedUntil: ad.promotedUntil,
   };
 }
 
@@ -96,6 +102,16 @@ function getStatusBadge(status: DashboardAd["status"]) {
   if (status === "SOLD") return { label: "Sold", className: "bg-[#f0f2f6] text-[#4f5361]" };
   if (status === "DRAFT") return { label: "Draft", className: "bg-[#eef2ff] text-[#3f51b5]" };
   return { label: "Paused/Archived", className: "bg-[#fff3e5] text-[#d77a00]" };
+}
+
+function getPromotionStatus(ad: DashboardAd): { label: string; className: string } | null {
+  if (!ad.isPromoted || !ad.promotedUntil) return null;
+  const now = new Date();
+  const expiry = new Date(ad.promotedUntil);
+  if (expiry > now) {
+    return { label: "Promoted", className: "bg-[#fff3e5] text-[#ff9715]" };
+  }
+  return { label: "Expired", className: "bg-[#f5f5f7] text-[#99989f]" };
 }
 
 function toEditFormState(ad: DashboardAd): EditFormState {
@@ -165,6 +181,7 @@ function AdCard({
   onDelete: () => void;
 }) {
   const badge = getStatusBadge(ad.status);
+  const promotionBadge = getPromotionStatus(ad);
 
   return (
     <article className="cursor-pointer rounded-card bg-white p-3.5 transition hover:scale-[1.01]" onClick={onClick}>
@@ -185,13 +202,23 @@ function AdCard({
         <div className="mb-2 flex flex-wrap items-center gap-2">
           <h3 className="min-w-0 text-[22px] font-semibold leading-none">{ad.price}</h3>
           <span className={`shrink-0 rounded-[10px] px-2.5 py-1 text-[13px] ${badge.className}`}>{badge.label}</span>
+          {promotionBadge ? (
+            <span className={`shrink-0 rounded-[10px] px-2.5 py-1 text-[13px] ${promotionBadge.className}`}>{promotionBadge.label}</span>
+          ) : null}
         </div>
         <h4 className="mb-2 text-[17px] font-medium leading-tight">{ad.title}</h4>
         <p className="mb-2 text-[14px] leading-[1.35] text-[#6d6a74]">{ad.description}</p>
-        <small className="flex items-center gap-1 text-[15px] text-[#4b4a54]">
-          <LocationPin />
-          {ad.location}
-        </small>
+        <div className="space-y-1">
+          <small className="flex items-center gap-1 text-[15px] text-[#4b4a54]">
+            <LocationPin />
+            {ad.location}
+          </small>
+          {ad.promotedUntil && (
+            <small className="block text-[13px] text-[#ff9715]">
+              ⭐ Promoted until {new Date(ad.promotedUntil).toLocaleDateString("en-NG", { month: "short", day: "numeric", year: "numeric" })}
+            </small>
+          )}
+        </div>
 
         <div className="mt-4 grid grid-cols-2 gap-2" onClick={(event) => event.stopPropagation()}>
           <button
