@@ -26,6 +26,7 @@ export default function AdminAds() {
   const [previewAd, setPreviewAd] = useState<AdminAd | null>(null);
   const [previewDetails, setPreviewDetails] = useState<Ad | null>(null);
   const [previewLoading, setPreviewLoading] = useState(false);
+  const [menuActionLoadingAdId, setMenuActionLoadingAdId] = useState<string | null>(null);
 
   useEffect(() => {
     void fetchAds();
@@ -132,35 +133,47 @@ export default function AdminAds() {
   const isPromotionActive = (ad: AdminAd) => Boolean(ad.isPromoted && ad.promotedUntil && new Date(ad.promotedUntil) > new Date());
 
   const promoteAd = async (ad: AdminAd) => {
+    if (menuActionLoadingAdId) return;
     try {
+      setMenuActionLoadingAdId(ad.id);
       await api.promoteAdminAd(ad.id, { durationDays: 30, priority: ad.promotionPriority && ad.promotionPriority > 0 ? ad.promotionPriority : 1 });
       success('Ad promoted successfully');
       await fetchAds();
     } catch (err) {
       showError(err instanceof Error ? err.message : 'Failed to promote ad');
+    } finally {
+      setMenuActionLoadingAdId(null);
     }
   };
 
   const unpromoteAd = async (ad: AdminAd) => {
+    if (menuActionLoadingAdId) return;
     try {
+      setMenuActionLoadingAdId(ad.id);
       await api.unpromoteAdminAd(ad.id);
       success('Ad unpromoted successfully');
       await fetchAds();
     } catch (err) {
       showError(err instanceof Error ? err.message : 'Failed to unpromote ad');
+    } finally {
+      setMenuActionLoadingAdId(null);
     }
   };
 
   const adjustPromotionPriority = async (ad: AdminAd, delta: number) => {
+    if (menuActionLoadingAdId) return;
     const currentPriority = Math.max(0, ad.promotionPriority ?? 0);
     const nextPriority = Math.min(100, Math.max(0, currentPriority + delta));
     if (nextPriority === currentPriority) return;
     try {
+      setMenuActionLoadingAdId(ad.id);
       await api.updateAdminAdPromotionPriority(ad.id, { priority: nextPriority });
       success(`Promotion priority set to ${nextPriority}`);
       await fetchAds();
     } catch (err) {
       showError(err instanceof Error ? err.message : 'Failed to update promotion priority');
+    } finally {
+      setMenuActionLoadingAdId(null);
     }
   };
 
@@ -205,11 +218,14 @@ export default function AdminAds() {
   const getDesktopAdActions = (ad: AdminAd) => {
     const status = ad.status || 'ACTIVE';
     const isPromotedActive = isPromotionActive(ad);
+    const disableMenuActions = Boolean(menuActionLoadingAdId);
 
     const actions: AdminRowActionItem[] = [
       {
+        id: `view-${ad.id}`,
         label: 'View details',
         onClick: () => void openAdPreview(ad),
+        disabled: disableMenuActions,
         icon: (
           <svg viewBox="0 0 24 24" className="h-4 w-4" fill="none" stroke="currentColor" strokeWidth="2" aria-hidden="true">
             <path d="M2.5 12S6 5.5 12 5.5 21.5 12 21.5 12 18 18.5 12 18.5 2.5 12 2.5 12Z" />
@@ -221,8 +237,12 @@ export default function AdminAds() {
 
     if (!isPromotedActive) {
       actions.push({
+        id: `promote-${ad.id}`,
         label: 'Promote',
-        onClick: () => void promoteAd(ad),
+        onClick: async () => {
+          await promoteAd(ad);
+        },
+        disabled: disableMenuActions,
         icon: (
           <svg viewBox="0 0 24 24" className="h-4 w-4" fill="none" stroke="currentColor" strokeWidth="2" aria-hidden="true">
             <path d="m12 3 2.6 5.3 5.9.9-4.2 4.1 1 5.8L12 16.8 6.7 19.1l1-5.8-4.2-4.1 5.9-.9L12 3Z" />
@@ -233,8 +253,12 @@ export default function AdminAds() {
 
     if (isPromotedActive) {
       actions.push({
+        id: `increase-priority-${ad.id}`,
         label: 'Increase priority',
-        onClick: () => void adjustPromotionPriority(ad, 1),
+        onClick: async () => {
+          await adjustPromotionPriority(ad, 1);
+        },
+        disabled: disableMenuActions,
         icon: (
           <svg viewBox="0 0 24 24" className="h-4 w-4" fill="none" stroke="currentColor" strokeWidth="2" aria-hidden="true">
             <path d="M12 19V5" />
@@ -243,8 +267,12 @@ export default function AdminAds() {
         ),
       });
       actions.push({
+        id: `decrease-priority-${ad.id}`,
         label: 'Decrease priority',
-        onClick: () => void adjustPromotionPriority(ad, -1),
+        onClick: async () => {
+          await adjustPromotionPriority(ad, -1);
+        },
+        disabled: disableMenuActions,
         icon: (
           <svg viewBox="0 0 24 24" className="h-4 w-4" fill="none" stroke="currentColor" strokeWidth="2" aria-hidden="true">
             <path d="M12 5v14" />
@@ -253,8 +281,12 @@ export default function AdminAds() {
         ),
       });
       actions.push({
+        id: `unpromote-${ad.id}`,
         label: 'Unpromote',
-        onClick: () => void unpromoteAd(ad),
+        onClick: async () => {
+          await unpromoteAd(ad);
+        },
+        disabled: disableMenuActions,
         icon: (
           <svg viewBox="0 0 24 24" className="h-4 w-4" fill="none" stroke="currentColor" strokeWidth="2" aria-hidden="true">
             <path d="M12 19V5" />
@@ -266,8 +298,10 @@ export default function AdminAds() {
 
     if (status === 'ACTIVE' || status === 'ARCHIVED') {
       actions.push({
+        id: `status-${ad.id}`,
         label: status === 'ARCHIVED' ? 'Reinstate' : 'Unlist',
         onClick: () => openActionModal(ad, status === 'ARCHIVED' ? 'reinstate' : 'unlist'),
+        disabled: disableMenuActions,
         icon: status === 'ARCHIVED' ? (
           <svg viewBox="0 0 24 24" className="h-4 w-4" fill="none" stroke="currentColor" strokeWidth="2" aria-hidden="true">
             <path d="M6 10V8a6 6 0 1 1 12 0v2" />
@@ -285,8 +319,10 @@ export default function AdminAds() {
     }
 
     actions.push({
+      id: `delete-${ad.id}`,
       label: 'Delete permanently',
       onClick: () => openActionModal(ad, 'delete'),
+      disabled: disableMenuActions,
       danger: true,
       icon: (
         <svg viewBox="0 0 24 24" className="h-4 w-4" fill="none" stroke="currentColor" strokeWidth="2" aria-hidden="true">
