@@ -25,7 +25,16 @@ declare global {
           }) => void;
           renderButton: (
             parent: HTMLElement,
-            options: { theme?: string; size?: string; type?: string; shape?: string; width?: number; text?: string; logo_alignment?: string }
+            options: {
+              theme?: string;
+              size?: string;
+              type?: string;
+              shape?: string;
+              width?: number;
+              text?: string;
+              logo_alignment?: string;
+              locale?: string;
+            }
           ) => void;
           prompt: () => void;
           cancel: () => void;
@@ -192,6 +201,7 @@ export default function GoogleSignInButton({
             shape: "rectangular",
             text: "continue_with",
             logo_alignment: "left",
+            locale: "en",
             width,
           });
           setStatus("ready");
@@ -251,18 +261,20 @@ export default function GoogleSignInButton({
         className="flex w-full justify-center"
         aria-busy={status === "submitting"}
         style={{
-          display: (status === "ready" || status === "submitting") && consentAccepted ? "flex" : "none",
+          display: "none",
           minHeight: 40,
           opacity: status === "submitting" ? 0.6 : 1,
           pointerEvents: status === "submitting" ? "none" : "auto",
         }}
       />
 
-      {(status === "ready" || status === "submitting") && !consentAccepted && (
+      {(status === "ready" || status === "submitting") && (
         <button
           type="button"
           onClick={triggerGooglePrompt}
-          className="flex h-[48px] w-full items-center justify-center gap-2 rounded-[10px] border border-[#dedee1] bg-white text-[14px] text-[#1f1f29] transition-colors hover:bg-[#fafafb] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#ffb357] focus-visible:ring-offset-2"
+          aria-disabled={status === "submitting"}
+          disabled={status === "submitting"}
+          className="flex h-[48px] w-full items-center justify-center gap-2 rounded-[10px] border border-[#dedee1] bg-white text-[14px] text-[#1f1f29] transition-colors hover:bg-[#fafafb] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#ffb357] focus-visible:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-70"
         >
           <GoogleIcon />
           <span>Continue with Google</span>
