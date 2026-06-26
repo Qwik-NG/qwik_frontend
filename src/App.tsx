@@ -1,5 +1,5 @@
 import { lazy, Suspense, type ReactNode } from "react";
-import { Route, Routes } from "react-router-dom";
+import { Navigate, Route, Routes } from "react-router-dom";
 import { ROUTES } from "./constants/routes";
 import { AdminRoute } from "./components/auth/AdminRoute";
 import { ProtectedRoute } from "./components/auth/ProtectedRoute";
@@ -83,6 +83,12 @@ export default function App() {
         <Route path={ROUTES.FAQS} element={lazyRoute(<FaqsPage />)} />
         <Route path={ROUTES.WELCOME} element={lazyRoute(<WelcomePage />)} />
         <Route path={ROUTES.VERIFY_EMAIL} element={lazyRoute(<VerifyEmailPage />)} />
+
+        {/* Legacy Mobile WebView Entry Routes */}
+        <Route path="/mob" element={<Navigate to={ROUTES.HOME} replace />} />
+        <Route path="/mob/" element={<Navigate to={ROUTES.HOME} replace />} />
+        <Route path="/mobile" element={<Navigate to={ROUTES.HOME} replace />} />
+        <Route path="/mobile/" element={<Navigate to={ROUTES.HOME} replace />} />
 
         {/* Authentication & Access Control */}
         <Route path={ROUTES.SIGNIN} element={lazyRoute(<SignInPage />)} />
