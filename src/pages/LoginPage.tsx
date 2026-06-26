@@ -17,89 +17,108 @@ export default function LoginPage() {
 
   return (
     <AuthLayout
-      title="Log in to your account"
+      title="Welcome Back"
+      subtitle="Log in to continue buying and selling on Qwik."
       onLogoClick={() => navigate("/")}
-      onCreateAccountClick={() => navigate("/signup")}
-      cardClassName="w-[430px]"
-      titleClassName="whitespace-nowrap"
+      topPromptText="Don't have an account?"
+      topPromptActionText="Sign Up"
+      onTopPromptActionClick={() => navigate("/signup")}
+      cardClassName="max-w-[520px]"
     >
-          <GoogleSignInButton
-            requiresLegalConsent
-            hasAcceptedLegal={acceptedLegal}
-          />
+      <FormInput
+        id="login-email"
+        label="Email"
+        aria-label="Email"
+        autoComplete="email"
+        type="email"
+        placeholder="you@example.com"
+        value={email}
+        onChange={(e) => setEmail(e.target.value)}
+        containerClassName="mb-4"
+      />
 
+      <label className="mb-5 flex items-start gap-2.5 text-[12px] leading-[1.45] text-[#6f6d78]">
+        <input
+          type="checkbox"
+          checked={acceptedLegal}
+          onChange={(e) => {
+            setAcceptedLegal(e.target.checked);
+            setAcceptedLegalConsentSnapshot(e.target.checked);
+          }}
+          className="mt-[2px] h-[16px] w-[16px] shrink-0 rounded-[4px] border border-[#acabb6] bg-transparent accent-[#ff8f00] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#ffb357] focus-visible:ring-offset-2 focus-visible:ring-offset-white"
+        />
+        <span>
+          I confirm and accept the{" "}
           <button
-            className="mb-[16px] flex h-[48px] w-full cursor-not-allowed items-center justify-center gap-2 rounded-[10px] bg-[#3f5db2] text-[14px] text-white opacity-55 transition-all duration-200"
             type="button"
-            disabled
-            aria-disabled="true"
-            title="Coming soon"
+            onClick={() => setLegalModal("terms")}
+            className="font-medium text-[#ff8f00] underline-offset-2 transition-colors hover:text-[#e67f00] hover:underline focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#ffb357] focus-visible:ring-offset-2 focus-visible:ring-offset-white"
           >
-            <FacebookIcon />
-            <span>Continue with Facebook</span>
+            Terms of Use
+          </button>{" "}
+          and{" "}
+          <button
+            type="button"
+            onClick={() => setLegalModal("privacy")}
+            className="font-medium text-[#ff8f00] underline-offset-2 transition-colors hover:text-[#e67f00] hover:underline focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#ffb357] focus-visible:ring-offset-2 focus-visible:ring-offset-white"
+          >
+            Privacy Policy
           </button>
+        </span>
+      </label>
 
-          <div className="mb-[14px] flex items-center gap-3 text-[#7f7e88]">
-            <span className="h-px flex-1 bg-[#d1d1d6]" />
-            <span className="text-[12px]">or sign in with email</span>
-            <span className="h-px flex-1 bg-[#d1d1d6]" />
-          </div>
+      <FormButton
+        disabled={!canContinue}
+        buttonClassName="h-[52px] rounded-[14px] text-[15px] font-semibold"
+        onClick={() => {
+          setLoginEmail(email.trim().toLowerCase());
+          navigate("/login-password");
+        }}
+      >
+        Continue
+      </FormButton>
 
-          <FormInput
-            type="email"
-            placeholder="Email"
-            value={email}
-            onChange={(e) => setEmail(e.target.value)}
-            containerClassName="mb-[12px]"
-          />
+      <div className="mb-4 mt-6 flex items-center gap-3 text-[#7b7882]">
+        <span className="h-px flex-1 bg-[#ded8cf]" />
+        <span className="text-[11px] font-semibold tracking-[0.08em]">OR CONTINUE WITH</span>
+        <span className="h-px flex-1 bg-[#ded8cf]" />
+      </div>
 
-          <label className="mb-[16px] flex items-start gap-2.5 text-[12px] leading-[1.35] text-[#7f7e88]">
-            <input
-              type="checkbox"
-              checked={acceptedLegal}
-              onChange={(e) => {
-                setAcceptedLegal(e.target.checked);
-                setAcceptedLegalConsentSnapshot(e.target.checked);
-              }}
-              className="mt-[1px] h-[16px] w-[16px] shrink-0 rounded-[4px] border border-[#acabb6] bg-transparent accent-[#ff8f00] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#ffb357] focus-visible:ring-offset-2 focus-visible:ring-offset-white"
-            />
-            <span>
-              I confirm &amp; accept the{" "}
-              <button
-                type="button"
-                onClick={() => setLegalModal("terms")}
-                className="font-medium text-[#ff8f00] underline-offset-2 transition-colors hover:text-[#e67f00] hover:underline focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#ffb357] focus-visible:ring-offset-2 focus-visible:ring-offset-white"
-              >
-                Terms of Use
-              </button>{" "}
-              and{" "}
-              <button
-                type="button"
-                onClick={() => setLegalModal("privacy")}
-                className="font-medium text-[#ff8f00] underline-offset-2 transition-colors hover:text-[#e67f00] hover:underline focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#ffb357] focus-visible:ring-offset-2 focus-visible:ring-offset-white"
-              >
-                Privacy Policy
-              </button>
-            </span>
-          </label>
+      <GoogleSignInButton
+        requiresLegalConsent
+        hasAcceptedLegal={acceptedLegal}
+      />
 
-          <FormButton
-            disabled={!canContinue}
-            onClick={() => {
-              setLoginEmail(email.trim().toLowerCase());
-              navigate("/login-password");
-            }}
-          >
-            Next
-          </FormButton>
-          <LegalConsentModal
-            documentType={legalModal}
-            onClose={() => setLegalModal(null)}
-            onAgree={() => {
-              setAcceptedLegal(true);
-              setAcceptedLegalConsentSnapshot(true);
-            }}
-          />
+      <button
+        className="mb-3 flex h-[52px] w-full cursor-not-allowed items-center justify-center gap-2 rounded-[12px] bg-[#3f5db2] text-[14px] font-medium text-white opacity-55 transition-all duration-200"
+        type="button"
+        disabled
+        aria-disabled="true"
+        title="Coming soon"
+      >
+        <FacebookIcon />
+        <span>Continue with Facebook</span>
+      </button>
+
+      <p className="text-center text-[13px] text-[#7a7884]">
+        Don&apos;t have an account?{" "}
+        <button
+          type="button"
+          onClick={() => navigate("/signup")}
+          className="font-semibold text-[#ff8f00] transition-colors hover:text-[#e67f00] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#ffb357] focus-visible:ring-offset-2"
+        >
+          Sign Up
+        </button>
+      </p>
+
+      <LegalConsentModal
+        documentType={legalModal}
+        onClose={() => setLegalModal(null)}
+        onAgree={() => {
+          setAcceptedLegal(true);
+          setAcceptedLegalConsentSnapshot(true);
+        }}
+      />
     </AuthLayout>
   );
 }

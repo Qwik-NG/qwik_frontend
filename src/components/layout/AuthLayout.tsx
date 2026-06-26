@@ -6,43 +6,74 @@ function cn(...values: Array<string | undefined>) {
 
 type AuthLayoutProps = {
   title: string;
+  subtitle?: string;
   children: ReactNode;
   onLogoClick: () => void;
-  onCreateAccountClick: () => void;
+  topPromptText?: string;
+  topPromptActionText?: string;
+  onTopPromptActionClick?: () => void;
   cardClassName?: string;
   titleClassName?: string;
-  headerClassName?: string;
+  subtitleClassName?: string;
+  mainClassName?: string;
 };
 
 export default function AuthLayout({
   title,
+  subtitle,
   children,
   onLogoClick,
-  onCreateAccountClick,
+  topPromptText,
+  topPromptActionText,
+  onTopPromptActionClick,
   cardClassName,
   titleClassName,
-  headerClassName,
+  subtitleClassName,
+  mainClassName,
 }: AuthLayoutProps) {
   return (
-    <div className="min-h-screen bg-[#f3f3f5] font-outfit text-[#1f1f29]">
-      <header className={cn("flex items-start justify-between gap-4 px-4 pt-5 sm:px-8 sm:pt-7 lg:px-[60px] lg:pt-[48px]", headerClassName)}>
-        <button onClick={onLogoClick} className="shrink-0 text-[34px] font-normal leading-none text-[#ff8300] sm:text-[40px] lg:text-[56px]">
-          qwik
-        </button>
-        <p className="max-w-[210px] text-right text-[13px] leading-[1.35] text-[#9a99a6] sm:max-w-none sm:text-[16px]">
-          New here?{" "}
-          <button className="text-[#ff8f00]" onClick={onCreateAccountClick}>
-            Create an account
-          </button>
-        </p>
-      </header>
+    <div className="min-h-screen overflow-x-hidden bg-[#f5f4f1] font-outfit text-[#1f1f29]">
+      <main className={cn("grid min-h-screen w-full grid-cols-1 md:grid-cols-[11fr_10fr] lg:grid-cols-[3fr_2fr]", mainClassName)}>
+        <section className="relative hidden items-center justify-center overflow-hidden bg-[#efe2ce] px-10 py-16 md:flex lg:px-16">
+          <img
+            src="/auth-illustration.PNG"
+            alt="Qwik marketplace illustration"
+            className="h-auto max-h-[78vh] w-full max-w-[760px] object-contain"
+            loading="eager"
+          />
+        </section>
 
-      <main className="mx-auto flex min-h-[calc(100dvh-84px)] w-full max-w-[1728px] items-center justify-center px-4 py-8 sm:min-h-[calc(100dvh-100px)] lg:min-h-[calc(100dvh-120px)]">
-        <section className={cn("mx-auto max-w-full rounded-[24px] bg-white px-[22px] pb-[24px] pt-[18px]", cardClassName)}>
-          <h2 className={cn("mb-[14px] text-center text-[28px] font-normal leading-[1.05] text-[#22222b]", titleClassName)}>
-            {title}
-          </h2>
-          {children}
+        <section className="flex items-center justify-center px-4 py-8 sm:px-7 md:px-8 lg:px-10">
+          <div className="w-full max-w-[540px] rounded-[30px] bg-white/95 p-6 shadow-[0_18px_65px_rgba(39,34,24,0.12)] backdrop-blur-sm sm:p-8 lg:p-10">
+            <button
+              onClick={onLogoClick}
+              type="button"
+              aria-label="Go to home"
+              className="mb-4 text-left text-[42px] font-semibold leading-none text-[#ff8300] transition-opacity duration-200 hover:opacity-85 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#ffb357] focus-visible:ring-offset-2"
+            >
+              QWIK
+            </button>
+
+            {(topPromptText && topPromptActionText && onTopPromptActionClick) && (
+              <p className="mb-6 text-[14px] leading-[1.45] text-[#7a7884]">
+                {topPromptText}{" "}
+                <button
+                  className="font-semibold text-[#ff8f00] transition-colors duration-200 hover:text-[#e67f00] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#ffb357] focus-visible:ring-offset-2"
+                  onClick={onTopPromptActionClick}
+                  type="button"
+                >
+                  {topPromptActionText}
+                </button>
+              </p>
+            )}
+
+            <h1 className={cn("text-[32px] font-semibold leading-tight tracking-[-0.02em] text-[#252431] sm:text-[36px]", titleClassName)}>{title}</h1>
+            {subtitle && (
+              <p className={cn("mb-6 mt-2 text-[14px] leading-[1.5] text-[#6f6d78]", subtitleClassName)}>{subtitle}</p>
+            )}
+
+            <div className="transition-opacity duration-300">{children}</div>
+          </div>
         </section>
       </main>
     </div>
