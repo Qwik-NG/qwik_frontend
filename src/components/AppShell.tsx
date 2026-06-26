@@ -489,7 +489,12 @@ export function SiteFooter({ navigate }: { navigate: NavigateTo }) {
           Download
         </h5>
         <div className="flex gap-2.5 sm:flex-col sm:gap-2.5">
-          <button disabled aria-disabled="true" type="button" className="flex h-12 flex-1 cursor-not-allowed items-center justify-center gap-2 rounded-[10px] bg-[#1b1a2f] px-2 text-[13px] text-[#76798d]/80 sm:w-[160px] sm:flex-none sm:justify-start sm:px-4 sm:text-[14px]">
+          <a
+            href="https://apps.apple.com/ng/app/qwik-nigeria-buy-sell-qwik/id1634841175"
+            target="_blank"
+            rel="noopener noreferrer"
+            className="flex h-12 flex-1 items-center justify-center gap-2 rounded-[10px] bg-[#1b1a2f] px-2 text-[13px] text-[#76798d]/80 sm:w-[160px] sm:flex-none sm:justify-start sm:px-4 sm:text-[14px]"
+          >
             <svg
               viewBox="0 0 24 24"
               className="h-5 w-5 fill-current text-[#666877]"
@@ -498,7 +503,7 @@ export function SiteFooter({ navigate }: { navigate: NavigateTo }) {
               <path d="M16.5 12.8c0-2 1.7-3 1.8-3.1-1-.1-2-.6-2.6-1.3-1.1-1.1-2.7-1-3.4-.7-.7.3-1.3.7-2 .7-.8 0-1.5-.4-2.3-.7-1-.4-2.3-.1-3.2.8-1.7 1.8-1.4 5.2.3 7.9.8 1.3 1.8 2.7 3.1 2.7 1.2 0 1.7-.8 3.2-.8s1.9.8 3.2.8 2.2-1.2 3-2.5c.5-.7.8-1.5 1-2.1-.1-.1-2.1-.8-2.1-3.7ZM14.9 6.5c.7-.8 1.1-1.8 1-2.8-1 .1-2 .6-2.7 1.4-.6.7-1.1 1.8-1 2.8 1.1.1 2.1-.5 2.7-1.4Z" />
             </svg>
             <span>App Store</span>
-          </button>
+          </a>
           <button disabled aria-disabled="true" type="button" className="flex h-12 flex-1 cursor-not-allowed items-center justify-center gap-2 rounded-[10px] bg-[#1b1a2f] px-2 text-[13px] text-[#76798d]/80 sm:w-[160px] sm:flex-none sm:justify-start sm:px-4 sm:text-[14px]">
             <svg
               viewBox="0 0 24 24"
