@@ -23,6 +23,7 @@ export default function AdminSidebar({ className = '' }: AdminSidebarProps) {
 
   const navItems = [
     { label: 'Dashboard', icon: BarChart3, path: '/admin' },
+    { label: 'Analytics', icon: BarChart3, path: '/admin/analytics' },
     { label: 'Users', icon: Users, path: '/admin/users' },
     { label: 'Ads', icon: Package, path: '/admin/ads' },
     { label: 'Reports', icon: AlertCircle, path: '/admin/reports' },

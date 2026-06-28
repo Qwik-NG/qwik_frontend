@@ -29,6 +29,7 @@ import type {
   VerificationDocument,
   PaymentCheckoutResponse,
   AdminStats,
+  AdminAnalytics,
   AdminReport,
   AdminAd,
   AdminReview,
@@ -559,6 +560,12 @@ export const api = {
     retry: 1,
   }),
 
+  adminAnalytics: () => request<AdminAnalytics>("/admin/analytics", {
+    staleTime: ADMIN_STALE_TIME,
+    cacheTime: ADMIN_CACHE_TIME,
+    retry: 1,
+  }),
+
   adminUsers: (params?: { page?: number; pageSize?: number; search?: string; role?: 'USER' | 'ADMIN'; status?: 'ACTIVE' | 'BANNED' }) => {
     const searchParams = new URLSearchParams();
     if (params?.page) searchParams.set("page", String(params.page));
@@ -748,6 +755,7 @@ export const api = {
 
   prefetchAdminPages: async () => {
     await Promise.allSettled([
+      api.adminAnalytics(),
       api.adminUsers({ page: 1, pageSize: 20 }),
       api.adminAds({ page: 1, pageSize: 20 }),
       api.adminReports({ page: 1, pageSize: 20 }),

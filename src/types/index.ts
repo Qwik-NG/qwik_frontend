@@ -124,6 +124,71 @@ export interface AdminStats {
   pendingVerifications?: number;
 }
 
+export interface CountByLabel {
+  count: number;
+}
+
+export interface AdminAnalyticsCountByStatus extends CountByLabel {
+  status: string;
+}
+
+export interface AdminAnalyticsCountByPurpose extends CountByLabel {
+  purpose: string;
+}
+
+export interface AdminAnalyticsCountByType extends CountByLabel {
+  type: string;
+}
+
+export interface AdminAnalyticsCategoryDistribution extends CountByLabel {
+  categoryId: string;
+  categoryName: string;
+}
+
+export interface AdminAnalyticsLocationDistribution extends CountByLabel {
+  locationState: string;
+}
+
+export interface AdminAnalytics {
+  users: {
+    total: number;
+    newToday: number;
+    newLast7Days: number;
+  };
+  ads: {
+    total: number;
+    active: number;
+    promoted: number;
+    activePromoted: number;
+    newToday: number;
+    newLast7Days: number;
+  };
+  marketplace: {
+    totalConversations: number;
+    totalMessages: number;
+  };
+  moderation: {
+    reportsCount: number;
+    pendingReports: number;
+    reviewsCount: number;
+  };
+  notifications: {
+    total: number;
+    unread: number;
+    byType: AdminAnalyticsCountByType[];
+  };
+  payments: {
+    byStatus: AdminAnalyticsCountByStatus[];
+    byPurpose: AdminAnalyticsCountByPurpose[];
+  };
+  distribution: {
+    adsByCategory: AdminAnalyticsCategoryDistribution[];
+    adsByLocationState: AdminAnalyticsLocationDistribution[];
+    usersByLocationState: AdminAnalyticsLocationDistribution[];
+  };
+  generatedAt: string;
+}
+
 export interface AdminReport {
   id: string;
   reason: string;
