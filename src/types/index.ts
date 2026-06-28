@@ -153,10 +153,16 @@ export interface AdminAnalyticsLandingPage extends CountByLabel {
   path: string;
 }
 
+export interface AdminAnalyticsPageTitleView extends CountByLabel {
+  title: string;
+}
+
 export interface AdminAnalyticsTraffic {
   totalVisits: number;
+  activeUsers: number;
   uniqueVisitors: number;
   topLandingPages: AdminAnalyticsLandingPage[];
+  pageTitleViews: AdminAnalyticsPageTitleView[];
   deviceBreakdown: {
     mobile: number;
     desktop: number;
