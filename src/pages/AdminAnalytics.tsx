@@ -173,6 +173,7 @@ export default function AdminAnalytics() {
     : [];
 
   const topLandingPages = traffic?.topLandingPages ?? [];
+  const pageTitleViews = traffic?.pageTitleViews ?? [];
 
   if (loading) {
     return (
@@ -298,6 +299,10 @@ export default function AdminAnalytics() {
                     <div className="mt-1 text-[22px] font-semibold text-[#1f1f29]">{numberValue(traffic.totalVisits)}</div>
                   </div>
                   <div className="rounded-[10px] border border-[#efedf2] bg-[#faf9fc] px-3 py-3">
+                    <div className="text-[12px] text-[#7f7e88]">Active Users</div>
+                    <div className="mt-1 text-[22px] font-semibold text-[#1f1f29]">{numberValue(traffic.activeUsers)}</div>
+                  </div>
+                  <div className="rounded-[10px] border border-[#efedf2] bg-[#faf9fc] px-3 py-3">
                     <div className="text-[12px] text-[#7f7e88]">Unique Visitors</div>
                     <div className="mt-1 text-[22px] font-semibold text-[#1f1f29]">{numberValue(traffic.uniqueVisitors)}</div>
                   </div>
@@ -334,6 +339,27 @@ export default function AdminAnalytics() {
                 <div className="rounded-[10px] border border-[#efedf2] bg-[#faf9fc] px-3 py-3 lg:col-span-1">
                   <div className="mb-2 text-[12px] text-[#7f7e88]">Traffic Source Summary</div>
                   <DistributionList rows={trafficSources} label="traffic source" />
+                </div>
+
+                <div className="rounded-[10px] border border-[#efedf2] bg-[#faf9fc] px-3 py-3 lg:col-span-3">
+                  <div className="mb-2 text-[12px] text-[#7f7e88]">Top Page Titles</div>
+                  {!pageTitleViews.length ? (
+                    <div className="text-[13px] text-[#9a99a6]">No page title data available yet.</div>
+                  ) : (
+                    <ul className="grid grid-cols-1 gap-2 md:grid-cols-2">
+                      {pageTitleViews.slice(0, 8).map((item) => (
+                        <li
+                          key={item.title}
+                          className="flex items-center justify-between rounded-[10px] border border-[#efedf2] bg-white px-3 py-2"
+                        >
+                          <span className="truncate pr-3 text-[13px] text-[#4f4b59]">{item.title}</span>
+                          <span className="rounded-full bg-[#faf9fc] px-2 py-1 text-[12px] font-semibold text-[#1f1f29]">
+                            {numberValue(item.count)}
+                          </span>
+                        </li>
+                      ))}
+                    </ul>
+                  )}
                 </div>
               </div>
             )}
