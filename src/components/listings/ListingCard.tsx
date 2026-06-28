@@ -65,6 +65,7 @@ export default function ListingCard({
           className="absolute inset-0 z-0 rounded-[24px] sm:rounded-[28px]"
           onClick={(event) => {
             event.preventDefault();
+            event.stopPropagation();
             onClick?.();
           }}
         />
