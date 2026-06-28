@@ -273,20 +273,20 @@ export default function AdminAnalytics() {
             {!traffic ? (
               <div className="space-y-3">
                 <div className="rounded-[10px] border border-dashed border-[#d9d8df] bg-[#faf9fc] px-4 py-4 text-[13px] text-[#7f7e88]">
-                  Connect GA4 to view traffic analytics.
+                  GA4 tracking is configured. Traffic reports will be available in Google Analytics. Admin dashboard traffic sync is not connected yet.
                 </div>
                 <div className="grid grid-cols-1 gap-3 sm:grid-cols-2 lg:grid-cols-4">
                   <div className="rounded-[10px] border border-[#efedf2] bg-[#faf9fc] px-3 py-3">
                     <div className="text-[12px] text-[#7f7e88]">Total Visits</div>
-                    <div className="mt-1 text-[20px] font-semibold text-[#1f1f29]">Connect GA4</div>
+                    <div className="mt-1 text-[20px] font-semibold text-[#1f1f29]">Awaiting Sync</div>
                   </div>
                   <div className="rounded-[10px] border border-[#efedf2] bg-[#faf9fc] px-3 py-3">
                     <div className="text-[12px] text-[#7f7e88]">Unique Visitors</div>
-                    <div className="mt-1 text-[20px] font-semibold text-[#1f1f29]">Connect GA4</div>
+                    <div className="mt-1 text-[20px] font-semibold text-[#1f1f29]">Awaiting Sync</div>
                   </div>
                   <div className="rounded-[10px] border border-[#efedf2] bg-[#faf9fc] px-3 py-3 sm:col-span-2">
                     <div className="text-[12px] text-[#7f7e88]">Top Landing Pages</div>
-                    <div className="mt-1 text-[13px] text-[#9a99a6]">Connect GA4</div>
+                    <div className="mt-1 text-[13px] text-[#9a99a6]">Awaiting Sync</div>
                   </div>
                 </div>
               </div>
