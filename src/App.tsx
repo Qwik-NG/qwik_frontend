@@ -4,6 +4,7 @@ import { ROUTES } from "./constants/routes";
 import { AdminRoute } from "./components/auth/AdminRoute";
 import { ProtectedRoute } from "./components/auth/ProtectedRoute";
 import { ScrollToTop } from "./components/ScrollToTop";
+import { RouteAnalyticsTracker } from "./components/RouteAnalyticsTracker";
 
 const SignInPage = lazy(() => import("./pages/SignInPage"));
 const HomePage = lazy(() => import("./pages/HomePage"));
@@ -71,6 +72,7 @@ function lazyRoute(node: ReactNode) {
 export default function App() {
   return (
     <>
+      <RouteAnalyticsTracker />
       <ScrollToTop />
       <Routes>
         {/* Home & Welcome */}
