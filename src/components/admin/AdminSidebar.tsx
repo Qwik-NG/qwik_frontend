@@ -1,6 +1,7 @@
 import { useNavigate, useLocation } from 'react-router-dom';
 import { clearAllAuthData } from '../../services/auth';
 import { disconnectRealtimeSocket } from '../../services/realtime';
+import { api } from '../../services/api';
 import { 
   BarChart3, 
   Users, 
@@ -35,10 +36,16 @@ export default function AdminSidebar({ className = '' }: AdminSidebarProps) {
 
   const isActive = (path: string) => location.pathname === path;
 
-  const handleLogout = () => {
-    clearAllAuthData();
-    disconnectRealtimeSocket();
-    navigate('/admin/login');
+  const handleLogout = async () => {
+    try {
+      await api.logout();
+    } catch {
+      // Local logout must still complete even if backend audit write fails.
+    } finally {
+      clearAllAuthData();
+      disconnectRealtimeSocket();
+      navigate('/admin/login');
+    }
   };
 
   return (
@@ -84,7 +91,7 @@ export default function AdminSidebar({ className = '' }: AdminSidebarProps) {
       {/* Logout */}
       <div className="p-4">
         <button
-          onClick={handleLogout}
+          onClick={() => void handleLogout()}
           className="w-full flex items-center gap-3 px-4 py-3 rounded-lg text-[#d32f2f] hover:bg-[#ffebee] transition text-sm font-medium"
         >
           <LogOut size={20} />

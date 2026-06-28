@@ -18,7 +18,7 @@ export default function AdminLogin() {
     try {
       setError("");
       setIsSubmitting(true);
-      const res = await api.login({ email: email.trim().toLowerCase(), password });
+      const res = await api.login({ email: email.trim().toLowerCase(), password }, { authContext: "admin" });
       
       // Check if user is admin
       if (res.data.user.role !== "ADMIN") {

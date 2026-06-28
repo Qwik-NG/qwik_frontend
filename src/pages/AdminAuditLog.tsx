@@ -5,6 +5,9 @@ import type { AdminAuditLogEntry } from '../types';
 
 // All known action strings emitted by the backend across phases 1-8.
 const KNOWN_ACTIONS = [
+  'ADMIN_LOGIN_SUCCESS',
+  'ADMIN_LOGIN_FAILED',
+  'ADMIN_LOGOUT',
   'AD_DELETED',
   'AD_STATUS_UPDATED',
   'REPORT_STATUS_UPDATED',
@@ -18,6 +21,9 @@ const KNOWN_TARGET_TYPES = ['Ad', 'Report', 'Review', 'User', 'VerificationAppli
 
 function actionLabel(action: string) {
   const map: Record<string, string> = {
+    ADMIN_LOGIN_SUCCESS: 'Admin Login Success',
+    ADMIN_LOGIN_FAILED: 'Admin Login Failed',
+    ADMIN_LOGOUT: 'Admin Logout',
     AD_DELETED: 'Ad Deleted',
     AD_STATUS_UPDATED: 'Ad Status Updated',
     REPORT_STATUS_UPDATED: 'Report Updated',
@@ -33,11 +39,20 @@ function actionBadgeClass(action: string) {
   if (action === 'USER_BANNED' || action === 'AD_DELETED' || action === 'REVIEW_DELETED') {
     return 'bg-red-100 text-red-800';
   }
+  if (action === 'ADMIN_LOGIN_FAILED') {
+    return 'bg-red-100 text-red-800';
+  }
   if (action === 'USER_UNBANNED' || action === 'AD_STATUS_UPDATED') {
+    return 'bg-green-100 text-green-800';
+  }
+  if (action === 'ADMIN_LOGIN_SUCCESS') {
     return 'bg-green-100 text-green-800';
   }
   if (action === 'REPORT_STATUS_UPDATED') {
     return 'bg-yellow-100 text-yellow-800';
+  }
+  if (action === 'ADMIN_LOGOUT') {
+    return 'bg-slate-100 text-slate-800';
   }
   if (action === 'VERIFICATION_REVIEWED') {
     return 'bg-blue-100 text-blue-800';
