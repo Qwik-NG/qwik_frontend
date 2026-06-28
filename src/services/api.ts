@@ -225,9 +225,10 @@ export const api = {
       body: JSON.stringify(payload)
     }),
 
-  login: (payload: LoginPayload) =>
+  login: (payload: LoginPayload, options?: { authContext?: "admin" | "user" }) =>
     request<AuthResponse>("/auth/login", {
       method: "POST",
+      headers: options?.authContext ? { "X-Auth-Context": options.authContext } : undefined,
       body: JSON.stringify(payload)
     }),
 
@@ -267,8 +268,11 @@ export const api = {
       body: JSON.stringify({ otp })
     }),
 
-  // TODO: logout endpoint if needed (frontend only clears token)
-  // logout: () => request<null>("/auth/logout", { method: "POST" }),
+  logout: () =>
+    request<null>("/auth/logout", {
+      method: "POST",
+      body: JSON.stringify({})
+    }),
 
   // ===== User & Profile Endpoints =====
   me: () =>
