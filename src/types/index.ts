@@ -149,6 +149,30 @@ export interface AdminAnalyticsLocationDistribution extends CountByLabel {
   locationState: string;
 }
 
+export interface AdminAnalyticsLandingPage extends CountByLabel {
+  path: string;
+}
+
+export interface AdminAnalyticsTraffic {
+  totalVisits: number;
+  uniqueVisitors: number;
+  topLandingPages: AdminAnalyticsLandingPage[];
+  deviceBreakdown: {
+    mobile: number;
+    desktop: number;
+    tablet: number;
+  };
+  sourceSummary: {
+    direct: number;
+    googleSearch: number;
+    facebook: number;
+    instagram: number;
+    tiktok: number;
+    whatsapp: number;
+    other: number;
+  };
+}
+
 export interface AdminAnalytics {
   users: {
     total: number;
@@ -186,6 +210,7 @@ export interface AdminAnalytics {
     adsByLocationState: AdminAnalyticsLocationDistribution[];
     usersByLocationState: AdminAnalyticsLocationDistribution[];
   };
+  traffic?: AdminAnalyticsTraffic;
   generatedAt: string;
 }
 

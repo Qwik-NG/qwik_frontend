@@ -4,8 +4,10 @@ import {
   BarChart3,
   CreditCard,
   Flag,
+  Globe,
   MapPin,
   MessageSquare,
+  MonitorSmartphone,
   Sparkles,
   Users,
 } from 'lucide-react';
@@ -149,6 +151,29 @@ export default function AdminAnalytics() {
     }));
   }, [analytics]);
 
+  const traffic = analytics?.traffic;
+  const trafficDevices = traffic
+    ? [
+        { key: 'mobile', value: 'Mobile', count: traffic.deviceBreakdown.mobile },
+        { key: 'desktop', value: 'Desktop', count: traffic.deviceBreakdown.desktop },
+        { key: 'tablet', value: 'Tablet', count: traffic.deviceBreakdown.tablet },
+      ]
+    : [];
+
+  const trafficSources = traffic
+    ? [
+        { key: 'direct', value: 'Direct', count: traffic.sourceSummary.direct },
+        { key: 'googleSearch', value: 'Google Search', count: traffic.sourceSummary.googleSearch },
+        { key: 'facebook', value: 'Facebook', count: traffic.sourceSummary.facebook },
+        { key: 'instagram', value: 'Instagram', count: traffic.sourceSummary.instagram },
+        { key: 'tiktok', value: 'TikTok', count: traffic.sourceSummary.tiktok },
+        { key: 'whatsapp', value: 'WhatsApp', count: traffic.sourceSummary.whatsapp },
+        { key: 'other', value: 'Other', count: traffic.sourceSummary.other },
+      ]
+    : [];
+
+  const topLandingPages = traffic?.topLandingPages ?? [];
+
   if (loading) {
     return (
       <AdminLayout title="Analytics" description="Marketplace and business performance from existing data">
@@ -239,6 +264,81 @@ export default function AdminAnalytics() {
         </section>
 
         <section className="grid grid-cols-1 gap-4 lg:grid-cols-2">
+          <article className="rounded-[14px] border border-[#e8e8ea] bg-white p-5 shadow-sm lg:col-span-2">
+            <div className="mb-4 flex items-center gap-2">
+              <Globe size={18} className="text-[#1f1f29]" />
+              <h2 className="text-[16px] font-semibold text-[#1f1f29]">Traffic Overview</h2>
+            </div>
+
+            {!traffic ? (
+              <div className="space-y-3">
+                <div className="rounded-[10px] border border-dashed border-[#d9d8df] bg-[#faf9fc] px-4 py-4 text-[13px] text-[#7f7e88]">
+                  Connect GA4 to view traffic analytics.
+                </div>
+                <div className="grid grid-cols-1 gap-3 sm:grid-cols-2 lg:grid-cols-4">
+                  <div className="rounded-[10px] border border-[#efedf2] bg-[#faf9fc] px-3 py-3">
+                    <div className="text-[12px] text-[#7f7e88]">Total Visits</div>
+                    <div className="mt-1 text-[20px] font-semibold text-[#1f1f29]">Connect GA4</div>
+                  </div>
+                  <div className="rounded-[10px] border border-[#efedf2] bg-[#faf9fc] px-3 py-3">
+                    <div className="text-[12px] text-[#7f7e88]">Unique Visitors</div>
+                    <div className="mt-1 text-[20px] font-semibold text-[#1f1f29]">Connect GA4</div>
+                  </div>
+                  <div className="rounded-[10px] border border-[#efedf2] bg-[#faf9fc] px-3 py-3 sm:col-span-2">
+                    <div className="text-[12px] text-[#7f7e88]">Top Landing Pages</div>
+                    <div className="mt-1 text-[13px] text-[#9a99a6]">Connect GA4</div>
+                  </div>
+                </div>
+              </div>
+            ) : (
+              <div className="grid grid-cols-1 gap-4 lg:grid-cols-3">
+                <div className="space-y-3 lg:col-span-1">
+                  <div className="rounded-[10px] border border-[#efedf2] bg-[#faf9fc] px-3 py-3">
+                    <div className="text-[12px] text-[#7f7e88]">Total Visits</div>
+                    <div className="mt-1 text-[22px] font-semibold text-[#1f1f29]">{numberValue(traffic.totalVisits)}</div>
+                  </div>
+                  <div className="rounded-[10px] border border-[#efedf2] bg-[#faf9fc] px-3 py-3">
+                    <div className="text-[12px] text-[#7f7e88]">Unique Visitors</div>
+                    <div className="mt-1 text-[22px] font-semibold text-[#1f1f29]">{numberValue(traffic.uniqueVisitors)}</div>
+                  </div>
+                  <div className="rounded-[10px] border border-[#efedf2] bg-[#faf9fc] px-3 py-3">
+                    <div className="mb-2 flex items-center gap-2 text-[12px] text-[#7f7e88]">
+                      <MonitorSmartphone size={14} />
+                      Device Breakdown
+                    </div>
+                    <DistributionList rows={trafficDevices} label="device" />
+                  </div>
+                </div>
+
+                <div className="rounded-[10px] border border-[#efedf2] bg-[#faf9fc] px-3 py-3 lg:col-span-1">
+                  <div className="mb-2 text-[12px] text-[#7f7e88]">Top Landing Pages</div>
+                  {!topLandingPages.length ? (
+                    <div className="text-[13px] text-[#9a99a6]">No landing page data available yet.</div>
+                  ) : (
+                    <ul className="space-y-2">
+                      {topLandingPages.slice(0, 8).map((item) => (
+                        <li
+                          key={item.path}
+                          className="flex items-center justify-between rounded-[10px] border border-[#efedf2] bg-white px-3 py-2"
+                        >
+                          <span className="truncate pr-3 text-[13px] text-[#4f4b59]">{item.path}</span>
+                          <span className="rounded-full bg-[#faf9fc] px-2 py-1 text-[12px] font-semibold text-[#1f1f29]">
+                            {numberValue(item.count)}
+                          </span>
+                        </li>
+                      ))}
+                    </ul>
+                  )}
+                </div>
+
+                <div className="rounded-[10px] border border-[#efedf2] bg-[#faf9fc] px-3 py-3 lg:col-span-1">
+                  <div className="mb-2 text-[12px] text-[#7f7e88]">Traffic Source Summary</div>
+                  <DistributionList rows={trafficSources} label="traffic source" />
+                </div>
+              </div>
+            )}
+          </article>
+
           <article className="rounded-[14px] border border-[#e8e8ea] bg-white p-5 shadow-sm">
             <div className="mb-4 flex items-center gap-2">
               <MessageSquare size={18} className="text-[#1f1f29]" />
