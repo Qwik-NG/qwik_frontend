@@ -52,6 +52,7 @@ const GetVerifiedPaymentPage = lazy(() => import("./pages/GetVerifiedPaymentPage
 const GetVerifiedSuccessfulPage = lazy(() => import("./pages/GetVerifiedSuccessfulPage"));
 const AdminLogin = lazy(() => import("./pages/AdminLogin"));
 const AdminDashboard = lazy(() => import("./pages/AdminDashboard"));
+const AdminAnalytics = lazy(() => import("./pages/AdminAnalytics"));
 const AdminUsers = lazy(() => import("./pages/AdminUsers"));
 const AdminAds = lazy(() => import("./pages/AdminAds"));
 const AdminReports = lazy(() => import("./pages/AdminReports"));
@@ -149,6 +150,7 @@ export default function App() {
 
         {/* Admin Dashboard */}
         <Route path="/admin" element={lazyRoute(<AdminRoute><AdminDashboard /></AdminRoute>)} />
+        <Route path="/admin/analytics" element={lazyRoute(<AdminRoute><AdminAnalytics /></AdminRoute>)} />
         <Route path="/admin/users" element={lazyRoute(<AdminRoute><AdminUsers /></AdminRoute>)} />
         <Route path="/admin/ads" element={lazyRoute(<AdminRoute><AdminAds /></AdminRoute>)} />
         <Route path="/admin/reports" element={lazyRoute(<AdminRoute><AdminReports /></AdminRoute>)} />
