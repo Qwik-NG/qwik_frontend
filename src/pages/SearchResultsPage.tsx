@@ -653,6 +653,7 @@ export default function SearchResultsPage() {
                     <ListingCard
                       key={item.id}
                       item={item}
+                      href={buildProductDetailsRoute(item.id)}
                       interactive
                       clampTitleLines={2}
                       clampDescriptionLines={3}

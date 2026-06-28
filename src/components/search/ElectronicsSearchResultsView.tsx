@@ -534,6 +534,7 @@ export default function ElectronicsSearchResultsView({ query, navigate, view, lo
                     image: item.ad.images?.[0]?.url,
                     verifiedSeller: isSellerVerified(item.ad.user),
                   }}
+                  href={buildProductDetailsRoute(item.ad.id)}
                   interactive
                   clampTitleLines={2}
                   clampDescriptionLines={3}
@@ -556,6 +557,7 @@ export default function ElectronicsSearchResultsView({ query, navigate, view, lo
                     image: item.ad.images?.[0]?.url,
                     verifiedSeller: isSellerVerified(item.ad.user),
                   }}
+                  href={buildProductDetailsRoute(item.ad.id)}
                   interactive
                   clampTitleLines={2}
                   clampDescriptionLines={3}

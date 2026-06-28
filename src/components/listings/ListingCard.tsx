@@ -19,6 +19,7 @@ export type ListingCardItem = {
 
 type ListingCardProps = {
   item: ListingCardItem;
+  href?: string;
   onClick?: () => void;
   className?: string;
   interactive?: boolean;
@@ -38,6 +39,7 @@ const clampStyle = (lines?: number): CSSProperties | undefined =>
 
 export default function ListingCard({
   item,
+  href,
   onClick,
   className = "",
   interactive = false,
@@ -53,9 +55,20 @@ export default function ListingCard({
 
   return (
     <article
-      className={`rounded-[24px] border border-[#ddd9d2] bg-white p-3 shadow-[0_8px_24px_rgba(31,29,39,0.05)] sm:rounded-[28px] sm:p-4 ${interactiveClasses} ${className}`.trim()}
+      className={`relative rounded-[24px] border border-[#ddd9d2] bg-white p-3 shadow-[0_8px_24px_rgba(31,29,39,0.05)] sm:rounded-[28px] sm:p-4 ${interactiveClasses} ${className}`.trim()}
       onClick={onClick}
     >
+      {href ? (
+        <a
+          href={href}
+          aria-label={`View details for ${item.title}`}
+          className="absolute inset-0 z-0 rounded-[24px] sm:rounded-[28px]"
+          onClick={(event) => {
+            event.preventDefault();
+            onClick?.();
+          }}
+        />
+      ) : null}
       <div className={`relative w-full overflow-hidden rounded-[18px] bg-white sm:rounded-[22px] ${imageHeightClassName}`.trim()}>
         {item.verifiedSeller ? <VerifiedSellerBadge /> : null}
         {item.image ? (
@@ -70,7 +83,7 @@ export default function ListingCard({
           <ImagePlaceholder title="" labelClassName="hidden" className="rounded-[14px] sm:rounded-[18px]" />
         )}
       </div>
-      <div className="px-0 pb-1 pt-4 sm:pt-5">
+      <div className="relative z-10 px-0 pb-1 pt-4 sm:pt-5">
         <div className="flex flex-wrap items-center gap-2">
           <h3 className="m-0 min-w-0 text-[18px] font-semibold leading-none text-[#1f1d27] sm:text-[20px]">{item.price}</h3>
           {item.isPromoted && item.promotedUntil && new Date(item.promotedUntil) > new Date() ? (

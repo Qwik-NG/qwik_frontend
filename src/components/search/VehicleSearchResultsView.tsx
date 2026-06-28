@@ -654,6 +654,7 @@ export default function VehicleSearchResultsView({ query, navigate, view, locati
                       image: item.ad.images?.[0]?.url,
                       verifiedSeller: isSellerVerified(item.ad.user),
                     }}
+                    href={buildProductDetailsRoute(item.ad.id)}
                     showBadge={Boolean(getAdConditionLabel(item.ad.condition))}
                     badgeLabel={getAdConditionLabel(item.ad.condition) ?? undefined}
                     interactive

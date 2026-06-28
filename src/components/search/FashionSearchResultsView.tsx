@@ -638,6 +638,7 @@ export default function FashionSearchResultsView({ query, navigate, view, locati
                   image: item.ad.images?.[0]?.url,
                   verifiedSeller: isSellerVerified(item.ad.user),
                 }}
+                href={buildProductDetailsRoute(item.ad.id)}
                 interactive
                 clampTitleLines={2}
                 clampDescriptionLines={3}

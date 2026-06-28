@@ -486,6 +486,7 @@ export default function BeautySearchResultsView({ query, navigate, view, locatio
                   image: item.ad.images?.[0]?.url,
                   verifiedSeller: isSellerVerified(item.ad.user),
                 }}
+                href={buildProductDetailsRoute(item.ad.id)}
                 interactive
                 clampTitleLines={2}
                 clampDescriptionLines={3}
