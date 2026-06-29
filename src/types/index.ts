@@ -53,7 +53,19 @@ export interface FollowingSeller {
   fullName: string;
   location?: string;
   profile?: UserProfile;
+  verification?: VerificationSummary | null;
+  stats?: UserStats;
   followersCount: number;
+  followedAt: string;
+}
+
+export interface FollowerSeller {
+  id: string;
+  fullName: string;
+  location?: string;
+  profile?: UserProfile;
+  verification?: VerificationSummary | null;
+  stats?: UserStats;
   followedAt: string;
 }
 

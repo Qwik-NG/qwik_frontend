@@ -35,6 +35,7 @@ import type {
   AdminReview,
   AdminAuditLogEntry,
   FollowStatus,
+  FollowerSeller,
   FollowingSeller,
   PublicUserProfile
 } from "../types/index";
@@ -309,6 +310,12 @@ export const api = {
   }),
 
   getMyFollowing: () => request<FollowingSeller[]>("/users/me/following", {
+    staleTime: SHORT_LIST_STALE_TIME,
+    cacheTime: SHORT_LIST_STALE_TIME * 2,
+    retry: 1,
+  }),
+
+  getMyFollowers: () => request<FollowerSeller[]>("/users/me/followers", {
     staleTime: SHORT_LIST_STALE_TIME,
     cacheTime: SHORT_LIST_STALE_TIME * 2,
     retry: 1,

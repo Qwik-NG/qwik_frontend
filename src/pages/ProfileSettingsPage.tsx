@@ -7,12 +7,28 @@ import Toggle from "../components/ui/Toggle";
 import { UserAvatar } from "../components/ui/UserAvatar";
 import { useToast } from "../context/ToastContext";
 import { useCurrentUser } from "../hooks/useCurrentUser";
+import { useMessageNotificationsSetting } from "../hooks/useMessageNotificationsSetting";
 import { clearUserCache } from "../hooks/useUserCache";
 import { api } from "../services/api";
 import { getSettingsNavItems } from "../lib/settings-nav-config";
 import { ALL_NIGERIA_LOCATION, NIGERIAN_AREAS, NIGERIAN_LOCATIONS } from "../lib/searchContext";
+import ProfileStatsModal from "../components/settings/ProfileStatsModal";
+import { ROUTES } from "../constants/routes";
+import type { FollowerSeller, FollowingSeller } from "../types";
 
 type TabKey = "edit-profile" | "company-details" | "chat-settings";
+
+type ProfileSnapshot = {
+  fullName: string;
+  email: string;
+  bio: string;
+  phone: string;
+  locationState: string;
+  locationArea: string;
+  avatarUrl: string;
+};
+
+type StatsModalMode = "following" | "followers" | null;
 
 function DetailCard({ label, value }: { label: string; value: string }) {
   return (
@@ -21,6 +37,22 @@ function DetailCard({ label, value }: { label: string; value: string }) {
       <p className="mt-1 text-[15px] font-medium text-ink">{value}</p>
     </div>
   );
+}
+
+function toProvidedValue(value?: string | null, options?: { treatQwikUserAsMissing?: boolean }) {
+  if (typeof value !== "string") return "Not provided";
+  const normalized = value.trim();
+  if (!normalized) return "Not provided";
+  if (options?.treatQwikUserAsMissing && normalized === "Qwik User") return "Not provided";
+  return normalized;
+}
+
+function getVerificationStatusLabel(status?: string | null) {
+  if (!status) return "Not provided";
+  if (status === "APPROVED") return "Verified";
+  if (status === "SUBMITTED" || status === "IN_REVIEW") return "Pending verification";
+  if (status === "REJECTED" || status === "DRAFT") return "Not verified";
+  return "Not provided";
 }
 
 export default function ProfileSettingsPage() {
@@ -39,7 +71,19 @@ export default function ProfileSettingsPage() {
   const [selectedAvatarFile, setSelectedAvatarFile] = useState<File | null>(null);
   const [avatarPreviewUrl, setAvatarPreviewUrl] = useState("");
   const [avatarUrl, setAvatarUrl] = useState("");
+  const [isEditMode, setIsEditMode] = useState(false);
+  const [initialProfile, setInitialProfile] = useState<ProfileSnapshot | null>(null);
   const [loading, setLoading] = useState(false);
+  const chatSettings = useMessageNotificationsSetting();
+  const [statsModal, setStatsModal] = useState<StatsModalMode>(null);
+  const [followers, setFollowers] = useState<FollowerSeller[]>([]);
+  const [following, setFollowing] = useState<FollowingSeller[]>([]);
+  const [followersLoaded, setFollowersLoaded] = useState(false);
+  const [followingLoaded, setFollowingLoaded] = useState(false);
+  const [loadingFollowers, setLoadingFollowers] = useState(false);
+  const [loadingFollowing, setLoadingFollowing] = useState(false);
+  const [statsError, setStatsError] = useState<string | null>(null);
+  const [unfollowingId, setUnfollowingId] = useState<string | null>(null);
 
   useEffect(() => {
     if (!selectedAvatarFile) {
@@ -53,52 +97,212 @@ export default function ProfileSettingsPage() {
     return () => URL.revokeObjectURL(previewUrl);
   }, [selectedAvatarFile]);
 
-  // TODO: replace these fallbacks with real company profile fields when backend company settings are available.
   const companyDetails = {
-    businessType: typeof profileFallback.businessType === "string" ? profileFallback.businessType : "Retail Business",
-    businessCategory: typeof profileFallback.businessCategory === "string" ? profileFallback.businessCategory : "General Merchandise",
-    registrationNumber: typeof profileFallback.registrationNumber === "string" ? profileFallback.registrationNumber : "RC-1029384",
-    businessAddress: typeof profileFallback.businessAddress === "string" ? profileFallback.businessAddress : display.location || "Lagos, Nigeria",
-    verificationStatus: typeof profileFallback.verificationStatus === "string" ? profileFallback.verificationStatus : "Pending verification",
-    memberSince: user?.createdAt ? new Date(user.createdAt).toLocaleDateString() : "Jan 2024",
-    activeAds: String(display.stats.find((stat) => stat.label.toLowerCase().includes("ads"))?.value ?? "0"),
+    businessName: toProvidedValue(user?.fullName ?? display.fullName, { treatQwikUserAsMissing: true }),
+    description: toProvidedValue(user?.profile?.bio ?? display.bio),
+    businessAddress: toProvidedValue(user?.location ?? display.location),
+    verificationStatus: getVerificationStatusLabel(user?.verification?.status),
+    memberSince: user?.createdAt ? new Date(user.createdAt).toLocaleDateString() : "Not provided",
+    activeAds: String(user?.stats?.adverts ?? display.stats.find((stat) => stat.label.toLowerCase().includes("ads"))?.value ?? 0),
   };
 
   useEffect(() => {
-    setFullName(user?.fullName ?? display.fullName);
-    setEmail(user?.email ?? display.email);
-    setBio(user?.profile?.bio ?? display.bio);
-    setPhone(user?.phone ?? display.phone);
-    setAvatarUrl(user?.profile?.avatarUrl ?? display.avatarUrl);
+      const nextFullName = user?.fullName ?? display.fullName;
+      const nextEmail = user?.email ?? display.email;
+      const nextBio = user?.profile?.bio ?? display.bio;
+      const nextPhone = user?.phone ?? display.phone;
+      const nextAvatarUrl = user?.profile?.avatarUrl ?? display.avatarUrl;
 
     // Prefer structured fields when present; otherwise parse legacy `location`.
     const existingLocation = (user?.location ?? (typeof profileFallback.location === "string" ? profileFallback.location : display.location) ?? "").trim();
     const explicitState = (user?.locationState ?? "").trim();
     const explicitArea = (user?.locationArea ?? "").trim();
-    if (explicitState || explicitArea) {
-      setLocationState(explicitState);
-      setLocationArea(explicitArea);
+      let nextLocationState = "";
+      let nextLocationArea = "";
+      if (explicitState || explicitArea) {
+        nextLocationState = explicitState;
+        nextLocationArea = explicitArea;
     } else if (existingLocation) {
       // Try "Area, State" pattern first
       const parts = existingLocation.split(",").map((s) => s.trim()).filter(Boolean);
       if (parts.length >= 2 && NIGERIAN_LOCATIONS.includes(parts[parts.length - 1])) {
-        setLocationState(parts[parts.length - 1]);
-        setLocationArea(parts.slice(0, -1).join(", "));
+          nextLocationState = parts[parts.length - 1];
+          nextLocationArea = parts.slice(0, -1).join(", ");
       } else if (NIGERIAN_LOCATIONS.includes(existingLocation)) {
-        setLocationState(existingLocation);
-        setLocationArea("");
+          nextLocationState = existingLocation;
+          nextLocationArea = "";
       } else {
-        setLocationState("");
-        setLocationArea(existingLocation);
+          nextLocationState = "";
+          nextLocationArea = existingLocation;
       }
-    } else {
-      setLocationState("");
-      setLocationArea("");
     }
+
+      setFullName(nextFullName);
+      setEmail(nextEmail);
+      setBio(nextBio);
+      setPhone(nextPhone);
+      setAvatarUrl(nextAvatarUrl);
+      setLocationState(nextLocationState);
+      setLocationArea(nextLocationArea);
+      setInitialProfile({
+        fullName: nextFullName,
+        email: nextEmail,
+        bio: nextBio,
+        phone: nextPhone,
+        locationState: nextLocationState,
+        locationArea: nextLocationArea,
+        avatarUrl: nextAvatarUrl,
+      });
+      setIsEditMode(false);
+      setSelectedAvatarFile(null);
+      setSelectedLogoName("");
   }, [display.avatarUrl, display.bio, display.email, display.fullName, display.location, display.phone, profileFallback.location, user]);
 
   const stateOptions = useMemo(() => NIGERIAN_LOCATIONS.filter((s) => s !== ALL_NIGERIA_LOCATION), []);
   const areasForState = locationState ? NIGERIAN_AREAS[locationState] : undefined;
+    const hasChanges = useMemo(() => {
+      if (!initialProfile) return false;
+      return (
+        fullName !== initialProfile.fullName
+        || bio !== initialProfile.bio
+        || phone !== initialProfile.phone
+        || locationState !== initialProfile.locationState
+        || locationArea !== initialProfile.locationArea
+        || selectedAvatarFile !== null
+      );
+    }, [bio, fullName, initialProfile, locationArea, locationState, phone, selectedAvatarFile]);
+
+    const handleAvatarFileChange = (file: File | null) => {
+      if (!isEditMode || loading) return;
+      setSelectedAvatarFile(file);
+      setSelectedLogoName(file?.name || "");
+    };
+
+    const handleCancelEdit = () => {
+      if (!initialProfile || loading) return;
+      setFullName(initialProfile.fullName);
+      setEmail(initialProfile.email);
+      setBio(initialProfile.bio);
+      setPhone(initialProfile.phone);
+      setLocationState(initialProfile.locationState);
+      setLocationArea(initialProfile.locationArea);
+      setAvatarUrl(initialProfile.avatarUrl);
+      setSelectedAvatarFile(null);
+      setSelectedLogoName("");
+      setIsEditMode(false);
+    };
+
+    const handleSaveProfile = async () => {
+      if (loading || !isEditMode || !hasChanges) return;
+      try {
+        setLoading(true);
+        let nextAvatarUrl = avatarUrl;
+        if (selectedAvatarFile) {
+          const uploadResponse = await api.uploadImages([selectedAvatarFile]);
+          nextAvatarUrl = uploadResponse.data.urls[0] || "";
+        }
+        const trimmedState = locationState.trim();
+        const trimmedArea = locationArea.trim();
+        const composedLocation = trimmedState
+          ? (trimmedArea ? `${trimmedArea}, ${trimmedState}` : trimmedState)
+          : trimmedArea;
+        const response = await api.updateMe({
+          fullName,
+          bio,
+          phone,
+          location: composedLocation,
+          locationState: trimmedState || undefined,
+          locationArea: trimmedArea || undefined,
+          ...(nextAvatarUrl ? { avatarUrl: nextAvatarUrl } : {}),
+        });
+        setUser(response.data);
+        clearUserCache(); // Clear cache to sync across pages
+        setAvatarUrl(response.data.profile?.avatarUrl || "");
+        setSelectedAvatarFile(null);
+        setSelectedLogoName("");
+        setIsEditMode(false);
+        success("Profile updated");
+      } catch (error) {
+        showError(error instanceof Error ? error.message : "Failed to update profile");
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    const baseFollowing = user?.stats?.following ?? Number(display.stats.find((stat) => stat.label.toLowerCase() === "following")?.value ?? 0);
+    const baseFollowers = user?.stats?.followers ?? Number(display.stats.find((stat) => stat.label.toLowerCase() === "followers")?.value ?? 0);
+    const baseAdverts = user?.stats?.adverts ?? Number(display.stats.find((stat) => stat.label.toLowerCase().includes("ad"))?.value ?? 0);
+    const followingCount = followingLoaded ? following.length : baseFollowing;
+    const followersCount = followersLoaded ? followers.length : baseFollowers;
+
+    const loadFollowing = async () => {
+      try {
+        setLoadingFollowing(true);
+        setStatsError(null);
+        const response = await api.getMyFollowing();
+        setFollowing(response.data);
+        setFollowingLoaded(true);
+      } catch (error) {
+        setStatsError(error instanceof Error ? error.message : "Failed to load following users");
+      } finally {
+        setLoadingFollowing(false);
+      }
+    };
+
+    const loadFollowers = async () => {
+      try {
+        setLoadingFollowers(true);
+        setStatsError(null);
+        const response = await api.getMyFollowers();
+        setFollowers(response.data);
+        setFollowersLoaded(true);
+      } catch (error) {
+        setStatsError(error instanceof Error ? error.message : "Failed to load followers");
+      } finally {
+        setLoadingFollowers(false);
+      }
+    };
+
+    const handleOpenFollowing = () => {
+      setStatsModal("following");
+      void loadFollowing();
+    };
+
+    const handleOpenFollowers = () => {
+      setStatsModal("followers");
+      void loadFollowers();
+    };
+
+    const handleStatClick = (label: string) => {
+      const normalized = label.toLowerCase();
+      if (normalized === "following") {
+        handleOpenFollowing();
+        return;
+      }
+      if (normalized === "followers") {
+        handleOpenFollowers();
+        return;
+      }
+      if (normalized.includes("ad")) {
+        navigate(ROUTES.ADS_DASHBOARD);
+      }
+    };
+
+    const handleUnfollow = async (sellerId: string) => {
+      if (unfollowingId) return;
+      const previous = following;
+      try {
+        setUnfollowingId(sellerId);
+        setStatsError(null);
+        setFollowing((current) => current.filter((seller) => seller.id !== sellerId));
+        await api.unfollowUser(sellerId);
+      } catch (error) {
+        setFollowing(previous);
+        setStatsError(error instanceof Error ? error.message : "Failed to unfollow user");
+      } finally {
+        setUnfollowingId(null);
+      }
+    };
 
   return (
     <div className="min-h-screen bg-page text-ink">
@@ -133,7 +337,7 @@ export default function ProfileSettingsPage() {
               <div className="flex flex-wrap items-center justify-between gap-6">
                 <div className="flex items-center gap-4">
                   <div className="relative">
-                    <label className="block cursor-pointer" aria-label="Choose profile photo">
+                      <label className={`block ${isEditMode && !loading ? "cursor-pointer" : "cursor-not-allowed"}`} aria-label="Choose profile photo">
                       <UserAvatar
                         name={fullName || display.fullName}
                         imageUrl={avatarPreviewUrl || avatarUrl}
@@ -144,10 +348,10 @@ export default function ProfileSettingsPage() {
                         type="file"
                         accept="image/jpeg,image/png,image/webp,image/gif"
                         className="hidden"
+                          disabled={!isEditMode || loading}
                         onChange={(event) => {
-                          const file = event.target.files?.[0] || null;
-                          setSelectedAvatarFile(file);
-                          setSelectedLogoName(file?.name || "");
+                            const file = event.target.files?.[0] || null;
+                            handleAvatarFileChange(file);
                         }}
                       />
                     </label>
@@ -158,12 +362,27 @@ export default function ProfileSettingsPage() {
                   </div>
                 </div>
                 <div className="flex flex-wrap gap-6 text-center sm:gap-10">
-                  {display.stats.map((stat) => (
-                    <div key={stat.label}>
-                      <p className="text-[24px] sm:text-[28px]">{stat.value}</p>
-                      <p className="text-[14px] text-[#8c8996] sm:text-[15px]">{stat.label}</p>
-                    </div>
-                  ))}
+                  {display.stats.map((stat) => {
+                    const normalized = stat.label.toLowerCase();
+                    const value = normalized === "following"
+                      ? followingCount
+                      : normalized === "followers"
+                        ? followersCount
+                        : normalized.includes("ad")
+                          ? baseAdverts
+                          : Number(stat.value) || 0;
+                    return (
+                      <button
+                        key={stat.label}
+                        type="button"
+                        onClick={() => handleStatClick(stat.label)}
+                        className="rounded-[10px] p-1 text-center transition hover:bg-[#f7f5fb]"
+                      >
+                        <p className="text-[24px] sm:text-[28px]">{value}</p>
+                        <p className="text-[14px] text-[#8c8996] sm:text-[15px]">{stat.label}</p>
+                      </button>
+                    );
+                  })}
                 </div>
               </div>
             </div>
@@ -195,33 +414,54 @@ export default function ProfileSettingsPage() {
 
               {activeTab === "edit-profile" ? (
                 <>
+                    <div className="mb-5 flex flex-wrap items-center gap-3">
+                      <button
+                        type="button"
+                        onClick={() => setIsEditMode(true)}
+                        disabled={isEditMode || loading}
+                        className="h-10 rounded-[10px] border border-[#dedde4] px-4 text-[14px] text-ink transition-colors hover:border-[#ffb357] disabled:cursor-not-allowed disabled:opacity-50"
+                      >
+                        Edit Profile
+                      </button>
+                      {isEditMode ? (
+                        <button
+                          type="button"
+                          onClick={handleCancelEdit}
+                          disabled={loading}
+                          className="h-10 rounded-[10px] border border-[#dedde4] px-4 text-[14px] text-[#6c6a74] transition-colors hover:border-[#cfcbd8] disabled:cursor-not-allowed disabled:opacity-50"
+                        >
+                          Cancel
+                        </button>
+                      ) : null}
+                    </div>
+
                   <label className="mb-2 block text-[15px] text-[#94919d]">Business Name</label>
-                  <input type="text" value={fullName} onChange={(e) => setFullName(e.target.value)} className="mb-5 h-12 w-full rounded-[10px] border border-[#dedde4] bg-transparent px-3 text-[15px] outline-none" placeholder="Enter your business name" />
+                    <input type="text" value={fullName} onChange={(e) => setFullName(e.target.value)} disabled={!isEditMode || loading} className="mb-5 h-12 w-full rounded-[10px] border border-[#dedde4] bg-transparent px-3 text-[15px] outline-none disabled:cursor-not-allowed disabled:bg-[#f5f4f7] disabled:text-[#8f8a98]" placeholder="Enter your business name" />
 
                   <label className="mb-2 block text-[15px] text-[#94919d]">Description</label>
-                  <textarea value={bio} onChange={(e) => setBio(e.target.value)} className="mb-5 h-[120px] w-full rounded-[10px] border border-[#dedde4] bg-transparent px-3 py-3 text-[15px] outline-none" placeholder="What does your company do?" />
+                    <textarea value={bio} onChange={(e) => setBio(e.target.value)} disabled={!isEditMode || loading} className="mb-5 h-[120px] w-full rounded-[10px] border border-[#dedde4] bg-transparent px-3 py-3 text-[15px] outline-none disabled:cursor-not-allowed disabled:bg-[#f5f4f7] disabled:text-[#8f8a98]" placeholder="What does your company do?" />
 
                   <label className="mb-2 block text-[15px] text-[#94919d]">Profile / Logo Upload</label>
-                  <label className="mb-5 flex min-h-[52px] w-full cursor-pointer items-center justify-between rounded-[10px] border border-dashed border-[#dedde4] px-3 text-[15px] text-[#6c6a74]">
+                    <label className={`mb-5 flex min-h-[52px] w-full items-center justify-between rounded-[10px] border border-dashed border-[#dedde4] px-3 text-[15px] text-[#6c6a74] ${isEditMode && !loading ? "cursor-pointer" : "cursor-not-allowed bg-[#f5f4f7]"}`}>
                     <span className="truncate">{selectedLogoName || "Choose a logo or profile image"}</span>
                     <span className="ml-4 shrink-0 text-[#ff7f11]">Browse</span>
                     <input
                       type="file"
                       accept="image/jpeg,image/png,image/webp,image/gif"
                       className="hidden"
+                        disabled={!isEditMode || loading}
                       onChange={(event) => {
                         const file = event.target.files?.[0] || null;
-                        setSelectedAvatarFile(file);
-                        setSelectedLogoName(file?.name || "");
+                          handleAvatarFileChange(file);
                       }}
                     />
                   </label>
 
                   <label className="mb-2 block text-[15px] text-[#94919d]">Email</label>
-                  <input type="email" value={email} onChange={(e) => setEmail(e.target.value)} className="mb-5 h-12 w-full rounded-[10px] border border-[#dedde4] bg-transparent px-3 text-[15px] outline-none" placeholder="@mail" />
+                    <input type="email" value={email} readOnly disabled className="mb-5 h-12 w-full rounded-[10px] border border-[#dedde4] bg-transparent px-3 text-[15px] outline-none disabled:cursor-not-allowed disabled:bg-[#f5f4f7] disabled:text-[#8f8a98]" placeholder="@mail" />
 
                   <label className="mb-2 block text-[15px] text-[#94919d]">Phone</label>
-                  <input type="tel" value={phone} onChange={(e) => setPhone(e.target.value)} className="mb-5 h-12 w-full rounded-[10px] border border-[#dedde4] bg-transparent px-3 text-[15px] outline-none" placeholder="0800 000 0000" />
+                    <input type="tel" value={phone} onChange={(e) => setPhone(e.target.value)} disabled={!isEditMode || loading} className="mb-5 h-12 w-full rounded-[10px] border border-[#dedde4] bg-transparent px-3 text-[15px] outline-none disabled:cursor-not-allowed disabled:bg-[#f5f4f7] disabled:text-[#8f8a98]" placeholder="0800 000 0000" />
 
                   <div className="mb-5 space-y-4">
                     <DropdownSelect
@@ -229,6 +469,7 @@ export default function ProfileSettingsPage() {
                       placeholder="Select your state"
                       value={locationState}
                       options={stateOptions.map((s) => ({ value: s, label: s }))}
+                        disabled={!isEditMode || loading}
                       onChange={(val) => { setLocationState(val); setLocationArea(""); }}
                     />
                     {locationState && areasForState ? (
@@ -237,42 +478,18 @@ export default function ProfileSettingsPage() {
                         placeholder="Select your area"
                         value={locationArea}
                         options={areasForState.map((a) => ({ value: a, label: a }))}
+                          disabled={!isEditMode || loading}
                         onChange={setLocationArea}
                       />
                     ) : locationState ? (
                       <div>
                         <label className="mb-2 block text-[15px] text-[#94919d]">Area</label>
-                        <input type="text" value={locationArea} onChange={(e) => setLocationArea(e.target.value)} className="h-12 w-full rounded-[10px] border border-[#dedde4] bg-transparent px-3 text-[15px] outline-none" placeholder="City or area (optional)" />
+                          <input type="text" value={locationArea} onChange={(e) => setLocationArea(e.target.value)} disabled={!isEditMode || loading} className="h-12 w-full rounded-[10px] border border-[#dedde4] bg-transparent px-3 text-[15px] outline-none disabled:cursor-not-allowed disabled:bg-[#f5f4f7] disabled:text-[#8f8a98]" placeholder="City or area (optional)" />
                       </div>
                     ) : null}
                   </div>
 
-                  <button className="h-[50px] w-full rounded-[10px] bg-gradient-to-r from-amber to-orange text-[16px] text-white shadow-glow transition-all duration-200 hover:opacity-95 active:scale-[0.99] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#ffb357] focus-visible:ring-offset-2 focus-visible:ring-offset-white" type="button" onClick={async () => {
-                    try {
-                      setLoading(true);
-                      let nextAvatarUrl = avatarUrl;
-                      if (selectedAvatarFile) {
-                        const uploadResponse = await api.uploadImages([selectedAvatarFile]);
-                        nextAvatarUrl = uploadResponse.data.urls[0] || "";
-                      }
-                      const trimmedState = locationState.trim();
-                      const trimmedArea = locationArea.trim();
-                      const composedLocation = trimmedState
-                        ? (trimmedArea ? `${trimmedArea}, ${trimmedState}` : trimmedState)
-                        : trimmedArea;
-                      const response = await api.updateMe({ fullName, bio, phone, location: composedLocation, locationState: trimmedState || undefined, locationArea: trimmedArea || undefined, ...(nextAvatarUrl ? { avatarUrl: nextAvatarUrl } : {}) });
-                      setUser(response.data);
-                      clearUserCache(); // Clear cache to sync across pages
-                      setAvatarUrl(response.data.profile?.avatarUrl || "");
-                      setSelectedAvatarFile(null);
-                      setSelectedLogoName("");
-                      success("Profile updated");
-                    } catch (error) {
-                      showError(error instanceof Error ? error.message : "Failed to update profile");
-                    } finally {
-                      setLoading(false);
-                    }
-                  }}>
+                    <button className="h-[50px] w-full rounded-[10px] bg-gradient-to-r from-amber to-orange text-[16px] text-white shadow-glow transition-all duration-200 hover:opacity-95 active:scale-[0.99] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#ffb357] focus-visible:ring-offset-2 focus-visible:ring-offset-white disabled:cursor-not-allowed disabled:opacity-50" type="button" onClick={() => void handleSaveProfile()} disabled={!isEditMode || !hasChanges || loading}>
                     {loading ? "Saving..." : "Save"}
                   </button>
                 </>
@@ -286,9 +503,8 @@ export default function ProfileSettingsPage() {
                   </div>
 
                   <div className="space-y-4">
-                    <DetailCard label="Business Type" value={companyDetails.businessType} />
-                    <DetailCard label="Business Category" value={companyDetails.businessCategory} />
-                    <DetailCard label="Registration Number" value={companyDetails.registrationNumber} />
+                    <DetailCard label="Business/Profile Name" value={companyDetails.businessName} />
+                    <DetailCard label="Description" value={companyDetails.description} />
                     <DetailCard label="Business Address" value={companyDetails.businessAddress} />
                     <DetailCard label="Member Since" value={companyDetails.memberSince} />
                   </div>
@@ -297,10 +513,33 @@ export default function ProfileSettingsPage() {
 
               {activeTab === "chat-settings" ? (
                 <div className="max-w-[584px] space-y-[24px]">
-                  <div className="flex items-center justify-between gap-6 rounded-[14px] border border-[#eceaf0] bg-white px-4 py-4">
-                    <span className="text-[16px] text-[#9c98a5]">Receive messages</span>
-                    <Toggle size="sm" defaultChecked ariaLabelChecked="Disable receive messages" ariaLabelUnchecked="Enable receive messages" />
-                  </div>
+                  {chatSettings.loading ? (
+                    <div className="h-[56px] animate-pulse rounded-[14px] bg-white" />
+                  ) : (
+                    <div className="flex items-center justify-between gap-6 rounded-[14px] border border-[#eceaf0] bg-white px-4 py-4">
+                      <span className="text-[16px] text-[#9c98a5]">Receive messages</span>
+                      <Toggle
+                        size="sm"
+                        checked={chatSettings.messageNotifications}
+                        onCheckedChange={chatSettings.setMessageNotifications}
+                        ariaLabelChecked="Disable receive messages"
+                        ariaLabelUnchecked="Enable receive messages"
+                        className={chatSettings.saving ? "opacity-60" : ""}
+                      />
+                    </div>
+                  )}
+
+                  {chatSettings.error ? <p className="text-[14px] text-[#d14343]">{chatSettings.error}</p> : null}
+                  {chatSettings.message ? <p className="text-[14px] text-[#248a4b]">{chatSettings.message}</p> : null}
+
+                  <button
+                    className="h-[48px] w-full max-w-[420px] rounded-[14px] bg-gradient-to-r from-amber to-orange text-[16px] text-white shadow-glow disabled:cursor-not-allowed disabled:opacity-50 sm:h-[52px] sm:text-[18px]"
+                    type="button"
+                    onClick={() => void chatSettings.save()}
+                    disabled={chatSettings.loading || chatSettings.saving || !chatSettings.hasChanges}
+                  >
+                    {chatSettings.saving ? "Saving..." : "Save"}
+                  </button>
                 </div>
               ) : null}
             </div>
@@ -311,6 +550,32 @@ export default function ProfileSettingsPage() {
       <div className="hidden md:block">
         <SiteFooter navigate={navigate} />
       </div>
+
+      <ProfileStatsModal
+        title="Following"
+        users={following}
+        loading={loadingFollowing}
+        error={statsError}
+        open={statsModal === "following"}
+        onClose={() => setStatsModal(null)}
+        onViewProfile={(id) => navigate(`/users/${id}`)}
+        showUnfollow
+        unfollowingId={unfollowingId}
+        onUnfollow={handleUnfollow}
+        showAdverts
+        emptyText="You are not following any users yet."
+      />
+
+      <ProfileStatsModal
+        title="Followers"
+        users={followers}
+        loading={loadingFollowers}
+        error={statsError}
+        open={statsModal === "followers"}
+        onClose={() => setStatsModal(null)}
+        onViewProfile={(id) => navigate(`/users/${id}`)}
+        emptyText="You have no followers yet."
+      />
     </div>
   );
 }
