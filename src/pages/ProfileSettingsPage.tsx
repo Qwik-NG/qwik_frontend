@@ -7,6 +7,7 @@ import Toggle from "../components/ui/Toggle";
 import { UserAvatar } from "../components/ui/UserAvatar";
 import { useToast } from "../context/ToastContext";
 import { useCurrentUser } from "../hooks/useCurrentUser";
+import { useMessageNotificationsSetting } from "../hooks/useMessageNotificationsSetting";
 import { clearUserCache } from "../hooks/useUserCache";
 import { api } from "../services/api";
 import { getSettingsNavItems } from "../lib/settings-nav-config";
@@ -52,6 +53,7 @@ export default function ProfileSettingsPage() {
   const [isEditMode, setIsEditMode] = useState(false);
   const [initialProfile, setInitialProfile] = useState<ProfileSnapshot | null>(null);
   const [loading, setLoading] = useState(false);
+  const chatSettings = useMessageNotificationsSetting();
 
   useEffect(() => {
     if (!selectedAvatarFile) {
@@ -394,10 +396,33 @@ export default function ProfileSettingsPage() {
 
               {activeTab === "chat-settings" ? (
                 <div className="max-w-[584px] space-y-[24px]">
-                  <div className="flex items-center justify-between gap-6 rounded-[14px] border border-[#eceaf0] bg-white px-4 py-4">
-                    <span className="text-[16px] text-[#9c98a5]">Receive messages</span>
-                    <Toggle size="sm" defaultChecked ariaLabelChecked="Disable receive messages" ariaLabelUnchecked="Enable receive messages" />
-                  </div>
+                  {chatSettings.loading ? (
+                    <div className="h-[56px] animate-pulse rounded-[14px] bg-white" />
+                  ) : (
+                    <div className="flex items-center justify-between gap-6 rounded-[14px] border border-[#eceaf0] bg-white px-4 py-4">
+                      <span className="text-[16px] text-[#9c98a5]">Receive messages</span>
+                      <Toggle
+                        size="sm"
+                        checked={chatSettings.messageNotifications}
+                        onCheckedChange={chatSettings.setMessageNotifications}
+                        ariaLabelChecked="Disable receive messages"
+                        ariaLabelUnchecked="Enable receive messages"
+                        className={chatSettings.saving ? "opacity-60" : ""}
+                      />
+                    </div>
+                  )}
+
+                  {chatSettings.error ? <p className="text-[14px] text-[#d14343]">{chatSettings.error}</p> : null}
+                  {chatSettings.message ? <p className="text-[14px] text-[#248a4b]">{chatSettings.message}</p> : null}
+
+                  <button
+                    className="h-[48px] w-full max-w-[420px] rounded-[14px] bg-gradient-to-r from-amber to-orange text-[16px] text-white shadow-glow disabled:cursor-not-allowed disabled:opacity-50 sm:h-[52px] sm:text-[18px]"
+                    type="button"
+                    onClick={() => void chatSettings.save()}
+                    disabled={chatSettings.loading || chatSettings.saving || !chatSettings.hasChanges}
+                  >
+                    {chatSettings.saving ? "Saving..." : "Save"}
+                  </button>
                 </div>
               ) : null}
             </div>

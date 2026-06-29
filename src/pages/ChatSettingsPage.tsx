@@ -1,3 +1,4 @@
+import { useMessageNotificationsSetting } from "../hooks/useMessageNotificationsSetting";
 import { useNavigate } from "react-router-dom";
 import { SiteFooter, SiteHeader } from "../components/AppShell";
 import SettingsSidebar, { MobileSettingsMenu } from "../components/settings/SettingsSidebar";
@@ -6,18 +7,10 @@ import { UserAvatar } from "../components/ui/UserAvatar";
 import { useCurrentUser } from "../hooks/useCurrentUser";
 import { getSettingsNavItems } from "../lib/settings-nav-config";
 
-function ToggleRow({ label }: { label: string }) {
-  return (
-    <div className="mb-6 flex items-center justify-between">
-      <p className="text-[16px] sm:text-[18px] text-[#9794a1]">{label}</p>
-      <Toggle checked />
-    </div>
-  );
-}
-
 export default function ChatSettingsPage() {
   const navigate = useNavigate();
   const { user, display } = useCurrentUser();
+  const chatSettings = useMessageNotificationsSetting();
 
   return (
     <div className="min-h-screen bg-page text-ink">
@@ -74,11 +67,32 @@ export default function ChatSettingsPage() {
                 </button>
               </div>
 
-              <ToggleRow label="Receive messages" />
-              <ToggleRow label="Receive messages" />
+              {chatSettings.loading ? (
+                <div className="mb-6 h-[56px] animate-pulse rounded-[14px] bg-white" />
+              ) : (
+                <div className="mb-6 flex items-center justify-between gap-4">
+                  <p className="text-[16px] sm:text-[18px] text-[#9794a1]">Receive messages</p>
+                  <Toggle
+                    size="sm"
+                    checked={chatSettings.messageNotifications}
+                    onCheckedChange={chatSettings.setMessageNotifications}
+                    ariaLabelChecked="Disable receive messages"
+                    ariaLabelUnchecked="Enable receive messages"
+                    className={chatSettings.saving ? "opacity-60" : ""}
+                  />
+                </div>
+              )}
 
-              <button className="mt-2 h-[48px] w-full max-w-[420px] rounded-[14px] bg-gradient-to-r from-amber to-orange text-[16px] text-white shadow-glow sm:h-[52px] sm:text-[18px]" type="button">
-                Save
+              {chatSettings.error ? <p className="mb-4 text-[14px] text-[#d14343]">{chatSettings.error}</p> : null}
+              {chatSettings.message ? <p className="mb-4 text-[14px] text-[#248a4b]">{chatSettings.message}</p> : null}
+
+              <button
+                className="mt-2 h-[48px] w-full max-w-[420px] rounded-[14px] bg-gradient-to-r from-amber to-orange text-[16px] text-white shadow-glow disabled:cursor-not-allowed disabled:opacity-50 sm:h-[52px] sm:text-[18px]"
+                type="button"
+                onClick={() => void chatSettings.save()}
+                disabled={chatSettings.loading || chatSettings.saving || !chatSettings.hasChanges}
+              >
+                {chatSettings.saving ? "Saving..." : "Save"}
               </button>
             </div>
           </section>
