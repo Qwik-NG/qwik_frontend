@@ -402,10 +402,10 @@ function EditProfilePanel({
               alt={`${display.fullName} profile`}
               className="h-[76px] w-[76px] shrink-0 rounded-full object-cover"
             />
-            <div className="min-w-0">
+            <div className="min-w-0 max-w-full">
               <p className="text-[13px] uppercase tracking-[0.12em] text-[#94919d]">Saved profile</p>
-              <h2 className="mt-1 break-words text-[24px] font-medium leading-tight text-ink">{display.fullName}</h2>
-              <p className="mt-1 break-words text-[15px] text-[#7d7986]">{email || "No email added"}</p>
+              <h2 className="mt-1 truncate whitespace-nowrap text-[24px] font-medium leading-tight text-ink">{display.fullName}</h2>
+              <p className="mt-1 truncate text-[15px] text-[#7d7986]">{email || "No email added"}</p>
             </div>
           </div>
           <button

@@ -335,7 +335,7 @@ export default function ProfileSettingsPage() {
             </div>
             <div className="rounded-card bg-white p-6">
               <div className="flex flex-wrap items-center justify-between gap-6">
-                <div className="flex items-center gap-4">
+                <div className="flex min-w-0 items-center gap-4">
                   <div className="relative">
                       <label className={`block ${isEditMode && !loading ? "cursor-pointer" : "cursor-not-allowed"}`} aria-label="Choose profile photo">
                       <UserAvatar
@@ -356,9 +356,9 @@ export default function ProfileSettingsPage() {
                       />
                     </label>
                   </div>
-                  <div>
-                    <h1 className="text-[28px] font-medium leading-tight sm:text-[32px]">{fullName || display.fullName}</h1>
-                    <p className="text-[16px] text-[#8c8996]">{email || ""}</p>
+                  <div className="min-w-0 max-w-full">
+                    <h1 className="truncate whitespace-nowrap text-[28px] font-medium leading-tight sm:text-[32px]">{fullName || display.fullName}</h1>
+                    <p className="truncate text-[16px] text-[#8c8996]">{email || ""}</p>
                   </div>
                 </div>
                 <div className="flex flex-wrap gap-6 text-center sm:gap-10">
