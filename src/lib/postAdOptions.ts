@@ -15,7 +15,17 @@ export const POST_CATEGORY_OPTIONS = [
   { name: "Beauty", slug: "beauty" },
 ];
 
-export const CONDITION_OPTIONS = ["New", "Foreign Used", "Local Used"];
+export const DEFAULT_CONDITION_OPTIONS = ["New", "Foreign Used", "Local Used"];
+export const PROPERTY_CONDITION_OPTIONS = [
+  "Newly Built",
+  "Old / Existing",
+  "Under Construction",
+  "Renovated",
+  "Needs Renovation",
+];
+
+// Kept for backward compatibility at existing call sites.
+export const CONDITION_OPTIONS = DEFAULT_CONDITION_OPTIONS;
 
 const MODEL_OPTIONS_BY_BRAND: Record<string, string[]> = {
   Apple: ["iPhone 11", "iPhone 12", "iPhone 13", "iPhone 14", "iPhone 15", "MacBook Pro", "MacBook Air", "Other"],
@@ -56,6 +66,16 @@ export function getOrderedPostCategories(categories: Category[]) {
 
 export function getCategorySlugById(categoryId: string, categories: Category[]) {
   return getOrderedPostCategories(categories).find((category) => category.id === categoryId)?.slug ?? "";
+}
+
+export function getConditionOptionsForCategory(categorySlug: string) {
+  return categorySlug === "properties" ? PROPERTY_CONDITION_OPTIONS : DEFAULT_CONDITION_OPTIONS;
+}
+
+export function isConditionAllowedForCategory(condition: string, categorySlug: string) {
+  const normalized = condition.trim().toLowerCase();
+  if (!normalized) return false;
+  return getConditionOptionsForCategory(categorySlug).some((option) => option.toLowerCase() === normalized);
 }
 
 export function getCategoryById(categoryId: string, categories: Category[]) {

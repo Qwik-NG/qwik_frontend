@@ -2,7 +2,14 @@ import { useEffect, useMemo, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { SiteFooter, SiteHeader } from "../components/AppShell";
 import DropdownSelect from "../components/ui/DropdownSelect";
-import { getBrandOptions, getCategoryById, getCategorySlugById, getModelOptions, getOrderedPostCategories } from "../lib/postAdOptions";
+import {
+  getBrandOptions,
+  getCategoryById,
+  getCategorySlugById,
+  getModelOptions,
+  getOrderedPostCategories,
+  isConditionAllowedForCategory,
+} from "../lib/postAdOptions";
 import { isBrandInOptions } from "../lib/brandOptions";
 import { api } from "../services/api";
 import type { Category } from "../types";
@@ -17,6 +24,7 @@ type PostDraft = {
   negotiable?: boolean;
   categoryId?: string;
   subcategoryId?: string;
+  categorySlug?: string;
   brand?: string;
   model?: string;
   year?: string;
@@ -153,17 +161,23 @@ export default function NewAdvertDetailsPage() {
   useEffect(() => {
     if (!hasHydratedDraft) return;
 
+    const existingDraft = readDraft();
+    const draftCondition = existingDraft.condition ?? "";
+    const nextCondition = draftCondition && isConditionAllowedForCategory(draftCondition, categorySlug) ? draftCondition : "";
+
     writeDraft({
-      ...readDraft(),
+      ...existingDraft,
       price,
       negotiable,
       categoryId,
       subcategoryId,
+      categorySlug,
       brand,
       model,
       year,
+      condition: nextCondition,
     });
-  }, [hasHydratedDraft, price, negotiable, categoryId, subcategoryId, brand, model, year]);
+  }, [hasHydratedDraft, price, negotiable, categoryId, subcategoryId, categorySlug, brand, model, year]);
 
   const handleNext = () => {
     if (!canProceed) return;
@@ -175,6 +189,7 @@ export default function NewAdvertDetailsPage() {
       negotiable,
       categoryId,
       subcategoryId: hasSubcategories ? subcategoryId : "",
+      categorySlug,
       brand: brand.trim(),
       model: model.trim(),
       year: year.trim(),

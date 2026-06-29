@@ -1,10 +1,10 @@
 import type { ReactNode } from "react";
-import { useEffect, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { SiteFooter, SiteHeader } from "../components/AppShell";
 import DropdownSelect from "../components/ui/DropdownSelect";
 import { reconcileVerificationRequiredError } from "../lib/emailVerification";
-import { CONDITION_OPTIONS } from "../lib/postAdOptions";
+import { getConditionOptionsForCategory, isConditionAllowedForCategory } from "../lib/postAdOptions";
 import { ALL_NIGERIA_LOCATION, NIGERIAN_AREAS, NIGERIAN_LOCATIONS } from "../lib/searchContext";
 import { api, isEmailVerificationRequiredError } from "../services/api";
 import { useToast } from "../context/ToastContext";
@@ -19,6 +19,7 @@ type PostDraft = {
   negotiable?: boolean;
   categoryId?: string;
   subcategoryId?: string;
+  categorySlug?: string;
   brand?: string;
   model?: string;
   condition?: string;
@@ -305,6 +306,7 @@ function Spinner() {
 export default function PostDetailsPage() {
   const navigate = useNavigate();
   const { success, error: showError } = useToast();
+  const [categorySlug, setCategorySlug] = useState("");
   const [condition, setCondition] = useState("");
   const [color, setColor] = useState("");
   const [locationState, setLocationState] = useState("");
@@ -315,12 +317,23 @@ export default function PostDetailsPage() {
 
   useEffect(() => {
     const draft = readDraft();
-    setCondition(draft.condition || "");
+    const draftCategorySlug = (draft.categorySlug || "").trim().toLowerCase();
+    const draftCondition = draft.condition || "";
+    const hasValidCondition = !draftCondition || isConditionAllowedForCategory(draftCondition, draftCategorySlug);
+
+    setCategorySlug(draftCategorySlug);
+    setCondition(hasValidCondition ? draftCondition : "");
     setColor(draft.color || "");
     setLocationState(draft.locationState || "");
     setLocationArea(draft.locationArea || "");
     setExchangeAvailable(draft.exchangeAvailable ?? true);
+
+    if (!hasValidCondition) {
+      writeDraft({ ...draft, categorySlug: draftCategorySlug, condition: "" });
+    }
   }, []);
+
+  const conditionOptions = useMemo(() => getConditionOptionsForCategory(categorySlug), [categorySlug]);
 
   const handleSubmit = async () => {
     if (submitting) return;
@@ -411,7 +424,7 @@ export default function PostDetailsPage() {
               label="Condition"
               placeholder="Is it new, used, which?"
               value={condition}
-              options={CONDITION_OPTIONS.map((option) => ({ value: option, label: option }))}
+              options={conditionOptions.map((option) => ({ value: option, label: option }))}
               onChange={setCondition}
             />
             <TextField label="Colour" placeholder="What's the colour?" value={color} onChange={setColor} />
@@ -457,6 +470,7 @@ export default function PostDetailsPage() {
               if (!canSubmit) return;
               writeDraft({
                 ...readDraft(),
+                categorySlug,
                 condition: condition.trim(),
                 color: color.trim(),
                 location: composedLocation,

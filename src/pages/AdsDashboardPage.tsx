@@ -1,4 +1,4 @@
-import { useCallback, useEffect, useMemo, useState, type FormEvent } from "react";
+import { useCallback, useEffect, useMemo, useRef, useState, type FormEvent } from "react";
 import { useNavigate } from "react-router-dom";
 import { SiteFooter, SiteHeader } from "../components/AppShell";
 import { LocationPin } from "../components/icons/LocationPin";
@@ -6,7 +6,15 @@ import SettingsSidebar, { MobileSettingsMenu } from "../components/settings/Sett
 import DropdownSelect from "../components/ui/DropdownSelect";
 import { FallbackImage } from "../components/ui/FallbackImage";
 import { ImagePlaceholder } from "../components/ui/ImagePlaceholder";
-import { getBrandOptions, getCategoryById, getCategorySlugById, getModelOptions, getOrderedPostCategories } from "../lib/postAdOptions";
+import {
+  getBrandOptions,
+  getCategoryById,
+  getCategorySlugById,
+  getConditionOptionsForCategory,
+  getModelOptions,
+  getOrderedPostCategories,
+  isConditionAllowedForCategory,
+} from "../lib/postAdOptions";
 import { isBrandInOptions } from "../lib/brandOptions";
 import { getSettingsNavItems } from "../lib/settings-nav-config";
 import { ALL_NIGERIA_LOCATION, NIGERIAN_AREAS, NIGERIAN_LOCATIONS } from "../lib/searchContext";
@@ -433,6 +441,16 @@ export default function AdsDashboardPage() {
 
   const subcategoryOptions = selectedCategory?.children ?? [];
   const brandOptions = useMemo(() => getBrandOptions(categorySlug, selectedSubcategory?.name), [categorySlug, selectedSubcategory?.name]);
+  const conditionOptions = useMemo(() => {
+    const baseOptions = getConditionOptionsForCategory(categorySlug);
+    const currentCondition = editForm?.condition.trim() ?? "";
+
+    if (!currentCondition || isConditionAllowedForCategory(currentCondition, categorySlug)) {
+      return baseOptions;
+    }
+
+    return [currentCondition, ...baseOptions];
+  }, [categorySlug, editForm?.condition]);
   const modelOptions = useMemo(() => getModelOptions(editForm?.brand ?? ""), [editForm?.brand]);
   const yearOptions = useMemo(() => {
     const currentYear = new Date().getFullYear();
@@ -443,6 +461,27 @@ export default function AdsDashboardPage() {
   const brandInputValue = isKnownBrand || !editForm ? "" : editForm.brand;
   const areasForState = editForm?.locationState ? NIGERIAN_AREAS[editForm.locationState] ?? null : null;
   const locationStateOptions = useMemo(() => NIGERIAN_LOCATIONS.filter((location) => location !== ALL_NIGERIA_LOCATION), []);
+  const previousCategorySlugRef = useRef<string | null>(null);
+
+  useEffect(() => {
+    if (!editForm) {
+      previousCategorySlugRef.current = null;
+      return;
+    }
+
+    if (previousCategorySlugRef.current === null) {
+      previousCategorySlugRef.current = categorySlug;
+      return;
+    }
+
+    if (previousCategorySlugRef.current !== categorySlug) {
+      const currentCondition = editForm.condition.trim();
+      if (currentCondition && !isConditionAllowedForCategory(currentCondition, categorySlug)) {
+        updateEditForm({ condition: "" });
+      }
+      previousCategorySlugRef.current = categorySlug;
+    }
+  }, [categorySlug, editForm, updateEditForm]);
 
   const handleEditImageUpload = useCallback(async (files: FileList | null) => {
     if (!files || files.length === 0) return;
@@ -724,7 +763,7 @@ export default function AdsDashboardPage() {
                 label="Condition"
                 placeholder="Select condition"
                 value={editForm.condition}
-                options={["New", "Foreign Used", "Local Used"].map((option) => ({ value: option, label: option }))}
+                options={conditionOptions.map((option) => ({ value: option, label: option }))}
                 onChange={(value) => updateEditForm({ condition: value })}
               />
 
