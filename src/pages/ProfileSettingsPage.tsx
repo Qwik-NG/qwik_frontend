@@ -34,6 +34,22 @@ function DetailCard({ label, value }: { label: string; value: string }) {
   );
 }
 
+function toProvidedValue(value?: string | null, options?: { treatQwikUserAsMissing?: boolean }) {
+  if (typeof value !== "string") return "Not provided";
+  const normalized = value.trim();
+  if (!normalized) return "Not provided";
+  if (options?.treatQwikUserAsMissing && normalized === "Qwik User") return "Not provided";
+  return normalized;
+}
+
+function getVerificationStatusLabel(status?: string | null) {
+  if (!status) return "Not provided";
+  if (status === "APPROVED") return "Verified";
+  if (status === "SUBMITTED" || status === "IN_REVIEW") return "Pending verification";
+  if (status === "REJECTED" || status === "DRAFT") return "Not verified";
+  return "Not provided";
+}
+
 export default function ProfileSettingsPage() {
   const navigate = useNavigate();
   const { success, error: showError } = useToast();
@@ -67,15 +83,13 @@ export default function ProfileSettingsPage() {
     return () => URL.revokeObjectURL(previewUrl);
   }, [selectedAvatarFile]);
 
-  // TODO: replace these fallbacks with real company profile fields when backend company settings are available.
   const companyDetails = {
-    businessType: typeof profileFallback.businessType === "string" ? profileFallback.businessType : "Retail Business",
-    businessCategory: typeof profileFallback.businessCategory === "string" ? profileFallback.businessCategory : "General Merchandise",
-    registrationNumber: typeof profileFallback.registrationNumber === "string" ? profileFallback.registrationNumber : "RC-1029384",
-    businessAddress: typeof profileFallback.businessAddress === "string" ? profileFallback.businessAddress : display.location || "Lagos, Nigeria",
-    verificationStatus: typeof profileFallback.verificationStatus === "string" ? profileFallback.verificationStatus : "Pending verification",
-    memberSince: user?.createdAt ? new Date(user.createdAt).toLocaleDateString() : "Jan 2024",
-    activeAds: String(display.stats.find((stat) => stat.label.toLowerCase().includes("ads"))?.value ?? "0"),
+    businessName: toProvidedValue(user?.fullName ?? display.fullName, { treatQwikUserAsMissing: true }),
+    description: toProvidedValue(user?.profile?.bio ?? display.bio),
+    businessAddress: toProvidedValue(user?.location ?? display.location),
+    verificationStatus: getVerificationStatusLabel(user?.verification?.status),
+    memberSince: user?.createdAt ? new Date(user.createdAt).toLocaleDateString() : "Not provided",
+    activeAds: String(user?.stats?.adverts ?? display.stats.find((stat) => stat.label.toLowerCase().includes("ads"))?.value ?? 0),
   };
 
   useEffect(() => {
@@ -385,9 +399,8 @@ export default function ProfileSettingsPage() {
                   </div>
 
                   <div className="space-y-4">
-                    <DetailCard label="Business Type" value={companyDetails.businessType} />
-                    <DetailCard label="Business Category" value={companyDetails.businessCategory} />
-                    <DetailCard label="Registration Number" value={companyDetails.registrationNumber} />
+                    <DetailCard label="Business/Profile Name" value={companyDetails.businessName} />
+                    <DetailCard label="Description" value={companyDetails.description} />
                     <DetailCard label="Business Address" value={companyDetails.businessAddress} />
                     <DetailCard label="Member Since" value={companyDetails.memberSince} />
                   </div>

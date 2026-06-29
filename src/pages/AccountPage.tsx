@@ -15,10 +15,26 @@ import Toggle from "../components/ui/Toggle";
 import { UserAvatar } from "../components/ui/UserAvatar";
 import { getSettingsNavItems } from "../lib/settings-nav-config";
 import { useToast } from "../context/ToastContext";
-import type { FollowingSeller } from "../types";
+import type { FollowingSeller, User } from "../types";
 
 type TabKey = "profile" | "company" | "chat";
 type MenuItem = { label: string; icon: ReactNode; active?: boolean; to?: string };
+
+function toProvidedValue(value?: string | null, options?: { treatQwikUserAsMissing?: boolean }) {
+  if (typeof value !== "string") return "Not provided";
+  const normalized = value.trim();
+  if (!normalized) return "Not provided";
+  if (options?.treatQwikUserAsMissing && normalized === "Qwik User") return "Not provided";
+  return normalized;
+}
+
+function getVerificationStatusLabel(status?: string | null) {
+  if (!status) return "Not provided";
+  if (status === "APPROVED") return "Verified";
+  if (status === "SUBMITTED" || status === "IN_REVIEW") return "Pending verification";
+  if (status === "REJECTED" || status === "DRAFT") return "Not verified";
+  return "Not provided";
+}
 
 function SearchIcon() {
   return (
@@ -431,21 +447,31 @@ function EditProfilePanel({
   );
 }
 
-function CompanyDetailsForm({ display }: { display: CurrentUserDisplay }) {
+function CompanyDetailsForm({ display, user }: { display: CurrentUserDisplay; user: User | null }) {
+  const businessName = toProvidedValue(user?.fullName ?? display.fullName, { treatQwikUserAsMissing: true });
+  const description = toProvidedValue(user?.profile?.bio ?? display.bio);
+  const businessAddress = toProvidedValue(user?.location ?? display.location);
+  const verificationStatus = getVerificationStatusLabel(user?.verification?.status);
+  const memberSince = user?.createdAt ? new Date(user.createdAt).toLocaleDateString() : "Not provided";
+  const activeAds = String(user?.stats?.adverts ?? 0);
+
   return (
     <div className="mt-[48px] w-full max-w-[584px]">
       <div className="space-y-[34px]">
-        <Field label="Business Name" placeholder="Enter your full name" value={display.fullName === "Qwik User" ? "" : display.fullName} readOnly />
+        <Field label="Business/Profile Name" placeholder="Not provided" value={businessName} readOnly />
+        <Field label="Business Address" placeholder="Not provided" value={businessAddress} readOnly />
+        <Field label="Verification Status" placeholder="Not provided" value={verificationStatus} readOnly />
+        <Field label="Member Since" placeholder="Not provided" value={memberSince} readOnly />
+        <Field label="Active Ads" placeholder="0" value={activeAds} readOnly />
         <label className="block">
           <span className="mb-[10px] block text-[16px] text-[#9c98a5]">Description</span>
           <textarea
-            className="h-[210px] w-full max-w-[584px] resize-none rounded-[8px] border border-card bg-page px-[20px] py-[22px] text-[17px] text-ink outline-none placeholder:text-[#a4a0aa] focus:border-orange"
-            placeholder="What does your company do?"
-            defaultValue={display.bio}
+            className="h-[210px] w-full max-w-[584px] resize-none rounded-[8px] border border-card bg-page px-[20px] py-[22px] text-[17px] text-ink outline-none read-only:text-[#6f6b78]"
+            value={description}
+            readOnly
           />
         </label>
       </div>
-      <SaveButton className="mt-[44px] max-w-[584px]" />
     </div>
   );
 }
@@ -588,7 +614,7 @@ function FollowingSellersSection({
 export default function AccountPage() {
   const navigate = useNavigate();
   const [activeTab, setActiveTab] = useState<TabKey>("profile");
-  const { display, setUser, loading: loadingUser } = useCurrentUser();
+  const { user, display, setUser, loading: loadingUser } = useCurrentUser();
   const { success, error: showError } = useToast();
   const [isEditingProfile, setIsEditingProfile] = useState(false);
   const [profileModeInitialized, setProfileModeInitialized] = useState(false);
@@ -804,7 +830,7 @@ export default function AccountPage() {
                 onLocationChange={setLocation}
               />
             ) : null}
-            {activeTab === "company" ? <CompanyDetailsForm display={display} /> : null}
+            {activeTab === "company" ? <CompanyDetailsForm display={display} user={user} /> : null}
             {activeTab === "chat" ? <ChatSettingsForm /> : null}
             <FollowingSellersSection
               sellers={followingSellers}
