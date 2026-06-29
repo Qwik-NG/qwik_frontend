@@ -178,7 +178,6 @@ export default function GoogleSignInButton({
             }
 
             if (!response.credential) {
-              showErrorRef.current("Google sign-in was cancelled");
               setStatus("ready");
               return;
             }
@@ -244,32 +243,17 @@ export default function GoogleSignInButton({
           if (!notDisplayed && !skipped) return;
 
           const reason = notification?.getNotDisplayedReason?.() || notification?.getSkippedReason?.() || "";
-          const normalizedReason = reason.toLowerCase();
-          const isTemporaryFedcmState =
-            normalizedReason.includes("network")
-            || normalizedReason.includes("suppressed")
-            || normalizedReason.includes("cancel")
-            || normalizedReason.includes("fedcm");
-
-          setStatus("ready");
-          if (isTemporaryFedcmState) {
-            showErrorRef.current("Google sign-in was interrupted. Please reload and try again.");
-            return;
+          if (reason) {
+            console.info("Google prompt unavailable", reason);
           }
-          showErrorRef.current("Could not open Google sign-in. Please try again.");
+          setStatus("ready");
         });
       } catch (err) {
         console.error(err);
-        const message = err instanceof Error ? err.message.toLowerCase() : "";
-        if (message.includes("fedcm") || message.includes("networkerror") || message.includes("cancel")) {
-          setStatus("ready");
-          showErrorRef.current("Google sign-in was interrupted. Please reload and try again.");
-          return;
-        }
-        showErrorRef.current("Could not open Google sign-in. Please try again.");
+        setStatus("ready");
       }
     } else {
-      showErrorRef.current("Google sign-in is still loading. Please try again in a moment.");
+      setStatus("loading");
     }
   };
 
