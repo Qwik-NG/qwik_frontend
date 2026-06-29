@@ -11,6 +11,13 @@ const READY_TIMEOUT_MS = 8000;
 
 type GoogleCredentialResponse = { credential?: string };
 
+type GooglePromptNotification = {
+  isNotDisplayed?: () => boolean;
+  isSkippedMoment?: () => boolean;
+  getNotDisplayedReason?: () => string;
+  getSkippedReason?: () => string;
+};
+
 declare global {
   interface Window {
     google?: {
@@ -36,7 +43,7 @@ declare global {
               locale?: string;
             }
           ) => void;
-          prompt: () => void;
+          prompt: (momentListener?: (notification: GooglePromptNotification) => void) => void;
           cancel: () => void;
         };
       };
@@ -172,6 +179,7 @@ export default function GoogleSignInButton({
 
             if (!response.credential) {
               showErrorRef.current("Google sign-in was cancelled");
+              setStatus("ready");
               return;
             }
             try {
@@ -229,9 +237,35 @@ export default function GoogleSignInButton({
 
     if (window.google?.accounts?.id) {
       try {
-        window.google.accounts.id.prompt();
+        window.google.accounts.id.cancel();
+        window.google.accounts.id.prompt((notification?: GooglePromptNotification) => {
+          const notDisplayed = notification?.isNotDisplayed?.() ?? false;
+          const skipped = notification?.isSkippedMoment?.() ?? false;
+          if (!notDisplayed && !skipped) return;
+
+          const reason = notification?.getNotDisplayedReason?.() || notification?.getSkippedReason?.() || "";
+          const normalizedReason = reason.toLowerCase();
+          const isTemporaryFedcmState =
+            normalizedReason.includes("network")
+            || normalizedReason.includes("suppressed")
+            || normalizedReason.includes("cancel")
+            || normalizedReason.includes("fedcm");
+
+          setStatus("ready");
+          if (isTemporaryFedcmState) {
+            showErrorRef.current("Google sign-in was interrupted. Please reload and try again.");
+            return;
+          }
+          showErrorRef.current("Could not open Google sign-in. Please try again.");
+        });
       } catch (err) {
         console.error(err);
+        const message = err instanceof Error ? err.message.toLowerCase() : "";
+        if (message.includes("fedcm") || message.includes("networkerror") || message.includes("cancel")) {
+          setStatus("ready");
+          showErrorRef.current("Google sign-in was interrupted. Please reload and try again.");
+          return;
+        }
         showErrorRef.current("Could not open Google sign-in. Please try again.");
       }
     } else {
