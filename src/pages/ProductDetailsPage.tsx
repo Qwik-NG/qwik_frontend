@@ -6,6 +6,7 @@ import Zoom from "yet-another-react-lightbox/plugins/zoom";
 import "yet-another-react-lightbox/styles.css";
 import "yet-another-react-lightbox/plugins/counter.css";
 import { SiteFooter, SiteHeader } from "../components/AppShell";
+import SeoHead from "../components/seo/SeoHead";
 import { ROUTES } from "../constants/routes";
 import { FallbackImage } from "../components/ui/FallbackImage";
 import { ImagePlaceholder } from "../components/ui/ImagePlaceholder";
@@ -216,6 +217,9 @@ export default function ProductDetailsPage() {
   const [reportOpen, setReportOpen] = useState(false);
   const [reportReason, setReportReason] = useState("");
   const [submittingReport, setSubmittingReport] = useState(false);
+  const productId = id ?? "";
+  const canonicalPath = productId ? `/product-details/${encodeURIComponent(productId)}` : "/product-details";
+  const canonicalUrl = `${window.location.origin}${canonicalPath}`;
 
   // Sync cached user updates
   useEffect(() => {
@@ -304,6 +308,12 @@ export default function ProductDetailsPage() {
     setReportReason("");
     setSubmittingReport(false);
   }, [id]);
+
+  useEffect(() => {
+    if (!productId) return;
+    if (location.pathname === canonicalPath) return;
+    navigate(canonicalPath, { replace: true });
+  }, [canonicalPath, location.pathname, navigate, productId]);
 
   const fetchReviews = useCallback(async (adId: string, isCancelled: () => boolean = () => false) => {
     setReviewsLoading(true);
@@ -657,6 +667,62 @@ export default function ProductDetailsPage() {
   const sellerName = ad.user?.fullName || "Seller";
   const sellerAvatarUrl = ad.user?.profile?.avatarUrl || "";
   const sellerMeta = formatMemberSince(ad.user?.createdAt);
+  const productPrice = Number.isFinite(ad.price) ? ad.price : undefined;
+  const seoTitle = `${ad.title} | QwikBay`;
+  const seoDescription = (ad.description || "Browse this product on QwikBay.").trim().slice(0, 160);
+  const seoImage = ad.images?.[0]?.url;
+  const brandName = ad.brand || ad.category?.name || "QwikBay";
+  const breadcrumbCategory = ad.category?.name || "Listings";
+  const availability = ad.status === "SOLD" ? "https://schema.org/SoldOut" : "https://schema.org/InStock";
+  const productStructuredData: Record<string, unknown> = {
+    "@context": "https://schema.org",
+    "@type": "Product",
+    name: ad.title,
+    description: seoDescription,
+    sku: ad.id,
+    category: breadcrumbCategory,
+    brand: {
+      "@type": "Brand",
+      name: brandName,
+    },
+    image: ad.images?.map((image) => image.url).filter(Boolean),
+    offers: {
+      "@type": "Offer",
+      url: canonicalUrl,
+      priceCurrency: "NGN",
+      price: typeof productPrice === "number" ? productPrice.toFixed(0) : undefined,
+      availability,
+      itemCondition: "https://schema.org/UsedCondition",
+    },
+    seller: {
+      "@type": "Organization",
+      name: sellerName,
+    },
+  };
+  const breadcrumbStructuredData: Record<string, unknown> = {
+    "@context": "https://schema.org",
+    "@type": "BreadcrumbList",
+    itemListElement: [
+      {
+        "@type": "ListItem",
+        position: 1,
+        name: "Home",
+        item: `${window.location.origin}/`,
+      },
+      {
+        "@type": "ListItem",
+        position: 2,
+        name: breadcrumbCategory,
+        item: `${window.location.origin}/search`,
+      },
+      {
+        "@type": "ListItem",
+        position: 3,
+        name: ad.title,
+        item: canonicalUrl,
+      },
+    ],
+  };
   const isOwner = Boolean(currentUser?.id && ad.user?.id === currentUser.id);
   const isAuthenticated = Boolean(getToken());
   const canLeaveReview = isAuthenticated && !isOwner;
@@ -701,6 +767,14 @@ export default function ProductDetailsPage() {
 
   return (
     <div className="min-h-screen bg-page text-ink">
+      <SeoHead
+        title={seoTitle}
+        description={seoDescription}
+        canonicalUrl={canonicalUrl}
+        ogType="product"
+        ogImage={seoImage}
+        structuredData={[productStructuredData, breadcrumbStructuredData]}
+      />
       <SiteHeader navigate={navigate} />
 
       <main className="mx-auto w-full max-w-[1360px] px-4 pb-12 pt-4 sm:px-6 sm:pb-16 sm:pt-6 lg:px-10">

@@ -472,6 +472,13 @@ export default function AdsDashboardPage() {
     updateEditForm({ imageUrls: editForm.imageUrls.filter((_, i) => i !== index) });
   }, [editForm]);
 
+  const handleMakeEditCover = useCallback((index: number) => {
+    if (!editForm || index <= 0 || index >= editForm.imageUrls.length) return;
+    updateEditForm({
+      imageUrls: [editForm.imageUrls[index], ...editForm.imageUrls.filter((_, imageIndex) => imageIndex !== index)],
+    });
+  }, [editForm, updateEditForm]);
+
   const submitEdit = useCallback(async (event: FormEvent<HTMLFormElement>) => {
     event.preventDefault();
     if (!editingAd || !editForm) return;
@@ -849,6 +856,20 @@ export default function AdsDashboardPage() {
                             alt={`Product ${index + 1}`}
                             className="h-full w-full object-cover"
                           />
+                          {index === 0 ? (
+                            <div className="absolute bottom-1 left-1 rounded bg-black/65 px-2 py-1 text-[10px] font-medium text-white">
+                              Cover
+                            </div>
+                          ) : (
+                            <button
+                              type="button"
+                              onClick={() => handleMakeEditCover(index)}
+                              disabled={savingEdit}
+                              className="absolute bottom-1 left-1 rounded bg-white/90 px-2 py-1 text-[10px] font-medium text-[#1f1d27] shadow-sm transition hover:bg-white disabled:cursor-not-allowed disabled:opacity-60"
+                            >
+                              Make cover
+                            </button>
+                          )}
                           <button
                             type="button"
                             onClick={() => handleRemoveEditImage(index)}

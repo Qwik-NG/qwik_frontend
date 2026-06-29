@@ -11,6 +11,13 @@ const READY_TIMEOUT_MS = 8000;
 
 type GoogleCredentialResponse = { credential?: string };
 
+type GooglePromptNotification = {
+  isNotDisplayed?: () => boolean;
+  isSkippedMoment?: () => boolean;
+  getNotDisplayedReason?: () => string;
+  getSkippedReason?: () => string;
+};
+
 declare global {
   interface Window {
     google?: {
@@ -36,7 +43,7 @@ declare global {
               locale?: string;
             }
           ) => void;
-          prompt: () => void;
+          prompt: (momentListener?: (notification: GooglePromptNotification) => void) => void;
           cancel: () => void;
         };
       };
@@ -171,7 +178,7 @@ export default function GoogleSignInButton({
             }
 
             if (!response.credential) {
-              showErrorRef.current("Google sign-in was cancelled");
+              setStatus("ready");
               return;
             }
             try {
@@ -229,13 +236,24 @@ export default function GoogleSignInButton({
 
     if (window.google?.accounts?.id) {
       try {
-        window.google.accounts.id.prompt();
+        window.google.accounts.id.cancel();
+        window.google.accounts.id.prompt((notification?: GooglePromptNotification) => {
+          const notDisplayed = notification?.isNotDisplayed?.() ?? false;
+          const skipped = notification?.isSkippedMoment?.() ?? false;
+          if (!notDisplayed && !skipped) return;
+
+          const reason = notification?.getNotDisplayedReason?.() || notification?.getSkippedReason?.() || "";
+          if (reason) {
+            console.info("Google prompt unavailable", reason);
+          }
+          setStatus("ready");
+        });
       } catch (err) {
         console.error(err);
-        showErrorRef.current("Could not open Google sign-in. Please try again.");
+        setStatus("ready");
       }
     } else {
-      showErrorRef.current("Google sign-in is still loading. Please try again in a moment.");
+      setStatus("loading");
     }
   };
 

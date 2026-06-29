@@ -509,6 +509,7 @@ export default function CategoryListingView({ config, query, navigate, locationF
                     image: ad.images?.[0]?.url,
                     verifiedSeller: isSellerVerified(ad.user),
                   }}
+                    href={buildProductDetailsRoute(ad.id)}
                     showBadge={Boolean(getAdConditionLabel(ad.condition))}
                     badgeLabel={getAdConditionLabel(ad.condition) ?? undefined}
                   interactive
