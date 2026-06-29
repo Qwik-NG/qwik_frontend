@@ -274,6 +274,14 @@ export default function PostPage() {
     setError(nextImageUrls.length < MIN_IMAGE_COUNT ? "Please upload at least 4 product photos." : null);
   };
 
+  const handleMakeCover = (index: number) => {
+    if (uploading || navigating || index <= 0 || index >= imageUrls.length) return;
+    const nextImageUrls = [imageUrls[index], ...imageUrls.filter((_, imageIndex) => imageIndex !== index)];
+    setImageUrls(nextImageUrls);
+    writeDraft({ ...readDraft(), title: title.trim(), description: description.trim(), imageUrls: nextImageUrls });
+    setUploadMessage(null);
+  };
+
   const handleNext = () => {
     if (imageUrls.length < MIN_IMAGE_COUNT) {
       setError("Please upload at least 4 product photos.");
@@ -331,9 +339,19 @@ export default function PostPage() {
           {imageUrls.length > 0 && (
             <div className="mt-[16px] flex flex-wrap gap-2">
               {imageUrls.map((url, index) => (
-                <div key={`${url}-${index}`} className="relative h-[64px] w-[64px] overflow-hidden rounded-[12px]">
+                <div key={`${url}-${index}`} className="relative h-[72px] w-[72px] overflow-hidden rounded-[12px]">
                   <img src={url} alt={index === 0 ? "Uploaded ad cover" : "Uploaded ad"} className="h-full w-full object-cover" />
                   {index === 0 ? <span className="absolute bottom-1 left-1 rounded bg-black/65 px-1.5 py-0.5 text-[10px] font-medium text-white">Cover</span> : null}
+                  {index > 0 ? (
+                    <button
+                      type="button"
+                      onClick={() => handleMakeCover(index)}
+                      disabled={uploading || navigating}
+                      className="absolute bottom-1 left-1 rounded bg-white/90 px-1.5 py-0.5 text-[10px] font-medium text-[#201d27] shadow-sm transition hover:bg-white disabled:cursor-not-allowed disabled:opacity-50"
+                    >
+                      Make cover
+                    </button>
+                  ) : null}
                   <button
                     type="button"
                     onClick={() => handleRemoveImage(index)}
