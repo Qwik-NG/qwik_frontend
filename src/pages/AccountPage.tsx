@@ -15,10 +15,13 @@ import Toggle from "../components/ui/Toggle";
 import { UserAvatar } from "../components/ui/UserAvatar";
 import { getSettingsNavItems } from "../lib/settings-nav-config";
 import { useToast } from "../context/ToastContext";
-import type { FollowingSeller, User } from "../types";
+import ProfileStatsModal from "../components/settings/ProfileStatsModal";
+import { ROUTES } from "../constants/routes";
+import type { FollowerSeller, FollowingSeller, User } from "../types";
 
 type TabKey = "profile" | "company" | "chat";
 type MenuItem = { label: string; icon: ReactNode; active?: boolean; to?: string };
+type StatsModalMode = "following" | "followers" | null;
 
 function toProvidedValue(value?: string | null, options?: { treatQwikUserAsMissing?: boolean }) {
   if (typeof value !== "string") return "Not provided";
@@ -238,6 +241,10 @@ function ProfileSummary({
   savingAvatar,
   onAvatarFileChange,
   onSaveAvatar,
+  followingCount,
+  followersCount,
+  advertsCount,
+  onStatClick,
 }: {
   display: CurrentUserDisplay;
   avatarImageUrl: string;
@@ -245,6 +252,10 @@ function ProfileSummary({
   savingAvatar: boolean;
   onAvatarFileChange: (file: File | null) => void;
   onSaveAvatar: () => void;
+  followingCount: number;
+  followersCount: number;
+  advertsCount: number;
+  onStatClick: (label: string) => void;
 }) {
   return (
     <section className="flex min-w-0 flex-col gap-7 rounded-[24px] bg-white px-[28px] py-[34px] sm:px-[40px] lg:h-[164px] lg:flex-row lg:items-center lg:justify-between lg:px-[40px]">
@@ -294,12 +305,27 @@ function ProfileSummary({
       </div>
 
       <div className="grid w-full max-w-[300px] grid-cols-3 gap-4 text-center lg:max-w-[330px]">
-        {display.stats.map((stat) => (
-          <div key={stat.label}>
-            <p className="text-[22px] leading-tight text-ink sm:text-[24px]">{stat.value}</p>
-            <p className="text-[14px] text-muted sm:text-[16px]">{stat.label}</p>
-          </div>
-        ))}
+        {display.stats.map((stat) => {
+          const normalized = stat.label.toLowerCase();
+          const value = normalized === "following"
+            ? followingCount
+            : normalized === "followers"
+              ? followersCount
+              : normalized.includes("ad")
+                ? advertsCount
+                : Number(stat.value) || 0;
+          return (
+            <button
+              key={stat.label}
+              type="button"
+              onClick={() => onStatClick(stat.label)}
+              className="rounded-[10px] p-1 text-center transition hover:bg-[#f7f5fb]"
+            >
+              <p className="text-[22px] leading-tight text-ink sm:text-[24px]">{value}</p>
+              <p className="text-[14px] text-muted sm:text-[16px]">{stat.label}</p>
+            </button>
+          );
+        })}
       </div>
     </section>
   );
@@ -627,6 +653,12 @@ export default function AccountPage() {
   const [savingAvatar, setSavingAvatar] = useState(false);
   const [savingProfile, setSavingProfile] = useState(false);
   const [followingSellers, setFollowingSellers] = useState<FollowingSeller[]>([]);
+  const [followers, setFollowers] = useState<FollowerSeller[]>([]);
+  const [followersLoaded, setFollowersLoaded] = useState(false);
+  const [followingLoaded, setFollowingLoaded] = useState(false);
+  const [loadingFollowers, setLoadingFollowers] = useState(false);
+  const [statsModal, setStatsModal] = useState<StatsModalMode>(null);
+  const [statsError, setStatsError] = useState<string | null>(null);
   const [loadingFollowing, setLoadingFollowing] = useState(false);
   const [unfollowingSellerId, setUnfollowingSellerId] = useState<string | null>(null);
 
@@ -656,12 +688,32 @@ export default function AccountPage() {
   const loadFollowing = async () => {
     try {
       setLoadingFollowing(true);
+      setStatsError(null);
       const response = await api.getMyFollowing();
       setFollowingSellers(response.data);
+      setFollowingLoaded(true);
     } catch (error) {
-      showError(error instanceof Error ? error.message : "Failed to load following sellers");
+      const message = error instanceof Error ? error.message : "Failed to load following sellers";
+      setStatsError(message);
+      showError(message);
     } finally {
       setLoadingFollowing(false);
+    }
+  };
+
+  const loadFollowers = async () => {
+    try {
+      setLoadingFollowers(true);
+      setStatsError(null);
+      const response = await api.getMyFollowers();
+      setFollowers(response.data);
+      setFollowersLoaded(true);
+    } catch (error) {
+      const message = error instanceof Error ? error.message : "Failed to load followers";
+      setStatsError(message);
+      showError(message);
+    } finally {
+      setLoadingFollowers(false);
     }
   };
 
@@ -684,6 +736,39 @@ export default function AccountPage() {
       return null;
     } finally {
       setUnfollowingSellerId(null);
+    }
+  };
+
+  const baseFollowing = user?.stats?.following ?? Number(display.stats.find((stat) => stat.label.toLowerCase() === "following")?.value ?? 0);
+  const baseFollowers = user?.stats?.followers ?? Number(display.stats.find((stat) => stat.label.toLowerCase() === "followers")?.value ?? 0);
+  const baseAdverts = user?.stats?.adverts ?? Number(display.stats.find((stat) => stat.label.toLowerCase().includes("ad"))?.value ?? 0);
+  const followingCount = followingLoaded ? followingSellers.length : baseFollowing;
+  const followersCount = followersLoaded ? followers.length : baseFollowers;
+
+  const handleOpenFollowing = () => {
+    setStatsModal("following");
+    if (!followingLoaded) {
+      void loadFollowing();
+    }
+  };
+
+  const handleOpenFollowers = () => {
+    setStatsModal("followers");
+    void loadFollowers();
+  };
+
+  const handleStatClick = (label: string) => {
+    const normalized = label.toLowerCase();
+    if (normalized === "following") {
+      handleOpenFollowing();
+      return;
+    }
+    if (normalized === "followers") {
+      handleOpenFollowers();
+      return;
+    }
+    if (normalized.includes("ad")) {
+      navigate(ROUTES.ADS_DASHBOARD);
     }
   };
 
@@ -806,6 +891,10 @@ export default function AccountPage() {
             savingAvatar={savingAvatar}
             onAvatarFileChange={setSelectedAvatarFile}
             onSaveAvatar={saveAvatar}
+            followingCount={followingCount}
+            followersCount={followersCount}
+            advertsCount={baseAdverts}
+            onStatClick={handleStatClick}
           />
           <div className="mt-[42px]">
             <Tabs activeTab={activeTab} onChange={setActiveTab} />
@@ -844,6 +933,32 @@ export default function AccountPage() {
       </main>
 
       <SiteFooter navigate={navigate} />
+
+      <ProfileStatsModal
+        title="Following"
+        users={followingSellers}
+        loading={loadingFollowing}
+        error={statsError}
+        open={statsModal === "following"}
+        onClose={() => setStatsModal(null)}
+        onViewProfile={(id) => navigate(`/users/${id}`)}
+        showUnfollow
+        unfollowingId={unfollowingSellerId}
+        onUnfollow={handleUnfollowSeller}
+        showAdverts
+        emptyText="You are not following any users yet."
+      />
+
+      <ProfileStatsModal
+        title="Followers"
+        users={followers}
+        loading={loadingFollowers}
+        error={statsError}
+        open={statsModal === "followers"}
+        onClose={() => setStatsModal(null)}
+        onViewProfile={(id) => navigate(`/users/${id}`)}
+        emptyText="You have no followers yet."
+      />
     </div>
   );
 }

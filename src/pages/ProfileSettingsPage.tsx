@@ -12,6 +12,9 @@ import { clearUserCache } from "../hooks/useUserCache";
 import { api } from "../services/api";
 import { getSettingsNavItems } from "../lib/settings-nav-config";
 import { ALL_NIGERIA_LOCATION, NIGERIAN_AREAS, NIGERIAN_LOCATIONS } from "../lib/searchContext";
+import ProfileStatsModal from "../components/settings/ProfileStatsModal";
+import { ROUTES } from "../constants/routes";
+import type { FollowerSeller, FollowingSeller } from "../types";
 
 type TabKey = "edit-profile" | "company-details" | "chat-settings";
 
@@ -24,6 +27,8 @@ type ProfileSnapshot = {
   locationArea: string;
   avatarUrl: string;
 };
+
+type StatsModalMode = "following" | "followers" | null;
 
 function DetailCard({ label, value }: { label: string; value: string }) {
   return (
@@ -70,6 +75,15 @@ export default function ProfileSettingsPage() {
   const [initialProfile, setInitialProfile] = useState<ProfileSnapshot | null>(null);
   const [loading, setLoading] = useState(false);
   const chatSettings = useMessageNotificationsSetting();
+  const [statsModal, setStatsModal] = useState<StatsModalMode>(null);
+  const [followers, setFollowers] = useState<FollowerSeller[]>([]);
+  const [following, setFollowing] = useState<FollowingSeller[]>([]);
+  const [followersLoaded, setFollowersLoaded] = useState(false);
+  const [followingLoaded, setFollowingLoaded] = useState(false);
+  const [loadingFollowers, setLoadingFollowers] = useState(false);
+  const [loadingFollowing, setLoadingFollowing] = useState(false);
+  const [statsError, setStatsError] = useState<string | null>(null);
+  const [unfollowingId, setUnfollowingId] = useState<string | null>(null);
 
   useEffect(() => {
     if (!selectedAvatarFile) {
@@ -215,6 +229,81 @@ export default function ProfileSettingsPage() {
       }
     };
 
+    const baseFollowing = user?.stats?.following ?? Number(display.stats.find((stat) => stat.label.toLowerCase() === "following")?.value ?? 0);
+    const baseFollowers = user?.stats?.followers ?? Number(display.stats.find((stat) => stat.label.toLowerCase() === "followers")?.value ?? 0);
+    const baseAdverts = user?.stats?.adverts ?? Number(display.stats.find((stat) => stat.label.toLowerCase().includes("ad"))?.value ?? 0);
+    const followingCount = followingLoaded ? following.length : baseFollowing;
+    const followersCount = followersLoaded ? followers.length : baseFollowers;
+
+    const loadFollowing = async () => {
+      try {
+        setLoadingFollowing(true);
+        setStatsError(null);
+        const response = await api.getMyFollowing();
+        setFollowing(response.data);
+        setFollowingLoaded(true);
+      } catch (error) {
+        setStatsError(error instanceof Error ? error.message : "Failed to load following users");
+      } finally {
+        setLoadingFollowing(false);
+      }
+    };
+
+    const loadFollowers = async () => {
+      try {
+        setLoadingFollowers(true);
+        setStatsError(null);
+        const response = await api.getMyFollowers();
+        setFollowers(response.data);
+        setFollowersLoaded(true);
+      } catch (error) {
+        setStatsError(error instanceof Error ? error.message : "Failed to load followers");
+      } finally {
+        setLoadingFollowers(false);
+      }
+    };
+
+    const handleOpenFollowing = () => {
+      setStatsModal("following");
+      void loadFollowing();
+    };
+
+    const handleOpenFollowers = () => {
+      setStatsModal("followers");
+      void loadFollowers();
+    };
+
+    const handleStatClick = (label: string) => {
+      const normalized = label.toLowerCase();
+      if (normalized === "following") {
+        handleOpenFollowing();
+        return;
+      }
+      if (normalized === "followers") {
+        handleOpenFollowers();
+        return;
+      }
+      if (normalized.includes("ad")) {
+        navigate(ROUTES.ADS_DASHBOARD);
+      }
+    };
+
+    const handleUnfollow = async (sellerId: string) => {
+      if (unfollowingId) return;
+      const previous = following;
+      try {
+        setUnfollowingId(sellerId);
+        setStatsError(null);
+        setFollowing((current) => current.filter((seller) => seller.id !== sellerId));
+        await api.unfollowUser(sellerId);
+      } catch (error) {
+        setFollowing(previous);
+        setStatsError(error instanceof Error ? error.message : "Failed to unfollow user");
+      } finally {
+        setUnfollowingId(null);
+      }
+    };
+
   return (
     <div className="min-h-screen bg-page text-ink">
       <div className="hidden md:block">
@@ -273,12 +362,27 @@ export default function ProfileSettingsPage() {
                   </div>
                 </div>
                 <div className="flex flex-wrap gap-6 text-center sm:gap-10">
-                  {display.stats.map((stat) => (
-                    <div key={stat.label}>
-                      <p className="text-[24px] sm:text-[28px]">{stat.value}</p>
-                      <p className="text-[14px] text-[#8c8996] sm:text-[15px]">{stat.label}</p>
-                    </div>
-                  ))}
+                  {display.stats.map((stat) => {
+                    const normalized = stat.label.toLowerCase();
+                    const value = normalized === "following"
+                      ? followingCount
+                      : normalized === "followers"
+                        ? followersCount
+                        : normalized.includes("ad")
+                          ? baseAdverts
+                          : Number(stat.value) || 0;
+                    return (
+                      <button
+                        key={stat.label}
+                        type="button"
+                        onClick={() => handleStatClick(stat.label)}
+                        className="rounded-[10px] p-1 text-center transition hover:bg-[#f7f5fb]"
+                      >
+                        <p className="text-[24px] sm:text-[28px]">{value}</p>
+                        <p className="text-[14px] text-[#8c8996] sm:text-[15px]">{stat.label}</p>
+                      </button>
+                    );
+                  })}
                 </div>
               </div>
             </div>
@@ -446,6 +550,32 @@ export default function ProfileSettingsPage() {
       <div className="hidden md:block">
         <SiteFooter navigate={navigate} />
       </div>
+
+      <ProfileStatsModal
+        title="Following"
+        users={following}
+        loading={loadingFollowing}
+        error={statsError}
+        open={statsModal === "following"}
+        onClose={() => setStatsModal(null)}
+        onViewProfile={(id) => navigate(`/users/${id}`)}
+        showUnfollow
+        unfollowingId={unfollowingId}
+        onUnfollow={handleUnfollow}
+        showAdverts
+        emptyText="You are not following any users yet."
+      />
+
+      <ProfileStatsModal
+        title="Followers"
+        users={followers}
+        loading={loadingFollowers}
+        error={statsError}
+        open={statsModal === "followers"}
+        onClose={() => setStatsModal(null)}
+        onViewProfile={(id) => navigate(`/users/${id}`)}
+        emptyText="You have no followers yet."
+      />
     </div>
   );
 }
