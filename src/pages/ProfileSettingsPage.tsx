@@ -14,6 +14,16 @@ import { ALL_NIGERIA_LOCATION, NIGERIAN_AREAS, NIGERIAN_LOCATIONS } from "../lib
 
 type TabKey = "edit-profile" | "company-details" | "chat-settings";
 
+type ProfileSnapshot = {
+  fullName: string;
+  email: string;
+  bio: string;
+  phone: string;
+  locationState: string;
+  locationArea: string;
+  avatarUrl: string;
+};
+
 function DetailCard({ label, value }: { label: string; value: string }) {
   return (
     <div className="rounded-[14px] border border-[#eceaf0] bg-[#faf9fc] px-4 py-3">
@@ -39,6 +49,8 @@ export default function ProfileSettingsPage() {
   const [selectedAvatarFile, setSelectedAvatarFile] = useState<File | null>(null);
   const [avatarPreviewUrl, setAvatarPreviewUrl] = useState("");
   const [avatarUrl, setAvatarUrl] = useState("");
+  const [isEditMode, setIsEditMode] = useState(false);
+  const [initialProfile, setInitialProfile] = useState<ProfileSnapshot | null>(null);
   const [loading, setLoading] = useState(false);
 
   useEffect(() => {
@@ -65,40 +77,127 @@ export default function ProfileSettingsPage() {
   };
 
   useEffect(() => {
-    setFullName(user?.fullName ?? display.fullName);
-    setEmail(user?.email ?? display.email);
-    setBio(user?.profile?.bio ?? display.bio);
-    setPhone(user?.phone ?? display.phone);
-    setAvatarUrl(user?.profile?.avatarUrl ?? display.avatarUrl);
+      const nextFullName = user?.fullName ?? display.fullName;
+      const nextEmail = user?.email ?? display.email;
+      const nextBio = user?.profile?.bio ?? display.bio;
+      const nextPhone = user?.phone ?? display.phone;
+      const nextAvatarUrl = user?.profile?.avatarUrl ?? display.avatarUrl;
 
     // Prefer structured fields when present; otherwise parse legacy `location`.
     const existingLocation = (user?.location ?? (typeof profileFallback.location === "string" ? profileFallback.location : display.location) ?? "").trim();
     const explicitState = (user?.locationState ?? "").trim();
     const explicitArea = (user?.locationArea ?? "").trim();
-    if (explicitState || explicitArea) {
-      setLocationState(explicitState);
-      setLocationArea(explicitArea);
+      let nextLocationState = "";
+      let nextLocationArea = "";
+      if (explicitState || explicitArea) {
+        nextLocationState = explicitState;
+        nextLocationArea = explicitArea;
     } else if (existingLocation) {
       // Try "Area, State" pattern first
       const parts = existingLocation.split(",").map((s) => s.trim()).filter(Boolean);
       if (parts.length >= 2 && NIGERIAN_LOCATIONS.includes(parts[parts.length - 1])) {
-        setLocationState(parts[parts.length - 1]);
-        setLocationArea(parts.slice(0, -1).join(", "));
+          nextLocationState = parts[parts.length - 1];
+          nextLocationArea = parts.slice(0, -1).join(", ");
       } else if (NIGERIAN_LOCATIONS.includes(existingLocation)) {
-        setLocationState(existingLocation);
-        setLocationArea("");
+          nextLocationState = existingLocation;
+          nextLocationArea = "";
       } else {
-        setLocationState("");
-        setLocationArea(existingLocation);
+          nextLocationState = "";
+          nextLocationArea = existingLocation;
       }
-    } else {
-      setLocationState("");
-      setLocationArea("");
     }
+
+      setFullName(nextFullName);
+      setEmail(nextEmail);
+      setBio(nextBio);
+      setPhone(nextPhone);
+      setAvatarUrl(nextAvatarUrl);
+      setLocationState(nextLocationState);
+      setLocationArea(nextLocationArea);
+      setInitialProfile({
+        fullName: nextFullName,
+        email: nextEmail,
+        bio: nextBio,
+        phone: nextPhone,
+        locationState: nextLocationState,
+        locationArea: nextLocationArea,
+        avatarUrl: nextAvatarUrl,
+      });
+      setIsEditMode(false);
+      setSelectedAvatarFile(null);
+      setSelectedLogoName("");
   }, [display.avatarUrl, display.bio, display.email, display.fullName, display.location, display.phone, profileFallback.location, user]);
 
   const stateOptions = useMemo(() => NIGERIAN_LOCATIONS.filter((s) => s !== ALL_NIGERIA_LOCATION), []);
   const areasForState = locationState ? NIGERIAN_AREAS[locationState] : undefined;
+    const hasChanges = useMemo(() => {
+      if (!initialProfile) return false;
+      return (
+        fullName !== initialProfile.fullName
+        || bio !== initialProfile.bio
+        || phone !== initialProfile.phone
+        || locationState !== initialProfile.locationState
+        || locationArea !== initialProfile.locationArea
+        || selectedAvatarFile !== null
+      );
+    }, [bio, fullName, initialProfile, locationArea, locationState, phone, selectedAvatarFile]);
+
+    const handleAvatarFileChange = (file: File | null) => {
+      if (!isEditMode || loading) return;
+      setSelectedAvatarFile(file);
+      setSelectedLogoName(file?.name || "");
+    };
+
+    const handleCancelEdit = () => {
+      if (!initialProfile || loading) return;
+      setFullName(initialProfile.fullName);
+      setEmail(initialProfile.email);
+      setBio(initialProfile.bio);
+      setPhone(initialProfile.phone);
+      setLocationState(initialProfile.locationState);
+      setLocationArea(initialProfile.locationArea);
+      setAvatarUrl(initialProfile.avatarUrl);
+      setSelectedAvatarFile(null);
+      setSelectedLogoName("");
+      setIsEditMode(false);
+    };
+
+    const handleSaveProfile = async () => {
+      if (loading || !isEditMode || !hasChanges) return;
+      try {
+        setLoading(true);
+        let nextAvatarUrl = avatarUrl;
+        if (selectedAvatarFile) {
+          const uploadResponse = await api.uploadImages([selectedAvatarFile]);
+          nextAvatarUrl = uploadResponse.data.urls[0] || "";
+        }
+        const trimmedState = locationState.trim();
+        const trimmedArea = locationArea.trim();
+        const composedLocation = trimmedState
+          ? (trimmedArea ? `${trimmedArea}, ${trimmedState}` : trimmedState)
+          : trimmedArea;
+        const response = await api.updateMe({
+          fullName,
+          bio,
+          phone,
+          location: composedLocation,
+          locationState: trimmedState || undefined,
+          locationArea: trimmedArea || undefined,
+          ...(nextAvatarUrl ? { avatarUrl: nextAvatarUrl } : {}),
+        });
+        setUser(response.data);
+        clearUserCache(); // Clear cache to sync across pages
+        setAvatarUrl(response.data.profile?.avatarUrl || "");
+        setSelectedAvatarFile(null);
+        setSelectedLogoName("");
+        setIsEditMode(false);
+        success("Profile updated");
+      } catch (error) {
+        showError(error instanceof Error ? error.message : "Failed to update profile");
+      } finally {
+        setLoading(false);
+      }
+    };
 
   return (
     <div className="min-h-screen bg-page text-ink">
@@ -133,7 +232,7 @@ export default function ProfileSettingsPage() {
               <div className="flex flex-wrap items-center justify-between gap-6">
                 <div className="flex items-center gap-4">
                   <div className="relative">
-                    <label className="block cursor-pointer" aria-label="Choose profile photo">
+                      <label className={`block ${isEditMode && !loading ? "cursor-pointer" : "cursor-not-allowed"}`} aria-label="Choose profile photo">
                       <UserAvatar
                         name={fullName || display.fullName}
                         imageUrl={avatarPreviewUrl || avatarUrl}
@@ -144,10 +243,10 @@ export default function ProfileSettingsPage() {
                         type="file"
                         accept="image/jpeg,image/png,image/webp,image/gif"
                         className="hidden"
+                          disabled={!isEditMode || loading}
                         onChange={(event) => {
-                          const file = event.target.files?.[0] || null;
-                          setSelectedAvatarFile(file);
-                          setSelectedLogoName(file?.name || "");
+                            const file = event.target.files?.[0] || null;
+                            handleAvatarFileChange(file);
                         }}
                       />
                     </label>
@@ -195,33 +294,54 @@ export default function ProfileSettingsPage() {
 
               {activeTab === "edit-profile" ? (
                 <>
+                    <div className="mb-5 flex flex-wrap items-center gap-3">
+                      <button
+                        type="button"
+                        onClick={() => setIsEditMode(true)}
+                        disabled={isEditMode || loading}
+                        className="h-10 rounded-[10px] border border-[#dedde4] px-4 text-[14px] text-ink transition-colors hover:border-[#ffb357] disabled:cursor-not-allowed disabled:opacity-50"
+                      >
+                        Edit Profile
+                      </button>
+                      {isEditMode ? (
+                        <button
+                          type="button"
+                          onClick={handleCancelEdit}
+                          disabled={loading}
+                          className="h-10 rounded-[10px] border border-[#dedde4] px-4 text-[14px] text-[#6c6a74] transition-colors hover:border-[#cfcbd8] disabled:cursor-not-allowed disabled:opacity-50"
+                        >
+                          Cancel
+                        </button>
+                      ) : null}
+                    </div>
+
                   <label className="mb-2 block text-[15px] text-[#94919d]">Business Name</label>
-                  <input type="text" value={fullName} onChange={(e) => setFullName(e.target.value)} className="mb-5 h-12 w-full rounded-[10px] border border-[#dedde4] bg-transparent px-3 text-[15px] outline-none" placeholder="Enter your business name" />
+                    <input type="text" value={fullName} onChange={(e) => setFullName(e.target.value)} disabled={!isEditMode || loading} className="mb-5 h-12 w-full rounded-[10px] border border-[#dedde4] bg-transparent px-3 text-[15px] outline-none disabled:cursor-not-allowed disabled:bg-[#f5f4f7] disabled:text-[#8f8a98]" placeholder="Enter your business name" />
 
                   <label className="mb-2 block text-[15px] text-[#94919d]">Description</label>
-                  <textarea value={bio} onChange={(e) => setBio(e.target.value)} className="mb-5 h-[120px] w-full rounded-[10px] border border-[#dedde4] bg-transparent px-3 py-3 text-[15px] outline-none" placeholder="What does your company do?" />
+                    <textarea value={bio} onChange={(e) => setBio(e.target.value)} disabled={!isEditMode || loading} className="mb-5 h-[120px] w-full rounded-[10px] border border-[#dedde4] bg-transparent px-3 py-3 text-[15px] outline-none disabled:cursor-not-allowed disabled:bg-[#f5f4f7] disabled:text-[#8f8a98]" placeholder="What does your company do?" />
 
                   <label className="mb-2 block text-[15px] text-[#94919d]">Profile / Logo Upload</label>
-                  <label className="mb-5 flex min-h-[52px] w-full cursor-pointer items-center justify-between rounded-[10px] border border-dashed border-[#dedde4] px-3 text-[15px] text-[#6c6a74]">
+                    <label className={`mb-5 flex min-h-[52px] w-full items-center justify-between rounded-[10px] border border-dashed border-[#dedde4] px-3 text-[15px] text-[#6c6a74] ${isEditMode && !loading ? "cursor-pointer" : "cursor-not-allowed bg-[#f5f4f7]"}`}>
                     <span className="truncate">{selectedLogoName || "Choose a logo or profile image"}</span>
                     <span className="ml-4 shrink-0 text-[#ff7f11]">Browse</span>
                     <input
                       type="file"
                       accept="image/jpeg,image/png,image/webp,image/gif"
                       className="hidden"
+                        disabled={!isEditMode || loading}
                       onChange={(event) => {
                         const file = event.target.files?.[0] || null;
-                        setSelectedAvatarFile(file);
-                        setSelectedLogoName(file?.name || "");
+                          handleAvatarFileChange(file);
                       }}
                     />
                   </label>
 
                   <label className="mb-2 block text-[15px] text-[#94919d]">Email</label>
-                  <input type="email" value={email} onChange={(e) => setEmail(e.target.value)} className="mb-5 h-12 w-full rounded-[10px] border border-[#dedde4] bg-transparent px-3 text-[15px] outline-none" placeholder="@mail" />
+                    <input type="email" value={email} readOnly disabled className="mb-5 h-12 w-full rounded-[10px] border border-[#dedde4] bg-transparent px-3 text-[15px] outline-none disabled:cursor-not-allowed disabled:bg-[#f5f4f7] disabled:text-[#8f8a98]" placeholder="@mail" />
 
                   <label className="mb-2 block text-[15px] text-[#94919d]">Phone</label>
-                  <input type="tel" value={phone} onChange={(e) => setPhone(e.target.value)} className="mb-5 h-12 w-full rounded-[10px] border border-[#dedde4] bg-transparent px-3 text-[15px] outline-none" placeholder="0800 000 0000" />
+                    <input type="tel" value={phone} onChange={(e) => setPhone(e.target.value)} disabled={!isEditMode || loading} className="mb-5 h-12 w-full rounded-[10px] border border-[#dedde4] bg-transparent px-3 text-[15px] outline-none disabled:cursor-not-allowed disabled:bg-[#f5f4f7] disabled:text-[#8f8a98]" placeholder="0800 000 0000" />
 
                   <div className="mb-5 space-y-4">
                     <DropdownSelect
@@ -229,6 +349,7 @@ export default function ProfileSettingsPage() {
                       placeholder="Select your state"
                       value={locationState}
                       options={stateOptions.map((s) => ({ value: s, label: s }))}
+                        disabled={!isEditMode || loading}
                       onChange={(val) => { setLocationState(val); setLocationArea(""); }}
                     />
                     {locationState && areasForState ? (
@@ -237,42 +358,18 @@ export default function ProfileSettingsPage() {
                         placeholder="Select your area"
                         value={locationArea}
                         options={areasForState.map((a) => ({ value: a, label: a }))}
+                          disabled={!isEditMode || loading}
                         onChange={setLocationArea}
                       />
                     ) : locationState ? (
                       <div>
                         <label className="mb-2 block text-[15px] text-[#94919d]">Area</label>
-                        <input type="text" value={locationArea} onChange={(e) => setLocationArea(e.target.value)} className="h-12 w-full rounded-[10px] border border-[#dedde4] bg-transparent px-3 text-[15px] outline-none" placeholder="City or area (optional)" />
+                          <input type="text" value={locationArea} onChange={(e) => setLocationArea(e.target.value)} disabled={!isEditMode || loading} className="h-12 w-full rounded-[10px] border border-[#dedde4] bg-transparent px-3 text-[15px] outline-none disabled:cursor-not-allowed disabled:bg-[#f5f4f7] disabled:text-[#8f8a98]" placeholder="City or area (optional)" />
                       </div>
                     ) : null}
                   </div>
 
-                  <button className="h-[50px] w-full rounded-[10px] bg-gradient-to-r from-amber to-orange text-[16px] text-white shadow-glow transition-all duration-200 hover:opacity-95 active:scale-[0.99] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#ffb357] focus-visible:ring-offset-2 focus-visible:ring-offset-white" type="button" onClick={async () => {
-                    try {
-                      setLoading(true);
-                      let nextAvatarUrl = avatarUrl;
-                      if (selectedAvatarFile) {
-                        const uploadResponse = await api.uploadImages([selectedAvatarFile]);
-                        nextAvatarUrl = uploadResponse.data.urls[0] || "";
-                      }
-                      const trimmedState = locationState.trim();
-                      const trimmedArea = locationArea.trim();
-                      const composedLocation = trimmedState
-                        ? (trimmedArea ? `${trimmedArea}, ${trimmedState}` : trimmedState)
-                        : trimmedArea;
-                      const response = await api.updateMe({ fullName, bio, phone, location: composedLocation, locationState: trimmedState || undefined, locationArea: trimmedArea || undefined, ...(nextAvatarUrl ? { avatarUrl: nextAvatarUrl } : {}) });
-                      setUser(response.data);
-                      clearUserCache(); // Clear cache to sync across pages
-                      setAvatarUrl(response.data.profile?.avatarUrl || "");
-                      setSelectedAvatarFile(null);
-                      setSelectedLogoName("");
-                      success("Profile updated");
-                    } catch (error) {
-                      showError(error instanceof Error ? error.message : "Failed to update profile");
-                    } finally {
-                      setLoading(false);
-                    }
-                  }}>
+                    <button className="h-[50px] w-full rounded-[10px] bg-gradient-to-r from-amber to-orange text-[16px] text-white shadow-glow transition-all duration-200 hover:opacity-95 active:scale-[0.99] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#ffb357] focus-visible:ring-offset-2 focus-visible:ring-offset-white disabled:cursor-not-allowed disabled:opacity-50" type="button" onClick={() => void handleSaveProfile()} disabled={!isEditMode || !hasChanges || loading}>
                     {loading ? "Saving..." : "Save"}
                   </button>
                 </>
