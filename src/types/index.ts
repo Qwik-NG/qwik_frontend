@@ -52,7 +52,7 @@ export interface ReferralSummary {
   code: string | null;
   totalReferrals: number;
   referralsByStatus: { PENDING_VERIFICATION: number; ACTIVE: number; REVOKED: number };
-  earnings: { pending: number; settled: number; paid: number; reversed: number };
+  earnings: { total: number; pending: number; settled: number; paid: number; reversed: number };
 }
 
 export interface ReferralListItem {
