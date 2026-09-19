@@ -118,6 +118,7 @@ type Props = {
   disabledLabel?: string;
   requiresLegalConsent?: boolean;
   hasAcceptedLegal?: boolean;
+  referralCode?: string;
   onLegalConsentRequired?: () => void;
 };
 
@@ -127,6 +128,7 @@ export default function GoogleSignInButton({
   disabledLabel = "Continue with Google",
   requiresLegalConsent = false,
   hasAcceptedLegal = false,
+  referralCode,
   onLegalConsentRequired,
 }: Props) {
   const containerRef = useRef<HTMLDivElement | null>(null);
@@ -138,9 +140,11 @@ export default function GoogleSignInButton({
   const navigateRef = useRef(navigate);
   const showErrorRef = useRef(showError);
   const successRef = useRef(success);
+  const referralCodeRef = useRef(referralCode);
   useEffect(() => { navigateRef.current = navigate; }, [navigate]);
   useEffect(() => { showErrorRef.current = showError; }, [showError]);
   useEffect(() => { successRef.current = success; }, [success]);
+  useEffect(() => { referralCodeRef.current = referralCode; }, [referralCode]);
 
   const consentAccepted = !requiresLegalConsent || hasAcceptedLegal;
   const consentAcceptedRef = useRef(consentAccepted);
@@ -188,12 +192,13 @@ export default function GoogleSignInButton({
             }
             try {
               setStatus("submitting");
-              const referralCode = requiresLegalConsent ? getStoredReferralCode() : undefined;
+              const trimmedCode = typeof referralCodeRef.current === "string" ? referralCodeRef.current.trim() : "";
+              const activeReferralCode = trimmedCode.length > 0 ? trimmedCode : requiresLegalConsent ? getStoredReferralCode() : undefined;
               const res = await api.googleAuth({
                 credential: response.credential,
                 termsAccepted: true,
                 privacyAccepted: true,
-                referralCode,
+                referralCode: activeReferralCode,
               });
               setToken(res.data.token);
               setRole(res.data.user.role);

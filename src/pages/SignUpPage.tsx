@@ -62,6 +62,7 @@ export default function SignUpPage() {
   const [showPassword, setShowPassword] = useState(false);
   const [showConfirmPassword, setShowConfirmPassword] = useState(false);
   const [acceptedLegal, setAcceptedLegal] = useState(false);
+  const [referralCode, setReferralCode] = useState(() => getStoredReferralCode() ?? "");
   const [legalModal, setLegalModal] = useState<LegalDocumentType | null>(null);
   const [isSubmitting, setIsSubmitting] = useState(false);
 
@@ -186,6 +187,17 @@ export default function SignUpPage() {
         <PasswordRule met={hasSpecial} text="One special character" />
       </ul>
 
+      <FormInput
+        id="signup-referral-code"
+        label="Referral Code (Optional)"
+        aria-label="Referral code"
+        type="text"
+        placeholder="e.g. Usman123"
+        value={referralCode}
+        onChange={(e) => setReferralCode(e.target.value)}
+        containerClassName="mb-4"
+      />
+
       <label className="mb-5 flex items-start gap-2.5 text-[12px] leading-[1.45] text-[#6f6d78]">
         <input
           type="checkbox"
@@ -219,7 +231,8 @@ export default function SignUpPage() {
         onClick={async () => {
           try {
             setIsSubmitting(true);
-            const referralCode = getStoredReferralCode();
+            const trimmedCode = referralCode.trim();
+            const activeReferralCode = trimmedCode.length > 0 ? trimmedCode : getStoredReferralCode();
             const res = await api.register({
               email: email.trim().toLowerCase(),
               password,
@@ -229,13 +242,14 @@ export default function SignUpPage() {
               privacyAccepted: true,
               termsVersion: LEGAL_CONSENT_VERSION,
               privacyVersion: LEGAL_CONSENT_VERSION,
-              referralCode,
+              referralCode: activeReferralCode,
             });
             setToken(res.data.token);
             setRole(res.data.user.role);
             setAcceptedLegalConsentSnapshot(true);
             persistLegalConsentFromUser(res.data.user);
             clearUserCache(); // Clear cache for new user
+            clearStoredReferralCode();
             success("Account created successfully");
             
             // Check if profile is complete; if not, redirect to profile completion
@@ -250,7 +264,6 @@ export default function SignUpPage() {
           } catch (error) {
             showError(error instanceof Error ? error.message : "Sign up failed");
           } finally {
-            clearStoredReferralCode();
             setIsSubmitting(false);
           }
         }}
@@ -269,6 +282,7 @@ export default function SignUpPage() {
       <GoogleSignInButton
         requiresLegalConsent
         hasAcceptedLegal={acceptedLegal}
+        referralCode={referralCode}
         onLegalConsentRequired={() => showError("Please accept the Terms of Use and Privacy Policy to continue.")}
       />
 
