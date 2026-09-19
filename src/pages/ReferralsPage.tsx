@@ -33,6 +33,21 @@ export default function ReferralsPage() {
   const [payoutAccount, setPayoutAccount] = useState<PayoutAccount | null>(null);
   const [payoutForm, setPayoutForm] = useState({ accountName: "", accountNumber: "", bankName: "" });
   const [savingPayoutAccount, setSavingPayoutAccount] = useState(false);
+  const [showEarningsModal, setShowEarningsModal] = useState(false);
+
+  useEffect(() => {
+    if (!showEarningsModal) return;
+    const handleKeyDown = (e: KeyboardEvent) => {
+      if (e.key === "Escape") setShowEarningsModal(false);
+    };
+    const previousOverflow = document.body.style.overflow;
+    document.body.style.overflow = "hidden";
+    window.addEventListener("keydown", handleKeyDown);
+    return () => {
+      document.body.style.overflow = previousOverflow;
+      window.removeEventListener("keydown", handleKeyDown);
+    };
+  }, [showEarningsModal]);
 
   useEffect(() => {
     let cancelled = false;
@@ -150,7 +165,7 @@ export default function ReferralsPage() {
                     </button>
                   </div>
 
-                  <div className="mt-6 grid grid-cols-2 gap-3 sm:grid-cols-4">
+                  <div className="mt-6 grid grid-cols-2 gap-3 sm:grid-cols-3 lg:grid-cols-5">
                     <div className="rounded-[14px] border border-[#eceaf0] p-4">
                       <p className="text-[13px] text-[#94919d]">Total referrals</p>
                       <p className="mt-1 text-[20px] font-semibold text-ink">{summary?.totalReferrals ?? 0}</p>
@@ -159,6 +174,19 @@ export default function ReferralsPage() {
                       <p className="text-[13px] text-[#94919d]">Active</p>
                       <p className="mt-1 text-[20px] font-semibold text-ink">{summary?.referralsByStatus.ACTIVE ?? 0}</p>
                     </div>
+                    <button
+                      type="button"
+                      onClick={() => setShowEarningsModal(true)}
+                      className="group rounded-[14px] border border-[#eceaf0] p-4 text-left transition hover:border-[#ff9715] hover:bg-[#fffaf6] focus:outline-none focus:ring-2 focus:ring-[#ff9715]/20 cursor-pointer"
+                      aria-haspopup="dialog"
+                      aria-expanded={showEarningsModal}
+                    >
+                      <div className="flex items-center justify-between">
+                        <p className="text-[13px] text-[#94919d] group-hover:text-[#ff9715] transition-colors">Total earnings</p>
+                        <span className="text-[11px] font-medium text-[#ff9715] opacity-80 group-hover:opacity-100">Breakdown →</span>
+                      </div>
+                      <p className="mt-1 text-[20px] font-semibold text-ink">{formatNaira(summary?.earnings.total ?? 0)}</p>
+                    </button>
                     <div className="rounded-[14px] border border-[#eceaf0] p-4">
                       <p className="text-[13px] text-[#94919d]">Pending earnings</p>
                       <p className="mt-1 text-[20px] font-semibold text-ink">{formatNaira(summary?.earnings.pending ?? 0)}</p>
@@ -272,6 +300,106 @@ export default function ReferralsPage() {
           </section>
         </div>
       </main>
+
+      {showEarningsModal && (
+        <div
+          className="fixed inset-0 z-[120] flex items-end justify-center bg-black/40 p-3 sm:items-center sm:p-5 overscroll-contain"
+          role="dialog"
+          aria-modal="true"
+          aria-labelledby="earnings-modal-title"
+          onClick={() => setShowEarningsModal(false)}
+        >
+          <div
+            className="flex max-h-[90vh] w-full max-w-[480px] flex-col overflow-hidden rounded-[20px] bg-white shadow-[0_20px_70px_rgba(20,18,26,0.25)]"
+            onClick={(e) => e.stopPropagation()}
+          >
+            <div className="flex shrink-0 items-center justify-between border-b border-[#eceaf0] p-5 pb-4 sm:p-6 sm:pb-4">
+              <div>
+                <h2 id="earnings-modal-title" className="text-[18px] font-semibold text-ink sm:text-[20px]">
+                  Total Earnings Breakdown
+                </h2>
+                <p className="mt-0.5 text-[13px] text-[#7a7884]">
+                  Your referral earnings since joining the affiliate program
+                </p>
+              </div>
+              <button
+                type="button"
+                onClick={() => setShowEarningsModal(false)}
+                aria-label="Close modal"
+                className="rounded-[8px] border border-[#eceaf0] px-3 py-1.5 text-[13px] text-[#6c6a74] transition hover:border-[#cfcbd8] hover:text-ink"
+              >
+                Close
+              </button>
+            </div>
+
+            <div className="min-h-0 flex-1 overflow-y-auto overscroll-contain p-5 pt-4 sm:p-6 sm:pt-4">
+              <div className="rounded-[14px] border border-[#ffe4d1] bg-[#fffaf6] p-4">
+                <p className="text-[13px] font-medium text-[#ff9715]">Total Earnings</p>
+                <p className="mt-1 text-[24px] font-bold text-ink">
+                  {formatNaira(summary?.earnings.total ?? 0)}
+                </p>
+                <p className="mt-1 text-[12px] text-[#94919d]">
+                  Sum of all active rewards earned (Paid + Settled + Pending)
+                </p>
+              </div>
+
+              <div className="mt-4 space-y-3">
+                <div className="flex items-center justify-between rounded-[12px] border border-[#eceaf0] p-3.5">
+                  <div>
+                    <p className="text-[14px] font-medium text-ink">Paid</p>
+                    <p className="text-[12px] text-[#94919d]">Disbursed to your payout account</p>
+                  </div>
+                  <p className="text-[16px] font-semibold text-[#1f7742]">
+                    {formatNaira(summary?.earnings.paid ?? 0)}
+                  </p>
+                </div>
+
+                <div className="flex items-center justify-between rounded-[12px] border border-[#eceaf0] p-3.5">
+                  <div>
+                    <p className="text-[14px] font-medium text-ink">Settled</p>
+                    <p className="text-[12px] text-[#94919d]">Processed in monthly settlement cycle</p>
+                  </div>
+                  <p className="text-[16px] font-semibold text-[#8a6a1f]">
+                    {formatNaira(summary?.earnings.settled ?? 0)}
+                  </p>
+                </div>
+
+                <div className="flex items-center justify-between rounded-[12px] border border-[#eceaf0] p-3.5">
+                  <div>
+                    <p className="text-[14px] font-medium text-ink">Pending</p>
+                    <p className="text-[12px] text-[#94919d]">Accrued from verified vendors, ready for settlement</p>
+                  </div>
+                  <p className="text-[16px] font-semibold text-ink">
+                    {formatNaira(summary?.earnings.pending ?? 0)}
+                  </p>
+                </div>
+
+                {(summary?.earnings.reversed ?? 0) > 0 && (
+                  <div className="flex items-center justify-between rounded-[12px] border border-[#fbe1e1] bg-[#fff8f8] p-3.5">
+                    <div>
+                      <p className="text-[14px] font-medium text-[#c0362c]">Reversed</p>
+                      <p className="text-[12px] text-[#94919d]">Voided or cancelled (excluded from total)</p>
+                    </div>
+                    <p className="text-[16px] font-semibold text-[#c0362c]">
+                      {formatNaira(summary?.earnings.reversed ?? 0)}
+                    </p>
+                  </div>
+                )}
+              </div>
+
+              <div className="mt-6 flex justify-end">
+                <button
+                  type="button"
+                  onClick={() => setShowEarningsModal(false)}
+                  className="h-[40px] rounded-[10px] bg-gradient-to-r from-amber to-orange px-5 text-[14px] font-semibold text-white transition hover:opacity-90"
+                >
+                  Done
+                </button>
+              </div>
+            </div>
+          </div>
+        </div>
+      )}
 
       <SiteFooter navigate={navigate} />
     </div>
