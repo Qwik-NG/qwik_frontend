@@ -40,8 +40,13 @@ export default function ReferralsPage() {
     const handleKeyDown = (e: KeyboardEvent) => {
       if (e.key === "Escape") setShowEarningsModal(false);
     };
+    const previousOverflow = document.body.style.overflow;
+    document.body.style.overflow = "hidden";
     window.addEventListener("keydown", handleKeyDown);
-    return () => window.removeEventListener("keydown", handleKeyDown);
+    return () => {
+      document.body.style.overflow = previousOverflow;
+      window.removeEventListener("keydown", handleKeyDown);
+    };
   }, [showEarningsModal]);
 
   useEffect(() => {
@@ -298,17 +303,17 @@ export default function ReferralsPage() {
 
       {showEarningsModal && (
         <div
-          className="fixed inset-0 z-[120] flex items-end justify-center bg-black/40 p-3 sm:items-center sm:p-5"
+          className="fixed inset-0 z-[120] flex items-end justify-center bg-black/40 p-3 sm:items-center sm:p-5 overscroll-contain"
           role="dialog"
           aria-modal="true"
           aria-labelledby="earnings-modal-title"
           onClick={() => setShowEarningsModal(false)}
         >
           <div
-            className="w-full max-w-[480px] rounded-[20px] bg-white p-5 shadow-[0_20px_70px_rgba(20,18,26,0.25)] sm:p-6"
+            className="flex max-h-[90vh] w-full max-w-[480px] flex-col overflow-hidden rounded-[20px] bg-white shadow-[0_20px_70px_rgba(20,18,26,0.25)]"
             onClick={(e) => e.stopPropagation()}
           >
-            <div className="flex items-center justify-between border-b border-[#eceaf0] pb-4">
+            <div className="flex shrink-0 items-center justify-between border-b border-[#eceaf0] p-5 pb-4 sm:p-6 sm:pb-4">
               <div>
                 <h2 id="earnings-modal-title" className="text-[18px] font-semibold text-ink sm:text-[20px]">
                   Total Earnings Breakdown
@@ -320,74 +325,77 @@ export default function ReferralsPage() {
               <button
                 type="button"
                 onClick={() => setShowEarningsModal(false)}
+                aria-label="Close modal"
                 className="rounded-[8px] border border-[#eceaf0] px-3 py-1.5 text-[13px] text-[#6c6a74] transition hover:border-[#cfcbd8] hover:text-ink"
               >
                 Close
               </button>
             </div>
 
-            <div className="mt-5 rounded-[14px] border border-[#ffe4d1] bg-[#fffaf6] p-4">
-              <p className="text-[13px] font-medium text-[#ff9715]">Total Earnings</p>
-              <p className="mt-1 text-[24px] font-bold text-ink">
-                {formatNaira(summary?.earnings.total ?? 0)}
-              </p>
-              <p className="mt-1 text-[12px] text-[#94919d]">
-                Sum of all active rewards earned (Paid + Settled + Pending)
-              </p>
-            </div>
-
-            <div className="mt-4 space-y-3">
-              <div className="flex items-center justify-between rounded-[12px] border border-[#eceaf0] p-3.5">
-                <div>
-                  <p className="text-[14px] font-medium text-ink">Paid</p>
-                  <p className="text-[12px] text-[#94919d]">Disbursed to your payout account</p>
-                </div>
-                <p className="text-[16px] font-semibold text-[#1f7742]">
-                  {formatNaira(summary?.earnings.paid ?? 0)}
+            <div className="min-h-0 flex-1 overflow-y-auto overscroll-contain p-5 pt-4 sm:p-6 sm:pt-4">
+              <div className="rounded-[14px] border border-[#ffe4d1] bg-[#fffaf6] p-4">
+                <p className="text-[13px] font-medium text-[#ff9715]">Total Earnings</p>
+                <p className="mt-1 text-[24px] font-bold text-ink">
+                  {formatNaira(summary?.earnings.total ?? 0)}
+                </p>
+                <p className="mt-1 text-[12px] text-[#94919d]">
+                  Sum of all active rewards earned (Paid + Settled + Pending)
                 </p>
               </div>
 
-              <div className="flex items-center justify-between rounded-[12px] border border-[#eceaf0] p-3.5">
-                <div>
-                  <p className="text-[14px] font-medium text-ink">Settled</p>
-                  <p className="text-[12px] text-[#94919d]">Processed in monthly settlement cycle</p>
-                </div>
-                <p className="text-[16px] font-semibold text-[#8a6a1f]">
-                  {formatNaira(summary?.earnings.settled ?? 0)}
-                </p>
-              </div>
-
-              <div className="flex items-center justify-between rounded-[12px] border border-[#eceaf0] p-3.5">
-                <div>
-                  <p className="text-[14px] font-medium text-ink">Pending</p>
-                  <p className="text-[12px] text-[#94919d]">Accrued from verified vendors, ready for settlement</p>
-                </div>
-                <p className="text-[16px] font-semibold text-ink">
-                  {formatNaira(summary?.earnings.pending ?? 0)}
-                </p>
-              </div>
-
-              {(summary?.earnings.reversed ?? 0) > 0 && (
-                <div className="flex items-center justify-between rounded-[12px] border border-[#fbe1e1] bg-[#fff8f8] p-3.5">
+              <div className="mt-4 space-y-3">
+                <div className="flex items-center justify-between rounded-[12px] border border-[#eceaf0] p-3.5">
                   <div>
-                    <p className="text-[14px] font-medium text-[#c0362c]">Reversed</p>
-                    <p className="text-[12px] text-[#94919d]">Voided or cancelled (excluded from total)</p>
+                    <p className="text-[14px] font-medium text-ink">Paid</p>
+                    <p className="text-[12px] text-[#94919d]">Disbursed to your payout account</p>
                   </div>
-                  <p className="text-[16px] font-semibold text-[#c0362c]">
-                    {formatNaira(summary?.earnings.reversed ?? 0)}
+                  <p className="text-[16px] font-semibold text-[#1f7742]">
+                    {formatNaira(summary?.earnings.paid ?? 0)}
                   </p>
                 </div>
-              )}
-            </div>
 
-            <div className="mt-6 flex justify-end">
-              <button
-                type="button"
-                onClick={() => setShowEarningsModal(false)}
-                className="h-[40px] rounded-[10px] bg-gradient-to-r from-amber to-orange px-5 text-[14px] font-semibold text-white transition hover:opacity-90"
-              >
-                Done
-              </button>
+                <div className="flex items-center justify-between rounded-[12px] border border-[#eceaf0] p-3.5">
+                  <div>
+                    <p className="text-[14px] font-medium text-ink">Settled</p>
+                    <p className="text-[12px] text-[#94919d]">Processed in monthly settlement cycle</p>
+                  </div>
+                  <p className="text-[16px] font-semibold text-[#8a6a1f]">
+                    {formatNaira(summary?.earnings.settled ?? 0)}
+                  </p>
+                </div>
+
+                <div className="flex items-center justify-between rounded-[12px] border border-[#eceaf0] p-3.5">
+                  <div>
+                    <p className="text-[14px] font-medium text-ink">Pending</p>
+                    <p className="text-[12px] text-[#94919d]">Accrued from verified vendors, ready for settlement</p>
+                  </div>
+                  <p className="text-[16px] font-semibold text-ink">
+                    {formatNaira(summary?.earnings.pending ?? 0)}
+                  </p>
+                </div>
+
+                {(summary?.earnings.reversed ?? 0) > 0 && (
+                  <div className="flex items-center justify-between rounded-[12px] border border-[#fbe1e1] bg-[#fff8f8] p-3.5">
+                    <div>
+                      <p className="text-[14px] font-medium text-[#c0362c]">Reversed</p>
+                      <p className="text-[12px] text-[#94919d]">Voided or cancelled (excluded from total)</p>
+                    </div>
+                    <p className="text-[16px] font-semibold text-[#c0362c]">
+                      {formatNaira(summary?.earnings.reversed ?? 0)}
+                    </p>
+                  </div>
+                )}
+              </div>
+
+              <div className="mt-6 flex justify-end">
+                <button
+                  type="button"
+                  onClick={() => setShowEarningsModal(false)}
+                  className="h-[40px] rounded-[10px] bg-gradient-to-r from-amber to-orange px-5 text-[14px] font-semibold text-white transition hover:opacity-90"
+                >
+                  Done
+                </button>
+              </div>
             </div>
           </div>
         </div>
